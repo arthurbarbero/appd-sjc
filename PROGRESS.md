@@ -15,6 +15,9 @@ Fase 0 — Fundação.
   (é Python-only); fundação mínima montada à mão.
 - 2026-08-05 — Conta Cloudflare adiada: o spike da Fase 0 roda 100% local
   (miniflare/`wrangler --local`). Conta só quando for deployar.
+- 2026-08-05 — Spike **aprovado**, stack confirmada: Drizzle+D1 e `scrypt` do
+  `node:crypto` funcionam no workerd real. Registrado em `docs/adr/adr-001` e
+  `adr-002`; código do spike removido no commit seguinte (fica no histórico, `b7e321d`).
 
 ## Feito
 
@@ -25,12 +28,14 @@ Fase 0 — Fundação.
 - [x] Drizzle + wrangler configurados (D1 local).
 - [x] `openspec/changes/` e `openspec/archive/` criados.
 
+- [x] Spike: Drizzle+D1 e `scrypt` no runtime workerd — os dois passaram (ADR-001, ADR-002).
+
 ## Em aberto / próximos passos
 
-- [ ] Spike: rota Nitro gravando e lendo no D1 local + `scrypt` do `node:crypto` no
-      runtime workerd (`nodejs_compat`). Resultado vira ADR.
-- [ ] `gh repo create appd-sjc --public --source=. --push`.
 - [ ] Fase 1 — discovery e inventário de conteúdo de appd.org.br.
+- [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
+      os padrões do `node:crypto`, que não foram medidos contra o limite de CPU do Worker.
+- [ ] Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).
 - [ ] AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita. NÃO ativar R2.
 
 ## Bugs / riscos conhecidos
