@@ -197,14 +197,14 @@ e sem depender de rede alheia).
 
 ### Escala
 
-| Papel         | Tamanho            | Peso | Entrelinha | Uso                           |
-| ------------- | ------------------ | ---- | ---------- | ----------------------------- |
-| `display`     | clamp(30px → 44px) | 700  | 1,15       | `h1` de página                |
-| `headline-lg` | clamp(26px → 32px) | 700  | 1,2        | `h2` de seção                 |
-| `headline-md` | 24px               | 700  | 1,3        | `h3`                          |
-| `body-lg`     | 19px               | 400  | 1,6        | texto de abertura             |
-| `body-md`     | **17px**           | 400  | 1,6        | texto corrente (piso do site) |
-| `label-sm`    | 15px               | 700  | 1,4        | rótulo, legenda (piso duro)   |
+| Papel         | Token              | Tamanho            | Peso | Entrelinha | Uso                           |
+| ------------- | ------------------ | ------------------ | ---- | ---------- | ----------------------------- |
+| `display`     | `--texto-display`  | clamp(36px → 56px) | 700  | 1,12       | `h1` de página                |
+| `headline-lg` | `--texto-titulo-g` | clamp(28px → 36px) | 700  | 1,12       | `h2` de seção                 |
+| `headline-md` | `--texto-titulo-m` | 22px               | 700  | 1,3        | `h3`                          |
+| `body-lg`     | `--texto-corpo-g`  | 19px               | 400  | 1,65       | texto de abertura             |
+| `body-md`     | `--texto-corpo`    | **17px**           | 400  | 1,65       | texto corrente (piso do site) |
+| `label-sm`    | `--texto-rotulo`   | 15px               | 700  | 1,4        | rótulo, legenda (piso duro)   |
 
 Dois pesos apenas: 400 e 700 — como no site atual. Nada abaixo de 15px em lugar nenhum.
 Largura de linha entre 60 e 75 caracteres. Nenhum texto justificado (o rio de espaços
@@ -230,9 +230,13 @@ a sombra só desgruda a superfície.
 
 ### Alvos de toque
 
-Mínimo **44 × 44px** em qualquer elemento clicável (WCAG 2.2, critério 2.5.8). Na
-prática: botão e campo com 48px de altura, checkbox e rádio com área de toque de 44px
-incluindo o rótulo, e 8px de folga entre alvos vizinhos.
+Mínimo **44 × 44px** em qualquer elemento clicável (WCAG 2.2, critério 2.5.8) —
+`--alvo-min`. Na prática: botão e campo com **52px** de altura (`--altura-controle`),
+checkbox e rádio com área de toque de 44px incluindo o rótulo, e 8px de folga entre
+alvos vizinhos.
+
+> **Em caso de divergência, `tokens.css` manda.** Este documento explica o porquê; o
+> arquivo de tokens é o que a máquina lê. Se os dois discordarem, o texto está errado.
 
 ---
 
