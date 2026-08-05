@@ -20,6 +20,7 @@
     "cf:dev": "npm run build && wrangler dev"
   },
   "dependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "drizzle-orm": "^0.45.2",
     "nuxt": "^4.5.1",
     "vue": "^3.5.40",

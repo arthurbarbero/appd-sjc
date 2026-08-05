@@ -1,0 +1,366 @@
+/**
+ * Conteúdo institucional da APPD-SJC.
+ *
+ * Só entra aqui o que foi verificado no site atual ou no formulário oficial
+ * (ver `docs/inventario-conteudo.md`). O que a associação ainda não confirmou fica em
+ * `aConfirmar` e aparece na tela com o selo "A confirmar" — nunca como fato.
+ *
+ * Enquanto não houver banco, esta é a fonte de conteúdo do site.
+ */
+
+export const ASSOCIACAO = {
+  nome: 'APPD São José dos Campos',
+  nomeCompleto: 'Associação das Pessoas com Deficiência de São José dos Campos',
+  cnpj: '08.074.883/0001-96',
+  fundacao: 2006,
+  endereco: {
+    logradouro: 'Rua Acássia Pereira, 136',
+    bairro: 'Campos dos Alemães',
+    cidade: 'São José dos Campos',
+    uf: 'SP',
+    cep: '12239-530',
+  },
+  telefones: [
+    { rotulo: 'Sede', numero: '(12) 3346-0605', e164: '+551233460605' },
+    { rotulo: 'Secretaria', numero: '(12) 99165-7059', e164: '+5512991657059' },
+    { rotulo: 'Serviço Social', numero: '(12) 99124-7257', e164: '+5512991247257' },
+  ],
+  email: 'appdsjc@gmail.com',
+  redes: [
+    { nome: 'Facebook', url: 'https://www.facebook.com/appdsjc' },
+    { nome: 'Instagram', url: 'https://www.instagram.com/appdsjc/' },
+  ],
+} as const
+
+/** Regras declaradas pelo formulário oficial de atendimento. São fato verificado. */
+export const REGRAS_ATENDIMENTO = [
+  'As vagas são chamadas conforme abrem — o cadastro entra em fila.',
+  'As sessões acontecem somente no período da manhã.',
+  'Mantenha o telefone atualizado: é por ele que vem o primeiro contato.',
+] as const
+
+export interface Oferta {
+  slug: string
+  nome: string
+  resumo: string
+  /** Aparece no formulário oficial, no campo "Tipo de Atendimento". */
+  noFormulario: boolean
+  paraQuem: string[]
+  sobre: string[]
+  oQueEsperar: string[]
+  naAppd: string[]
+  aConfirmar: string[]
+  horarios?: { local: string; endereco: string; dias: string; horario: string }[]
+}
+
+/** Serviços: estão no campo "Tipo de Atendimento" do formulário oficial. */
+export const SERVICOS: Oferta[] = [
+  {
+    slug: 'fisioterapia',
+    nome: 'Fisioterapia',
+    resumo: 'Atendimento de fisioterapia com foco em manter e recuperar a autonomia de movimento.',
+    noFormulario: true,
+    paraQuem: [
+      'Pessoas com deficiência física ou neurológica',
+      'Quem precisa de reabilitação depois de uma cirurgia ou internação',
+      'Quem perdeu movimento e quer recuperar autonomia no dia a dia',
+    ],
+    sobre: [
+      'A fisioterapia trabalha o movimento do corpo. Para a pessoa com deficiência, ela não busca uma cura: busca autonomia — conseguir se transferir da cama para a cadeira, manter a força que já existe, evitar dor e deformidade.',
+      'A continuidade é o que faz diferença. Sessão isolada alivia; acompanhamento regular preserva função. É por isso que a fila existe e é levada a sério.',
+      'A Lei Brasileira de Inclusão garante à pessoa com deficiência atenção integral à saúde, incluindo reabilitação, pelo SUS. O atendimento da associação não substitui esse direito — soma a ele.',
+    ],
+    oQueEsperar: [
+      'Na primeira vez, uma conversa sobre o que você já consegue fazer e o que quer voltar a fazer.',
+      'Sessões acompanhadas, com exercícios adaptados ao seu quadro.',
+      'Orientação de que fazer em casa entre uma sessão e outra.',
+    ],
+    naAppd: [
+      'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
+      'As sessões são somente no período da manhã.',
+      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+    ],
+    aConfirmar: [
+      'Dias e horários das sessões',
+      'Quem é o fisioterapeuta responsável e o registro no CREFITO',
+      'Duração e frequência das sessões',
+      'Se há critério de prioridade na fila',
+      'Documentos que a pessoa precisa levar',
+    ],
+  },
+  {
+    slug: 'psicologia',
+    nome: 'Psicologia',
+    resumo: 'Acompanhamento psicológico para a pessoa com deficiência e para quem cuida dela.',
+    noFormulario: true,
+    paraQuem: [
+      'Pessoas com deficiência que querem falar sobre o que estão vivendo',
+      'Familiares e cuidadores sobrecarregados',
+      'Quem passa por luto, adoecimento ou mudança grande de vida',
+    ],
+    sobre: [
+      'Acompanhamento psicológico é conversa com método, com quem tem formação para escutar. Não é conselho de amigo e não é remédio.',
+      'A sobrecarga de quem cuida é um assunto pouco falado e muito comum. Quem cuida em tempo integral costuma adiar a própria saúde até adoecer — e aí duas pessoas ficam sem apoio.',
+      'Procurar não exige estar em crise. Procurar antes da crise costuma ser mais barato, em todos os sentidos.',
+    ],
+    oQueEsperar: [
+      'Uma conversa inicial para entender o que trouxe você até aqui.',
+      'Sigilo: o que é dito no atendimento não é repassado.',
+      'Encaminhamento para a rede pública quando o caso pedir outro tipo de cuidado.',
+    ],
+    naAppd: [
+      'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
+      'As sessões são somente no período da manhã.',
+      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+    ],
+    aConfirmar: [
+      'Se o atendimento inclui cuidadores e familiares, ou só a pessoa com deficiência',
+      'Quem é o psicólogo responsável e o registro no CRP',
+      'Se é individual ou em grupo',
+      'Faixa etária atendida',
+      'Se há limite de sessões',
+    ],
+  },
+  {
+    slug: 'servico-social',
+    nome: 'Serviço Social',
+    resumo:
+      'Orientação sobre direitos, benefícios e a rede de apoio pública de São José dos Campos.',
+    noFormulario: true,
+    paraQuem: [
+      'Quem não sabe a quais benefícios tem direito',
+      'Famílias que precisam de encaminhamento para a rede pública',
+      'Quem teve um pedido de benefício negado e não sabe o que fazer',
+    ],
+    sobre: [
+      'O assistente social conhece o caminho das pedras da rede pública: onde pedir, que documento levar, a quem recorrer. Muita gente deixa de receber o que tem direito só por não saber que existe.',
+      'Alguns direitos que a maioria desconhece: o BPC, o passe livre municipal e intermunicipal, a isenção de IPI e IPVA na compra de veículo, a credencial de estacionamento e o transporte adaptado do município.',
+      'A associação orienta e encaminha. Quem concede o benefício é o órgão público — nenhuma entidade "consegue" ou "agiliza" benefício.',
+    ],
+    oQueEsperar: [
+      'Uma conversa sobre a sua situação e a da sua família.',
+      'Uma lista do que buscar, onde buscar e com quais documentos.',
+      'Encaminhamento para CRAS, CREAS ou outro serviço quando for o caso.',
+    ],
+    naAppd: [
+      'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
+      'Há um telefone rotulado como Serviço Social: (12) 99124-7257.',
+      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+    ],
+    aConfirmar: [
+      'Quem atende e o registro no CRESS',
+      'Se a associação acompanha pedido e recurso de BPC',
+      'Dias e horários do atendimento',
+      'Se atende quem mora fora de São José dos Campos',
+    ],
+  },
+  {
+    slug: 'orientacoes-gerais',
+    nome: 'Orientações Gerais',
+    resumo: 'A porta de entrada: a primeira conversa sobre o que a associação pode fazer por você.',
+    noFormulario: true,
+    paraQuem: [
+      'Quem está chegando agora e não sabe por onde começar',
+      'Famílias que receberam um diagnóstico recente',
+      'Quem quer entender como funciona o atendimento antes de se cadastrar',
+    ],
+    sobre: [
+      'Nem todo mundo chega sabendo do que precisa. As orientações gerais existem para essa conversa: entender a situação, explicar o que a associação faz e apontar o caminho.',
+      'É também onde as regras do atendimento são explicadas: como funciona a fila, por que as sessões são de manhã, e o que esperar dos próximos passos.',
+    ],
+    oQueEsperar: [
+      'Uma conversa sem compromisso sobre a sua situação.',
+      'Explicação de como funciona o atendimento na associação.',
+      'Encaminhamento para o serviço certo, dentro ou fora da APPD.',
+    ],
+    naAppd: [
+      'O formulário oficial declara que as orientações gerais são repassadas no primeiro atendimento.',
+      'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
+    ],
+    aConfirmar: [
+      'Quem faz o primeiro atendimento',
+      'Se precisa agendar antes de ir até a sede',
+      'Quanto tempo costuma levar até o primeiro contato',
+    ],
+  },
+  {
+    slug: 'emprestimo-equipamentos',
+    nome: 'Empréstimo de Equipamentos',
+    resumo:
+      'Empréstimo de cadeira de rodas, muletas, andadores e outros equipamentos de locomoção.',
+    noFormulario: true,
+    paraQuem: [
+      'Quem precisa de equipamento por um período, depois de cirurgia ou internação',
+      'Quem está na fila do SUS esperando um equipamento definitivo',
+      'Famílias sem condição de comprar ou manter o equipamento',
+    ],
+    sobre: [
+      'Equipamento de locomoção é tecnologia assistiva: não é conforto, é o que permite sair de casa, trabalhar e estudar.',
+      'Equipamento errado ou mal ajustado machuca. Cadeira de tamanho inadequado causa lesão por pressão e dor de ombro; muleta na altura errada machuca a axila. Ajuste não é detalhe.',
+      'O SUS fornece órtese, prótese e meios auxiliares de locomoção pela rede de reabilitação. A fila é o motivo pelo qual o empréstimo social existe.',
+    ],
+    oQueEsperar: [
+      'Uma conversa sobre a sua necessidade e por quanto tempo.',
+      'Verificação do que está disponível no momento.',
+      'Orientação de uso e de cuidado com o equipamento.',
+    ],
+    naAppd: [
+      'Este serviço é uma das opções do formulário oficial de atendimento.',
+      'A Central de Doações da associação pede, entre outras coisas, cadeiras de rodas e de banho — os equipamentos vêm de doação.',
+    ],
+    aConfirmar: [
+      'Quais equipamentos existem hoje',
+      'Prazo do empréstimo e se há renovação',
+      'Se há caução, taxa ou termo de responsabilidade',
+      'Quem avalia a necessidade',
+      'Se a retirada é na sede',
+    ],
+  },
+]
+
+/** Projetos: atividades contínuas. Não estão no campo "Tipo de Atendimento". */
+export const PROJETOS: Oferta[] = [
+  {
+    slug: 'bocha-paralimpica',
+    nome: 'Bocha Paralímpica',
+    resumo:
+      'Esporte paralímpico praticado em cadeira de rodas, com treinos em dois locais da cidade.',
+    noFormulario: false,
+    paraQuem: [
+      'Pessoas com deficiência severa, inclusive quem tem pouca mobilidade de braços',
+      'Quem quer praticar esporte e conviver',
+      'Quem busca competição, do nível iniciante ao paralímpico',
+    ],
+    sobre: [
+      'A bocha paralímpica é um dos poucos esportes pensados para pessoas com deficiência severa. Quem não consegue lançar com as mãos joga com uma calha e um auxiliar — e compete em igualdade.',
+      'O jogo é de precisão: aproximar as bolas da bola branca. Exige estratégia, controle e concentração, não força.',
+      'É esporte paralímpico oficial desde 1984 e tem classes funcionais que agrupam atletas com condições parecidas.',
+    ],
+    oQueEsperar: [
+      'Treinos em quadra, com acompanhamento técnico.',
+      'Convivência com outras pessoas com deficiência e suas famílias.',
+      'Possibilidade de competir, se você quiser.',
+    ],
+    naAppd: [
+      'Há treinos em dois locais da cidade, de segunda a sexta, sempre das 13h às 16h30.',
+      'O projeto tem uma página própria no Facebook, mantida pela equipe.',
+    ],
+    aConfirmar: [
+      'Como entrar no projeto',
+      'Se há avaliação de classe funcional',
+      'Se a associação empresta o material de jogo',
+      'Se há vagas abertas e limite de idade',
+      'Se os horários seguem valendo em 2026',
+    ],
+    horarios: [
+      {
+        local: 'Praça de Esportes Pedro Otávio',
+        endereco: 'Rua Palmares, 841 — Parque Industrial, São José dos Campos/SP',
+        dias: 'Segundas, quartas e sextas',
+        horario: '13h às 16h30',
+      },
+      {
+        local: 'Centro Esportivo Palmeiras São José',
+        endereco: 'Rua Saudades de Querência, 225 — Palmeiras de São José, São José dos Campos/SP',
+        dias: 'Terças e quintas',
+        horario: '13h às 16h30',
+      },
+    ],
+  },
+  {
+    slug: 'mao-na-roda',
+    nome: 'Oficina Mão na Roda',
+    resumo: 'Manutenção de cadeira de rodas, muletas, andadores e bengalas.',
+    noFormulario: false,
+    paraQuem: [
+      'Quem usa equipamento de locomoção e precisa de conserto ou ajuste',
+      'Famílias sem condição de manter o equipamento em bom estado',
+    ],
+    sobre: [
+      'Cadeira de rodas, muleta, andador e bengala são equipamentos de uso diário e, como tal, precisam de manutenção. A autonomia na locomoção define a qualidade de vida da pessoa com deficiência.',
+      'A Oficina Mão na Roda nasceu para dar suporte a famílias que não têm condição de manter ou adquirir um equipamento funcional e digno.',
+      'Manutenção é segurança, não conforto: roda com folga, freio que não trava e pneu careca derrubam.',
+    ],
+    oQueEsperar: [
+      'Avaliação do equipamento e do que ele precisa.',
+      'Conserto e ajuste, quando houver peça disponível.',
+      'Orientação sobre o que dá para cuidar em casa.',
+    ],
+    naAppd: [
+      'O projeto tem página própria no site atual da associação.',
+      'As informações são dadas pelos telefones da associação.',
+    ],
+    aConfirmar: [
+      'Dias e horários da oficina',
+      'Se o serviço é gratuito e quem paga a peça',
+      'Lista dos serviços que a oficina faz',
+      'Se atende cadeira motorizada',
+      'Prazo médio de conserto e se há equipamento reserva',
+    ],
+  },
+  {
+    slug: 'artesao-da-inclusao',
+    nome: 'Artesão da Inclusão',
+    resumo: 'Capacitação em artesanato e comercialização, como fonte de renda alternativa.',
+    noFormulario: false,
+    paraQuem: [
+      'Pessoas com deficiência que querem gerar renda',
+      'Familiares que deixaram o trabalho para cuidar e precisam de alternativa',
+    ],
+    sobre: [
+      'Renda é um problema concreto para a família da pessoa com deficiência. Segundo o IBGE, na PNAD Contínua de 2022, o nível de ocupação entre pessoas com deficiência era de 26,6%, contra 60,7% entre as demais; o rendimento médio do trabalho era de R$ 1.860 contra R$ 2.690.',
+      'Parte disso vem do cuidado: alguém da casa costuma reduzir a jornada ou deixar o emprego para acompanhar o dia a dia.',
+      'O projeto capacita e ajuda a comercializar o que é produzido, sem atrapalhar o convívio e os cuidados diários.',
+    ],
+    oQueEsperar: ['Oficinas de técnicas de artesanato.', 'Apoio para vender o que você produzir.'],
+    naAppd: ['O projeto tem página própria no site atual da associação.'],
+    aConfirmar: [
+      'Se o projeto está ativo e quando abre turma',
+      'Se participa a pessoa com deficiência, o cuidador, ou os dois',
+      'Dias, horários e local das oficinas',
+      'Como funciona a venda e o repasse ao artesão',
+      'Quais técnicas são ensinadas',
+    ],
+  },
+  {
+    slug: 'informatica-nota-10',
+    nome: 'Informática Nota 10',
+    resumo: 'Inclusão digital: aprender a usar o computador com autonomia.',
+    noFormulario: false,
+    paraQuem: [
+      'Pessoas com deficiência que querem aprender a usar o computador',
+      'Quem precisa de informática para estudar ou procurar trabalho',
+    ],
+    sobre: [
+      'Cada vez mais serviço só existe em versão digital: marcar consulta, pedir benefício, emitir documento. Quem não usa computador ou celular fica de fora de direitos que já tem.',
+      'Existem recursos que tornam o computador acessível — leitor de tela, teclado adaptado, ampliação — e boa parte deles é gratuita.',
+      'A Lei de Cotas obriga empresas com cem ou mais empregados a reservar vagas para pessoas com deficiência. O gargalo costuma ser o preparo, não a vaga.',
+    ],
+    oQueEsperar: ['Aulas de informática adaptadas ao ritmo de cada pessoa.'],
+    naAppd: [
+      'O projeto existe e está em funcionamento — confirmado presencialmente pelo dono deste projeto em 2026-08-05.',
+      'Não há nenhum registro público sobre ele: nem página, nem texto, nem menu no site atual.',
+    ],
+    aConfirmar: [
+      'O nome correto: Informática Nota 10 ou Inclusão Nota 10',
+      'Dias, horários e local das aulas',
+      'Quem ministra',
+      'Se há laboratório com computadores e quantas máquinas',
+      'Como entrar e se há vagas',
+      'Se há encaminhamento para vagas de emprego',
+    ],
+  },
+]
+
+export const TODAS_AS_OFERTAS = [...SERVICOS, ...PROJETOS]
+
+export function acharOferta(slug: string): Oferta | undefined {
+  return TODAS_AS_OFERTAS.find((o) => o.slug === slug)
+}
+
+/** O que a Central de Doações declara precisar hoje. Texto do site atual. */
+export const DOACAO_EM_ESPECIE = [
+  'Fraldas descartáveis geriátricas',
+  'Cadeiras de rodas ou de banho',
+  'Alimentos não perecíveis',
+] as const
