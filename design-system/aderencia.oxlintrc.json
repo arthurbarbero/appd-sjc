@@ -1,0 +1,16 @@
+{
+  "_comentario": "Regras de aderência ao design system, geradas pelo Claude Design e importadas em 2026-08-05. Não são executadas hoje: o projeto usa ESLint, não oxlint. Valem como especificação do que precisa ser proibido na Fase 4 — nenhum hex cru, nenhum px cru, tudo por var(). Traduzir para stylelint quando a implementação começar.",
+  "rules": {
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\b/]",
+        "message": "Cor em hex cru — use um token de cor do design system via var()."
+      },
+      {
+        "selector": "Literal[value=/\b\d+px\b/]",
+        "message": "Valor em px cru — use um token de espaçamento do design system via var()."
+      }
+    ]
+  }
+}

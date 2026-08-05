@@ -1,0 +1,39 @@
+{
+  "_comentario": "Gerado pelo Claude Design, importado em 2026-08-05. Registro do que existe no projeto appd-sjc: 8 cartões de componente e 9 templates de tela. Não editar à mão — o app regenera. Serve como índice do que veio no handoff.",
+  "namespace": "AppdSjc_ca4c3e",
+  "globalCssPaths": ["tokens.css", "base.css", "styles.css"],
+  "cards": [
+    { "path": "componentes/cores.html", "group": "Fundamentos" },
+    { "path": "componentes/tipografia.html", "group": "Fundamentos" },
+    { "path": "componentes/acoes.html", "group": "Ações" },
+    { "path": "componentes/campos.html", "group": "Formulário" },
+    { "path": "componentes/data.html", "group": "Formulário", "name": "Campo de data" },
+    { "path": "componentes/escolhas.html", "group": "Formulário" },
+    { "path": "componentes/avisos.html", "group": "Feedback" },
+    { "path": "componentes/estrutura.html", "group": "Estrutura" }
+  ],
+  "templates": [
+    { "name": "Home institucional", "entryPath": "templates/home/Home.dc.html" },
+    { "name": "Página de serviço", "entryPath": "templates/servico/Servico.dc.html" },
+    {
+      "name": "Cadastro de atendimento",
+      "entryPath": "templates/cadastro-atendimento/CadastroAtendimento.dc.html"
+    },
+    { "name": "Atendimento (hub)", "entryPath": "templates/atendimento/Atendimento.dc.html" },
+    { "name": "Projetos (lista)", "entryPath": "templates/projetos/Projetos.dc.html" },
+    { "name": "Página de projeto", "entryPath": "templates/projeto/Projeto.dc.html" },
+    { "name": "Central de Doações", "entryPath": "templates/doar/Doar.dc.html" },
+    { "name": "Contato", "entryPath": "templates/contato/Contato.dc.html" },
+    {
+      "name": "Página não encontrada (404)",
+      "entryPath": "templates/nao-encontrada/NaoEncontrada.dc.html"
+    }
+  ],
+  "brandFonts": [
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "status": "no-face",
+      "_atencao": "Sem @font-face declarado. Todas as telas renderizam na fonte de fallback do sistema. Resolver hospedando a fonte no repositório (Fase 4)."
+    }
+  ]
+}
