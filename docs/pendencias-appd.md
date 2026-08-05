@@ -75,10 +75,25 @@ do que é, para quem, em que dia e horário, e como a pessoa entra.
 O que trava: a lista de Projetos Sociais, os cards da home e a decisão de qual serviço
 usa o formulário de atendimento e qual usa outro caminho.
 
-**Enquanto isso**: o site novo publica **só o que tem descrição verificável** (Bocha,
-Mão na Roda, Artesão) e mantém as opções do formulário intactas, com uma página de
-serviço "em revisão" para os demais. Melhor uma lista curta e verdadeira do que seis
-promessas vazias.
+**Enquanto isso**: o site novo publica **as nove páginas** (decisão do dono,
+2026-08-05), cada uma com conteúdo pesquisado sobre a área e marcação `[A CONFIRMAR]`
+em tudo que descreve especificamente a APPD. Rascunhos em [servicos/](servicos/) — é o
+material que a associação precisa revisar item a item.
+
+### 1b. Bocha, Artesão, Mão na Roda e Informática não são opções do formulário
+
+Derivado do item acima, mas é uma pergunta separada e objetiva. O campo "Tipo de
+Atendimento" tem cinco opções — Empréstimo Equipamentos, Fisioterapia, Orientações
+Gerais, Psicologia, Serviço Social — e **nenhum dos quatro projetos está lá**. Hoje,
+quem quer entrar na Bocha só consegue pedir marcando `Outro` e escrevendo o nome. No
+caso do Artesão e da Informática isso é pior: o bloco da home leva justamente a esse
+formulário, então a pessoa clica no que foi oferecido e não encontra a opção.
+
+Pergunta: os quatro projetos devem virar opção do campo "Tipo de Atendimento", ou eles
+entram por outro caminho (contato direto com o responsável)?
+
+**Enquanto isso**: os 15 campos e as opções não mudam ([campos-formulario.md](campos-formulario.md)),
+e cada página de projeto avisa na tela que o pedido vai por `Outro`.
 
 ### 2. Chave PIX e dados de doação (bloqueia a Central de Doações)
 
