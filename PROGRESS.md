@@ -29,6 +29,17 @@ Fase 0 — Fundação.
 - [x] `openspec/changes/` e `openspec/archive/` criados.
 
 - [x] Spike: Drizzle+D1 e `scrypt` no runtime workerd — os dois passaram (ADR-001, ADR-002).
+- [x] Repo público publicado: https://github.com/arthurbarbero/appd-sjc — CI verde.
+- [x] Identidade dos commits usa o e-mail `noreply` do GitHub: repo público não expõe
+      e-mail pessoal em metadado de commit.
+
+## Aprendizados
+
+- `gitleaks/gitleaks-action` varre o intervalo `<commit>^..HEAD` e **quebra no push
+  inicial**, porque o primeiro commit não tem pai. Trocado pelo binário rodando
+  `gitleaks git` sobre o histórico inteiro — mais simples e determinístico.
+- Arquivo `.example` com valor de placeholder de alta entropia dispara a regra
+  `generic-api-key`. Solução: valor vazio + allowlist por caminho em `.gitleaks.toml`.
 
 ## Em aberto / próximos passos
 
