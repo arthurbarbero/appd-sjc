@@ -1,0 +1,148 @@
+<!-- @dsCard group="Fundamentos" -->
+<!-- ESTILOS -->
+<style>
+  .grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--e3);
+  }
+  .amostra {
+    border: var(--borda-largura) solid var(--borda);
+    display: flex;
+    flex-direction: column;
+  }
+  .amostra .cor {
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    padding: var(--e3);
+    font-weight: var(--peso-forte);
+  }
+  .amostra .meta {
+    padding: var(--e2) var(--e3);
+    border-top: var(--borda-largura) solid var(--borda);
+    font-size: var(--texto-rotulo);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hex {
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  .proibido .cor {
+    position: relative;
+  }
+  .selo-proibido {
+    display: inline-block;
+    margin-top: var(--e1);
+    padding: 2px var(--e2);
+    background: var(--erro);
+    color: #fff;
+    font-weight: var(--peso-forte);
+    font-size: var(--texto-rotulo);
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e4)">
+  <div>
+    <h2>Cores</h2>
+    <p>
+      Toda cor abaixo foi medida contra WCAG 2.2 AA. O número é a razão de contraste real com o
+      texto que aparece em cima dela.
+    </p>
+  </div>
+
+  <div class="grade">
+    <div class="amostra">
+      <div class="cor" style="background: var(--primaria); color: var(--sobre-primaria)">
+        Ação principal
+      </div>
+      <div class="meta">
+        <span class="hex">--primaria #8b0000</span>
+        <span>10,01:1 com branco</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--verde); color: var(--sobre-verde)">
+        Institucional
+      </div>
+      <div class="meta">
+        <span class="hex">--verde #4e5d2e</span>
+        <span>7,17:1 com branco</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--amarelo); color: var(--sobre-amarelo)">
+        Destaque
+      </div>
+      <div class="meta">
+        <span class="hex">--amarelo #bbb070</span>
+        <span>7,92:1 com texto escuro</span>
+      </div>
+    </div>
+
+    <div class="amostra proibido">
+      <div class="cor" style="background: var(--amarelo); color: #ffffff">Nunca faça isto</div>
+      <div class="meta">
+        <span class="hex">#bbb070 + branco</span>
+        <span>2,20:1 — ilegível</span>
+        <span class="selo-proibido">Proibido</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--fundo); color: var(--texto)">Texto no fundo</div>
+      <div class="meta">
+        <span class="hex">--texto #1a1a1a</span>
+        <span>17,40:1</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--superficie); color: var(--texto-suave)">
+        Texto suave na superfície
+      </div>
+      <div class="meta">
+        <span class="hex">--texto-suave #5b5347</span>
+        <span>6,77:1</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--erro-fundo); color: var(--erro)">Erro</div>
+      <div class="meta">
+        <span class="hex">--erro #8b0000 em #fdecea</span>
+        <span>8,75:1</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--sucesso-fundo); color: var(--sucesso)">Sucesso</div>
+      <div class="meta">
+        <span class="hex">--sucesso #4e5d2e em #eef2e6</span>
+        <span>6,31:1</span>
+      </div>
+    </div>
+
+    <div class="amostra">
+      <div class="cor" style="background: var(--aviso-fundo); color: var(--aviso)">Atenção</div>
+      <div class="meta">
+        <span class="hex">--aviso #724923 em #f9f0e5</span>
+        <span>6,92:1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso aviso-atencao">
+    <span class="icone" aria-hidden="true">!</span>
+    <div class="conteudo">
+      <strong>O vermelho tem dois papéis.</strong>
+      <span>
+        Ação é vermelho preenchido. Erro é vermelho em fundo claro, com borda e ícone. Ação
+        destrutiva é vermelho contornado. Diferem em forma, não só em cor.
+      </span>
+    </div>
+  </div>
+</main>

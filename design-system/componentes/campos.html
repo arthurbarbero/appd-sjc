@@ -1,0 +1,88 @@
+<!-- @dsCard group="Formulário" -->
+<!-- ESTILOS -->
+<style>
+  .coluna {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e4);
+    max-width: 36rem;
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e5)">
+  <div>
+    <h2>Campos</h2>
+    <p>
+      Rótulo sempre visível — <code>placeholder</code> não é rótulo. Altura de 48px, borda de 2px
+      com 4,53:1, erro por campo ligado ao campo por <code>aria-describedby</code>.
+    </p>
+  </div>
+
+  <form class="coluna" novalidate>
+    <div class="campo">
+      <label for="nome">NOME <span class="obrigatorio" aria-hidden="true">*</span></label>
+      <input id="nome" name="nome" type="text" autocomplete="name" required />
+    </div>
+
+    <div class="campo">
+      <label for="telefone">
+        TELEFONE PARA CONTATO <span class="obrigatorio" aria-hidden="true">*</span>
+      </label>
+      <span class="ajuda" id="ajuda-telefone">
+        É por ele que vem o primeiro contato da associação.
+      </span>
+      <input
+        id="telefone"
+        name="telefone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        aria-describedby="ajuda-telefone"
+        value="(12) 9916-705"
+      />
+    </div>
+
+    <div class="campo campo-erro">
+      <label for="telefone-erro">
+        TELEFONE PARA CONTATO <span class="obrigatorio" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="telefone-erro"
+        name="telefone-erro"
+        type="tel"
+        inputmode="tel"
+        aria-invalid="true"
+        aria-describedby="erro-telefone"
+        value="(12) 9916-705"
+      />
+      <span class="erro" id="erro-telefone">
+        <span class="icone" aria-hidden="true">✕</span>
+        O telefone precisa ter DDD e 9 dígitos. Exemplo: (12) 99165-7059.
+      </span>
+    </div>
+
+    <div class="campo">
+      <label for="endereco">
+        ENDEREÇO (rua/avenida/travessa) <span class="obrigatorio" aria-hidden="true">*</span>
+      </label>
+      <textarea id="endereco" name="endereco" rows="2" autocomplete="street-address"></textarea>
+    </div>
+
+    <div class="campo">
+      <label for="complemento">COMPLEMENTO (se houver)</label>
+      <span class="ajuda" id="ajuda-complemento">Opcional.</span>
+      <input id="complemento" name="complemento" type="text" aria-describedby="ajuda-complemento" />
+    </div>
+  </form>
+
+  <div class="aviso aviso-atencao">
+    <span class="icone" aria-hidden="true">!</span>
+    <div class="conteudo">
+      <strong>Erro nunca apaga resposta.</strong>
+      <span>
+        Um formulário de 15 campos preenchido por alguém com deficiência motora não pode zerar
+        porque o telefone veio com um dígito a menos.
+      </span>
+    </div>
+  </div>
+</main>

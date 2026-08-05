@@ -1,0 +1,67 @@
+<!-- @dsCard group="Feedback" -->
+<!-- ESTILOS -->
+<style>
+  .pilha {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e3);
+    max-width: 44rem;
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e4)">
+  <div>
+    <h2>Avisos</h2>
+    <p>
+      Todo aviso tem ícone, texto e borda — nunca só cor. Quem não distingue vermelho de verde
+      continua entendendo o que aconteceu.
+    </p>
+  </div>
+
+  <div class="pilha">
+    <div class="aviso aviso-sucesso" role="status">
+      <span class="icone" aria-hidden="true">✓</span>
+      <div class="conteudo">
+        <strong>Cadastro enviado.</strong>
+        <span>
+          Você entrou na fila. A associação entra em contato pelo telefone (12) 99165-7059 quando
+          surgir vaga. Guarde este número: APPD-2026-00042.
+        </span>
+      </div>
+    </div>
+
+    <div class="aviso aviso-erro" role="alert">
+      <span class="icone" aria-hidden="true">✕</span>
+      <div class="conteudo">
+        <strong>Faltam 2 campos para enviar.</strong>
+        <span>Telefone para contato e Município. Suas outras respostas foram mantidas.</span>
+      </div>
+    </div>
+
+    <div class="aviso aviso-atencao">
+      <span class="icone" aria-hidden="true">!</span>
+      <div class="conteudo">
+        <strong>As sessões são somente de manhã.</strong>
+        <span>
+          Se você não tem disponibilidade pela manhã, fale com a associação antes de preencher o
+          cadastro.
+        </span>
+      </div>
+    </div>
+
+    <div class="aviso aviso-destaque">
+      <span class="icone" aria-hidden="true">◆</span>
+      <div class="conteudo">
+        <strong>Contribuição solidária de R$ 50,00 mensais.</strong>
+        <span>
+          O valor é sugerido e pode ser ajustado conforme a situação de cada pessoa atendida.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size: var(--texto-rotulo); color: var(--texto-suave)">
+    Sucesso usa <code>role="status"</code> e erro usa <code>role="alert"</code>: o leitor de tela
+    anuncia sem que a pessoa precise procurar a mensagem na página.
+  </p>
+</main>

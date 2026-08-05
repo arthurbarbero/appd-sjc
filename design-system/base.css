@@ -1,0 +1,386 @@
+/*
+  Estilos de base e componentes da APPD-SJC.
+  Depende de tokens.css. Nenhum valor cru: tudo sai de variável.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%; /* respeita o tamanho de fonte escolhido no navegador */
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: var(--texto-corpo);
+  line-height: var(--entrelinha-corpo);
+  -webkit-text-size-adjust: 100%;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: var(--peso-forte);
+  line-height: var(--entrelinha-titulo);
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--texto-display);
+}
+h2 {
+  font-size: var(--texto-titulo-g);
+}
+h3 {
+  font-size: var(--texto-titulo-m);
+}
+
+p {
+  margin: 0;
+  max-width: var(--medida);
+  text-align: left; /* nunca justificado: rio de espaços atrapalha leitura */
+}
+
+/* ---------- foco: nunca removido, sempre visível ---------- */
+
+:focus-visible {
+  outline: var(--foco-largura) solid var(--foco);
+  outline-offset: var(--foco-folga);
+}
+
+.sobre-escuro :focus-visible {
+  outline-color: var(--foco-sobre-escuro);
+}
+
+/* ---------- pular para o conteúdo ---------- */
+
+.pular {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--fundo);
+  color: var(--texto);
+  border: var(--borda-largura) solid var(--primaria);
+  padding: var(--e2) var(--e3);
+}
+
+.pular:focus {
+  left: var(--e2);
+  top: var(--e2);
+}
+
+/* ---------- links ---------- */
+
+a {
+  color: var(--link);
+  text-underline-offset: 3px;
+}
+
+a:visited {
+  color: var(--link-visitado);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e2);
+  min-height: var(--altura-controle);
+  min-width: var(--alvo-min);
+  padding: 0 var(--e4);
+  border-radius: var(--raio);
+  border: var(--borda-largura) solid transparent;
+  font: inherit;
+  font-weight: var(--peso-forte);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transicao);
+}
+
+.botao-primario {
+  background: var(--primaria);
+  color: var(--sobre-primaria);
+}
+
+.botao-primario:hover {
+  background: #6d0000;
+}
+
+.botao-primario:focus-visible {
+  outline-color: var(--primaria);
+  outline-offset: var(--foco-folga);
+}
+
+.botao-secundario {
+  background: transparent;
+  color: var(--primaria);
+  border-color: var(--primaria);
+}
+
+.botao-secundario:hover {
+  background: var(--erro-fundo);
+}
+
+/* Ação destrutiva: contornada, para nunca ser confundida com a ação principal. */
+.botao-destrutivo {
+  background: transparent;
+  color: var(--primaria);
+  border-color: var(--primaria);
+  border-style: dashed;
+}
+
+.botao[aria-disabled='true'],
+.botao:disabled {
+  background: var(--superficie);
+  color: var(--texto-suave);
+  border-color: var(--borda);
+  cursor: not-allowed;
+}
+
+/* ---------- campos ---------- */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  max-width: 34rem;
+}
+
+.campo label {
+  font-weight: var(--peso-forte);
+}
+
+.campo .ajuda {
+  color: var(--texto-suave);
+  font-size: var(--texto-rotulo);
+}
+
+.campo input,
+.campo textarea,
+.campo select {
+  min-height: var(--altura-controle);
+  padding: var(--e2) var(--e3);
+  border: var(--borda-largura) solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--fundo);
+  color: var(--texto);
+  font: inherit;
+}
+
+.campo textarea {
+  min-height: calc(var(--altura-controle) * 2);
+  resize: vertical;
+}
+
+.campo-erro input,
+.campo-erro textarea,
+.campo-erro select {
+  border-color: var(--erro);
+  border-width: 3px;
+}
+
+.campo .erro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e1);
+  color: var(--erro);
+  font-weight: var(--peso-forte);
+  font-size: var(--texto-rotulo);
+}
+
+.obrigatorio {
+  color: var(--erro);
+}
+
+/* ---------- escolhas: alvo de 44px incluindo o rótulo ---------- */
+
+.grupo-escolha {
+  border: var(--borda-largura) solid var(--borda);
+  border-radius: var(--raio);
+  padding: var(--e3);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.grupo-escolha legend {
+  font-weight: var(--peso-forte);
+  padding: 0 var(--e2);
+}
+
+.escolha {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: var(--alvo-min);
+  padding: var(--e1) var(--e2);
+  cursor: pointer;
+}
+
+.escolha input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--primaria);
+  flex: none;
+}
+
+/* ---------- avisos ---------- */
+
+.aviso {
+  display: flex;
+  gap: var(--e2);
+  padding: var(--e3);
+  border-left: 4px solid;
+  border-radius: var(--raio);
+}
+
+.aviso-erro {
+  background: var(--erro-fundo);
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.aviso-sucesso {
+  background: var(--sucesso-fundo);
+  border-color: var(--sucesso);
+  color: var(--sucesso);
+}
+
+.aviso-atencao {
+  background: var(--aviso-fundo);
+  border-color: var(--aviso);
+  color: var(--aviso);
+}
+
+.aviso-destaque {
+  background: var(--amarelo);
+  border-color: var(--texto);
+  color: var(--sobre-amarelo);
+}
+
+.aviso .icone {
+  flex: none;
+  font-weight: var(--peso-forte);
+}
+
+.aviso .conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.aviso strong {
+  color: inherit;
+}
+
+/* ---------- cartão ---------- */
+
+.cartao {
+  border: var(--borda-largura) solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--fundo);
+  padding: var(--e4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.cartao h3 {
+  font-size: var(--texto-titulo-m);
+}
+
+/* ---------- tabela ---------- */
+
+.rolagem {
+  overflow-x: auto;
+  border: var(--borda-largura) solid var(--borda);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+caption {
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  color: var(--texto-suave);
+  font-size: var(--texto-rotulo);
+}
+
+th,
+td {
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  border-bottom: 1px solid var(--borda-suave);
+}
+
+thead th {
+  background: var(--superficie);
+  font-weight: var(--peso-forte);
+}
+
+/* ---------- cabeçalho e rodapé ---------- */
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: var(--e3) var(--e4);
+  border-bottom: var(--borda-largura) solid var(--borda);
+  flex-wrap: wrap;
+}
+
+.cabecalho nav ul {
+  display: flex;
+  gap: var(--e3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.cabecalho nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  padding: 0 var(--e2);
+  color: var(--texto);
+  font-weight: var(--peso-forte);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.cabecalho nav a:hover,
+.cabecalho nav a[aria-current='page'] {
+  border-bottom-color: var(--primaria);
+}
+
+.rodape {
+  background: var(--verde);
+  color: var(--sobre-verde);
+  padding: var(--e5) var(--e4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+
+.rodape a {
+  color: var(--sobre-verde);
+}

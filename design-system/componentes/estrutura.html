@@ -1,0 +1,123 @@
+<!-- @dsCard group="Estrutura" -->
+<!-- ESTILOS -->
+<style>
+  .moldura {
+    border: var(--borda-largura) solid var(--borda);
+  }
+  .cartoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--e3);
+  }
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: var(--e2);
+    font-weight: var(--peso-forte);
+  }
+  .marca .bloco {
+    width: 48px;
+    height: 48px;
+    background: var(--primaria);
+    color: var(--sobre-primaria);
+    display: grid;
+    place-items: center;
+    font-size: var(--texto-rotulo);
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e5)">
+  <div>
+    <h2>Estrutura</h2>
+    <p>
+      Cabeçalho, cartão, tabela e rodapé. O item atual do menu é marcado por
+      <code>aria-current</code> e por uma barra — nunca só por cor.
+    </p>
+  </div>
+
+  <div class="moldura">
+    <header class="cabecalho">
+      <div class="marca">
+        <span class="bloco" aria-hidden="true">LOGO</span>
+        <span>APPD São José dos Campos</span>
+      </div>
+      <nav aria-label="Principal">
+        <ul>
+          <li><a href="#" aria-current="page">Início</a></li>
+          <li><a href="#">Atendimento</a></li>
+          <li><a href="#">Projetos</a></li>
+          <li><a href="#">Doar</a></li>
+          <li><a href="#">Sobre nós</a></li>
+          <li><a href="#">Contato</a></li>
+        </ul>
+      </nav>
+    </header>
+  </div>
+
+  <p style="font-size: var(--texto-rotulo); color: var(--texto-suave)">
+    O bloco vermelho é espaço reservado: a logo em vetor ainda não chegou. Ela entra como um bloco
+    de tamanho fixo, então trocar depois não mexe em mais nada.
+  </p>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e3)">
+    <h3>Cartões</h3>
+    <div class="cartoes">
+      <article class="cartao">
+        <h3>Fisioterapia</h3>
+        <p>Atendimento de reabilitação, com vaga por fila e sessões no período da manhã.</p>
+        <a href="#" class="botao botao-secundario">Ver como funciona</a>
+      </article>
+      <article class="cartao">
+        <h3>Bocha Paralímpica</h3>
+        <p>Treinos em dois locais da cidade, de segunda a sexta, das 13h às 16h30.</p>
+        <a href="#" class="botao botao-secundario">Ver como funciona</a>
+      </article>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e3)">
+    <h3>Tabela</h3>
+    <div class="rolagem">
+      <table>
+        <caption>
+          Locais e horários de treino da Bocha Paralímpica
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Local</th>
+            <th scope="col">Dias</th>
+            <th scope="col">Horário</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Praça de Esportes Pedro Otávio</th>
+            <td>Segundas, quartas e sextas</td>
+            <td>13h às 16h30</td>
+          </tr>
+          <tr>
+            <th scope="row">Centro Esportivo Palmeiras São José</th>
+            <td>Terças e quintas</td>
+            <td>13h às 16h30</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="rodape sobre-escuro">
+    <div>
+      <strong>APPD São José dos Campos</strong>
+      <p style="color: inherit">
+        Rua Acássia Pereira, 136 — Campos dos Alemães, São José dos Campos/SP<br />
+        CNPJ 08.074.883/0001-96
+      </p>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: var(--e3)">
+      <a href="#">(12) 3346-0605</a>
+      <a href="#">appdsjc@gmail.com</a>
+      <a href="#">Política de Privacidade</a>
+      <a href="#">Seus direitos</a>
+    </div>
+  </footer>
+</main>

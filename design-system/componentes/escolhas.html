@@ -1,0 +1,77 @@
+<!-- @dsCard group="Formulário" -->
+<!-- ESTILOS -->
+<style>
+  .duas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--e4);
+    align-items: start;
+  }
+  .regua {
+    font-size: var(--texto-rotulo);
+    color: var(--texto-suave);
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e5)">
+  <div>
+    <h2>Escolhas</h2>
+    <p>
+      Alvo de 44px incluindo o rótulo, que é clicável. Grupo em <code>fieldset</code> com
+      <code>legend</code> igual ao rótulo do campo. Controle de 24px, folga de 8px entre alvos.
+    </p>
+  </div>
+
+  <div class="duas">
+    <fieldset class="grupo-escolha">
+      <legend>
+        POSSUI ALGUMA DEFICIÊNCIA <span class="obrigatorio" aria-hidden="true">*</span>
+      </legend>
+      <label class="escolha">
+        <input type="checkbox" name="deficiencia" value="fisica" />
+        Física
+      </label>
+      <label class="escolha">
+        <input type="checkbox" name="deficiencia" value="intelectual" checked />
+        Intelectual ou Neurodivergentes
+      </label>
+      <label class="escolha">
+        <input type="checkbox" name="deficiencia" value="sensorial" />
+        Sensorial (visão, audição, fala)
+      </label>
+      <label class="escolha">
+        <input type="checkbox" name="deficiencia" value="outro" />
+        Outro
+      </label>
+    </fieldset>
+
+    <fieldset class="grupo-escolha">
+      <legend>É WHATSAPP <span class="obrigatorio" aria-hidden="true">*</span></legend>
+      <label class="escolha">
+        <input type="radio" name="whatsapp" value="sim" checked />
+        Sim
+      </label>
+      <label class="escolha">
+        <input type="radio" name="whatsapp" value="nao" />
+        Não
+      </label>
+    </fieldset>
+  </div>
+
+  <div class="aviso aviso-destaque">
+    <span class="icone" aria-hidden="true">◆</span>
+    <div class="conteudo">
+      <strong>Dado de saúde.</strong>
+      <span>
+        O campo de deficiência é dado sensível pelo Art. 11 da LGPD. Exige consentimento específico
+        e destacado, com registro da versão do termo e da data e hora do aceite. Nunca aparece na
+        verificação pública do crachá.
+      </span>
+    </div>
+  </div>
+
+  <p class="regua">
+    O grupo de deficiência aceita mais de uma marcação: pessoa com deficiência múltipla existe, e o
+    formulário atual da associação já reconhece isso.
+  </p>
+</main>

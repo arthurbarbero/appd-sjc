@@ -1,0 +1,88 @@
+<!-- @dsCard group="Fundamentos" -->
+<!-- ESTILOS -->
+<style>
+  .linha {
+    border-bottom: 1px solid var(--borda-suave);
+    padding-bottom: var(--e3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--e1);
+  }
+  .ficha {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: var(--texto-rotulo);
+    color: var(--texto-suave);
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e4)">
+  <div>
+    <h2>Tipografia</h2>
+    <p>
+      Uma família só: Atkinson Hyperlegible, desenhada pelo Braille Institute para leitores com
+      baixa visão. Dois pesos. Nada abaixo de 15px.
+    </p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: var(--e4)">
+    <div class="linha">
+      <span
+        style="font-size: var(--texto-display); font-weight: var(--peso-forte); line-height: 1.15"
+      >
+        Atendimento na APPD
+      </span>
+      <span class="ficha">display · 30 → 44px · 700 · h1 de página</span>
+    </div>
+
+    <div class="linha">
+      <span
+        style="font-size: var(--texto-titulo-g); font-weight: var(--peso-forte); line-height: 1.2"
+      >
+        Como funciona a fila de vagas
+      </span>
+      <span class="ficha">titulo-g · 26 → 32px · 700 · h2 de seção</span>
+    </div>
+
+    <div class="linha">
+      <span
+        style="font-size: var(--texto-titulo-m); font-weight: var(--peso-forte); line-height: 1.3"
+      >
+        Documentos que você precisa levar
+      </span>
+      <span class="ficha">titulo-m · 24px · 700 · h3</span>
+    </div>
+
+    <div class="linha">
+      <p style="font-size: var(--texto-corpo-g)">
+        As sessões acontecem somente no período da manhã. Escolha os melhores dias para você.
+      </p>
+      <span class="ficha">corpo-g · 19px · 400 · texto de abertura</span>
+    </div>
+
+    <div class="linha">
+      <p>
+        Preencha o cadastro e aguarde o contato da associação. As vagas são chamadas conforme abrem,
+        e o primeiro contato vem pelo telefone que você informar. Mantenha o número atualizado.
+      </p>
+      <span class="ficha">corpo · 17px · 400 · texto corrente, piso do site</span>
+    </div>
+
+    <div class="linha">
+      <span style="font-size: var(--texto-rotulo); font-weight: var(--peso-forte)">
+        Telefone para contato
+      </span>
+      <span class="ficha">rotulo · 15px · 700 · rótulo e legenda, piso duro</span>
+    </div>
+  </div>
+
+  <div class="aviso aviso-erro">
+    <span class="icone" aria-hidden="true">✕</span>
+    <div class="conteudo">
+      <strong>Descartado do site atual</strong>
+      <span>
+        Lobster nos títulos (fica só dentro da logo), Comic Sans, legenda de 10px e as seis famílias
+        que conviviam na mesma página.
+      </span>
+    </div>
+  </div>
+</main>

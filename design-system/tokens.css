@@ -1,0 +1,87 @@
+/*
+  Tokens do design system da APPD-SJC.
+  Fonte da verdade: DESIGN.md na raiz. Todo valor aqui foi auditado contra WCAG 2.2 AA —
+  não altere um hex sem refazer a conta de contraste e atualizar o DESIGN.md.
+*/
+
+:root {
+  /* ---------- cor: base ---------- */
+  --fundo: #ffffff;
+  --superficie: #f5f2ea;
+  --texto: #1a1a1a; /* 17,40:1 no fundo */
+  --texto-suave: #5b5347; /* 7,57:1 no fundo, 6,77:1 na superfície */
+  --borda: #8d7158; /* 4,53:1 — borda com significado */
+  --borda-suave: #aa9078; /* 3,01:1 — só divisória decorativa */
+
+  /* ---------- cor: marca ---------- */
+  --primaria: #8b0000; /* 10,01:1 com branco */
+  --sobre-primaria: #ffffff;
+  --verde: #4e5d2e; /* 7,17:1 com branco */
+  --sobre-verde: #ffffff;
+  --amarelo: #bbb070; /* SÓ com texto escuro: 7,92:1 */
+  --sobre-amarelo: #1a1a1a;
+
+  /* ---------- cor: semântica ---------- */
+  --erro: #8b0000;
+  --erro-fundo: #fdecea; /* 8,75:1 */
+  --sucesso: #4e5d2e;
+  --sucesso-fundo: #eef2e6; /* 6,31:1 */
+  --aviso: #724923;
+  --aviso-fundo: #f9f0e5; /* 6,92:1 */
+
+  /* ---------- cor: link e foco ---------- */
+  --link: #0000ee; /* 9,40:1 — herdado, ver ressalva no DESIGN.md */
+  --link-visitado: #551a8b; /* 11,01:1 */
+  --foco: #8b0000;
+  --foco-sobre-escuro: #ffffff;
+
+  /* ---------- tipografia ---------- */
+  --fonte:
+    'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+
+  --texto-display: clamp(1.875rem, 5vw, 2.75rem); /* 30 → 44px */
+  --texto-titulo-g: clamp(1.625rem, 3.5vw, 2rem); /* 26 → 32px */
+  --texto-titulo-m: 1.5rem; /* 24px */
+  --texto-corpo-g: 1.1875rem; /* 19px */
+  --texto-corpo: 1.0625rem; /* 17px — piso do texto corrente */
+  --texto-rotulo: 0.9375rem; /* 15px — piso duro do site */
+
+  --peso-normal: 400;
+  --peso-forte: 700;
+  --entrelinha-titulo: 1.2;
+  --entrelinha-corpo: 1.6;
+  --medida: 68ch; /* 60 a 75 caracteres */
+
+  /* ---------- espaçamento (base 8) ---------- */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 16px;
+  --e4: 24px;
+  --e5: 32px;
+  --e6: 48px;
+  --e7: 64px;
+  --e8: 96px;
+
+  /* ---------- forma e alvo ---------- */
+  --raio: 0; /* cantos retos, herdado da marca */
+  --alvo-min: 44px; /* WCAG 2.2, critério 2.5.8 */
+  --altura-controle: 48px;
+  --borda-largura: 2px;
+  --foco-largura: 3px;
+  --foco-folga: 2px;
+
+  /* ---------- movimento ---------- */
+  --transicao: 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -35,3 +35,6 @@ uploads/
 *.db
 *.sqlite
 *.sqlite3
+
+# Previews do design system são gerados: node design-system/montar.mjs
+design-system/build/

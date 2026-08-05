@@ -1,0 +1,79 @@
+<!-- @dsCard group="Ações" -->
+<!-- ESTILOS -->
+<style>
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e3);
+    align-items: center;
+  }
+  .nota {
+    font-size: var(--texto-rotulo);
+    color: var(--texto-suave);
+  }
+  .foco-falso {
+    outline: var(--foco-largura) solid var(--foco);
+    outline-offset: var(--foco-folga);
+  }
+  .foco-falso-claro {
+    outline: var(--foco-largura) solid var(--foco-sobre-escuro);
+    outline-offset: var(--foco-folga);
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e5)">
+  <div>
+    <h2>Ações</h2>
+    <p>Altura de 48px, cantos retos, rótulo que diz o que acontece. Uma ação principal por tela.</p>
+  </div>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e2)">
+    <h3>Variações</h3>
+    <div class="fila">
+      <button type="button" class="botao botao-primario">Fazer meu cadastro</button>
+      <button type="button" class="botao botao-secundario">Falar no WhatsApp</button>
+      <button type="button" class="botao botao-destrutivo">Excluir minha conta</button>
+      <button type="button" class="botao" disabled>Enviando…</button>
+    </div>
+    <p class="nota">
+      Principal preenchido · secundária contornada · destrutiva contornada tracejada · desabilitada
+      mantém 4,5:1 e diz o motivo.
+    </p>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e2)">
+    <h3>Foco</h3>
+    <div class="fila">
+      <span class="botao botao-primario foco-falso">Foco na principal</span>
+      <span class="botao botao-secundario foco-falso">Foco na secundária</span>
+      <span
+        class="botao botao-primario foco-falso-claro"
+        style="background: var(--verde); border-color: var(--verde)"
+      >
+        Foco sobre fundo escuro
+      </span>
+    </div>
+    <p class="nota">
+      Anel de 3px com 2px de folga. Sobre fundo escuro o anel vira branco. Nunca
+      <code>outline: none</code> sem substituto.
+    </p>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e2)">
+    <h3>Ação principal em contexto</h3>
+    <div
+      class="cartao"
+      style="max-width: 36rem; background: var(--superficie); border-color: var(--borda)"
+    >
+      <h3 style="font-size: var(--texto-titulo-m)">Quer atendimento de fisioterapia?</h3>
+      <p>
+        O primeiro passo é o cadastro. Você entra na fila e a associação entra em contato quando
+        surgir vaga.
+      </p>
+      <div class="fila">
+        <a href="#" class="botao botao-primario">Fazer meu cadastro</a>
+        <a href="#" class="botao botao-secundario">(12) 3346-0605</a>
+      </div>
+    </div>
+  </section>
+</main>
