@@ -4,7 +4,8 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela antes disso).
+Fase 2 — DESIGN. Fundação pronta (DESIGN.md, design system local e no Claude Design,
+prompts do lote piloto). Aguardando o dono gerar as telas no canvas.
 
 ## Decisões tomadas
 
@@ -73,8 +74,10 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
 
 ## Em aberto / próximos passos
 
-- [ ] Fase 2 — DESIGN. Começa por `npx brandmd https://www.appd.org.br` e pelo
-      DESIGN.md; nenhuma tela é implementada antes da aprovação no Claude Design.
+- [ ] AÇÃO DO DONO: gerar no canvas do Claude Design as três telas do lote piloto,
+      colando os prompts de `docs/prompts-design/`. Projeto de design system:
+      `appd-sjc` (id ca4c3e74-4515-46f8-a467-e137bf2ab04d), com 10 arquivos gravados.
+- [ ] Depois do piloto aprovado: escrever os prompts das 13 telas restantes.
 - [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
       telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
 - [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
