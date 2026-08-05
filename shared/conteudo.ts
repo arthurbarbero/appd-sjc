@@ -72,7 +72,7 @@ export const SERVICOS: Oferta[] = [
     nome: 'Fisioterapia',
     resumo: 'Atendimento de fisioterapia com foco em manter e recuperar a autonomia de movimento.',
     imagem: {
-      arquivo: '/imagens/63d3b3e346404676bc61a9091332600c.png',
+      arquivo: '/imagens/63d3b3e346404676bc61a9091332600c.webp',
       alt: 'Selo da Fisioterapia da APPD: um caduceu verde dentro de um círculo com o nome da associação.',
     },
     noFormulario: true,
@@ -143,7 +143,7 @@ export const SERVICOS: Oferta[] = [
     resumo:
       'Orientação sobre direitos, benefícios e a rede de apoio pública de São José dos Campos.',
     imagem: {
-      arquivo: '/imagens/33ee15be8c9d4c4fa99cd5219dacbbc8.png',
+      arquivo: '/imagens/33ee15be8c9d4c4fa99cd5219dacbbc8.webp',
       alt: 'Selo do Serviço Social da APPD: uma tocha e uma balança dentro de um círculo verde com o nome da associação.',
     },
     noFormulario: true,
@@ -179,7 +179,7 @@ export const SERVICOS: Oferta[] = [
     nome: 'Orientações Gerais',
     resumo: 'A porta de entrada: a primeira conversa sobre o que a associação pode fazer por você.',
     imagem: {
-      arquivo: '/imagens/ec90df9aa3bf49b0870b088592bd5c6f.png',
+      arquivo: '/imagens/ec90df9aa3bf49b0870b088592bd5c6f.webp',
       alt: 'Selo das Orientações Gerais da APPD: ilustração de uma pessoa sentada diante de um computador.',
     },
     noFormulario: true,
@@ -277,32 +277,32 @@ export const PROJETOS: Oferta[] = [
       'Se os horários seguem valendo em 2026',
     ],
     imagem: {
-      arquivo: '/imagens/a009cc5930f44abeaf7dacfcb834e613.jpg',
+      arquivo: '/imagens/a009cc5930f44abeaf7dacfcb834e613.webp',
       alt: 'Equipe de bocha paralímpica da APPD reunida na quadra: atletas em cadeiras de rodas, com uniforme azul e verde, à frente de acompanhantes e profissionais de jaleco branco. Bolas de bocha azuis e vermelhas no chão.',
     },
     galeria: [
       {
-        arquivo: '/imagens/2c64ff0311dc405a83953654da0baf7a.jpg',
+        arquivo: '/imagens/2c64ff0311dc405a83953654da0baf7a.webp',
         alt: 'Bolas de bocha vermelhas e a bola branca alvo, paradas no chão da quadra.',
       },
       {
-        arquivo: '/imagens/bc6c0245add54ce2a56d12f5203aad0e.jpg',
+        arquivo: '/imagens/bc6c0245add54ce2a56d12f5203aad0e.webp',
         alt: 'Dois atletas em cadeira de rodas jogando bocha com auxílio de calhas, acompanhados por auxiliares na quadra.',
       },
       {
-        arquivo: '/imagens/35085704197240fba6584a9f6102c7a9.jpg',
+        arquivo: '/imagens/35085704197240fba6584a9f6102c7a9.webp',
         alt: 'Atleta lançando a bola por uma calha, com o auxiliar posicionando o equipamento.',
       },
       {
-        arquivo: '/imagens/d19b56ab24c14baf8e65b4fa632972db.jpg',
+        arquivo: '/imagens/d19b56ab24c14baf8e65b4fa632972db.webp',
         alt: 'Atleta em cadeira de rodas alinhando a calha antes do lançamento, com o auxiliar ao lado.',
       },
       {
-        arquivo: '/imagens/af5d4f1e51d54ef0b7399d09b029cf40.jpg',
+        arquivo: '/imagens/af5d4f1e51d54ef0b7399d09b029cf40.webp',
         alt: 'Vista ampla da quadra durante o treino, com atletas espalhados e bolas em jogo.',
       },
       {
-        arquivo: '/imagens/cb1173521d1145ba96e0bbb8c7970967.jpg',
+        arquivo: '/imagens/cb1173521d1145ba96e0bbb8c7970967.webp',
         alt: 'Dois integrantes do projeto lado a lado, um deles exibindo a medalha conquistada.',
       },
     ],
@@ -341,12 +341,12 @@ export const PROJETOS: Oferta[] = [
       'Orientação sobre o que dá para cuidar em casa.',
     ],
     imagem: {
-      arquivo: '/imagens/f4255106208240399592ed2852586a06.jpg',
+      arquivo: '/imagens/f4255106208240399592ed2852586a06.webp',
       alt: 'Arte do projeto Oficina Inclusiva Mão na Roda: uma placa amarela de sinalização com o desenho de uma pessoa em cadeira de rodas dentro de uma chave de boca, e o subtítulo "conserto e manutenção de cadeira de rodas".',
     },
     galeria: [
       {
-        arquivo: '/imagens/e5a361b0765f4a62a21f9ba072f12527.jpg',
+        arquivo: '/imagens/e5a361b0765f4a62a21f9ba072f12527.webp',
         alt: 'Retrato de Bill, responsável técnico da Oficina Mão na Roda, de camisa clara e óculos.',
         legenda: 'Bill, responsável técnico da oficina',
       },
@@ -379,12 +379,12 @@ export const PROJETOS: Oferta[] = [
     ],
     oQueEsperar: ['Oficinas de técnicas de artesanato.', 'Apoio para vender o que você produzir.'],
     imagem: {
-      arquivo: '/imagens/4c54b2588ebb4044aa1b23db4303cd12.png',
+      arquivo: '/imagens/4c54b2588ebb4044aa1b23db4303cd12.webp',
       alt: 'Selo do projeto Artesão da Inclusão, com os dizeres "cursos profissionalizantes" e uma paleta de tintas coloridas.',
     },
     galeria: [
       {
-        arquivo: '/imagens/0bf304bf0d844fc28d60c0863cadd02a.png',
+        arquivo: '/imagens/0bf304bf0d844fc28d60c0863cadd02a.webp',
         alt: 'Placa de madeira entalhada com o nome Artesão da Inclusão e o símbolo internacional de acesso.',
       },
     ],
@@ -402,7 +402,7 @@ export const PROJETOS: Oferta[] = [
     nome: 'Informática Nota 10',
     resumo: 'Inclusão digital: aprender a usar o computador com autonomia.',
     imagem: {
-      arquivo: '/imagens/cbae5e83df0948c78b196574aeb04f3c.png',
+      arquivo: '/imagens/cbae5e83df0948c78b196574aeb04f3c.webp',
       alt: 'Selo do Informática Nota 10: um monitor de computador dentro de um círculo azul, com os dizeres "cursos profissionalizantes".',
     },
     noFormulario: false,
@@ -456,7 +456,7 @@ export const PESSOAS: Pessoa[] = [
   {
     nome: 'Maria Claudete da Silveira Rabelo de Moura',
     papel: 'Fundadora',
-    foto: '/imagens/242e24c8325c46fe99f614ab30b6fbbf.png',
+    foto: '/imagens/242e24c8325c46fe99f614ab30b6fbbf.webp',
     alt: 'Maria Claudete da Silveira Rabelo de Moura sentada à mesa de um evento oficial, com as bandeiras do Brasil e do estado ao fundo.',
     bio: [
       'Fundou a APPD em 29 de março de 2006, junto de pessoas que compartilhavam o mesmo objetivo: localizar, orientar e incluir pessoas com deficiência na região.',
@@ -465,7 +465,7 @@ export const PESSOAS: Pessoa[] = [
   {
     nome: 'Luiz Carlos Lucas Barbosa',
     papel: 'Presidente',
-    foto: '/imagens/adc13541b5744f6292df8093aa43f702.jpg',
+    foto: '/imagens/adc13541b5744f6292df8093aa43f702.webp',
     alt: 'Retrato de Luiz Carlos Lucas Barbosa, presidente da APPD, de camisa clara.',
     bio: [
       'Trabalhou como motorista profissional por 15 anos. Voltou a estudar já na presidência da associação e trocou a área de transporte e logística pelo curso de Serviço Social, para atuar melhor no atendimento.',

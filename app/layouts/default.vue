@@ -31,7 +31,7 @@ const atual = (para: string) =>
           alt vazio de propósito: o nome da associação está no texto ao lado, e leitor
           de tela anunciando duas vezes é ruído, não acessibilidade.
         -->
-        <img src="/marca/logo-appd.png" alt="" width="904" height="519" class="logo" />
+        <img src="/marca/logo-appd.png" alt="" width="600" height="345" class="logo" />
         <span class="nome">APPD<br />São José dos Campos</span>
       </NuxtLink>
 

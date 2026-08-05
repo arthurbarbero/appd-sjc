@@ -4,9 +4,10 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-Fase 2 — DESIGN. Design system v2 no Claude Design (11 arquivos) e **os 16 prompts de
-tela escritos**. Lote piloto (Home, Serviço, Formulário) gerado e aprovado pelo dono em
-2026-08-05. Aguardando a geração dos outros 13 no canvas e o handoff.
+**Site institucional rodando localmente** (`npm run dev`, http://localhost:3000), com
+12 rotas públicas em Nuxt sobre o design system v2. Fases 0 a 2 concluídas; a Fase 3
+(OpenSpec) foi pulada por decisão do dono para ter algo rodando — as changes ainda
+precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 
 ## Decisões tomadas
 
@@ -85,13 +86,34 @@ tela escritos**. Lote piloto (Home, Serviço, Formulário) gerado e aprovado pel
   301 das URLs antigas que têm equivalente; as sem equivalente caem na 404 útil.
 - Conteúdo vencido (evento de 2019, jantar de 2024) não migra.
 
+## Fase 2 e implementação (2026-08-05)
+
+- [x] DESIGN.md com a marca auditada contra WCAG AA; duas cores herdadas reprovaram e
+      foram ajustadas.
+- [x] Design system v2 (tokens, base, 8 previews) local e no Claude Design.
+- [x] 16 prompts de tela; 9 telas geradas no canvas e importadas.
+- [x] Site em Nuxt: home, hub de atendimento, 5 serviços, lista e 4 projetos, doações,
+      contato, sobre, regimento, COMTRAD, 404 e o formulário de 15 campos.
+- [x] PIX real: a chave é o CNPJ da associação. QR gerado do payload BR Code, com CRC
+      conferido — **falta escanear com o app do banco antes de publicar**.
+- [x] 36 imagens do site atual baixadas, distribuídas e comprimidas para WebP:
+      8,3 MB → 1,4 MB (-83%). Logo: 289 KB → 45 KB.
+- [x] Regimento interno e COMTRAD saem da orfandade e viram páginas de verdade.
+
 ## Em aberto / próximos passos
 
-- [ ] AÇÃO DO DONO: gerar as 13 telas restantes no canvas, em dois lotes (públicas
-      primeiro). Projeto de design system: `appd-sjc`
-      (id ca4c3e74-4515-46f8-a467-e137bf2ab04d), 11 arquivos.
-- [ ] Depois de geradas: revisão com `claude-design-review` + `auditoria-usabilidade`,
-      handoff (Share/Export → Send to Claude Code) e critério visual de aceite.
+- [ ] **Escanear o QR do PIX** com o app do banco. Validei estrutura e CRC; não
+      consigo validar que o banco aceita.
+- [ ] Escrever as changes de OpenSpec antes da parte com banco (`cadastro-e-login`,
+      `formulario-atendimento`, `cracha-do-associado`, `area-do-associado`).
+- [ ] Telas ainda não implementadas: Cadastro, Login, Área do Associado, Crachá,
+      Verificação pública e Política de Privacidade. Prompts prontos em
+      `docs/prompts-design/`.
+- [ ] Auditoria completa das 9 telas do handoff: só a 404 foi revisada a fundo. Achados
+      dela que valem para todas: Google Fonts por CDN (já corrigido na implementação),
+      `<html>` sem `lang` e links de rede social inventados.
+- [ ] Confirmar com a APPD que a foto da mulher é a fundadora e a do homem é o
+      presidente — a associação das fotos aos nomes é inferência minha.
 - [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
       telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
 - [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
@@ -106,6 +128,12 @@ tela escritos**. Lote piloto (Home, Serviço, Formulário) gerado e aprovado pel
   de produção. Revisar quando drizzle-kit/wrangler publicarem correção.
 - `wrangler.jsonc` tem `database_id` de placeholder — trocar pelo id real depois de
   `wrangler d1 create appd-sjc`.
+- **A logo diz "PESSOAS PORTADORAS DE DEFICIÊNCIAS"**. É a razão social registrada e
+  não muda; mas o texto do site usa "pessoa com deficiência". Marca e texto vão
+  divergir, e isso é conversa para a associação.
+- **As cores da logo são azul, amarelo e verde.** O vermelho `#8b0000` do design system
+  veio do CSS do site antigo, não da marca. Funciona, mas se o objetivo for conversar
+  com a logo, trocar a cor de ação por um azul do emblema é mudar um token.
 - **Texto institucional errado no site atual**: a página do Artesão afirma que
   "pesquisas comprovam" que a renda per capita das famílias de PcD é 50% a 70% menor.
   Essa pesquisa não existe — busca em IBGE, IPEA, OMS/Banco Mundial e literatura não
