@@ -29,7 +29,7 @@
         Telefone para contato <span class="obrigatorio" aria-hidden="true">*</span>
       </label>
       <span class="ajuda" id="ajuda-telefone">
-        É por ele que vem o primeiro contato da associação.
+        Com DDD. Exemplo: (12) 99165-7059. É por ele que vem o primeiro contato.
       </span>
       <input
         id="telefone"
@@ -38,7 +38,8 @@
         inputmode="tel"
         autocomplete="tel"
         aria-describedby="ajuda-telefone"
-        value="(12) 9916-705"
+        value="(12) 99165-7059"
+        placeholder="(00) 00000-0000"
       />
     </div>
 
@@ -74,6 +75,52 @@
       <input id="complemento" name="complemento" type="text" aria-describedby="ajuda-complemento" />
     </div>
   </form>
+
+  <section style="display: flex; flex-direction: column; gap: var(--e2); max-width: 36rem">
+    <h3>Máscaras</h3>
+    <div class="rolagem">
+      <table>
+        <caption>
+          O que cada campo formata enquanto a pessoa digita
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Campo</th>
+            <th scope="col">Máscara</th>
+            <th scope="col">Teclado no celular</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Telefone para contato</th>
+            <td><code>(00) 00000-0000</code></td>
+            <td><code>inputmode="tel"</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Contato do cuidador</th>
+            <td><code>(00) 00000-0000</code></td>
+            <td><code>inputmode="tel"</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Data de nascimento</th>
+            <td><code>00/00/0000</code></td>
+            <td><code>inputmode="numeric"</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="aviso aviso-destaque">
+      <span class="icone" aria-hidden="true">◆</span>
+      <div class="conteudo">
+        <strong>Máscara ajuda, mas não pode atrapalhar.</strong>
+        <span>
+          Ela formata enquanto a pessoa digita e nunca recusa a tecla em silêncio. Colar
+          "12991657059" funciona. Colar "+55 12 99165-7059" funciona. Apagar no meio não embaralha o
+          resto. Fixo de 8 dígitos também é aceito — a máscara se ajusta, não obriga celular.
+        </span>
+      </div>
+    </div>
+  </section>
 
   <div class="aviso aviso-atencao">
     <span class="icone" aria-hidden="true">!</span>

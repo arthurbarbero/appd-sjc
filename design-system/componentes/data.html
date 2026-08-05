@@ -1,0 +1,402 @@
+<!-- @dsCard group="Formulário" -->
+<!-- ESTILOS -->
+<style>
+  .coluna {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e5);
+    max-width: 38rem;
+  }
+
+  /* ---------- campo de data ---------- */
+
+  .campo-data {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: var(--e2);
+    max-width: 22rem;
+  }
+
+  .campo-data input {
+    flex: 1;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .abrir-calendario {
+    flex: none;
+    width: var(--altura-controle);
+    height: var(--altura-controle);
+    display: grid;
+    place-items: center;
+    background: var(--fundo);
+    border: var(--borda-campo) solid var(--borda);
+    border-radius: var(--raio);
+    cursor: pointer;
+    color: var(--texto);
+    transition:
+      border-color var(--transicao),
+      background-color var(--transicao);
+  }
+
+  .abrir-calendario:hover {
+    border-color: var(--primaria);
+    background: var(--primaria-tenue);
+    color: var(--primaria);
+  }
+
+  /* ---------- calendário ---------- */
+
+  .calendario {
+    width: 22rem;
+    background: var(--fundo);
+    border: var(--borda-largura) solid var(--borda-suave);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra-2);
+    padding: var(--e3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--e3);
+  }
+
+  .calendario-topo {
+    display: flex;
+    align-items: center;
+    gap: var(--e2);
+  }
+
+  .calendario-topo select {
+    min-height: var(--alvo-min);
+    padding: 0 var(--e2);
+    border: var(--borda-campo) solid var(--borda);
+    border-radius: var(--raio-p);
+    background: var(--fundo);
+    color: var(--texto);
+    font: inherit;
+    font-weight: var(--peso-forte);
+  }
+
+  .calendario-topo select.mes {
+    flex: 1;
+  }
+
+  .passo {
+    flex: none;
+    width: var(--alvo-min);
+    height: var(--alvo-min);
+    display: grid;
+    place-items: center;
+    background: var(--fundo);
+    border: var(--borda-largura) solid var(--borda-suave);
+    border-radius: var(--raio-p);
+    cursor: pointer;
+    color: var(--texto);
+    font-size: 1.1rem;
+  }
+
+  .passo:hover {
+    background: var(--superficie-forte);
+  }
+
+  .semana,
+  .dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .semana span {
+    text-align: center;
+    font-size: var(--texto-rotulo);
+    font-weight: var(--peso-forte);
+    color: var(--texto-suave);
+    padding-bottom: var(--e1);
+  }
+
+  .dia {
+    min-height: var(--alvo-min);
+    display: grid;
+    place-items: center;
+    border: var(--borda-largura) solid transparent;
+    border-radius: var(--raio-p);
+    background: transparent;
+    color: var(--texto);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition:
+      background-color var(--transicao),
+      border-color var(--transicao);
+  }
+
+  .dia:hover {
+    background: var(--superficie);
+    border-color: var(--borda-suave);
+  }
+
+  .dia[aria-selected='true'] {
+    background: var(--primaria);
+    border-color: var(--primaria);
+    color: var(--sobre-primaria);
+    font-weight: var(--peso-forte);
+  }
+
+  /* Dia de hoje: contorno, não preenchimento — não pode ser confundido com selecionado. */
+  .dia.hoje {
+    border-color: var(--texto);
+    font-weight: var(--peso-forte);
+  }
+
+  .dia.fora {
+    color: var(--texto-suave);
+    opacity: 0.55;
+  }
+
+  .dia[disabled] {
+    color: var(--texto-suave);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .dia.foco-falso {
+    outline: var(--foco-largura) solid var(--foco);
+    outline-offset: -1px;
+  }
+
+  .calendario-pe {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e2);
+    border-top: var(--borda-largura) solid var(--borda-suave);
+    padding-top: var(--e2);
+  }
+
+  .nota {
+    font-size: var(--texto-rotulo);
+    color: var(--texto-suave);
+  }
+
+  .par {
+    display: flex;
+    gap: var(--e5);
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+</style>
+
+<main style="padding: var(--e4); display: flex; flex-direction: column; gap: var(--e5)">
+  <div>
+    <h2>Data de nascimento</h2>
+    <p>
+      Digitar é o caminho principal; o calendário é atalho. Para data de nascimento, obrigar a
+      navegar dezenas de anos para trás é pior que deixar a pessoa escrever — por isso o campo
+      aceita <strong>dd/mm/aaaa</strong> direto, e o calendário abre com mês e ano em lista.
+    </p>
+  </div>
+
+  <div class="coluna">
+    <section style="display: flex; flex-direction: column; gap: var(--e2)">
+      <h3>Campo fechado</h3>
+      <div class="campo">
+        <label for="nascimento">Data de nascimento <span class="obrigatorio">*</span></label>
+        <span class="ajuda" id="ajuda-nascimento">
+          Escreva no formato dia/mês/ano. Exemplo: 12/03/1978.
+        </span>
+        <div class="campo-data">
+          <input
+            id="nascimento"
+            name="nascimento"
+            type="text"
+            inputmode="numeric"
+            autocomplete="bday"
+            placeholder="dd/mm/aaaa"
+            aria-describedby="ajuda-nascimento"
+            value="12/03/1978"
+          />
+          <button
+            type="button"
+            class="abrir-calendario"
+            aria-label="Escolher no calendário"
+            aria-expanded="false"
+            aria-haspopup="dialog"
+          >
+            <span aria-hidden="true">▦</span>
+          </button>
+        </div>
+      </div>
+      <p class="nota">
+        O <code>placeholder</code> aqui mostra o formato e repete o que já está no texto de ajuda —
+        ele nunca substitui o rótulo.
+      </p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--e2)">
+      <h3>Campo com erro</h3>
+      <div class="campo campo-erro">
+        <label for="nascimento-erro">Data de nascimento <span class="obrigatorio">*</span></label>
+        <div class="campo-data">
+          <input
+            id="nascimento-erro"
+            type="text"
+            inputmode="numeric"
+            aria-invalid="true"
+            aria-describedby="erro-nascimento"
+            value="31/02/1978"
+          />
+          <button
+            type="button"
+            class="abrir-calendario"
+            aria-label="Escolher no calendário"
+            aria-expanded="false"
+            aria-haspopup="dialog"
+          >
+            <span aria-hidden="true">▦</span>
+          </button>
+        </div>
+        <span class="erro" id="erro-nascimento">
+          <span class="icone" aria-hidden="true">✕</span>
+          Fevereiro não tem dia 31. Confira o dia e o mês.
+        </span>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--e2)">
+      <h3>Calendário aberto</h3>
+      <div class="par">
+        <div
+          class="calendario"
+          role="dialog"
+          aria-modal="false"
+          aria-label="Escolher data de nascimento"
+        >
+          <div class="calendario-topo">
+            <button type="button" class="passo" aria-label="Mês anterior">
+              <span aria-hidden="true">‹</span>
+            </button>
+            <select class="mes" aria-label="Mês">
+              <option>janeiro</option>
+              <option>fevereiro</option>
+              <option selected>março</option>
+              <option>abril</option>
+            </select>
+            <select class="ano" aria-label="Ano">
+              <option>1976</option>
+              <option>1977</option>
+              <option selected>1978</option>
+              <option>1979</option>
+            </select>
+            <button type="button" class="passo" aria-label="Próximo mês">
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
+
+          <div class="semana" aria-hidden="true">
+            <span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span>
+            <span>sex</span><span>sáb</span>
+          </div>
+
+          <div class="dias" role="grid" aria-label="março de 1978">
+            <button type="button" class="dia fora">26</button>
+            <button type="button" class="dia fora">27</button>
+            <button type="button" class="dia fora">28</button>
+            <button type="button" class="dia">1</button>
+            <button type="button" class="dia">2</button>
+            <button type="button" class="dia">3</button>
+            <button type="button" class="dia">4</button>
+
+            <button type="button" class="dia">5</button>
+            <button type="button" class="dia">6</button>
+            <button type="button" class="dia">7</button>
+            <button type="button" class="dia">8</button>
+            <button type="button" class="dia">9</button>
+            <button type="button" class="dia">10</button>
+            <button type="button" class="dia">11</button>
+
+            <button type="button" class="dia foco-falso" aria-selected="true">12</button>
+            <button type="button" class="dia">13</button>
+            <button type="button" class="dia">14</button>
+            <button type="button" class="dia">15</button>
+            <button type="button" class="dia">16</button>
+            <button type="button" class="dia">17</button>
+            <button type="button" class="dia">18</button>
+
+            <button type="button" class="dia">19</button>
+            <button type="button" class="dia">20</button>
+            <button type="button" class="dia">21</button>
+            <button type="button" class="dia">22</button>
+            <button type="button" class="dia">23</button>
+            <button type="button" class="dia">24</button>
+            <button type="button" class="dia">25</button>
+
+            <button type="button" class="dia">26</button>
+            <button type="button" class="dia">27</button>
+            <button type="button" class="dia">28</button>
+            <button type="button" class="dia">29</button>
+            <button type="button" class="dia">30</button>
+            <button type="button" class="dia">31</button>
+            <button type="button" class="dia fora">1</button>
+          </div>
+
+          <div class="calendario-pe">
+            <span class="nota">12 de março de 1978</span>
+            <button type="button" class="botao botao-fantasma" style="min-height: var(--alvo-min)">
+              Fechar
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="flex: 1; min-width: 15rem; display: flex; flex-direction: column; gap: var(--e2)"
+        >
+          <div class="aviso aviso-destaque">
+            <span class="icone" aria-hidden="true">◆</span>
+            <div class="conteudo">
+              <strong>Por que mês e ano em lista.</strong>
+              <span>
+                Quem nasceu em 1952 precisaria de mais de 800 cliques na seta para chegar lá. Com as
+                duas listas, chega em dois toques.
+              </span>
+            </div>
+          </div>
+          <p class="nota">
+            Data futura fica desabilitada e riscada: ninguém nasceu amanhã. O dia de hoje é marcado
+            por contorno, nunca por preenchimento, para não se confundir com o dia selecionado.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--e2)">
+      <h3>Como se comporta</h3>
+      <ul style="display: flex; flex-direction: column; gap: var(--e2); padding-left: var(--e4)">
+        <li>
+          <strong>Digitar é o caminho principal.</strong> O campo aceita 12031978, 12/03/1978 e
+          12-03-1978, e normaliza para dd/mm/aaaa ao sair do campo. Nunca bloqueia a digitação.
+        </li>
+        <li>
+          <strong>O calendário é opcional.</strong> Abre no mês e ano já digitados; se o campo
+          estiver vazio, abre num ano razoável para adulto, não no ano atual.
+        </li>
+        <li>
+          <strong>Teclado:</strong> setas andam pelos dias, PageUp e PageDown mudam o mês, Home e
+          End vão ao começo e ao fim da semana, Enter escolhe, Esc fecha e devolve o foco ao botão
+          do calendário.
+        </li>
+        <li>
+          <strong>Leitor de tela:</strong> o dia é anunciado por extenso ("12 de março de 1978,
+          domingo"), não como número solto.
+        </li>
+        <li>
+          <strong>Erro é específico:</strong> "Fevereiro não tem dia 31", não "data inválida".
+        </li>
+        <li>
+          <strong>No celular</strong> o teclado numérico abre sozinho
+          (<code>inputmode="numeric"</code>) e o calendário ocupa a largura da tela.
+        </li>
+      </ul>
+    </section>
+  </div>
+</main>

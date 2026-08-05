@@ -26,6 +26,7 @@ const titulos = {
   tipografia: 'Tipografia',
   acoes: 'Ações',
   campos: 'Campos',
+  data: 'Data de nascimento',
   escolhas: 'Escolhas',
   estrutura: 'Estrutura',
   avisos: 'Avisos',

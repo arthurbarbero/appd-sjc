@@ -58,17 +58,18 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 >   acontecem somente no período da manhã."; "Mantenha o telefone atualizado — é por
 >   ele que vem o primeiro contato." Não repita aqui nada sobre contribuição ou valor:
 >   isso aparece uma vez só, no campo 15.
-> - **Seção 1 — Quem vai ser atendido**: NOME (texto, obrigatório); DATA DE NASCIMENTO
->   (campo de data acessível que aceita digitação em dd/mm/aaaa, obrigatório); TELEFONE
->   PARA CONTATO (texto com máscara, obrigatório, com ajuda "É por ele que vem o
->   primeiro contato."); É WHATSAPP (rádio Sim/Não, obrigatório).
-> - **Seção 2 — Onde você mora**: ENDEREÇO (rua/avenida/travessa) (área de texto,
->   obrigatório); NÚMERO (texto, obrigatório); COMPLEMENTO (se houver) (texto,
->   opcional); BAIRRO (obrigatório); MUNICÍPIO (obrigatório).
-> - **Seção 3 — Cuidador, se houver**: NOME DO CUIDADOR (se necessário) (opcional);
->   CONTATO DO CUIDADOR (opcional). A seção começa com a linha "Preencha só se outra
+> - **Seção 1 — Quem vai ser atendido**: Nome (texto, obrigatório); Data de nascimento
+>   (ver o componente dedicado abaixo, obrigatório); Telefone para contato (texto com
+>   máscara `(00) 00000-0000`, obrigatório, com ajuda "Com DDD. Exemplo:
+>   (12) 99165-7059. É por ele que vem o primeiro contato."); É WhatsApp (rádio Sim/Não,
+>   obrigatório).
+> - **Seção 2 — Onde você mora**: Endereço (rua/avenida/travessa) (área de texto,
+>   obrigatório); Número (texto, obrigatório); Complemento (se houver) (texto,
+>   opcional); Bairro (obrigatório); Município (obrigatório).
+> - **Seção 3 — Cuidador, se houver**: Nome do cuidador (se necessário) (opcional);
+>   Contato do cuidador (opcional, com a mesma máscara de telefone). A seção começa com a linha "Preencha só se outra
 >   pessoa acompanha o atendimento."
-> - **Seção 4 — Sobre o atendimento**: POSSUI ALGUMA DEFICIÊNCIA (grupo de caixas de
+> - **Seção 4 — Sobre o atendimento**: Possui alguma deficiência (grupo de caixas de
 >   seleção, obrigatório, múltipla escolha: Física / Intelectual ou Neurodivergentes /
 >   Sensorial (visão, audição, fala) / Outro, com campo de texto que aparece ao marcar
 >   Outro); Tipo de Atendimento (caixas de seleção, múltipla: Empréstimo Equipamentos /
@@ -85,6 +86,25 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 >   link.
 > - **Envio**: botão primário "Enviar meu cadastro", e ao lado, em texto, "Prefere
 >   preencher por telefone? (12) 3346-0605".
+>
+> **Data de nascimento** — use o componente `componentes/data.html` do design system.
+> Campo de texto com máscara `00/00/0000`, `inputmode="numeric"`,
+> `autocomplete="bday"`, `placeholder="dd/mm/aaaa"`, e um botão quadrado de 52px ao
+> lado com ícone de calendário e `aria-label="Escolher no calendário"`. **Digitar é o
+> caminho principal**; o calendário é atalho. Ao abrir, o calendário aparece como um
+> painel com sombra, mês e ano em **listas suspensas** (não só setas — quem nasceu em
+> 1952 precisaria de mais de 800 cliques na seta), grade de dias com células de 44px,
+> dia selecionado preenchido em `#8b0000` com texto branco, dia de hoje apenas
+> contornado, datas futuras desabilitadas e riscadas, e rodapé com a data por extenso e
+> um botão "Fechar". Renderize o calendário aberto como um dos estados.
+>
+> **Máscaras** — obrigatórias e não bloqueantes. Telefone para contato e Contato do
+> cuidador usam `(00) 00000-0000` com `inputmode="tel"`; data de nascimento usa
+> `00/00/0000` com `inputmode="numeric"`. A máscara formata enquanto a pessoa digita e
+> **nunca recusa a tecla em silêncio**: colar "12991657059" funciona, colar
+> "+55 12 99165-7059" funciona, apagar no meio não embaralha o resto, e telefone fixo de
+> 8 dígitos também é aceito. O formato esperado aparece no texto de ajuda, não só no
+> `placeholder`.
 >
 > Cada grupo de caixas de seleção e de rádio vem dentro de um `fieldset` com `legend`
 > igual ao rótulo do campo, controles de 24px, área clicável de 44px incluindo o rótulo
@@ -117,6 +137,9 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 - [ ] Os 15 rótulos usam as mesmas palavras do original, na mesma ordem, em caixa alta
       e baixa.
 - [ ] Nenhum campo usa placeholder como rótulo.
+- [ ] Telefone, contato do cuidador e data de nascimento têm máscara, e a máscara
+      aceita colar e apagar sem embaralhar.
+- [ ] O calendário abre com mês e ano em lista suspensa, não só com setas.
 - [ ] O consentimento do Art. 11 é uma seção própria, destacada, com a caixa desmarcada.
 - [ ] O valor aparece **uma vez só**, no campo 15, ao lado do controle — não no topo,
       não na página de serviço, não na home.
