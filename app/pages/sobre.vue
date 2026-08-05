@@ -164,10 +164,21 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
     <section aria-labelledby="voluntario" class="voluntario">
       <h2 id="voluntario">Quer ajudar?</h2>
       <p>
-        A associação aceita voluntários. Se você tem tempo e alguma habilidade para oferecer —
-        profissional de saúde, artesão, professor, motorista, quem entende de manutenção —, fale com
-        a gente e conte o que sabe fazer.
+        A associação aceita voluntários, seguindo a Lei Federal nº 9.608/98, a Lei do Voluntário. Se
+        você tem tempo e alguma habilidade para oferecer — profissional de saúde, artesão,
+        professor, motorista, quem entende de manutenção —, fale com a gente e conte o que sabe
+        fazer.
       </p>
+      <p>Como funciona, pelo regimento interno:</p>
+      <ul class="lista-voluntario">
+        <li>
+          Você passa por uma entrevista com um coordenador ou supervisor de projeto, que avalia onde
+          a sua habilidade se encaixa.
+        </li>
+        <li>Pode ser designado para qualquer área disponível na associação.</li>
+        <li>O trabalho é sempre acompanhado por um coordenador ou supervisor.</li>
+      </ul>
+      <p>As regras completas estão no <NuxtLink to="/regimento">regimento interno</NuxtLink>.</p>
       <div class="botoes">
         <NuxtLink to="/contato" class="botao botao-primario">Quero ser voluntário</NuxtLink>
         <NuxtLink to="/doar" class="botao botao-secundario">Prefiro doar</NuxtLink>
@@ -255,6 +266,15 @@ section {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e3);
+}
+
+.lista-voluntario {
+  margin: 0;
+  padding-left: var(--e4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  max-width: var(--medida);
 }
 .pessoas {
   gap: var(--e5);

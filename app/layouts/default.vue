@@ -84,6 +84,13 @@ const atual = (para: string) =>
           <p class="titulo-rodape">Redes sociais</p>
           <a v-for="rede in ASSOCIACAO.redes" :key="rede.url" :href="rede.url">{{ rede.nome }}</a>
         </div>
+
+        <div class="coluna">
+          <p class="titulo-rodape">Institucional</p>
+          <NuxtLink to="/sobre">Sobre nós</NuxtLink>
+          <NuxtLink to="/regimento">Regimento interno</NuxtLink>
+          <NuxtLink to="/comtrad">COMTRAD</NuxtLink>
+        </div>
       </div>
 
       <p class="discreto aviso-rodape">

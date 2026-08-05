@@ -503,7 +503,8 @@ const numeroFicticio = 'APPD-2026-00042'
           <p class="explicacao">
             Para a manutenção do projeto, é solicitada uma contribuição solidária. O valor sugerido
             é de <strong>R$ 50,00 por mês</strong>, e pode ser alterado conforme a situação de cada
-            pessoa atendida.
+            pessoa atendida. Pelo regimento interno, a contribuição custeia a manutenção da
+            instituição e <strong>não dá prioridade nem exclusividade</strong> no atendimento.
           </p>
           <label class="escolha">
             <input v-model="f.ciente" type="radio" value="Ciente" />

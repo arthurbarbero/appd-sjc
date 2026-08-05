@@ -494,3 +494,93 @@ export const DOACAO_EM_ESPECIE = [
   'Cadeiras de rodas ou de banho',
   'Alimentos não perecíveis',
 ] as const
+
+/**
+ * Regimento interno, publicado no site atual numa página órfã (sem entrada no menu).
+ * Texto reorganizado em seções; o conteúdo das regras é o mesmo.
+ *
+ * Vale ler antes de marcar algo como desconhecido: várias perguntas que pareciam sem
+ * resposta estão aqui — como o horário é definido, como funciona o voluntariado e o
+ * que acontece com quem atrasa a contribuição.
+ */
+export const REGIMENTO = [
+  {
+    titulo: 'Atendimento',
+    itens: [
+      'Quem quer participar de um projeto precisa se cadastrar no site e aceitar o regimento interno e o termo de colaboração.',
+      'O horário de atendimento é estabelecido pela diretoria executiva, depois de conversar com os coordenadores de projeto.',
+      'O horário de cada projeto fica a cargo do coordenador daquele projeto, com aprovação da diretoria.',
+      'Os horários podem mudar, sempre com aviso, se houver necessidade de remanejamento interno.',
+    ],
+  },
+  {
+    titulo: 'Trabalho voluntário',
+    itens: [
+      'O voluntariado segue a Lei Federal nº 9.608/98, a Lei do Voluntário.',
+      'Quem quer ser voluntário passa por uma entrevista com um coordenador ou supervisor de projeto, que avalia as aptidões.',
+      'O voluntário pode ser designado para qualquer área disponível na associação.',
+      'O trabalho voluntário é sempre acompanhado por um coordenador ou supervisor.',
+    ],
+  },
+  {
+    titulo: 'Reuniões',
+    itens: [
+      'Assembleia Geral: uma vez por ano.',
+      'Conselho Fiscal: a cada seis meses.',
+      'Direção Executiva: uma vez por mês, ou quando a presidência convocar.',
+    ],
+  },
+  {
+    titulo: 'Contribuição do associado',
+    itens: [
+      'Os valores da contribuição são fixados pela diretoria, e podem ser diferentes para cada associado depois de uma análise da situação econômica.',
+      'O carnê de contribuição é retirado na sede.',
+      'O pagamento pode ser feito na sede ou por PIX, na conta da instituição.',
+      'Quem paga por PIX envia o recibo pelo WhatsApp indicado na capa do carnê.',
+      'Três meses seguidos sem pagar levam à exclusão automática, salvo justificativa acertada com a diretoria.',
+      'A contribuição não dá exclusividade nem prioridade nos atendimentos: ela custeia a manutenção da instituição.',
+    ],
+  },
+  {
+    titulo: 'Conservação do espaço',
+    itens: [
+      'A manutenção das instalações e a preservação dos bens são responsabilidade de todos, sem exceção.',
+      'Dano ao patrimônio causado por um associado é assumido por ele.',
+    ],
+  },
+] as const
+
+/**
+ * COMTRAD — Comissão dos Usuários do Transporte Adaptado de São José dos Campos.
+ * Existe no site atual em página órfã. Não é um projeto da APPD: é uma comissão
+ * independente, e o papel da associação é dar suporte jurídico.
+ */
+export const COMTRAD = {
+  nome: 'COMTRAD',
+  nomeCompleto: 'Comissão dos Usuários do Transporte Adaptado',
+  resumo:
+    'Comissão independente formada por quem usa o transporte adaptado de São José dos Campos. A APPD dá o suporte jurídico.',
+  porQueExiste: [
+    'Para muita gente com deficiência, o transporte é a única forma de chegar à saúde, ao trabalho, à escola, ao esporte e ao lazer — direitos garantidos pelo Estatuto da Pessoa com Deficiência.',
+    'A comissão nasceu para facilitar a comunicação entre quem usa o serviço e quem o administra, e para acompanhar de perto qualquer mudança nas regras.',
+  ],
+  finalidades: [
+    'Unificar quem usa o transporte adaptado da cidade, para manter o serviço funcionando em sua totalidade.',
+    'Fiscalizar mudanças no decreto que rege o serviço, e só aceitar as que melhorem o atendimento.',
+    'Lutar pela ampliação do serviço, acompanhando o crescimento do município.',
+    'Esclarecer direitos e deveres de quem usa, incluindo as penalidades previstas para o mau uso.',
+  ],
+  adesao: [
+    'A adesão é voluntária e gratuita.',
+    'É permitida a quem está credenciado e ativo no transporte adaptado, em dia com a Secretaria de Transporte.',
+    'Dá para pedir a adesão pelo site, pelas redes sociais ou por telefone.',
+    'Dá para cancelar o cadastro a qualquer momento, sem aviso prévio e sem ônus para nenhum dos lados.',
+  ],
+  baseLegal: [
+    'Lei Brasileira de Inclusão, Lei nº 13.146 de 2015, artigo 4º',
+    'Constituição Federal, artigo 1º, inciso III, e artigo 5º',
+    'Decreto municipal nº 13.107/08, de 20 de maio de 2008, que substituiu o decreto nº 9.647/99',
+  ],
+  limite:
+    'A comissão atua de forma coletiva, com quem é cadastrado nela. Não dá suporte individual, exceto em denúncia que aponte mau funcionamento do sistema.',
+} as const
