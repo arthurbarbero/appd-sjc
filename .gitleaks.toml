@@ -1,0 +1,10 @@
+# Configuração do gitleaks deste repositório.
+# Herda todas as regras padrão; só libera os arquivos que existem justamente para
+# documentar o NOME das variáveis — nunca o valor.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Arquivos-modelo de variáveis de ambiente"
+paths = ['''\.dev\.vars\.example$''', '''\.env\.example$''']

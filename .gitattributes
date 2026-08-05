@@ -1,0 +1,12 @@
+# O repositório guarda tudo com LF. Sem isso, o CI (Linux) e o Windows brigam por
+# fim de linha e o prettier --check quebra sem motivo.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

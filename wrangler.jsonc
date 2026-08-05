@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "appd-sjc",
+  "main": "./.output/server/index.mjs",
+  "compatibility_date": "2026-08-01",
+  // scrypt do node:crypto (hash de senha) depende de nodejs_compat.
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./.output/public/",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "appd-sjc",
+      // Substituir pelo id real depois de `wrangler d1 create appd-sjc`.
+      // Não é usado no modo local (`--local` usa SQLite em .wrangler/).
+      "database_id": "local-ainda-sem-conta-cloudflare",
+      "migrations_dir": "drizzle/migrations",
+    },
+  ],
+}

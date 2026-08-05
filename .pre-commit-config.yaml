@@ -1,0 +1,22 @@
+# Instalar uma vez: pre-commit install
+# Roda a cada commit. Segredo no repo público é falha grave — gitleaks é bloqueante.
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (caça segredo no staged)
+        entry: gitleaks git --staged --redact --verbose
+        language: system
+        pass_filenames: false
+
+      - id: prettier
+        name: prettier (formatação)
+        entry: npx prettier --check
+        language: system
+        files: \.(ts|js|mjs|vue|json|jsonc|md|css)$
+
+      - id: eslint
+        name: eslint
+        entry: npx eslint --max-warnings 0
+        language: system
+        files: \.(ts|js|mjs|vue)$

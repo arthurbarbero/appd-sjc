@@ -1,0 +1,6 @@
+# Modelo das variáveis locais. Copie para `.dev.vars` (que NUNCA é versionado).
+# Em produção, cada uma vira um Cloudflare Secret — jamais um valor no repo.
+
+# Senha de selagem do cookie de sessão (nuxt-auth-utils), mínimo 32 caracteres.
+# Gere a sua: node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+NUXT_SESSION_PASSWORD=
