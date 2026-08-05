@@ -60,10 +60,10 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
   placeholder: número plausível pode ser a linha de uma pessoa real, e PIX inventado
   manda dinheiro do doador para a conta de outro. Nesses dois campos, só dado real
   publicado ou marcação vazia.
-- Cadastro de **pessoa com deficiência** é central e está no escopo (`cadastro-e-login`
-  - `formulario-atendimento`). O que ficou de fora da V1 é cadastro de **voluntário**,
-    que vira assunto no formulário de contato — cadastro sem ninguém para triar produz
-    caixa de entrada abandonada.
+- Cadastro de **pessoa com deficiência** é central e está no escopo, nas changes
+  `cadastro-e-login` e `formulario-atendimento`. O que ficou de fora da V1 é cadastro de
+  **voluntário**, que vira assunto no formulário de contato — cadastro sem ninguém para
+  triar produz caixa de entrada abandonada.
 - Rotas em pt-BR curtas (`/sobre`, `/doar`, `/atendimento`, `/projetos/<slug>`), com
   301 das URLs antigas que têm equivalente; as sem equivalente caem na 404 útil.
 - Conteúdo vencido (evento de 2019, jantar de 2024) não migra.
