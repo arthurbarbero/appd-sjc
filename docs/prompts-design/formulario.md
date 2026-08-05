@@ -30,22 +30,25 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 
 > Formulário de cadastro de atendimento, responsivo (desktop 1280px, mobile 360px), do
 > site da APPD São José dos Campos, associação de pessoas com deficiência. Use o design
-> system do projeto `appd-sjc`: fundo branco, texto `#1a1a1a`, ação `#8b0000`
-> preenchida, amarelo `#bbb070` só com texto escuro, erro em `#8b0000` sobre `#fdecea`,
-> borda `#8d7158` de 2px, Atkinson Hyperlegible, corpo 17px, campos e botões com 48px de
-> altura, cantos retos, sem sombra, base 8.
+> system do projeto `appd-sjc` (versão 2): fundo branco, texto `#14161a`, superfície
+> `#f7f8f9`, ação `#8b0000` preenchida com raio de 8px e sombra discreta, amarelo
+> `#bbb070` só com texto escuro, borda de estrutura `#e2e5e9` e de campo `#6f7782`,
+> link e foco em `#0f4c93`, rodapé quase preto `#14161a`, Atkinson Hyperlegible com
+> corpo de 17px e título de página em 56px, raio de 10px em bloco e campo, elevação
+> discreta, espaçamento generoso com base 8, campos e botões com 52px de altura,
+> erro em `#8b0000` sobre `#fdf2f2`.
 > Quem preenche costuma ser um familiar cuidador, no celular, cansado — ou a própria
 > pessoa com deficiência, usando teclado ou leitor de tela. A tela não pode ser bonita
 > às custas de ser fácil: campo largo, rótulo grande e sempre visível acima do campo,
 > muito respiro entre campos, um assunto por vez. **Página única com seções**, não
 > assistente de várias etapas: a pessoa precisa ver o tamanho do que está assumindo e
 > poder voltar sem perder nada. A estética é de formulário público sério e bem
-> diagramado, quase um documento — retangular, delimitado por borda, hierarquia por
-> tamanho de texto. **Evite** placeholder no lugar de rótulo, campo flutuante com rótulo
-> que sobe, ícone dentro do campo, campos lado a lado no mobile, barra de progresso
-> decorativa, e qualquer animação de transição entre seções. **Prefira** rótulo em
-> maiúsculas exatamente como no formulário original, texto de ajuda abaixo do rótulo, e
-> agrupamento visível por borda.
+> diagramado, mas contemporâneo — campos com canto suave, agrupamento por espaço e
+> borda leve, hierarquia por tamanho de texto. **Evite** placeholder no lugar de rótulo,
+> campo flutuante com rótulo que sobe, ícone dentro do campo, campos lado a lado no
+> mobile, barra de progresso decorativa, e qualquer animação de transição entre seções.
+> **Prefira** rótulo estático acima do campo, texto de ajuda abaixo do rótulo, e cada
+> opção de escolha como um bloco clicável inteiro de 44px com canto de 6px.
 >
 > Estrutura, com os rótulos nas mesmas palavras do formulário oficial, escritos em
 > caixa alta e baixa (CAIXA ALTA reduz legibilidade; as palavras são as mesmas):
@@ -92,8 +95,8 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 >
 > 1. **Vazio** — o formulário como a pessoa encontra.
 > 2. **Com erro** — resumo no topo com `role="alert"` dizendo "Faltam 2 campos para
->    enviar" e listando links que levam ao campo; os dois campos com borda de 3px em
->    `#8b0000`, ícone e mensagem específica abaixo ("O telefone precisa ter DDD e 9
+>    enviar" e listando links que levam ao campo; os dois campos com borda de 2px em
+>    `#8b0000` e fundo `#fdf2f2`, ícone e mensagem específica abaixo ("O telefone precisa ter DDD e 9
 >    dígitos. Exemplo: (12) 99165-7059."); e **todas as demais respostas preservadas**,
 >    visivelmente preenchidas.
 > 3. **Enviando** — botão desabilitado com o rótulo "Enviando…" e aviso de que a pessoa
@@ -102,7 +105,7 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 >    (APPD-2026-00042), o que acontece agora, em quanto tempo e por qual canal vem o
 >    contato, e o que fazer se o telefone mudar.
 >
-> Acessibilidade como requisito de layout: um `h1`; foco visível de 3px `#8b0000` com
+> Acessibilidade como requisito de layout: um `h1`; foco visível de 3px `#0f4c93` com
 > 2px de folga; ordem de foco igual à ordem visual; mensagem de erro ligada ao campo por
 > `aria-describedby`; resumo de erros focado ao aparecer; nada sinalizado só por cor;
 > nenhum campo lado a lado no mobile.

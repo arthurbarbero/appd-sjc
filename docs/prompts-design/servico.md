@@ -34,9 +34,12 @@ rodapé); e leitura longa em 360px.
 
 > Página de serviço de um site institucional responsivo (desktop 1280px, mobile 360px)
 > da APPD São José dos Campos, associação de pessoas com deficiência. Use o design
-> system do projeto `appd-sjc`: fundo branco, texto `#1a1a1a`, ação `#8b0000`
-> preenchida, verde `#4e5d2e`, amarelo `#bbb070` só com texto escuro, borda `#8d7158`,
-> Atkinson Hyperlegible, corpo 17px, cantos retos, sem sombra, base 8.
+> system do projeto `appd-sjc` (versão 2): fundo branco, texto `#14161a`, superfície
+> `#f7f8f9`, ação `#8b0000` preenchida com raio de 8px e sombra discreta, amarelo
+> `#bbb070` só com texto escuro, borda de estrutura `#e2e5e9` e de campo `#6f7782`,
+> link e foco em `#0f4c93`, rodapé quase preto `#14161a`, Atkinson Hyperlegible com
+> corpo de 17px e título de página em 56px, raio de 10px em bloco e campo, elevação
+> discreta, espaçamento generoso com base 8.
 > Quem lê é a pessoa com deficiência ou um familiar cuidador, frequentemente cansado,
 > com pouca familiaridade digital, decidindo se vale a pena procurar a associação. É
 > uma página de **leitura**, não uma vitrine: texto corrido bem espaçado, largura de
@@ -62,8 +65,8 @@ rodapé); e leitura longa em 360px.
 > 5. **"O que a fisioterapia faz"** — quatro parágrafos de texto corrido com dois
 >    subtítulos, conteúdo informativo sobre reabilitação e autonomia.
 > 6. **"O que esperar"** — como é uma sessão, em três parágrafos.
-> 7. **"Como funciona na APPD"** — bloco com fundo `#f5f2ea` e borda, contendo o que é
->    confirmado (endereço da sede: Rua Acássia Pereira 136, Campos dos Alemães;
+> 7. **"Como funciona na APPD"** — bloco com fundo `#f7f8f9`, raio de 10px e borda
+>    `#e2e5e9`, contendo o que é confirmado (endereço da sede: Rua Acássia Pereira 136, Campos dos Alemães;
 >    telefone (12) 3346-0605) e um aviso de que horário, responsável técnico e
 >    frequência estão em revisão pela associação.
 > 8. **Perguntas frequentes** — quatro perguntas em blocos expansíveis, todos **abertos
@@ -76,7 +79,7 @@ rodapé); e leitura longa em 360px.
 > 10. **Rodapé** igual ao da home.
 >
 > Acessibilidade como requisito de layout: um `h1` só; headings em sequência sem pular
-> nível; foco visível de 3px `#8b0000` com 2px de folga; alvos de 44px; blocos
+> nível; foco visível de 3px `#0f4c93` com 2px de folga; alvos de 44px; blocos
 > expansíveis operáveis por teclado com estado anunciado; nada sinalizado só por cor;
 > texto não justificado.
 >
@@ -89,7 +92,8 @@ rodapé); e leitura longa em 360px.
 
 ## Aceite visual
 
-- [ ] As três condições (fila, manhã, contribuição) aparecem **antes** do texto longo.
+- [ ] As duas condições (fila e período da manhã) aparecem **antes** do texto longo.
+- [ ] Nenhuma menção a valor de contribuição nesta página.
 - [ ] O bloco amarelo tem texto escuro.
 - [ ] O texto tem 60 a 75 caracteres por linha e não está justificado.
 - [ ] As perguntas frequentes vêm abertas por padrão.
