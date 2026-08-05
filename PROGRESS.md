@@ -4,7 +4,7 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-Fase 0 — Fundação.
+Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela antes disso).
 
 ## Decisões tomadas
 
@@ -41,9 +41,28 @@ Fase 0 — Fundação.
 - Arquivo `.example` com valor de placeholder de alta entropia dispara a regra
   `generic-api-key`. Solução: valor vazio + allowlist por caminho em `.gitleaks.toml`.
 
+- [x] Fase 1 — `docs/inventario-conteudo.md` (15 páginas varridas),
+      `docs/campos-formulario.md`, `docs/arquitetura-informacao.md`,
+      `docs/pendencias-appd.md`.
+
+## Decisões da Fase 1 (a APPD pode derrubar)
+
+- V1 publica **três projetos** — Bocha Paralímpica, Oficina Mão na Roda, Artesão da
+  Inclusão. São os únicos com descrição verificável no site atual. Fisioterapia,
+  Serviço Social, Orientações Gerais, Psicologia, Empréstimo de Equipamentos e
+  Informática Nota 10 não têm uma linha de texto em lugar nenhum.
+- Voluntário **não ganha cadastro próprio** na V1: vira assunto no formulário de
+  contato. Cadastro sem ninguém para triar produz caixa de entrada abandonada.
+- Rotas em pt-BR curtas (`/sobre`, `/doar`, `/atendimento`, `/projetos/<slug>`), com
+  301 das URLs antigas que têm equivalente; as sem equivalente caem na 404 útil.
+- Conteúdo vencido (evento de 2019, jantar de 2024) não migra.
+
 ## Em aberto / próximos passos
 
-- [ ] Fase 1 — discovery e inventário de conteúdo de appd.org.br.
+- [ ] Fase 2 — DESIGN. Começa por `npx brandmd https://www.appd.org.br` e pelo
+      DESIGN.md; nenhuma tela é implementada antes da aprovação no Claude Design.
+- [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
+      telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
 - [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
       os padrões do `node:crypto`, que não foram medidos contra o limite de CPU do Worker.
 - [ ] Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).
