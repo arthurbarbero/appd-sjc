@@ -44,6 +44,9 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
 - [x] Fase 1 — `docs/inventario-conteudo.md` (15 páginas varridas),
       `docs/campos-formulario.md`, `docs/arquitetura-informacao.md`,
       `docs/pendencias-appd.md`.
+- [x] Conteúdo das nove landing pages em `docs/servicos/`, com fontes oficiais e
+      marcações `[A CONFIRMAR]`. Índice e prioridades da revisão em
+      `docs/servicos/README.md`.
 
 ## Decisões da Fase 1 (a APPD pode derrubar)
 
@@ -86,6 +89,15 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
   de produção. Revisar quando drizzle-kit/wrangler publicarem correção.
 - `wrangler.jsonc` tem `database_id` de placeholder — trocar pelo id real depois de
   `wrangler d1 create appd-sjc`.
+- **Texto institucional errado no site atual**: a página do Artesão afirma que
+  "pesquisas comprovam" que a renda per capita das famílias de PcD é 50% a 70% menor.
+  Essa pesquisa não existe — busca em IBGE, IPEA, OMS/Banco Mundial e literatura não
+  achou nada. O rascunho usa IBGE/PNAD Contínua 2022 e sinaliza a diferença de recorte
+  (renda do trabalho da pessoa, não per capita da família). A APPD precisa corrigir na
+  origem.
+- **Informática Nota 10 pode não existir.** Única menção fora do site: matéria de
+  novembro de 2021 sobre "Programa Inclusão Nota 10" — outro nome — como projeto que
+  ainda ia começar. A página só vai ao ar se a associação confirmar.
 
 ## Dívidas conscientes
 
