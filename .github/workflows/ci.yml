@@ -43,7 +43,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: gitleaks
-        uses: gitleaks/gitleaks-action@v3
+      # O binário direto, e não a gitleaks-action: a action varre um intervalo
+      # `<commit>^..HEAD` e quebra quando o intervalo inclui o commit inicial
+      # (que não tem pai). Aqui varremos o histórico inteiro, sempre.
+      - name: Instalar gitleaks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSAO: 8.30.1
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSAO}/gitleaks_${VERSAO}_linux_x64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Varredura de segredos (histórico completo)
+        run: gitleaks git --redact --verbose --exit-code 1
