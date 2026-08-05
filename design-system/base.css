@@ -103,6 +103,39 @@ a:visited {
   color: var(--link-visitado);
 }
 
+/*
+  Link visitado vale só para link de texto corrido.
+
+  `a:visited` tem especificidade (0,1,1) e ganha de qualquer classe simples como
+  `.botao-primario` (0,1,0). Sem as regras abaixo, o texto do botão vermelho vira roxo
+  depois da primeira visita — 1,36:1 de contraste, ilegível. Cada componente que é um
+  link precisa reafirmar a própria cor.
+*/
+.botao-primario:visited {
+  color: var(--sobre-primaria);
+}
+
+.botao-secundario:visited,
+.botao-destrutivo:visited {
+  color: var(--primaria);
+}
+
+.botao-fantasma:visited {
+  color: var(--texto);
+}
+
+.cabecalho nav a:visited {
+  color: var(--texto);
+}
+
+.cabecalho nav a[aria-current='page']:visited {
+  color: var(--primaria);
+}
+
+.rodape a:visited {
+  color: var(--sobre-escuro);
+}
+
 a:hover {
   text-decoration-thickness: 2px;
 }

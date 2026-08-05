@@ -6,6 +6,7 @@ const menu = [
   { rotulo: 'Atendimento', para: '/atendimento' },
   { rotulo: 'Projetos', para: '/projetos' },
   { rotulo: 'Doar', para: '/doar' },
+  { rotulo: 'Sobre nós', para: '/sobre' },
   { rotulo: 'Contato', para: '/contato' },
 ]
 
@@ -111,7 +112,8 @@ const atual = (para: string) =>
   gap: var(--e6);
 }
 
-.marca {
+.marca,
+.marca:visited {
   display: flex;
   align-items: center;
   gap: var(--e3);

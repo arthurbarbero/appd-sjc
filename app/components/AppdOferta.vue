@@ -29,6 +29,15 @@ const sede = ASSOCIACAO.telefones[0]!
       <p class="lide">{{ oferta.resumo }}</p>
     </header>
 
+    <figure v-if="oferta.imagem" class="ilustracao">
+      <img :src="oferta.imagem.arquivo" :alt="oferta.imagem.alt" loading="lazy" />
+      <figcaption v-if="oferta.imagem.pessoas">
+        <AppdSelo texto="Uso de imagem a confirmar" />
+        Foto do acervo da associação. A autorização de uso de imagem das pessoas retratadas ainda
+        não foi apresentada.
+      </figcaption>
+    </figure>
+
     <AppdAviso tipo="destaque" titulo="Antes de você se cadastrar">
       <ul class="lista-aviso">
         <li>As vagas são chamadas conforme abrem — o cadastro entra em fila.</li>
@@ -95,6 +104,22 @@ const sede = ASSOCIACAO.telefones[0]!
           <li v-for="item in oferta.aConfirmar" :key="item">{{ item }}</li>
         </ul>
       </div>
+    </section>
+
+    <section v-if="oferta.galeria?.length" aria-labelledby="galeria">
+      <h2 id="galeria">Imagens do projeto</h2>
+      <ul class="galeria">
+        <li v-for="img in oferta.galeria" :key="img.arquivo">
+          <figure>
+            <img :src="img.arquivo" :alt="img.alt" loading="lazy" />
+          </figure>
+        </li>
+      </ul>
+      <p v-if="oferta.galeria.some((i) => i.pessoas)" class="aviso-imagem">
+        <AppdSelo texto="Uso de imagem a confirmar" />
+        Fotos do acervo da associação. A autorização das pessoas retratadas ainda não foi
+        apresentada.
+      </p>
     </section>
 
     <section aria-labelledby="acao" class="acao">
@@ -198,5 +223,52 @@ section {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e3);
+}
+
+.ilustracao {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.ilustracao img {
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  border-radius: var(--raio);
+  border: var(--borda-largura) solid var(--borda-suave);
+}
+
+.galeria {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--e3);
+}
+
+.galeria figure {
+  margin: 0;
+}
+
+.galeria img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--raio);
+  border: var(--borda-largura) solid var(--borda-suave);
+}
+
+.aviso-imagem,
+.ilustracao figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e2);
+  font-size: var(--texto-rotulo);
+  color: var(--texto-suave);
+  max-width: var(--medida);
 }
 </style>

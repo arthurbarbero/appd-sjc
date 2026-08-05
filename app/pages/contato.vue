@@ -226,7 +226,9 @@ section {
   gap: var(--e3);
 }
 
-.canal {
+.canal,
+.canal:visited {
+  color: var(--texto);
   display: flex;
   flex-direction: column;
   gap: var(--e1);

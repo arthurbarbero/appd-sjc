@@ -1,8 +1,21 @@
 <script setup lang="ts">
-import { ASSOCIACAO, DOACAO_EM_ESPECIE } from '~~/shared/conteudo'
+import { ASSOCIACAO, DOACAO_EM_ESPECIE, PIX } from '~~/shared/conteudo'
 
 useHead({ title: 'Central de Doações — APPD São José dos Campos' })
 const sede = ASSOCIACAO.telefones[0]!
+
+const copiado = ref(false)
+async function copiarChave() {
+  try {
+    await navigator.clipboard.writeText(PIX.chave)
+    copiado.value = true
+    setTimeout(() => (copiado.value = false), 4000)
+  } catch {
+    // Navegador sem permissão de área de transferência: a chave continua visível
+    // e selecionável na tela, então ninguém fica sem o dado.
+    copiado.value = false
+  }
+}
 </script>
 
 <template>
@@ -58,20 +71,43 @@ const sede = ASSOCIACAO.telefones[0]!
     </section>
 
     <section aria-labelledby="pix" class="pix">
-      <div class="cabeca">
-        <h2 id="pix">Doar por PIX</h2>
-        <AppdSelo />
-      </div>
-      <AppdAviso tipo="atencao" titulo="Ainda não temos a chave PIX oficial">
-        <span>
-          A associação ainda não informou a chave. Não publicamos nenhum valor de exemplo aqui de
-          propósito: chave errada manda o seu dinheiro para a conta de outra pessoa. Assim que a
-          chave for confirmada, ela aparece nesta página com QR Code.
-        </span>
-      </AppdAviso>
-      <div class="reserva" aria-hidden="true">
-        <div class="qr-reservado">QR Code<br />a confirmar</div>
-        <div class="chave-reservada">Chave PIX a confirmar</div>
+      <h2 id="pix">Doar por PIX</h2>
+      <p>
+        A chave é o <strong>CNPJ da associação</strong> — o mesmo número que está no rodapé deste
+        site e no registro público. Confira antes de transferir: chave de PIX que você não consegue
+        verificar é o golpe mais comum que existe.
+      </p>
+
+      <div class="pix-caixa">
+        <img
+          :src="PIX.qr"
+          alt="QR Code do PIX da APPD São José dos Campos. A chave também está escrita ao lado."
+          width="240"
+          height="240"
+          class="qr"
+        />
+
+        <div class="pix-dados">
+          <dl>
+            <div>
+              <dt>Favorecido</dt>
+              <dd>{{ PIX.favorecido }}</dd>
+            </div>
+            <div>
+              <dt>Tipo de chave</dt>
+              <dd>{{ PIX.tipo }}</dd>
+            </div>
+            <div>
+              <dt>Chave</dt>
+              <dd class="chave">{{ PIX.chaveFormatada }}</dd>
+            </div>
+          </dl>
+
+          <button type="button" class="botao botao-primario" @click="copiarChave">
+            Copiar a chave
+          </button>
+          <p v-if="copiado" class="copiado" role="status">Chave copiada.</p>
+        </div>
       </div>
     </section>
 
@@ -174,34 +210,60 @@ section {
   gap: var(--e3);
 }
 
-.reserva {
+.pix-caixa {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--e4);
-}
-
-.qr-reservado {
-  width: 160px;
-  height: 160px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  background: var(--superficie-forte);
-  border: 2px dashed var(--borda);
+  gap: var(--e5);
+  align-items: flex-start;
+  background: var(--superficie);
+  border: var(--borda-largura) solid var(--borda-suave);
   border-radius: var(--raio);
-  color: var(--texto-suave);
-  font-size: var(--texto-rotulo);
+  padding: var(--e4);
 }
 
-.chave-reservada {
+.qr {
+  width: 240px;
+  height: 240px;
+  background: var(--fundo);
+  border: var(--borda-largura) solid var(--borda-suave);
+  border-radius: var(--raio);
+  padding: var(--e2);
+}
+
+.pix-dados {
   flex: 1;
-  min-width: 220px;
-  padding: var(--e3);
-  background: var(--superficie-forte);
-  border: 2px dashed var(--borda);
-  border-radius: var(--raio);
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+
+.pix-dados dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+
+.pix-dados dt {
+  font-size: var(--texto-rotulo);
   color: var(--texto-suave);
+}
+
+.pix-dados dd {
+  margin: 0;
+  font-weight: var(--peso-forte);
+}
+
+.chave {
+  font-size: var(--texto-titulo-m);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.copiado {
+  color: var(--sucesso);
+  font-weight: var(--peso-forte);
 }
 
 .verificacao {

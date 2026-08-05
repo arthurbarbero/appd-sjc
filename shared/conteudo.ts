@@ -51,6 +51,14 @@ export interface Oferta {
   naAppd: string[]
   aConfirmar: string[]
   horarios?: { local: string; endereco: string; dias: string; horario: string }[]
+  /**
+   * Imagem do site atual. `alt` descreve o que a imagem mostra para quem não a vê.
+   * `pessoas: true` marca foto com rosto identificável — depende de autorização de
+   * uso de imagem, que ainda não foi apresentada (pendência R3).
+   */
+  imagem?: { arquivo: string; alt: string; pessoas: boolean }
+  /** Galeria da atividade. Mesma regra de `imagem` para o campo `pessoas`. */
+  galeria?: { arquivo: string; alt: string; pessoas: boolean }[]
 }
 
 /** Serviços: estão no campo "Tipo de Atendimento" do formulário oficial. */
@@ -59,6 +67,11 @@ export const SERVICOS: Oferta[] = [
     slug: 'fisioterapia',
     nome: 'Fisioterapia',
     resumo: 'Atendimento de fisioterapia com foco em manter e recuperar a autonomia de movimento.',
+    imagem: {
+      arquivo: '/imagens/63d3b3e346404676bc61a9091332600c.png',
+      alt: 'Selo da Fisioterapia da APPD: um caduceu verde dentro de um círculo com o nome da associação.',
+      pessoas: false,
+    },
     noFormulario: true,
     paraQuem: [
       'Pessoas com deficiência física ou neurológica',
@@ -126,6 +139,11 @@ export const SERVICOS: Oferta[] = [
     nome: 'Serviço Social',
     resumo:
       'Orientação sobre direitos, benefícios e a rede de apoio pública de São José dos Campos.',
+    imagem: {
+      arquivo: '/imagens/33ee15be8c9d4c4fa99cd5219dacbbc8.png',
+      alt: 'Selo do Serviço Social da APPD: uma tocha e uma balança dentro de um círculo verde com o nome da associação.',
+      pessoas: false,
+    },
     noFormulario: true,
     paraQuem: [
       'Quem não sabe a quais benefícios tem direito',
@@ -158,6 +176,11 @@ export const SERVICOS: Oferta[] = [
     slug: 'orientacoes-gerais',
     nome: 'Orientações Gerais',
     resumo: 'A porta de entrada: a primeira conversa sobre o que a associação pode fazer por você.',
+    imagem: {
+      arquivo: '/imagens/ec90df9aa3bf49b0870b088592bd5c6f.png',
+      alt: 'Selo das Orientações Gerais da APPD: ilustração de uma pessoa sentada diante de um computador.',
+      pessoas: false,
+    },
     noFormulario: true,
     paraQuem: [
       'Quem está chegando agora e não sabe por onde começar',
@@ -252,6 +275,43 @@ export const PROJETOS: Oferta[] = [
       'Se há vagas abertas e limite de idade',
       'Se os horários seguem valendo em 2026',
     ],
+    imagem: {
+      arquivo: '/imagens/a009cc5930f44abeaf7dacfcb834e613.jpg',
+      alt: 'Equipe de bocha paralímpica da APPD reunida na quadra: atletas em cadeiras de rodas, com uniforme azul e verde, à frente de acompanhantes e profissionais de jaleco branco. Bolas de bocha azuis e vermelhas no chão.',
+      pessoas: true,
+    },
+    galeria: [
+      {
+        arquivo: '/imagens/2c64ff0311dc405a83953654da0baf7a.jpg',
+        alt: 'Bolas de bocha vermelhas e a bola branca alvo, paradas no chão da quadra.',
+        pessoas: false,
+      },
+      {
+        arquivo: '/imagens/bc6c0245add54ce2a56d12f5203aad0e.jpg',
+        alt: 'Dois atletas em cadeira de rodas jogando bocha com auxílio de calhas, acompanhados por auxiliares na quadra.',
+        pessoas: true,
+      },
+      {
+        arquivo: '/imagens/35085704197240fba6584a9f6102c7a9.jpg',
+        alt: 'Atleta lançando a bola por uma calha, com o auxiliar posicionando o equipamento.',
+        pessoas: true,
+      },
+      {
+        arquivo: '/imagens/d19b56ab24c14baf8e65b4fa632972db.jpg',
+        alt: 'Atleta em cadeira de rodas alinhando a calha antes do lançamento, com o auxiliar ao lado.',
+        pessoas: true,
+      },
+      {
+        arquivo: '/imagens/af5d4f1e51d54ef0b7399d09b029cf40.jpg',
+        alt: 'Vista ampla da quadra durante o treino, com atletas espalhados e bolas em jogo.',
+        pessoas: true,
+      },
+      {
+        arquivo: '/imagens/cb1173521d1145ba96e0bbb8c7970967.jpg',
+        alt: 'Dois integrantes do projeto lado a lado, um deles exibindo a medalha conquistada.',
+        pessoas: true,
+      },
+    ],
     horarios: [
       {
         local: 'Praça de Esportes Pedro Otávio',
@@ -286,6 +346,11 @@ export const PROJETOS: Oferta[] = [
       'Conserto e ajuste, quando houver peça disponível.',
       'Orientação sobre o que dá para cuidar em casa.',
     ],
+    imagem: {
+      arquivo: '/imagens/f4255106208240399592ed2852586a06.jpg',
+      alt: 'Arte do projeto Oficina Inclusiva Mão na Roda: uma placa amarela de sinalização com o desenho de uma pessoa em cadeira de rodas dentro de uma chave de boca, e o subtítulo "conserto e manutenção de cadeira de rodas".',
+      pessoas: false,
+    },
     naAppd: [
       'O projeto tem página própria no site atual da associação.',
       'As informações são dadas pelos telefones da associação.',
@@ -313,6 +378,18 @@ export const PROJETOS: Oferta[] = [
       'O projeto capacita e ajuda a comercializar o que é produzido, sem atrapalhar o convívio e os cuidados diários.',
     ],
     oQueEsperar: ['Oficinas de técnicas de artesanato.', 'Apoio para vender o que você produzir.'],
+    imagem: {
+      arquivo: '/imagens/4c54b2588ebb4044aa1b23db4303cd12.png',
+      alt: 'Selo do projeto Artesão da Inclusão, com os dizeres "cursos profissionalizantes" e uma paleta de tintas coloridas.',
+      pessoas: false,
+    },
+    galeria: [
+      {
+        arquivo: '/imagens/0bf304bf0d844fc28d60c0863cadd02a.png',
+        alt: 'Placa de madeira entalhada com o nome Artesão da Inclusão e o símbolo internacional de acesso.',
+        pessoas: false,
+      },
+    ],
     naAppd: ['O projeto tem página própria no site atual da associação.'],
     aConfirmar: [
       'Se o projeto está ativo e quando abre turma',
@@ -326,6 +403,11 @@ export const PROJETOS: Oferta[] = [
     slug: 'informatica-nota-10',
     nome: 'Informática Nota 10',
     resumo: 'Inclusão digital: aprender a usar o computador com autonomia.',
+    imagem: {
+      arquivo: '/imagens/cbae5e83df0948c78b196574aeb04f3c.png',
+      alt: 'Selo do Informática Nota 10: um monitor de computador dentro de um círculo azul, com os dizeres "cursos profissionalizantes".',
+      pessoas: false,
+    },
     noFormulario: false,
     paraQuem: [
       'Pessoas com deficiência que querem aprender a usar o computador',
@@ -357,6 +439,20 @@ export const TODAS_AS_OFERTAS = [...SERVICOS, ...PROJETOS]
 export function acharOferta(slug: string): Oferta | undefined {
   return TODAS_AS_OFERTAS.find((o) => o.slug === slug)
 }
+
+/**
+ * PIX da associação. A chave é o CNPJ — o mesmo que está no rodapé e no registro
+ * público. Chave verificável importa: chave de PIX que ninguém consegue conferir é
+ * vetor de golpe. O QR em `public/marca/pix-appd.svg` é gerado a partir dela por
+ * `scripts/gerar-pix-qr.mjs`.
+ */
+export const PIX = {
+  tipo: 'CNPJ',
+  chaveFormatada: '08.074.883/0001-96',
+  chave: '08074883000196',
+  favorecido: 'Associação das Pessoas com Deficiência de São José dos Campos',
+  qr: '/marca/pix-appd.svg',
+} as const
 
 /** O que a Central de Doações declara precisar hoje. Texto do site atual. */
 export const DOACAO_EM_ESPECIE = [
