@@ -1,38 +1,51 @@
 /*
-  Tokens do design system da APPD-SJC.
-  Fonte da verdade: DESIGN.md na raiz. Todo valor aqui foi auditado contra WCAG 2.2 AA —
-  não altere um hex sem refazer a conta de contraste e atualizar o DESIGN.md.
+  Tokens do design system da APPD-SJC — v2.
+  Fonte da verdade: DESIGN.md na raiz. Todo valor de cor tem contraste medido ao lado.
+  Não altere um hex sem refazer a conta e atualizar o DESIGN.md.
+
+  O que mudou da v1 (2026-08-05, depois da primeira geração de telas):
+  a v1 herdava do site atual canto reto, ausência de sombra, borda marrom em tudo e
+  superfície bege. Junto, isso datava a interface. Nada disso era exigência de
+  acessibilidade — era herança. A v2 moderniza a estrutura e mantém a marca.
 */
 
 :root {
   /* ---------- cor: base ---------- */
   --fundo: #ffffff;
-  --superficie: #f5f2ea;
-  --texto: #1a1a1a; /* 17,40:1 no fundo */
-  --texto-suave: #5b5347; /* 7,57:1 no fundo, 6,77:1 na superfície */
-  --borda: #8d7158; /* 4,53:1 — borda com significado */
-  --borda-suave: #aa9078; /* 3,01:1 — só divisória decorativa */
+  --superficie: #f7f8f9; /* cinza frio no lugar do bege */
+  --superficie-forte: #eef1f4; /* cabeçalho de tabela, estado ativo */
+  --texto: #14161a; /* 18,11:1 no fundo */
+  --texto-suave: #4a5159; /* 8,04:1 no fundo, 7,56:1 na superfície */
+  --borda: #6f7782; /* 4,53:1 — campo, controle, borda com significado */
+  --borda-suave: #e2e5e9; /* divisória e contorno decorativo */
+  --escuro: #14161a; /* rodapé e faixas escuras */
+  --sobre-escuro: #ffffff;
+  --texto-suave-escuro: #c7d0d9; /* 11,60:1 no escuro */
 
   /* ---------- cor: marca ---------- */
   --primaria: #8b0000; /* 10,01:1 com branco */
+  --primaria-escura: #6d0000; /* sobrevoo */
+  --primaria-tenue: #fdf2f2; /* fundo de realce */
   --sobre-primaria: #ffffff;
   --verde: #4e5d2e; /* 7,17:1 com branco */
+  --verde-tenue: #eef4e4;
   --sobre-verde: #ffffff;
-  --amarelo: #bbb070; /* SÓ com texto escuro: 7,92:1 */
-  --sobre-amarelo: #1a1a1a;
+  --amarelo: #bbb070; /* SÓ com texto escuro */
+  --amarelo-tenue: #fbf6e8; /* realce discreto, com texto escuro */
+  --sobre-amarelo: #14161a;
 
   /* ---------- cor: semântica ---------- */
-  --erro: #8b0000;
-  --erro-fundo: #fdecea; /* 8,75:1 */
-  --sucesso: #4e5d2e;
-  --sucesso-fundo: #eef2e6; /* 6,31:1 */
-  --aviso: #724923;
-  --aviso-fundo: #f9f0e5; /* 6,92:1 */
+  --erro: #8b0000; /* 9,13:1 em --erro-fundo */
+  --erro-fundo: #fdf2f2;
+  --sucesso: #3f5320; /* 7,57:1 em --sucesso-fundo */
+  --sucesso-fundo: #eef4e4;
+  --aviso: #7a4a10; /* 6,79:1 em --aviso-fundo */
+  --aviso-fundo: #fdf3e3;
 
   /* ---------- cor: link e foco ---------- */
-  --link: #0000ee; /* 9,40:1 — herdado, ver ressalva no DESIGN.md */
-  --link-visitado: #551a8b; /* 11,01:1 */
-  --foco: #8b0000;
+  --link: #0f4c93; /* 8,48:1 — substitui o azul default do navegador */
+  --link-visitado: #6b3fa0;
+  --foco: #0f4c93; /* anel neutro, não compete com a ação vermelha */
   --foco-sobre-escuro: #ffffff;
 
   /* ---------- tipografia ---------- */
@@ -40,39 +53,50 @@
     'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI',
     Roboto, sans-serif;
 
-  --texto-display: clamp(1.875rem, 5vw, 2.75rem); /* 30 → 44px */
-  --texto-titulo-g: clamp(1.625rem, 3.5vw, 2rem); /* 26 → 32px */
-  --texto-titulo-m: 1.5rem; /* 24px */
+  --texto-display: clamp(2.25rem, 5.5vw, 3.5rem); /* 36 → 56px */
+  --texto-titulo-g: clamp(1.75rem, 3.5vw, 2.25rem); /* 28 → 36px */
+  --texto-titulo-m: 1.375rem; /* 22px */
   --texto-corpo-g: 1.1875rem; /* 19px */
   --texto-corpo: 1.0625rem; /* 17px — piso do texto corrente */
   --texto-rotulo: 0.9375rem; /* 15px — piso duro do site */
 
   --peso-normal: 400;
+  --peso-medio: 400;
   --peso-forte: 700;
-  --entrelinha-titulo: 1.2;
-  --entrelinha-corpo: 1.6;
-  --medida: 68ch; /* 60 a 75 caracteres */
+  --entrelinha-titulo: 1.12;
+  --entrelinha-corpo: 1.65;
+  --ajuste-titulo: -0.02em; /* títulos grandes respiram melhor apertados */
+  --medida: 68ch;
 
-  /* ---------- espaçamento (base 8) ---------- */
+  /* ---------- espaçamento (base 8, mais generoso) ---------- */
   --e1: 4px;
   --e2: 8px;
   --e3: 16px;
   --e4: 24px;
-  --e5: 32px;
-  --e6: 48px;
-  --e7: 64px;
-  --e8: 96px;
+  --e5: 40px;
+  --e6: 64px;
+  --e7: 96px;
+  --e8: 128px;
 
-  /* ---------- forma e alvo ---------- */
-  --raio: 0; /* cantos retos, herdado da marca */
+  /* ---------- forma ---------- */
+  --raio: 10px; /* cartão, bloco, campo */
+  --raio-p: 6px; /* selo, elemento pequeno */
+  --raio-botao: 8px;
+  --borda-largura: 1px;
+  --borda-campo: 2px;
+
+  /* ---------- elevação: discreta, nunca decorativa ---------- */
+  --sombra-1: 0 1px 2px rgba(20, 22, 26, 0.06), 0 1px 3px rgba(20, 22, 26, 0.08);
+  --sombra-2: 0 4px 12px rgba(20, 22, 26, 0.08), 0 2px 4px rgba(20, 22, 26, 0.06);
+
+  /* ---------- alvo ---------- */
   --alvo-min: 44px; /* WCAG 2.2, critério 2.5.8 */
-  --altura-controle: 48px;
-  --borda-largura: 2px;
+  --altura-controle: 52px;
   --foco-largura: 3px;
   --foco-folga: 2px;
 
   /* ---------- movimento ---------- */
-  --transicao: 160ms ease-out;
+  --transicao: 160ms cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

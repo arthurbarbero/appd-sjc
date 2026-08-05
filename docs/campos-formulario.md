@@ -7,6 +7,13 @@ validação, base legal, mensagem de erro —, nunca a lista de perguntas.
 
 Data do levantamento: 2026-08-05.
 
+## Uma exceção de forma: caixa alta e baixa
+
+Os rótulos abaixo estão como no formulário original, em CAIXA ALTA. Na tela, eles são
+renderizados em caixa alta e baixa — "Nome", "Telefone para contato" —, com as **mesmas
+palavras**. Caixa alta apaga o contorno da palavra e reduz a legibilidade, justamente
+para quem este site precisa atender. É mudança de apresentação, não de pergunta.
+
 ## Por que não pode mudar
 
 A APPD já opera com essas perguntas: o atendimento, a fila e o critério de vaga foram

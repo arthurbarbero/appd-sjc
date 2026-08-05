@@ -1,5 +1,5 @@
 /*
-  Estilos de base e componentes da APPD-SJC.
+  Estilos de base e componentes da APPD-SJC — v2.
   Depende de tokens.css. Nenhum valor cru: tudo sai de variável.
 */
 
@@ -21,6 +21,7 @@ body {
   font-size: var(--texto-corpo);
   line-height: var(--entrelinha-corpo);
   -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -28,6 +29,7 @@ h2,
 h3 {
   font-weight: var(--peso-forte);
   line-height: var(--entrelinha-titulo);
+  letter-spacing: var(--ajuste-titulo);
   text-wrap: balance;
   margin: 0;
 }
@@ -40,26 +42,36 @@ h2 {
 }
 h3 {
   font-size: var(--texto-titulo-m);
+  letter-spacing: 0;
 }
 
 p {
   margin: 0;
   max-width: var(--medida);
-  text-align: left; /* nunca justificado: rio de espaços atrapalha leitura */
+  text-align: left; /* nunca justificado */
 }
 
-/* ---------- foco: nunca removido, sempre visível ---------- */
+/* Olho-de-seção: o pequeno rótulo acima do título. Dá hierarquia sem peso visual. */
+.olho {
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primaria);
+  margin: 0;
+}
+
+/* ---------- foco ---------- */
 
 :focus-visible {
   outline: var(--foco-largura) solid var(--foco);
   outline-offset: var(--foco-folga);
+  border-radius: var(--raio-p);
 }
 
 .sobre-escuro :focus-visible {
   outline-color: var(--foco-sobre-escuro);
 }
-
-/* ---------- pular para o conteúdo ---------- */
 
 .pular {
   position: absolute;
@@ -68,8 +80,10 @@ p {
   z-index: 100;
   background: var(--fundo);
   color: var(--texto);
-  border: var(--borda-largura) solid var(--primaria);
+  border: var(--borda-campo) solid var(--primaria);
+  border-radius: var(--raio-botao);
   padding: var(--e2) var(--e3);
+  box-shadow: var(--sombra-2);
 }
 
 .pular:focus {
@@ -82,6 +96,7 @@ p {
 a {
   color: var(--link);
   text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 a:visited {
@@ -101,53 +116,76 @@ a:hover {
   gap: var(--e2);
   min-height: var(--altura-controle);
   min-width: var(--alvo-min);
-  padding: 0 var(--e4);
-  border-radius: var(--raio);
-  border: var(--borda-largura) solid transparent;
+  padding: 0 var(--e5);
+  border-radius: var(--raio-botao);
+  border: var(--borda-campo) solid transparent;
   font: inherit;
   font-weight: var(--peso-forte);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color var(--transicao);
+  transition:
+    background-color var(--transicao),
+    box-shadow var(--transicao),
+    transform var(--transicao);
 }
 
 .botao-primario {
   background: var(--primaria);
   color: var(--sobre-primaria);
+  box-shadow: var(--sombra-1);
 }
 
 .botao-primario:hover {
-  background: #6d0000;
+  background: var(--primaria-escura);
+  box-shadow: var(--sombra-2);
 }
 
-.botao-primario:focus-visible {
-  outline-color: var(--primaria);
-  outline-offset: var(--foco-folga);
+.botao-primario:active {
+  transform: translateY(1px);
+  box-shadow: var(--sombra-1);
 }
 
 .botao-secundario {
-  background: transparent;
+  background: var(--fundo);
   color: var(--primaria);
-  border-color: var(--primaria);
+  border-color: var(--borda-suave);
+  box-shadow: var(--sombra-1);
 }
 
 .botao-secundario:hover {
-  background: var(--erro-fundo);
+  border-color: var(--primaria);
+  background: var(--primaria-tenue);
 }
 
-/* Ação destrutiva: contornada, para nunca ser confundida com a ação principal. */
+/* Destrutiva: contornada em vermelho, sem preenchimento — nunca confundível com a ação. */
 .botao-destrutivo {
   background: transparent;
   color: var(--primaria);
   border-color: var(--primaria);
-  border-style: dashed;
+  box-shadow: none;
+}
+
+.botao-destrutivo:hover {
+  background: var(--primaria-tenue);
+}
+
+.botao-fantasma {
+  background: transparent;
+  color: var(--texto);
+  border-color: transparent;
+  padding: 0 var(--e3);
+}
+
+.botao-fantasma:hover {
+  background: var(--superficie-forte);
 }
 
 .botao[aria-disabled='true'],
 .botao:disabled {
-  background: var(--superficie);
+  background: var(--superficie-forte);
   color: var(--texto-suave);
-  border-color: var(--borda);
+  border-color: var(--borda-suave);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -160,8 +198,11 @@ a:hover {
   max-width: 34rem;
 }
 
+/* Rótulo em caixa alta e baixa: CAIXA ALTA reduz legibilidade porque apaga o
+   contorno da palavra. O texto do rótulo é o mesmo do formulário oficial. */
 .campo label {
   font-weight: var(--peso-forte);
+  font-size: var(--texto-corpo);
 }
 
 .campo .ajuda {
@@ -174,11 +215,26 @@ a:hover {
 .campo select {
   min-height: var(--altura-controle);
   padding: var(--e2) var(--e3);
-  border: var(--borda-largura) solid var(--borda);
+  border: var(--borda-campo) solid var(--borda);
   border-radius: var(--raio);
   background: var(--fundo);
   color: var(--texto);
   font: inherit;
+  transition:
+    border-color var(--transicao),
+    box-shadow var(--transicao);
+}
+
+.campo input:hover,
+.campo textarea:hover,
+.campo select:hover {
+  border-color: var(--texto-suave);
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus {
+  border-color: var(--link);
 }
 
 .campo textarea {
@@ -190,7 +246,7 @@ a:hover {
 .campo-erro textarea,
 .campo-erro select {
   border-color: var(--erro);
-  border-width: 3px;
+  background: var(--erro-fundo);
 }
 
 .campo .erro {
@@ -206,16 +262,17 @@ a:hover {
   color: var(--erro);
 }
 
-/* ---------- escolhas: alvo de 44px incluindo o rótulo ---------- */
+/* ---------- escolhas ---------- */
 
 .grupo-escolha {
-  border: var(--borda-largura) solid var(--borda);
+  border: var(--borda-largura) solid var(--borda-suave);
   border-radius: var(--raio);
-  padding: var(--e3);
+  padding: var(--e4);
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--e2);
+  gap: var(--e1);
+  background: var(--fundo);
 }
 
 .grupo-escolha legend {
@@ -223,18 +280,34 @@ a:hover {
   padding: 0 var(--e2);
 }
 
+/* Cada opção é um bloco clicável inteiro, não só a caixinha. */
 .escolha {
   display: flex;
   align-items: center;
-  gap: var(--e2);
+  gap: var(--e3);
   min-height: var(--alvo-min);
-  padding: var(--e1) var(--e2);
+  padding: var(--e2) var(--e3);
+  border: var(--borda-largura) solid transparent;
+  border-radius: var(--raio-p);
   cursor: pointer;
+  transition:
+    background-color var(--transicao),
+    border-color var(--transicao);
+}
+
+.escolha:hover {
+  background: var(--superficie);
+  border-color: var(--borda-suave);
+}
+
+.escolha:has(input:checked) {
+  background: var(--primaria-tenue);
+  border-color: var(--primaria);
 }
 
 .escolha input {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   accent-color: var(--primaria);
   flex: none;
 }
@@ -243,10 +316,10 @@ a:hover {
 
 .aviso {
   display: flex;
-  gap: var(--e2);
-  padding: var(--e3);
-  border-left: 4px solid;
+  gap: var(--e3);
+  padding: var(--e4);
   border-radius: var(--raio);
+  border: var(--borda-largura) solid transparent;
 }
 
 .aviso-erro {
@@ -268,14 +341,15 @@ a:hover {
 }
 
 .aviso-destaque {
-  background: var(--amarelo);
-  border-color: var(--texto);
+  background: var(--amarelo-tenue);
+  border-color: var(--amarelo);
   color: var(--sobre-amarelo);
 }
 
 .aviso .icone {
   flex: none;
   font-weight: var(--peso-forte);
+  line-height: var(--entrelinha-corpo);
 }
 
 .aviso .conteudo {
@@ -284,31 +358,57 @@ a:hover {
   gap: var(--e1);
 }
 
-.aviso strong {
-  color: inherit;
-}
-
 /* ---------- cartão ---------- */
 
 .cartao {
-  border: var(--borda-largura) solid var(--borda);
+  border: var(--borda-largura) solid var(--borda-suave);
   border-radius: var(--raio);
   background: var(--fundo);
   padding: var(--e4);
   display: flex;
   flex-direction: column;
   gap: var(--e2);
+  box-shadow: var(--sombra-1);
+  transition:
+    box-shadow var(--transicao),
+    border-color var(--transicao);
+}
+
+.cartao:hover {
+  box-shadow: var(--sombra-2);
+  border-color: var(--borda);
 }
 
 .cartao h3 {
   font-size: var(--texto-titulo-m);
 }
 
+.cartao .rodape-cartao {
+  margin-top: auto;
+  padding-top: var(--e2);
+}
+
+/* ---------- selo ---------- */
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  padding: var(--e1) var(--e2);
+  border-radius: var(--raio-p);
+  background: var(--verde-tenue);
+  color: var(--verde);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-forte);
+}
+
 /* ---------- tabela ---------- */
 
 .rolagem {
   overflow-x: auto;
-  border: var(--borda-largura) solid var(--borda);
+  border: var(--borda-largura) solid var(--borda-suave);
+  border-radius: var(--raio);
+  background: var(--fundo);
 }
 
 table {
@@ -318,7 +418,7 @@ table {
 
 caption {
   text-align: left;
-  padding: var(--e2) var(--e3);
+  padding: var(--e3) var(--e4) var(--e2);
   color: var(--texto-suave);
   font-size: var(--texto-rotulo);
 }
@@ -326,13 +426,19 @@ caption {
 th,
 td {
   text-align: left;
-  padding: var(--e2) var(--e3);
-  border-bottom: 1px solid var(--borda-suave);
+  padding: var(--e3) var(--e4);
+  border-bottom: var(--borda-largura) solid var(--borda-suave);
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 thead th {
   background: var(--superficie);
   font-weight: var(--peso-forte);
+  font-size: var(--texto-rotulo);
 }
 
 /* ---------- cabeçalho e rodapé ---------- */
@@ -341,15 +447,16 @@ thead th {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--e3);
-  padding: var(--e3) var(--e4);
-  border-bottom: var(--borda-largura) solid var(--borda);
+  gap: var(--e4);
+  padding: var(--e3) var(--e5);
+  border-bottom: var(--borda-largura) solid var(--borda-suave);
+  background: var(--fundo);
   flex-wrap: wrap;
 }
 
 .cabecalho nav ul {
   display: flex;
-  gap: var(--e3);
+  gap: var(--e2);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -360,27 +467,39 @@ thead th {
   display: inline-flex;
   align-items: center;
   min-height: var(--alvo-min);
-  padding: 0 var(--e2);
+  padding: 0 var(--e3);
+  border-radius: var(--raio-botao);
   color: var(--texto);
   font-weight: var(--peso-forte);
   text-decoration: none;
-  border-bottom: 3px solid transparent;
+  transition: background-color var(--transicao);
 }
 
-.cabecalho nav a:hover,
+.cabecalho nav a:hover {
+  background: var(--superficie-forte);
+}
+
+/* Página atual: fundo tênue E sublinhado espesso — nunca só cor. */
 .cabecalho nav a[aria-current='page'] {
-  border-bottom-color: var(--primaria);
+  background: var(--primaria-tenue);
+  color: var(--primaria);
+  box-shadow: inset 0 -3px 0 var(--primaria);
 }
 
 .rodape {
-  background: var(--verde);
-  color: var(--sobre-verde);
-  padding: var(--e5) var(--e4);
+  background: var(--escuro);
+  color: var(--sobre-escuro);
+  padding: var(--e6) var(--e5);
   display: flex;
   flex-direction: column;
-  gap: var(--e3);
+  gap: var(--e4);
 }
 
 .rodape a {
-  color: var(--sobre-verde);
+  color: var(--sobre-escuro);
+}
+
+.rodape .discreto {
+  color: var(--texto-suave-escuro);
+  font-size: var(--texto-rotulo);
 }

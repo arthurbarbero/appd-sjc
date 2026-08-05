@@ -1,12 +1,12 @@
 ---
 version: alpha
 name: 'APPD-SJC'
-description: 'Institucional, direto e legível. Contraste alto, formas retas, nada decorativo na frente do conteúdo.'
+description: 'Institucional e contemporâneo. Contraste alto, neutros frios, cantos suaves, elevação discreta — nada decorativo na frente do conteúdo.'
 colors:
   background: '#ffffff'
-  on-background: '#1a1a1a'
-  surface: '#f5f2ea'
-  outline: '#8d7158'
+  on-background: '#14161a'
+  surface: '#f7f8f9'
+  outline: '#6f7782'
   primary: '#8b0000'
   on-primary: '#ffffff'
   secondary: '#4e5d2e'
@@ -14,17 +14,17 @@ colors:
 typography:
   display:
     fontFamily: 'Atkinson Hyperlegible Next'
-    fontSize: 44px
+    fontSize: 56px
     fontWeight: 700
-    lineHeight: 1.15
+    lineHeight: 1.12
   headline-lg:
     fontFamily: 'Atkinson Hyperlegible Next'
-    fontSize: 32px
+    fontSize: 36px
     fontWeight: 700
-    lineHeight: 1.2
+    lineHeight: 1.12
   headline-md:
     fontFamily: 'Atkinson Hyperlegible Next'
-    fontSize: 24px
+    fontSize: 22px
     fontWeight: 700
     lineHeight: 1.3
   body-lg:
@@ -47,19 +47,19 @@ spacing:
   xs: 4px
   sm: 8px
   md: 16px
-  lg: 24px
-  xl: 48px
+  lg: 40px
+  xl: 64px
 components:
   button-primary:
     backgroundColor: '#8b0000'
     typography: '{typography.body-md}'
-    rounded: 0px
-    height: 48px
+    rounded: 8px
+    height: 52px
   button-secondary:
     backgroundColor: transparent
     typography: '{typography.body-md}'
-    rounded: 0px
-    height: 48px
+    rounded: 8px
+    height: 52px
 ---
 
 # Design System: APPD-SJC
@@ -88,21 +88,21 @@ mais bonito que esteja.
 | ------------ | --------- | ---------------------- | -------------------- |
 | `--primaria` | `#8b0000` | Ação principal, marca  | 10,01:1 com branco   |
 | `--verde`    | `#4e5d2e` | Institucional, rodapé  | 7,17:1 com branco    |
-| `--amarelo`  | `#bbb070` | Superfície de destaque | 7,92:1 com `#1a1a1a` |
+| `--amarelo`  | `#bbb070` | Superfície de destaque | 7,92:1 com `#14161a` |
 | `--laranja`  | `#724923` | Aviso                  | 7,80:1 com branco    |
 | `--fundo`    | `#ffffff` | Fundo da página        | —                    |
 
 ### O que reprovou e foi ajustado
 
-| Herdado   | Ajustado  | Motivo                                                                                                                             |
-| --------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `#b8a28e` | `#8d7158` | Borda a 2,44:1 no branco — reprova o mínimo de 3:1 para componente de interface. Escurecido até 4,53:1, mantendo o matiz.          |
-| `#000000` | `#1a1a1a` | Preto puro sobre branco puro a 21:1 causa fadiga e cintilação para parte dos leitores. `#1a1a1a` entrega 17,4:1, folga suficiente. |
+| Herdado   | Ajustado  | Motivo                                                                                                                                                           |
+| --------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `#b8a28e` | `#6f7782` | Borda a 2,44:1 no branco — reprova o mínimo de 3:1 para componente de interface. Trocada por um cinza frio de 4,53:1: o marrom em toda borda datava a interface. |
+| `#000000` | `#14161a` | Preto puro sobre branco puro a 21:1 causa fadiga e cintilação para parte dos leitores. `#14161a` entrega 18,11:1, folga suficiente.                              |
 
 ### Regra dura do amarelo
 
 `#bbb070` com **texto branco dá 2,20:1** — reprova qualquer critério. O amarelo só
-aceita texto escuro (`#1a1a1a`, 7,92:1). Nenhuma exceção, nenhum "só nesse título".
+aceita texto escuro (`#14161a`, 7,92:1). Nenhuma exceção, nenhum "só nesse título".
 
 ### Paleta completa
 
@@ -110,11 +110,14 @@ aceita texto escuro (`#1a1a1a`, 7,92:1). Nenhuma exceção, nenhum "só nesse t�
 :root {
   /* base */
   --fundo: #ffffff;
-  --superficie: #f5f2ea; /* neutro quente, derivado do amarelo da marca */
-  --texto: #1a1a1a;
-  --texto-suave: #5b5347; /* 7,57:1 no fundo; 6,77:1 na superfície */
-  --borda: #8d7158; /* borda com significado: campo, tabela, card */
-  --borda-suave: #aa9078; /* 3,01:1 — só divisória decorativa */
+  --superficie: #f7f8f9; /* cinza frio */
+  --superficie-forte: #eef1f4;
+  --texto: #14161a; /* 18,11:1 */
+  --texto-suave: #4a5159; /* 8,04:1 no fundo; 7,56:1 na superfície */
+  --borda: #6f7782; /* 4,53:1 — campo e controle */
+  --borda-suave: #e2e5e9; /* divisória e contorno decorativo */
+  --escuro: #14161a; /* rodapé */
+  --sobre-escuro: #ffffff; /* 18,11:1 */
 
   /* marca */
   --primaria: #8b0000;
@@ -122,32 +125,32 @@ aceita texto escuro (`#1a1a1a`, 7,92:1). Nenhuma exceção, nenhum "só nesse t�
   --verde: #4e5d2e;
   --sobre-verde: #ffffff;
   --amarelo: #bbb070;
-  --sobre-amarelo: #1a1a1a;
+  --sobre-amarelo: #14161a;
+  --amarelo-tenue: #fbf6e8;
 
   /* semântica — todas derivadas da própria marca */
-  --erro: #8b0000;
-  --erro-fundo: #fdecea;
-  --sucesso: #4e5d2e;
-  --sucesso-fundo: #eef2e6;
-  --aviso: #724923;
-  --aviso-fundo: #f9f0e5;
+  --erro: #8b0000; /* 9,13:1 */
+  --erro-fundo: #fdf2f2;
+  --sucesso: #3f5320; /* 7,57:1 */
+  --sucesso-fundo: #eef4e4;
+  --aviso: #7a4a10; /* 6,79:1 */
+  --aviso-fundo: #fdf3e3;
 
   /* link */
-  --link: #0000ee; /* herdado, 9,40:1 — ver ressalva */
-  --link-visitado: #551a8b;
+  --link: #0f4c93; /* 8,48:1 */
+  --link-visitado: #6b3fa0;
 
   /* foco */
-  --foco: #8b0000;
+  --foco: #0f4c93; /* anel neutro: não compete com a ação vermelha */
   --foco-sobre-escuro: #ffffff;
 }
 ```
 
 ### Ressalva sobre o azul de link
 
-`#0000ee` é o azul padrão do navegador para links não estilizados. Passa em contraste
-(9,40:1), então foi mantido, **mas provavelmente não é uma decisão de marca — é ausência
-de decisão**. Revisar no canvas. Se mudar, o substituto precisa de 4,5:1 no fundo branco
-e ainda ser reconhecível como link.
+O site atual usa `#0000ee`, que é o azul padrão do navegador para link não estilizado —
+ausência de decisão, não decisão de marca. Substituído por `#0f4c93` (8,48:1): continua
+inconfundível como link, sem o brilho do azul cru.
 
 ### O conflito vermelho: ação e erro na mesma cor
 
@@ -216,10 +219,14 @@ uma escala de base 8:
 
 `4 · 8 · 16 · 24 · 32 · 48 · 64 · 96`
 
-**Cantos retos, raio 0** em tudo. Isso veio do site atual e é mantido de propósito:
-diferencia a marca do arredondamento genérico e não custa nada em acessibilidade.
+**Raio de 10px** em cartão, bloco e campo; 8px em botão; 6px em elementos pequenos. A
+v1 usava raio 0, herdado do site atual — na primeira leva de telas isso, somado à borda
+marrom e à ausência de sombra, datou a interface inteira. Canto reto não é requisito de
+acessibilidade nenhum.
 
-**Sem sombra.** A hierarquia vem de contraste e borda, como já era.
+**Elevação discreta**, nunca decorativa: `--sombra-1` separa o cartão do fundo,
+`--sombra-2` responde ao sobrevoo. A hierarquia continua vindo de contraste e tamanho —
+a sombra só desgruda a superfície.
 
 ### Alvos de toque
 
@@ -307,8 +314,8 @@ Como o site fala, e isso é design tanto quanto a cor:
 - Não traga Lobster nem Comic Sans para a interface.
 - Não desça abaixo de 15px, em nenhuma hipótese.
 - Não sinalize nada só por cor.
-- Não arredonde cantos: o raio é 0.
-- Não coloque sombra para criar hierarquia — use borda e contraste.
+- Não passe de 10px de raio, nem use raio diferente entre componentes irmãos.
+- Não use sombra para criar hierarquia — ela só separa superfícies; hierarquia é tamanho e contraste.
 - Não use carrossel automático nem conteúdo que se move sozinho.
 - Não substitua a logo, não recomponha a logo, não mude a cor da logo.
 
@@ -331,6 +338,27 @@ recortar.
 barato. Não vale gastar a Fase 2 nisso enquanto a versão clara ainda não existe.
 
 ---
+
+## Revisão v2 — 2026-08-05
+
+A primeira leva de telas geradas no Claude Design ficou datada, e a causa era este
+arquivo, não o app. A v1 herdava do site atual quatro coisas que, somadas, produziam
+aparência de formulário de 1990:
+
+| v1                                  | v2                                                    | Por quê                                                                   |
+| ----------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| Raio 0 em tudo                      | 10px em bloco, 8px em botão                           | Canto reto não é requisito de acessibilidade; era só herança.             |
+| Borda marrom `#8d7158` em toda peça | Cinza frio `#e2e5e9` na estrutura, `#6f7782` no campo | Borda quente em tudo é a marca visual dos anos 90.                        |
+| Sem sombra                          | Elevação discreta em cartão e botão                   | Superfície colada no fundo achata a página.                               |
+| Superfície bege `#f5f2ea`           | Cinza frio `#f7f8f9`                                  | O bege puxava a paleta para o passado.                                    |
+| Rodapé verde-oliva                  | Rodapé quase preto `#14161a`                          | Oliva em bloco grande envelhece; o verde vira acento, não plano de fundo. |
+| Rótulo de campo em CAIXA ALTA       | Caixa alta e baixa                                    | Caixa alta apaga o contorno da palavra e **reduz** legibilidade.          |
+
+Nada disso afrouxou acessibilidade: todos os pares continuam medidos e todos passam AA.
+O que mudou foi a herança estética, que nunca esteve sob obrigação nenhuma.
+
+Marca preservada: o vermelho `#8b0000` segue sendo a ação principal, o verde `#4e5d2e`
+segue presente como acento institucional, e o amarelo `#bbb070` segue no realce.
 
 ## Origem dos dados
 

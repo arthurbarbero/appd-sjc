@@ -47,7 +47,8 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 > maiúsculas exatamente como no formulário original, texto de ajuda abaixo do rótulo, e
 > agrupamento visível por borda.
 >
-> Estrutura, com os rótulos exatamente como escritos:
+> Estrutura, com os rótulos nas mesmas palavras do formulário oficial, escritos em
+> caixa alta e baixa (CAIXA ALTA reduz legibilidade; as palavras são as mesmas):
 >
 > - **Topo**: `h1` "Cadastro de Atendimento 2026" e, em bloco amarelo com texto escuro,
 >   ícone e borda esquerda: "As vagas são chamadas conforme abrem."; "As sessões
@@ -110,7 +111,8 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 
 ## Aceite visual
 
-- [ ] Os 15 rótulos estão idênticos ao original, na mesma ordem.
+- [ ] Os 15 rótulos usam as mesmas palavras do original, na mesma ordem, em caixa alta
+      e baixa.
 - [ ] Nenhum campo usa placeholder como rótulo.
 - [ ] O consentimento do Art. 11 é uma seção própria, destacada, com a caixa desmarcada.
 - [ ] O valor aparece **uma vez só**, no campo 15, ao lado do controle — não no topo,
