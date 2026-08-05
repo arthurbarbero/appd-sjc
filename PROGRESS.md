@@ -4,8 +4,9 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-Fase 2 — DESIGN. Fundação pronta (DESIGN.md, design system local e no Claude Design,
-prompts do lote piloto). Aguardando o dono gerar as telas no canvas.
+Fase 2 — DESIGN. Design system v2 no Claude Design (11 arquivos) e **os 16 prompts de
+tela escritos**. Lote piloto (Home, Serviço, Formulário) gerado e aprovado pelo dono em
+2026-08-05. Aguardando a geração dos outros 13 no canvas e o handoff.
 
 ## Decisões tomadas
 
@@ -49,6 +50,18 @@ prompts do lote piloto). Aguardando o dono gerar as telas no canvas.
       marcações `[A CONFIRMAR]`. Índice e prioridades da revisão em
       `docs/servicos/README.md`.
 
+## Decisões da Fase 2
+
+- **Design system v2** (2026-08-05): a v1 herdava do site atual raio 0, borda marrom,
+  ausência de sombra, superfície bege, rodapé oliva e rótulo em CAIXA ALTA — juntos,
+  datavam a interface. Nenhum era requisito de acessibilidade. A v2 modernizou tudo
+  isso mantendo AA em todos os pares. Marca preservada.
+- **Atkinson Hyperlegible** como fonte única, desenhada para baixa visão.
+- **Data de nascimento**: digitar é o caminho principal, calendário é atalho, com mês e
+  ano em lista suspensa. Máscaras em telefone e data, não bloqueantes.
+- **Ação destrutiva nunca preenchida**, e confirmação por caixas de seleção em vez de
+  digitar palavra — teclar "EXCLUIR" é barreira para o público do site.
+
 ## Decisões da Fase 1 (a APPD pode derrubar)
 
 - **Nove landing pages, uma por serviço e projeto** (decisão do dono, 2026-08-05 —
@@ -74,10 +87,11 @@ prompts do lote piloto). Aguardando o dono gerar as telas no canvas.
 
 ## Em aberto / próximos passos
 
-- [ ] AÇÃO DO DONO: gerar no canvas do Claude Design as três telas do lote piloto,
-      colando os prompts de `docs/prompts-design/`. Projeto de design system:
-      `appd-sjc` (id ca4c3e74-4515-46f8-a467-e137bf2ab04d), com 10 arquivos gravados.
-- [ ] Depois do piloto aprovado: escrever os prompts das 13 telas restantes.
+- [ ] AÇÃO DO DONO: gerar as 13 telas restantes no canvas, em dois lotes (públicas
+      primeiro). Projeto de design system: `appd-sjc`
+      (id ca4c3e74-4515-46f8-a467-e137bf2ab04d), 11 arquivos.
+- [ ] Depois de geradas: revisão com `claude-design-review` + `auditoria-usabilidade`,
+      handoff (Share/Export → Send to Claude Code) e critério visual de aceite.
 - [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
       telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
 - [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou

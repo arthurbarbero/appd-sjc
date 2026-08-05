@@ -131,11 +131,13 @@ depende da associação e do jurídico.
 >    borda esquerda, dizendo "A exclusão é definitiva. Para voltar a ser atendido, você
 >    precisará fazer um cadastro novo." **Passo 1**: caixa de seleção desmarcada com o
 >    texto "Entendi que a exclusão é definitiva e não pode ser desfeita." **Passo 2**:
->    campo de texto com o rótulo "Para confirmar, digite EXCLUIR" e ajuda "Use letras
->    maiúsculas.". O botão "Excluir minha conta agora" é contornado em vermelho, nunca
+>    segunda caixa de seleção, desmarcada, com o texto "Quero apagar minha conta e meus
+>    dados." **Não** peça para digitar uma palavra de confirmação: teclar "EXCLUIR" em
+>    maiúsculas é barreira real para quem tem dificuldade motora ou intelectual, e este
+>    site atende exatamente essas pessoas. Duas caixas separadas já dão a fricção
+>    necessária. O botão "Excluir minha conta agora" é contornado em vermelho, nunca
 >    preenchido, e permanece desabilitado com o motivo dito em texto ao lado —
->    "Marque a caixa e digite EXCLUIR para liberar" — até os dois passos estarem
->    completos. Ao lado, o botão primário preenchido é **"Cancelar e voltar"**: a saída
+>    "Marque as duas caixas para liberar" — até os dois passos estarem completos. Ao lado, o botão primário preenchido é **"Cancelar e voltar"**: a saída
 >    segura é a ação principal desta página. No fim, a alternativa humana: "Prefere
 >    resolver com uma pessoa? Ligue para (12) 3346-0605."
 >
