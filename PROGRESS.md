@@ -99,11 +99,14 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - [x] 36 imagens do site atual baixadas, distribuídas e comprimidas para WebP:
       8,3 MB → 1,4 MB (-83%). Logo: 289 KB → 45 KB.
 - [x] Regimento interno e COMTRAD saem da orfandade e viram páginas de verdade.
+- [x] Imagens comprimidas para WebP: 8,3 MB → 1,4 MB (-83%).
+- [x] ADRs 003 (foto como BLOB no D1) e 004 (liberação imediata do crachá).
 
 ## Em aberto / próximos passos
 
-- [ ] **Escanear o QR do PIX** com o app do banco. Validei estrutura e CRC; não
-      consigo validar que o banco aceita.
+- [x] QR do PIX **conferido pelo dono em 2026-08-05**: escaneia e resolve.
+- [x] Fotos do Sobre nós **confirmadas pelo dono**: a mulher é a fundadora Maria
+      Claudete, o homem é o presidente Luiz Carlos.
 - [ ] Escrever as changes de OpenSpec antes da parte com banco (`cadastro-e-login`,
       `formulario-atendimento`, `cracha-do-associado`, `area-do-associado`).
 - [ ] Telas ainda não implementadas: Cadastro, Login, Área do Associado, Crachá,
@@ -112,8 +115,6 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - [ ] Auditoria completa das 9 telas do handoff: só a 404 foi revisada a fundo. Achados
       dela que valem para todas: Google Fonts por CDN (já corrigido na implementação),
       `<html>` sem `lang` e links de rede social inventados.
-- [ ] Confirmar com a APPD que a foto da mulher é a fundadora e a do homem é o
-      presidente — a associação das fotos aos nomes é inferência minha.
 - [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
       telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
 - [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
