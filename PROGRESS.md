@@ -47,12 +47,23 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
 
 ## Decisões da Fase 1 (a APPD pode derrubar)
 
-- V1 publica **três projetos** — Bocha Paralímpica, Oficina Mão na Roda, Artesão da
-  Inclusão. São os únicos com descrição verificável no site atual. Fisioterapia,
-  Serviço Social, Orientações Gerais, Psicologia, Empréstimo de Equipamentos e
-  Informática Nota 10 não têm uma linha de texto em lugar nenhum.
-- Voluntário **não ganha cadastro próprio** na V1: vira assunto no formulário de
-  contato. Cadastro sem ninguém para triar produz caixa de entrada abandonada.
+- **Nove landing pages, uma por serviço e projeto** (decisão do dono, 2026-08-05 —
+  substitui a proposta anterior de publicar só os três projetos com texto). Cada página
+  tem conteúdo pesquisado sobre a área, com fontes, e marcações `[A CONFIRMAR]` no que
+  descreve especificamente a APPD. A associação revisa antes de ir ao ar. Rascunhos em
+  `docs/servicos/`.
+  - Serviços (estão no formulário): `/atendimento/<slug>` — fisioterapia, psicologia,
+    serviço social, orientações gerais, empréstimo de equipamentos.
+  - Projetos (não estão no formulário): `/projetos/<slug>` — bocha paralímpica, mão na
+    roda, artesão da inclusão, informática nota 10.
+- **Não se inventa telefone nem chave PIX**, mesmo com autorização para usar
+  placeholder: número plausível pode ser a linha de uma pessoa real, e PIX inventado
+  manda dinheiro do doador para a conta de outro. Nesses dois campos, só dado real
+  publicado ou marcação vazia.
+- Cadastro de **pessoa com deficiência** é central e está no escopo (`cadastro-e-login`
+  - `formulario-atendimento`). O que ficou de fora da V1 é cadastro de **voluntário**,
+    que vira assunto no formulário de contato — cadastro sem ninguém para triar produz
+    caixa de entrada abandonada.
 - Rotas em pt-BR curtas (`/sobre`, `/doar`, `/atendimento`, `/projetos/<slug>`), com
   301 das URLs antigas que têm equivalente; as sem equivalente caem na 404 útil.
 - Conteúdo vencido (evento de 2019, jantar de 2024) não migra.
