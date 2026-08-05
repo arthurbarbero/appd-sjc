@@ -107,8 +107,11 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - [x] QR do PIX **conferido pelo dono em 2026-08-05**: escaneia e resolve.
 - [x] Fotos do Sobre nós **confirmadas pelo dono**: a mulher é a fundadora Maria
       Claudete, o homem é o presidente Luiz Carlos.
-- [x] Fase 3 — seis changes OpenSpec escritas em `openspec/changes/`, com 258 cenários
-      Gherkin. Falta o gate do `revisor-spec` e a assinatura do dono.
+- [x] Fase 3 — seis changes OpenSpec escritas, com 262 cenários Gherkin.
+- [x] Gate do `revisor-spec` rodado: **reprovou as seis**, com 25 bloqueios nomeados.
+      Parecer em `openspec/PARECER-GATE.md`. Fase 3 **não está fechada**.
+- [ ] Resolver os 25 bloqueios do gate antes de qualquer código com banco. Os quatro
+      mais graves estão no topo do parecer.
 - [ ] **Decidir quem lê as inscrições na V1.** O painel admin é V1.1; se o formulário
       gravar no D1 sem painel, a associação para de receber os cadastros que hoje
       chegam pelo Google Forms. Pergunta P0 para a APPD.
