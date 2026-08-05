@@ -95,9 +95,12 @@ Fase 1 concluída. Próxima: Fase 2 — DESIGN no Claude Design (nenhuma tela an
   achou nada. O rascunho usa IBGE/PNAD Contínua 2022 e sinaliza a diferença de recorte
   (renda do trabalho da pessoa, não per capita da família). A APPD precisa corrigir na
   origem.
-- **Informática Nota 10 pode não existir.** Única menção fora do site: matéria de
-  novembro de 2021 sobre "Programa Inclusão Nota 10" — outro nome — como projeto que
-  ainda ia começar. A página só vai ao ar se a associação confirmar.
+- ~~Informática Nota 10 pode não existir.~~ **Resolvido em 2026-08-05**: o dono
+  confirmou que viu o projeto funcionando presencialmente. A pesquisa não achou nenhuma
+  evidência pública disso (única menção: matéria de novembro de 2021 sobre "Programa
+  Inclusão Nota 10", outro nome, projeto "em preparação") — ou seja, é falha de
+  divulgação, não projeto inativo. Segue em aberto: o nome correto, horários, turmas e
+  quem ministra.
 
 ## Dívidas conscientes
 

@@ -37,10 +37,13 @@ Contagem no momento da escrita; serve para dimensionar a revisão, não como mé
 
 ## O que a revisão precisa resolver primeiro
 
-1. **Cada serviço existe hoje, em 2026?** Informática Nota 10 é o caso mais grave: a
-   única menção que existe fora do site é uma matéria de novembro de 2021 sobre um
-   "Programa Inclusão Nota 10" — nome diferente — descrito como algo que ainda ia
-   começar. Se o projeto não existe, a página não vai ao ar.
+1. **Cada serviço existe hoje, em 2026?** O Informática Nota 10 já está resolvido:
+   **existe e está funcionando**, confirmado presencialmente por Arthur Barbero em
+   2026-08-05. A pesquisa não tinha achado nenhuma evidência pública disso — a única
+   menção na internet é uma matéria de novembro de 2021 sobre "Programa Inclusão Nota 10",
+   nome diferente, descrito como algo que ainda ia começar. Falta confirmar o resto:
+   horário, turmas, quem ministra, para quem é. Os demais serviços seguem sem
+   confirmação.
 2. **Psicologia atende cuidador e familiar, ou só a pessoa com deficiência?** Muda o
    público da página inteira.
 3. **Horário e local de cada atendimento.** Nenhuma página da APPD publica isso hoje, e

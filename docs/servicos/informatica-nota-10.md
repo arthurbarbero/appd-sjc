@@ -4,11 +4,15 @@
 > tem fontes citadas no fim. O que descreve o projeto da APPD está marcado
 > `[A CONFIRMAR]` e precisa ser revisado pela associação antes de publicar.
 
-> **Aviso: esta página é quase toda hipótese.** Não existe nenhuma descrição do Informática
-> Nota 10 no site atual da APPD. O nome aparece apenas como legenda de um bloco na home,
-> sem página própria, sem texto e sem estar no menu. Também não é opção do formulário de
-> atendimento. Tudo abaixo é proposta de conteúdo, escrita a partir do tema, e depende de
-> revisão da associação — **inclusive a confirmação de que o projeto existe e está ativo**.
+> **O projeto EXISTE.** Confirmado em 2026-08-05 por Arthur Barbero, dono do projeto, que
+> viu a atividade presencialmente. Isso resolve a dúvida que esta página trazia — a
+> pesquisa não tinha achado nenhuma evidência pública de que o Informática Nota 10
+> estivesse ativo.
+>
+> **O resto continua sendo hipótese.** Não existe nenhuma descrição do projeto no site
+> atual: o nome aparece só como legenda de um bloco na home, sem página, sem texto, sem
+> item de menu, e sem ser opção do formulário de atendimento. Como funciona, para quem é,
+> quando acontece e o que a pessoa aprende — nada disso está confirmado.
 
 ## Em uma frase
 
@@ -147,12 +151,13 @@ O que sabemos, e nada além disso:
 Note a diferença de nome: o site diz "Informática Nota 10" e a matéria de 2021 diz
 "Inclusão Nota 10".
 
-`[A CONFIRMAR]` **O projeto existe e está ativo em 2026?**
+**CONFIRMADO — o projeto existe e está em funcionamento.** Arthur Barbero viu a atividade
+presencialmente (2026-08-05). Ou seja: ele saiu do papel entre 2021 e hoje, e a ausência
+de qualquer registro público é uma falha de divulgação, não sinal de projeto inativo.
+Isso é, por si só, um argumento para a página existir.
 
 `[A CONFIRMAR]` O nome correto é Informática Nota 10, Inclusão Nota 10, ou são coisas
 diferentes?
-
-`[A CONFIRMAR]` Se o projeto nunca saiu do papel, ele deve ficar no site novo?
 
 `[A CONFIRMAR]` Quem coordena e ministra as aulas.
 
@@ -287,18 +292,17 @@ Todas consultadas em 2026-08-05.
 
 ## O que precisa ser revisado pela APPD
 
-**Esta página não pode ir ao ar sem uma conversa com a associação.** Nenhuma frase sobre o
-projeto está confirmada. A lista abaixo é a pauta dessa conversa.
+**Esta página não pode ir ao ar sem uma conversa com a associação.** A existência do
+projeto está confirmada; o conteúdo, não. A lista abaixo é a pauta dessa conversa.
 
-**Perguntas que decidem se a página existe**
+**Resolvido**
 
-1. **O Informática Nota 10 existe e está funcionando em 2026?**
+1. ~~O Informática Nota 10 existe e está funcionando em 2026?~~ **Sim** — confirmado
+   presencialmente por Arthur Barbero em 2026-08-05.
 2. O nome correto é Informática Nota 10 ou Inclusão Nota 10? São o mesmo projeto?
-3. Em 2021 o programa era descrito como "em preparação". Ele chegou a começar? Quando?
-4. Se o projeto está parado ou nunca começou, o que a APPD quer fazer: remover do site,
-   manter como intenção declarada, ou publicar com uma lista de espera?
+   (Segue em aberto — a matéria de 2021 usa o outro nome.)
 
-**Se o projeto existe — bloqueantes**
+**Bloqueantes**
 
 5. Onde acontecem as aulas? Dias, horários e turmas.
 6. Quem coordena e quem ministra.
