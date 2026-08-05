@@ -31,11 +31,6 @@ const sede = ASSOCIACAO.telefones[0]!
 
     <figure v-if="oferta.imagem" class="ilustracao">
       <img :src="oferta.imagem.arquivo" :alt="oferta.imagem.alt" loading="lazy" />
-      <figcaption v-if="oferta.imagem.pessoas">
-        <AppdSelo texto="Uso de imagem a confirmar" />
-        Foto do acervo da associação. A autorização de uso de imagem das pessoas retratadas ainda
-        não foi apresentada.
-      </figcaption>
     </figure>
 
     <AppdAviso tipo="destaque" titulo="Antes de você se cadastrar">
@@ -106,22 +101,6 @@ const sede = ASSOCIACAO.telefones[0]!
       </div>
     </section>
 
-    <section v-if="oferta.galeria?.length" aria-labelledby="galeria">
-      <h2 id="galeria">Imagens do projeto</h2>
-      <ul class="galeria">
-        <li v-for="img in oferta.galeria" :key="img.arquivo">
-          <figure>
-            <img :src="img.arquivo" :alt="img.alt" loading="lazy" />
-          </figure>
-        </li>
-      </ul>
-      <p v-if="oferta.galeria.some((i) => i.pessoas)" class="aviso-imagem">
-        <AppdSelo texto="Uso de imagem a confirmar" />
-        Fotos do acervo da associação. A autorização das pessoas retratadas ainda não foi
-        apresentada.
-      </p>
-    </section>
-
     <section aria-labelledby="acao" class="acao">
       <h2 id="acao">Quer participar?</h2>
 
@@ -144,6 +123,11 @@ const sede = ASSOCIACAO.telefones[0]!
         </a>
       </div>
     </section>
+    <AppdGaleria
+      v-if="oferta.galeria?.length"
+      :titulo="`${oferta.nome} em imagens`"
+      :fotos="oferta.galeria"
+    />
   </article>
 </template>
 
@@ -240,28 +224,6 @@ section {
   border: var(--borda-largura) solid var(--borda-suave);
 }
 
-.galeria {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--e3);
-}
-
-.galeria figure {
-  margin: 0;
-}
-
-.galeria img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: var(--raio);
-  border: var(--borda-largura) solid var(--borda-suave);
-}
-
-.aviso-imagem,
 .ilustracao figcaption {
   display: flex;
   flex-wrap: wrap;

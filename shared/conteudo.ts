@@ -10,9 +10,17 @@
 
 export const ASSOCIACAO = {
   nome: 'APPD São José dos Campos',
-  nomeCompleto: 'Associação das Pessoas com Deficiência de São José dos Campos',
+  /**
+   * Razão social como está registrada, com o termo "portadoras". É nome próprio da
+   * entidade e não se traduz nem se moderniza — está no CNPJ e na logo. No texto
+   * corrido, ao falar de gente, o site usa "pessoa com deficiência".
+   */
+  nomeCompleto: 'Associação das Pessoas Portadoras de Deficiência de São José dos Campos',
   cnpj: '08.074.883/0001-96',
+  inscricaoMunicipal: '154.420',
+  utilidadePublica: '7.477/08',
   fundacao: 2006,
+  fundacaoPorExtenso: '29 de março de 2006',
   endereco: {
     logradouro: 'Rua Acássia Pereira, 136',
     bairro: 'Campos dos Alemães',
@@ -51,14 +59,10 @@ export interface Oferta {
   naAppd: string[]
   aConfirmar: string[]
   horarios?: { local: string; endereco: string; dias: string; horario: string }[]
-  /**
-   * Imagem do site atual. `alt` descreve o que a imagem mostra para quem não a vê.
-   * `pessoas: true` marca foto com rosto identificável — depende de autorização de
-   * uso de imagem, que ainda não foi apresentada (pendência R3).
-   */
-  imagem?: { arquivo: string; alt: string; pessoas: boolean }
-  /** Galeria da atividade. Mesma regra de `imagem` para o campo `pessoas`. */
-  galeria?: { arquivo: string; alt: string; pessoas: boolean }[]
+  /** Imagem de abertura. `alt` descreve o que a imagem mostra para quem não a vê. */
+  imagem?: { arquivo: string; alt: string }
+  /** Fotos da atividade, exibidas no fim da página. */
+  galeria?: { arquivo: string; alt: string; legenda?: string }[]
 }
 
 /** Serviços: estão no campo "Tipo de Atendimento" do formulário oficial. */
@@ -70,7 +74,6 @@ export const SERVICOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/63d3b3e346404676bc61a9091332600c.png',
       alt: 'Selo da Fisioterapia da APPD: um caduceu verde dentro de um círculo com o nome da associação.',
-      pessoas: false,
     },
     noFormulario: true,
     paraQuem: [
@@ -142,7 +145,6 @@ export const SERVICOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/33ee15be8c9d4c4fa99cd5219dacbbc8.png',
       alt: 'Selo do Serviço Social da APPD: uma tocha e uma balança dentro de um círculo verde com o nome da associação.',
-      pessoas: false,
     },
     noFormulario: true,
     paraQuem: [
@@ -179,7 +181,6 @@ export const SERVICOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/ec90df9aa3bf49b0870b088592bd5c6f.png',
       alt: 'Selo das Orientações Gerais da APPD: ilustração de uma pessoa sentada diante de um computador.',
-      pessoas: false,
     },
     noFormulario: true,
     paraQuem: [
@@ -278,38 +279,31 @@ export const PROJETOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/a009cc5930f44abeaf7dacfcb834e613.jpg',
       alt: 'Equipe de bocha paralímpica da APPD reunida na quadra: atletas em cadeiras de rodas, com uniforme azul e verde, à frente de acompanhantes e profissionais de jaleco branco. Bolas de bocha azuis e vermelhas no chão.',
-      pessoas: true,
     },
     galeria: [
       {
         arquivo: '/imagens/2c64ff0311dc405a83953654da0baf7a.jpg',
         alt: 'Bolas de bocha vermelhas e a bola branca alvo, paradas no chão da quadra.',
-        pessoas: false,
       },
       {
         arquivo: '/imagens/bc6c0245add54ce2a56d12f5203aad0e.jpg',
         alt: 'Dois atletas em cadeira de rodas jogando bocha com auxílio de calhas, acompanhados por auxiliares na quadra.',
-        pessoas: true,
       },
       {
         arquivo: '/imagens/35085704197240fba6584a9f6102c7a9.jpg',
         alt: 'Atleta lançando a bola por uma calha, com o auxiliar posicionando o equipamento.',
-        pessoas: true,
       },
       {
         arquivo: '/imagens/d19b56ab24c14baf8e65b4fa632972db.jpg',
         alt: 'Atleta em cadeira de rodas alinhando a calha antes do lançamento, com o auxiliar ao lado.',
-        pessoas: true,
       },
       {
         arquivo: '/imagens/af5d4f1e51d54ef0b7399d09b029cf40.jpg',
         alt: 'Vista ampla da quadra durante o treino, com atletas espalhados e bolas em jogo.',
-        pessoas: true,
       },
       {
         arquivo: '/imagens/cb1173521d1145ba96e0bbb8c7970967.jpg',
         alt: 'Dois integrantes do projeto lado a lado, um deles exibindo a medalha conquistada.',
-        pessoas: true,
       },
     ],
     horarios: [
@@ -349,8 +343,14 @@ export const PROJETOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/f4255106208240399592ed2852586a06.jpg',
       alt: 'Arte do projeto Oficina Inclusiva Mão na Roda: uma placa amarela de sinalização com o desenho de uma pessoa em cadeira de rodas dentro de uma chave de boca, e o subtítulo "conserto e manutenção de cadeira de rodas".',
-      pessoas: false,
     },
+    galeria: [
+      {
+        arquivo: '/imagens/e5a361b0765f4a62a21f9ba072f12527.jpg',
+        alt: 'Retrato de Bill, responsável técnico da Oficina Mão na Roda, de camisa clara e óculos.',
+        legenda: 'Bill, responsável técnico da oficina',
+      },
+    ],
     naAppd: [
       'O projeto tem página própria no site atual da associação.',
       'As informações são dadas pelos telefones da associação.',
@@ -381,13 +381,11 @@ export const PROJETOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/4c54b2588ebb4044aa1b23db4303cd12.png',
       alt: 'Selo do projeto Artesão da Inclusão, com os dizeres "cursos profissionalizantes" e uma paleta de tintas coloridas.',
-      pessoas: false,
     },
     galeria: [
       {
         arquivo: '/imagens/0bf304bf0d844fc28d60c0863cadd02a.png',
         alt: 'Placa de madeira entalhada com o nome Artesão da Inclusão e o símbolo internacional de acesso.',
-        pessoas: false,
       },
     ],
     naAppd: ['O projeto tem página própria no site atual da associação.'],
@@ -406,7 +404,6 @@ export const PROJETOS: Oferta[] = [
     imagem: {
       arquivo: '/imagens/cbae5e83df0948c78b196574aeb04f3c.png',
       alt: 'Selo do Informática Nota 10: um monitor de computador dentro de um círculo azul, com os dizeres "cursos profissionalizantes".',
-      pessoas: false,
     },
     noFormulario: false,
     paraQuem: [
@@ -440,6 +437,43 @@ export function acharOferta(slug: string): Oferta | undefined {
   return TODAS_AS_OFERTAS.find((o) => o.slug === slug)
 }
 
+export interface Pessoa {
+  nome: string
+  papel: string
+  foto: string
+  alt: string
+  bio: string[]
+}
+
+/**
+ * Quem é quem na associação. Texto e nomes vêm da página institucional do site atual.
+ *
+ * O site publica também o histórico clínico do presidente — lesão medular, tetraplegia,
+ * datas e tratamento. Isso é dado de saúde, sensível pelo Art. 11 da LGPD, e não foi
+ * republicado: a associação decide por escrito o que quer contar dessa parte.
+ */
+export const PESSOAS: Pessoa[] = [
+  {
+    nome: 'Maria Claudete da Silveira Rabelo de Moura',
+    papel: 'Fundadora',
+    foto: '/imagens/242e24c8325c46fe99f614ab30b6fbbf.png',
+    alt: 'Maria Claudete da Silveira Rabelo de Moura sentada à mesa de um evento oficial, com as bandeiras do Brasil e do estado ao fundo.',
+    bio: [
+      'Fundou a APPD em 29 de março de 2006, junto de pessoas que compartilhavam o mesmo objetivo: localizar, orientar e incluir pessoas com deficiência na região.',
+    ],
+  },
+  {
+    nome: 'Luiz Carlos Lucas Barbosa',
+    papel: 'Presidente',
+    foto: '/imagens/adc13541b5744f6292df8093aa43f702.jpg',
+    alt: 'Retrato de Luiz Carlos Lucas Barbosa, presidente da APPD, de camisa clara.',
+    bio: [
+      'Trabalhou como motorista profissional por 15 anos. Voltou a estudar já na presidência da associação e trocou a área de transporte e logística pelo curso de Serviço Social, para atuar melhor no atendimento.',
+      'Além do trabalho voluntário como presidente, atua como palestrante e busca parceiros e colaboradores para ampliar o alcance dos atendimentos.',
+    ],
+  },
+]
+
 /**
  * PIX da associação. A chave é o CNPJ — o mesmo que está no rodapé e no registro
  * público. Chave verificável importa: chave de PIX que ninguém consegue conferir é
@@ -450,7 +484,7 @@ export const PIX = {
   tipo: 'CNPJ',
   chaveFormatada: '08.074.883/0001-96',
   chave: '08074883000196',
-  favorecido: 'Associação das Pessoas com Deficiência de São José dos Campos',
+  favorecido: 'Associação das Pessoas Portadoras de Deficiência de São José dos Campos',
   qr: '/marca/pix-appd.svg',
 } as const
 

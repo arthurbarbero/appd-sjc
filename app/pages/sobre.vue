@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ASSOCIACAO, PROJETOS, SERVICOS } from '~~/shared/conteudo'
+import { ASSOCIACAO, PESSOAS, PROJETOS, SERVICOS } from '~~/shared/conteudo'
 
 /*
   Sobre nós.
 
-  O site atual publica, nesta página, o nome do presidente junto de histórico clínico
-  detalhado — lesão medular, tetraplegia, tratamento, datas — e o nome de dois filhos.
-  Isso é dado de saúde, sensível pelo Art. 11 da LGPD, e não foi republicado aqui.
-  A associação decide por escrito o que quer publicar sobre a diretoria.
+  As duas pessoas que fundaram e presidem a associação aparecem aqui com nome, cargo e
+  retrato — decisão do dono do projeto, que tem autorização da associação.
+
+  O que não foi republicado é o histórico clínico do presidente que está no site atual
+  (lesão medular, tetraplegia, datas de tratamento) e o nome dos filhos dele. Isso é
+  dado de saúde, sensível pelo Art. 11 da LGPD, e a decisão de contar essa parte é da
+  própria pessoa, por escrito.
 */
 
 useHead({
@@ -37,7 +40,12 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       <h2 id="quem">Quem somos</h2>
       <p>
         A APPD é uma associação sem fins lucrativos, formada por pessoas com deficiência, suas
-        famílias e voluntários. São {{ anos }} anos de atividade na cidade.
+        famílias e voluntários. Foi fundada em {{ ASSOCIACAO.fundacaoPorExtenso }} — são
+        {{ anos }} anos de atividade na cidade.
+      </p>
+      <p>
+        O objetivo declarado desde o começo é <strong>localizar, orientar e inserir</strong> na
+        sociedade as pessoas com deficiência, e amparar quem tem mais dificuldade.
       </p>
       <p>
         O trabalho tem duas frentes. De um lado, o atendimento direto: fisioterapia, psicologia,
@@ -75,16 +83,31 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       </p>
     </section>
 
-    <section aria-labelledby="diretoria">
-      <h2 id="diretoria">Diretoria</h2>
-      <AppdAviso tipo="atencao" titulo="Em revisão com a associação">
-        <span>
-          O site anterior publicava o nome do presidente junto do histórico de saúde dele e do nome
-          de familiares. Informação de saúde é dado sensível pela LGPD, mesmo quando a própria
-          pessoa autoriza — por isso não foi republicada aqui. A composição da diretoria entra nesta
-          página quando a associação definir, por escrito, o que quer publicar.
-        </span>
-      </AppdAviso>
+    <section aria-labelledby="pessoas" class="pessoas">
+      <div class="cabeca">
+        <h2 id="pessoas">Quem começou e quem conduz</h2>
+        <p>
+          A associação nasceu de uma iniciativa pessoal e é presidida por quem vive a mesma
+          realidade de quem ela atende.
+        </p>
+      </div>
+
+      <ul class="lista-pessoas">
+        <li v-for="pessoa in PESSOAS" :key="pessoa.nome">
+          <article class="pessoa">
+            <img :src="pessoa.foto" :alt="pessoa.alt" decoding="async" />
+            <div class="dados">
+              <p class="papel">{{ pessoa.papel }}</p>
+              <h3>{{ pessoa.nome }}</h3>
+              <p v-for="(paragrafo, i) in pessoa.bio" :key="i">{{ paragrafo }}</p>
+            </div>
+          </article>
+        </li>
+      </ul>
+
+      <p class="nota">
+        <AppdSelo /> A composição completa da diretoria ainda não foi informada pela associação.
+      </p>
     </section>
 
     <section aria-labelledby="transparencia">
@@ -97,12 +120,45 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
         <li><AppdSelo /> Estatuto</li>
         <li><AppdSelo /> Prestação de contas</li>
         <li><AppdSelo /> Relatório de atividades</li>
-        <li><AppdSelo /> Missão, visão e valores como declaração formal</li>
       </ul>
-      <p>
-        O que já é público: CNPJ <strong>{{ ASSOCIACAO.cnpj }}</strong
-        >, com sede na {{ ASSOCIACAO.endereco.logradouro }}, {{ ASSOCIACAO.endereco.bairro }}.
-      </p>
+
+      <h3>O que já é público</h3>
+      <div class="rolagem">
+        <table>
+          <caption>
+            Registros da associação
+          </caption>
+          <tbody>
+            <tr>
+              <th scope="row">Razão social</th>
+              <td>{{ ASSOCIACAO.nomeCompleto }}</td>
+            </tr>
+            <tr>
+              <th scope="row">CNPJ</th>
+              <td>{{ ASSOCIACAO.cnpj }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Inscrição Municipal</th>
+              <td>{{ ASSOCIACAO.inscricaoMunicipal }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Utilidade Pública</th>
+              <td>nº {{ ASSOCIACAO.utilidadePublica }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Fundação</th>
+              <td>{{ ASSOCIACAO.fundacaoPorExtenso }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Sede</th>
+              <td>
+                {{ ASSOCIACAO.endereco.logradouro }} — {{ ASSOCIACAO.endereco.bairro }},
+                {{ ASSOCIACAO.endereco.cidade }}/{{ ASSOCIACAO.endereco.uf }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section aria-labelledby="voluntario" class="voluntario">
@@ -199,5 +255,70 @@ section {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e3);
+}
+.pessoas {
+  gap: var(--e5);
+}
+
+.cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.lista-pessoas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e5);
+}
+
+.pessoa {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--e5);
+  align-items: start;
+}
+
+.pessoa img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--raio);
+  border: var(--borda-largura) solid var(--borda-suave);
+  background: var(--superficie);
+}
+
+.dados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  max-width: var(--medida);
+}
+
+.papel {
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primaria);
+}
+
+.dados h3 {
+  font-size: var(--texto-titulo-m);
+}
+
+@media (max-width: 720px) {
+  .pessoa {
+    grid-template-columns: 1fr;
+    gap: var(--e3);
+  }
+
+  .pessoa img {
+    max-width: 220px;
+  }
 }
 </style>

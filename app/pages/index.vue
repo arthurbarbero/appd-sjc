@@ -7,7 +7,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Associação das Pessoas com Deficiência de São José dos Campos. Fisioterapia, psicologia, serviço social, empréstimo de equipamentos e projetos de esporte e geração de renda.',
+        'Associação das Pessoas Portadoras de Deficiência de São José dos Campos. Fisioterapia, psicologia, serviço social, empréstimo de equipamentos e projetos de esporte e geração de renda.',
     },
   ],
 })
