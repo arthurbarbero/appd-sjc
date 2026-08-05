@@ -9,15 +9,20 @@ mesmo esqueleto com um bloco a mais de horários.
 
 **Decisão que a tela ajuda a tomar:** "isto serve para mim, e eu consigo participar?"
 A pessoa precisa entender o que é o serviço, se ela se encaixa, e descobrir **antes de
-clicar** que a vaga entra em fila, que o atendimento é de manhã e que existe uma
-contribuição sugerida. Hoje ela só descobre isso depois de abrir o formulário do Google
-— e quem trabalha de manhã perde o tempo dela e o da associação.
+clicar** que a vaga entra em fila e que o atendimento é de manhã. Hoje ela só descobre
+isso depois de abrir o formulário do Google — e quem trabalha de manhã perde o tempo
+dela e o da associação.
 
 **O que o olho vê primeiro, segundo, terceiro:**
 
 1. O nome do serviço e a frase que explica o que é.
-2. As três condições práticas: fila, manhã, contribuição sugerida.
+2. As duas condições práticas: fila e período da manhã.
 3. A ação: fazer o cadastro.
+
+**Contribuição solidária não entra aqui.** Decisão do dono em 2026-08-05: o valor
+aparece uma vez só, no campo 15 do formulário, que é onde o formulário oficial o coloca.
+Repetir na página de serviço e no topo do formulário fazia a pessoa esbarrar em preço
+três vezes antes de começar.
 
 **Estados:** completo; **conteúdo em revisão** (o serviço existe mas a associação ainda
 não confirmou horário e responsável — precisa ficar honesto na tela, não em nota de
@@ -49,11 +54,10 @@ rodapé); e leitura longa em 360px.
 > 2. **`h1`**: "Fisioterapia". Abaixo, em 19px: "Atendimento de fisioterapia para
 >    pessoas com deficiência, com foco em manter e recuperar a autonomia de movimento."
 > 3. **Bloco "Antes de você se cadastrar"**, em amarelo `#bbb070` com texto escuro,
->    ícone e borda esquerda de 4px, com três itens em lista: "As vagas são chamadas
+>    ícone e borda esquerda de 4px, com dois itens em lista: "As vagas são chamadas
 >    conforme abrem — o cadastro entra em fila."; "As sessões acontecem somente no
->    período da manhã."; "É sugerida uma contribuição solidária de R$ 50,00 por mês,
->    ajustável conforme a situação de cada pessoa. Ela não é condição para ser
->    atendido." Este bloco fica **acima** do texto explicativo, não no fim da página.
+>    período da manhã." Este bloco fica **acima** do texto explicativo, não no fim da
+>    página. Não mencione valor de contribuição em lugar nenhum desta página.
 > 4. **"Para quem é"** — lista de quatro itens curtos.
 > 5. **"O que a fisioterapia faz"** — quatro parágrafos de texto corrido com dois
 >    subtítulos, conteúdo informativo sobre reabilitação e autonomia.

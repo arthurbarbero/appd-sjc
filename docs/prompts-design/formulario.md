@@ -52,8 +52,8 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 > - **Topo**: `h1` "Cadastro de Atendimento 2026" e, em bloco amarelo com texto escuro,
 >   ícone e borda esquerda: "As vagas são chamadas conforme abrem."; "As sessões
 >   acontecem somente no período da manhã."; "Mantenha o telefone atualizado — é por
->   ele que vem o primeiro contato."; "É sugerida uma contribuição solidária de
->   R$ 50,00 mensais, ajustável conforme a situação de cada pessoa."
+>   ele que vem o primeiro contato." Não repita aqui nada sobre contribuição ou valor:
+>   isso aparece uma vez só, no campo 15.
 > - **Seção 1 — Quem vai ser atendido**: NOME (texto, obrigatório); DATA DE NASCIMENTO
 >   (campo de data acessível que aceita digitação em dd/mm/aaaa, obrigatório); TELEFONE
 >   PARA CONTATO (texto com máscara, obrigatório, com ajuda "É por ele que vem o
@@ -113,7 +113,8 @@ enviando; sucesso com o número de registro. **Erro nunca apaga resposta.**
 - [ ] Os 15 rótulos estão idênticos ao original, na mesma ordem.
 - [ ] Nenhum campo usa placeholder como rótulo.
 - [ ] O consentimento do Art. 11 é uma seção própria, destacada, com a caixa desmarcada.
-- [ ] O valor de R$ 50,00 está visível ao lado do controle, não em link ou modal.
+- [ ] O valor aparece **uma vez só**, no campo 15, ao lado do controle — não no topo,
+      não na página de serviço, não na home.
 - [ ] No estado de erro, **todas as outras respostas continuam preenchidas**.
 - [ ] O erro diz como corrigir, com exemplo — não "campo inválido".
 - [ ] Cada grupo de opções está em `fieldset` com `legend`.
