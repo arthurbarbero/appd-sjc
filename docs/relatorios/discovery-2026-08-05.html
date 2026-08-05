@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Discovery — site novo da APPD-SJC</title>
+    <meta
+      name="description"
+      content="Painel de revisão do discovery do site novo da APPD-SJC, levantado em 5 de agosto de 2026."
+    />
+    <!--
+      Documento gerado na Fase 1 do projeto e congelado como registro do momento.
+      Autossuficiente de propósito: sem fonte externa, script ou imagem remota — abre
+      offline, com dois cliques, em qualquer navegador. Não editar para atualizar
+      status: se o projeto andou, gere um relatório novo com a data nova.
+    -->
+  </head>
+  <body>
+    <style>
+      :root {
+        --paper: #eceee8;
+        --card: #f6f7f3;
+        --ink: #16272b;
+        --muted: #55645f;
+        --rule: #d2d8cd;
+        --accent: #0b6472;
+        --accent-soft: #dce9ea;
+        --critico: #92291f;
+        --alto: #7c4a00;
+        --ok: #2b5f38;
+        --critico-soft: #f2ddd9;
+        --alto-soft: #f3e6cd;
+        --ok-soft: #dbe9dc;
+
+        --serif:
+          'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+        --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --mono:
+          ui-monospace, 'Cascadia Mono', 'Cascadia Code', Consolas, 'SF Mono', Menlo, monospace;
+
+        --measure: 68ch;
+        --pad: clamp(1.15rem, 4vw, 3rem);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #0e1514;
+          --card: #16201e;
+          --ink: #e4e9e2;
+          --muted: #9aa79f;
+          --rule: #26312d;
+          --accent: #5cc2d4;
+          --accent-soft: #14302f;
+          --critico: #f0938a;
+          --alto: #e0b25f;
+          --ok: #82c78e;
+          --critico-soft: #2c1a18;
+          --alto-soft: #2a2216;
+          --ok-soft: #172619;
+        }
+      }
+
+      :root[data-theme='dark'] {
+        --paper: #0e1514;
+        --card: #16201e;
+        --ink: #e4e9e2;
+        --muted: #9aa79f;
+        --rule: #26312d;
+        --accent: #5cc2d4;
+        --accent-soft: #14302f;
+        --critico: #f0938a;
+        --alto: #e0b25f;
+        --ok: #82c78e;
+        --critico-soft: #2c1a18;
+        --alto-soft: #2a2216;
+        --ok-soft: #172619;
+      }
+
+      :root[data-theme='light'] {
+        --paper: #eceee8;
+        --card: #f6f7f3;
+        --ink: #16272b;
+        --muted: #55645f;
+        --rule: #d2d8cd;
+        --accent: #0b6472;
+        --accent-soft: #dce9ea;
+        --critico: #92291f;
+        --alto: #7c4a00;
+        --ok: #2b5f38;
+        --critico-soft: #f2ddd9;
+        --alto-soft: #f3e6cd;
+        --ok-soft: #dbe9dc;
+      }
+
+      html {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      body {
+        font-family: var(--sans);
+        font-size: 17px;
+        line-height: 1.62;
+        background: var(--paper);
+        color: var(--ink);
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin-inline: auto;
+        padding: var(--pad);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(2.5rem, 6vw, 4.5rem);
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--serif);
+        font-weight: 600;
+        text-wrap: balance;
+        line-height: 1.15;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 6vw, 3.4rem);
+        letter-spacing: -0.015em;
+        margin: 0;
+      }
+
+      h2 {
+        font-size: clamp(1.4rem, 3.4vw, 1.95rem);
+        margin: 0;
+      }
+
+      h3 {
+        font-size: 1.12rem;
+        margin: 0;
+      }
+
+      p,
+      li {
+        max-width: var(--measure);
+      }
+
+      p {
+        margin: 0;
+      }
+
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+
+      a:focus-visible,
+      .theme-toggle:focus-visible,
+      .skip:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 2px;
+      }
+
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        background: var(--card);
+        color: var(--ink);
+        padding: 0.7rem 1rem;
+        z-index: 10;
+      }
+
+      .skip:focus {
+        left: 0.5rem;
+        top: 0.5rem;
+      }
+
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 0.76rem;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      /* ---------- cabeçalho ---------- */
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+        padding-top: clamp(1rem, 4vw, 2.5rem);
+      }
+
+      .lede {
+        font-family: var(--serif);
+        font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+        color: var(--muted);
+        max-width: 58ch;
+      }
+
+      .disclaimer {
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+        padding: 0.85rem 1.1rem;
+        max-width: var(--measure);
+        font-size: 0.95rem;
+      }
+
+      /* ---------- números ---------- */
+
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+      }
+
+      .tile {
+        background: var(--card);
+        padding: 1.15rem 1.2rem 1.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .tile .num {
+        font-family: var(--serif);
+        font-size: clamp(2rem, 5vw, 2.9rem);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+      }
+
+      .tile .cap {
+        font-size: 0.88rem;
+        color: var(--muted);
+        max-width: none;
+      }
+
+      /* ---------- seções ---------- */
+
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+      }
+
+      .section-head {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        border-top: 2px solid var(--ink);
+        padding-top: 0.9rem;
+      }
+
+      /* ---------- tabelas ---------- */
+
+      .scroll {
+        overflow-x: auto;
+        border: 1px solid var(--rule);
+        background: var(--card);
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 34rem;
+        font-size: 0.94rem;
+      }
+
+      caption {
+        text-align: left;
+        padding: 0.9rem 1rem 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+
+      thead th {
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td.num,
+      th.num {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.86em;
+      }
+
+      .sim {
+        color: var(--ok);
+        font-weight: 600;
+      }
+
+      .nao {
+        color: var(--critico);
+        font-weight: 600;
+      }
+
+      /* ---------- selos de severidade ---------- */
+
+      .selo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border: 1px solid currentColor;
+        white-space: nowrap;
+      }
+
+      .selo::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        background: currentColor;
+        flex: none;
+      }
+
+      .selo-critico {
+        color: var(--critico);
+        background: var(--critico-soft);
+      }
+
+      .selo-alto {
+        color: var(--alto);
+        background: var(--alto-soft);
+      }
+
+      .selo-ok {
+        color: var(--ok);
+        background: var(--ok-soft);
+      }
+
+      /* ---------- cartões de risco ---------- */
+
+      .riscos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 1rem;
+      }
+
+      .risco {
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-top: 3px solid var(--critico);
+        padding: 1.1rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .risco p {
+        font-size: 0.94rem;
+        max-width: none;
+      }
+
+      /* ---------- páginas ---------- */
+
+      .paginas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+      }
+
+      .pagina {
+        background: var(--card);
+        padding: 1rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .pagina .rota {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--muted);
+        word-break: break-all;
+      }
+
+      .barra {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        margin-top: 0.2rem;
+      }
+
+      .barra .val {
+        font-family: var(--serif);
+        font-size: 1.5rem;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+
+      .barra .rot {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .medidor {
+        height: 5px;
+        background: var(--rule);
+        margin-top: 0.45rem;
+      }
+
+      .medidor > span {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+      }
+
+      /* ---------- perguntas ---------- */
+
+      ol.perguntas {
+        margin: 0;
+        padding-left: 1.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      ol.perguntas li {
+        font-family: var(--serif);
+        font-size: clamp(1.05rem, 2.1vw, 1.22rem);
+        line-height: 1.4;
+        padding-left: 0.3rem;
+      }
+
+      ul.limpa {
+        margin: 0;
+        padding-left: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      /* ---------- fases ---------- */
+
+      .fases {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--rule);
+        background: var(--card);
+      }
+
+      .fase {
+        display: flex;
+        gap: 1rem;
+        padding: 0.95rem 1.1rem;
+        border-bottom: 1px solid var(--rule);
+        align-items: flex-start;
+      }
+
+      .fase:last-child {
+        border-bottom: 0;
+      }
+
+      .fase .id {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--muted);
+        padding-top: 0.28rem;
+        white-space: nowrap;
+      }
+
+      .fase .corpo {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .fase .corpo p {
+        font-size: 0.94rem;
+        color: var(--muted);
+      }
+
+      footer {
+        border-top: 1px solid var(--rule);
+        padding-top: 1.4rem;
+        padding-bottom: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      footer p {
+        max-width: var(--measure);
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        a {
+          transition: opacity 120ms ease;
+        }
+
+        a:hover {
+          opacity: 0.75;
+        }
+      }
+    </style>
+
+    <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+    <div class="wrap">
+      <header>
+        <p class="eyebrow">Documento interno de trabalho &middot; 5 de agosto de 2026</p>
+        <h1>Discovery do site novo da APPD&#8209;SJC</h1>
+        <p class="lede">
+          O que foi levantado sobre o site atual, o que já está escrito para o site novo, e as
+          respostas que só a associação pode dar.
+        </p>
+        <p class="disclaimer">
+          <strong>Isto não é o site da APPD e não é comunicação da associação.</strong> É o material
+          de trabalho de um projeto voluntário, feito para ser revisado pela APPD&#8209;SJC antes de
+          qualquer publicação. Nenhum dado de pessoa real aparece aqui.
+        </p>
+      </header>
+
+      <main
+        id="conteudo"
+        style="display: flex; flex-direction: column; gap: clamp(2.5rem, 6vw, 4.5rem)"
+      >
+        <section aria-labelledby="numeros">
+          <div class="section-head">
+            <p class="eyebrow">Onde estamos</p>
+            <h2 id="numeros">O trabalho em números</h2>
+          </div>
+          <div class="tiles">
+            <div class="tile">
+              <span class="num">15</span>
+              <span class="cap">páginas do site atual varridas, uma a uma</span>
+            </div>
+            <div class="tile">
+              <span class="num">9</span>
+              <span class="cap">páginas de conteúdo escritas para o site novo</span>
+            </div>
+            <div class="tile">
+              <span class="num">218</span>
+              <span class="cap"
+                >marcações <span class="mono">[A CONFIRMAR]</span> aguardando a APPD</span
+              >
+            </div>
+            <div class="tile">
+              <span class="num">0</span>
+              <span class="cap">telas implementadas — por decisão, o design vem antes</span>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="diagnostico">
+          <div class="section-head">
+            <p class="eyebrow">O site de hoje</p>
+            <h2 id="diagnostico">O que a varredura encontrou</h2>
+          </div>
+          <p>
+            Tudo abaixo foi verificado página por página em 5 de agosto de 2026. Nenhum item é
+            impressão: cada um tem a URL e o trecho de origem registrados no inventário.
+          </p>
+          <div class="scroll">
+            <table>
+              <caption>
+                Achados do site atual, por gravidade
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Gravidade</th>
+                  <th scope="col">Achado</th>
+                  <th scope="col">Consequência para quem usa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="selo selo-critico">Crítico</span></td>
+                  <td>
+                    O link de WhatsApp da home <strong>na versão mobile</strong> tem dois caracteres
+                    invisíveis na URL e um número que não bate com nenhum telefone publicado.
+                  </td>
+                  <td>Quem entra pelo celular não consegue falar com a associação.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-critico">Crítico</span></td>
+                  <td>
+                    Os cinco blocos de serviço da home levam
+                    <strong>todos ao mesmo formulário</strong>. O link de Fisioterapia abre a URL
+                    administrativa de um formulário de visitas.
+                  </td>
+                  <td>A pessoa clica no que precisa e chega a outro lugar.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-critico">Crítico</span></td>
+                  <td>
+                    37 certificados individuais em PDF, com nome de participante, públicos e
+                    indexáveis.
+                  </td>
+                  <td>Dado pessoal exposto sem que a pessoa tenha como saber.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-alto">Alto</span></td>
+                  <td>
+                    Nenhuma chave PIX publicada. O único meio concreto de doar é um boleto escaneado
+                    de <strong>2016</strong>, ilegível para leitor de tela.
+                  </td>
+                  <td>Quem quer doar hoje, pelo celular, não consegue.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-alto">Alto</span></td>
+                  <td>
+                    Título principal ausente em <strong>14 de 15</strong> páginas; 10 páginas sem
+                    nenhum título de seção; textos alternativos vazios ou com nome de arquivo.
+                  </td>
+                  <td>Leitor de tela não consegue anunciar a estrutura da página.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-alto">Alto</span></td>
+                  <td>
+                    Sete páginas no ar fora do menu, incluindo um evento de 2019 com inscrição
+                    aberta e um jantar de 2024 vendendo convite.
+                  </td>
+                  <td>Conteúdo vencido apresentado como atual.</td>
+                </tr>
+                <tr>
+                  <td><span class="selo selo-alto">Alto</span></td>
+                  <td>
+                    Duas páginas de Facebook institucionais, ambas ativas. O site aponta para uma
+                    só.
+                  </td>
+                  <td>Audiência dividida e uma página sem manutenção declarada.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section aria-labelledby="divergencia">
+          <div class="section-head">
+            <p class="eyebrow">O achado central</p>
+            <h2 id="divergencia">O site oferece uma coisa; o formulário, outra</h2>
+          </div>
+          <p>
+            O que a associação divulga e o que a pessoa consegue efetivamente pedir são conjuntos
+            quase separados. Esta é a inconsistência que mais custa: alguém decide pedir ajuda,
+            preenche o formulário, e o serviço que motivou o clique não está lá.
+          </p>
+          <div class="scroll">
+            <table>
+              <caption>
+                Cruzamento entre os serviços divulgados e as opções do formulário oficial
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Serviço ou projeto</th>
+                  <th scope="col">Opção no formulário</th>
+                  <th scope="col">Página no site</th>
+                  <th scope="col">Situação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Psicologia</th>
+                  <td class="sim">Sim</td>
+                  <td class="nao">Não</td>
+                  <td>Oferecido no formulário, invisível no site.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Empréstimo de Equipamentos</th>
+                  <td class="sim">Sim</td>
+                  <td class="nao">Não</td>
+                  <td>Oferecido no formulário, invisível no site.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Fisioterapia</th>
+                  <td class="sim">Sim</td>
+                  <td class="nao">Não</td>
+                  <td>Só uma legenda na home, sem uma linha de descrição.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Serviço Social</th>
+                  <td class="sim">Sim</td>
+                  <td class="nao">Não</td>
+                  <td>Só uma legenda na home, sem uma linha de descrição.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Orientações Gerais</th>
+                  <td class="sim">Sim</td>
+                  <td class="nao">Não</td>
+                  <td>Só uma legenda na home, sem uma linha de descrição.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Informática Nota 10</th>
+                  <td class="nao">Não</td>
+                  <td class="nao">Não</td>
+                  <td>
+                    Divulgado na home, mas não é opção do formulário para onde o próprio bloco leva.
+                    O projeto existe e funciona — confirmado presencialmente.
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Artesão da Inclusão</th>
+                  <td class="nao">Não</td>
+                  <td class="sim">Sim</td>
+                  <td>Tem página, mas o bloco leva a um formulário que não o oferece.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Bocha Paralímpica</th>
+                  <td class="nao">Não</td>
+                  <td class="sim">Sim</td>
+                  <td>Tem página com horários de treino e nenhum caminho de inscrição.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Oficina Mão na Roda</th>
+                  <td class="nao">Não</td>
+                  <td class="sim">Sim</td>
+                  <td>Tem página e nenhum caminho de inscrição.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section aria-labelledby="paginas">
+          <div class="section-head">
+            <p class="eyebrow">O site novo</p>
+            <h2 id="paginas">Nove páginas escritas, todas com fonte</h2>
+          </div>
+          <p>
+            Cada serviço e cada projeto ganhou uma página com conteúdo real sobre a área —
+            pesquisado em COFFITO, CFP, CFESS, INSS, Ministério da Saúde, OMS, IBGE, Prefeitura de
+            São José dos Campos e legislação, com URL e data de acesso. O que descreve
+            especificamente a APPD e não pôde ser verificado está marcado para revisão. O número em
+            cada cartão é quanto falta confirmar ali.
+          </p>
+          <div class="paginas">
+            <article class="pagina">
+              <h3>Fisioterapia</h3>
+              <span class="rota">/atendimento/fisioterapia</span>
+              <div class="barra">
+                <span class="val">23</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 62%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Psicologia</h3>
+              <span class="rota">/atendimento/psicologia</span>
+              <div class="barra">
+                <span class="val">23</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 62%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Serviço Social</h3>
+              <span class="rota">/atendimento/servico-social</span>
+              <div class="barra">
+                <span class="val">20</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 54%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Orientações Gerais</h3>
+              <span class="rota">/atendimento/orientacoes-gerais</span>
+              <div class="barra">
+                <span class="val">21</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 57%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Empréstimo de Equipamentos</h3>
+              <span class="rota">/atendimento/emprestimo-equipamentos</span>
+              <div class="barra">
+                <span class="val">19</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 51%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Bocha Paralímpica</h3>
+              <span class="rota">/projetos/bocha-paralimpica</span>
+              <div class="barra">
+                <span class="val">26</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 70%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Oficina Mão na Roda</h3>
+              <span class="rota">/projetos/mao-na-roda</span>
+              <div class="barra">
+                <span class="val">22</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 59%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Artesão da Inclusão</h3>
+              <span class="rota">/projetos/artesao-da-inclusao</span>
+              <div class="barra">
+                <span class="val">27</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 73%"></span></div>
+            </article>
+            <article class="pagina">
+              <h3>Informática Nota 10</h3>
+              <span class="rota">/projetos/informatica-nota-10</span>
+              <div class="barra">
+                <span class="val">37</span><span class="rot">a confirmar</span>
+              </div>
+              <div class="medidor"><span style="width: 100%"></span></div>
+            </article>
+          </div>
+          <p>
+            A página de Informática lidera a lista porque o projeto
+            <strong>existe e funciona</strong>, mas não há um único registro público sobre ele: nem
+            página, nem texto, nem menu, nem opção no formulário. A única menção em toda a internet
+            é uma notícia de novembro de 2021 sobre um programa de nome parecido, descrito como algo
+            que ainda ia começar.
+          </p>
+        </section>
+
+        <section aria-labelledby="correcao">
+          <div class="section-head">
+            <p class="eyebrow">Correção de fato</p>
+            <h2 id="correcao">Um dado do site atual não tem lastro</h2>
+          </div>
+          <p>
+            A página do Artesão da Inclusão afirma hoje que <em>“pesquisas comprovam”</em> que a
+            renda per capita das famílias de pessoas com deficiência é 50% a 70% menor. Essa
+            pesquisa não foi encontrada — nem no IBGE, nem no IPEA, nem no Relatório Mundial sobre
+            Deficiência da OMS e do Banco Mundial, nem na literatura acadêmica.
+          </p>
+          <p>
+            O rascunho substituiu o número por dado oficial do IBGE, da PNAD Contínua de 2022,
+            módulo Pessoas com Deficiência:
+          </p>
+          <div class="scroll">
+            <table>
+              <caption>
+                IBGE, PNAD Contínua 2022 — pessoas com e sem deficiência, 14 anos ou mais
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Indicador</th>
+                  <th scope="col" class="num">Com deficiência</th>
+                  <th scope="col" class="num">Sem deficiência</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Nível de ocupação</th>
+                  <td class="num">26,6%</td>
+                  <td class="num">60,7%</td>
+                </tr>
+                <tr>
+                  <th scope="row">Rendimento médio do trabalho</th>
+                  <td class="num">R$ 1.860</td>
+                  <td class="num">R$ 2.690</td>
+                </tr>
+                <tr>
+                  <th scope="row">Informalidade</th>
+                  <td class="num">55,0%</td>
+                  <td class="num">38,7%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            O recorte não é o mesmo, e isso está dito dentro da página: o dado do IBGE é sobre a
+            renda do trabalho da própria pessoa, não sobre a renda per capita da família. A
+            associação precisa saber porque o texto sem lastro está no site dela agora.
+          </p>
+        </section>
+
+        <section aria-labelledby="riscos">
+          <div class="section-head">
+            <p class="eyebrow">Decisões que não são técnicas</p>
+            <h2 id="riscos">Quatro riscos para a associação avaliar</h2>
+          </div>
+          <p>
+            Nenhum destes é pedido de material. São achados sobre dado pessoal e confiança que
+            precisam de decisão antes de qualquer conteúdo migrar para o site novo.
+          </p>
+          <div class="riscos">
+            <article class="risco">
+              <h3>Certificados públicos</h3>
+              <p>
+                Uma lista de nomes de participantes, cada um ligado a um PDF individual em endereço
+                público. Esse conteúdo não será migrado sem decisão explícita.
+              </p>
+            </article>
+            <article class="risco">
+              <h3>Dado de saúde na página institucional</h3>
+              <p>
+                A página sobre a associação publica histórico clínico detalhado de uma pessoa
+                identificada. É dado sensível mesmo quando a própria pessoa autoriza — o que muda é
+                a base legal, não a natureza do dado.
+              </p>
+            </article>
+            <article class="risco">
+              <h3>Fotos de atividade</h3>
+              <p>
+                Galerias com rostos possivelmente identificáveis de assistidos. Autorização para
+                usar o material do projeto não é autorização de imagem das pessoas.
+              </p>
+            </article>
+            <article class="risco">
+              <h3>Captação por telefone</h3>
+              <p>
+                O site descreve doação por ligação, com um agente que recolhe a contribuição
+                presencialmente, e não oferece nenhuma forma de o doador conferir se a ligação é
+                legítima. É um modelo fácil de imitar.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section aria-labelledby="perguntas">
+          <div class="section-head">
+            <p class="eyebrow">Pauta da reunião</p>
+            <h2 id="perguntas">Se der para perguntar só cinco coisas</h2>
+          </div>
+          <ol class="perguntas">
+            <li>Quais serviços a APPD oferece hoje, e como a pessoa entra em cada um?</li>
+            <li>Qual é a chave PIX da instituição?</li>
+            <li>Onde está a logo em arquivo vetorial?</li>
+            <li>Qual e-mail recebe as mensagens do site, e quem responde?</li>
+            <li>
+              O texto sobre o presidente, com o histórico clínico, pode ser republicado como está?
+            </li>
+          </ol>
+          <p>
+            As quatro primeiras travam telas específicas. Cada uma tem um caminho alternativo já
+            definido, para o projeto não parar enquanto a resposta não vem.
+          </p>
+        </section>
+
+        <section aria-labelledby="fases">
+          <div class="section-head">
+            <p class="eyebrow">Andamento</p>
+            <h2 id="fases">Onde o projeto está</h2>
+          </div>
+          <div class="fases">
+            <div class="fase">
+              <span class="id">Fase 0</span>
+              <div class="corpo">
+                <h3>Fundação <span class="selo selo-ok">Concluída</span></h3>
+                <p>
+                  Repositório público, testes e verificações automáticas a cada envio, banco de
+                  dados e hospedagem validados em teste real. Custo de operação: zero, sem cartão
+                  cadastrado.
+                </p>
+              </div>
+            </div>
+            <div class="fase">
+              <span class="id">Fase 1</span>
+              <div class="corpo">
+                <h3>Levantamento <span class="selo selo-ok">Concluída</span></h3>
+                <p>
+                  Inventário do site atual, arquitetura de informação para os três públicos,
+                  pendências da associação e o conteúdo das nove páginas.
+                </p>
+              </div>
+            </div>
+            <div class="fase">
+              <span class="id">Fase 2</span>
+              <div class="corpo">
+                <h3>Design <span class="selo selo-alto">Próxima</span></h3>
+                <p>
+                  Identidade visual e o desenho de cada tela, aprovado antes de virar código.
+                  Nenhuma tela é implementada antes disso.
+                </p>
+              </div>
+            </div>
+            <div class="fase">
+              <span class="id">Fases 3 a 5</span>
+              <div class="corpo">
+                <h3>Especificação, construção e entrega</h3>
+                <p>
+                  Cada parte do site é especificada, construída e testada em separado — incluindo
+                  teste de acessibilidade com leitor de tela e navegação por teclado.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="acessibilidade">
+          <div class="section-head">
+            <p class="eyebrow">O compromisso</p>
+            <h2 id="acessibilidade">Acessibilidade é o produto</h2>
+          </div>
+          <p>
+            Um site de uma associação de pessoas com deficiência que não é acessível falha no
+            essencial, por mais bonito que fique. Por isso acessibilidade não é um item de
+            conferência no fim: é critério de aprovação de cada tela, com contraste verificado,
+            navegação inteira por teclado, foco sempre visível, alvos de toque generosos, respeito a
+            quem prefere menos animação e nada sinalizado apenas por cor.
+          </p>
+          <p>
+            Esta própria página segue essas regras. É o mínimo que se pode pedir de um documento que
+            as defende.
+          </p>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          Projeto voluntário, sem vínculo comercial, feito com autorização da APPD&#8209;SJC para
+          uso de marca e conteúdo. O código é público; marca, logo, fotos e textos institucionais
+          pertencem à associação.
+        </p>
+        <p>
+          Documentos completos, com fontes e datas de acesso, no repositório
+          <span class="mono">github.com/arthurbarbero/appd-sjc</span>, na pasta
+          <span class="mono">docs/</span>.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
