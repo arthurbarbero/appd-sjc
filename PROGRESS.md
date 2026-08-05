@@ -107,8 +107,14 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - [x] QR do PIX **conferido pelo dono em 2026-08-05**: escaneia e resolve.
 - [x] Fotos do Sobre nós **confirmadas pelo dono**: a mulher é a fundadora Maria
       Claudete, o homem é o presidente Luiz Carlos.
-- [ ] Escrever as changes de OpenSpec antes da parte com banco (`cadastro-e-login`,
-      `formulario-atendimento`, `cracha-do-associado`, `area-do-associado`).
+- [x] Fase 3 — seis changes OpenSpec escritas em `openspec/changes/`, com 258 cenários
+      Gherkin. Falta o gate do `revisor-spec` e a assinatura do dono.
+- [ ] **Decidir quem lê as inscrições na V1.** O painel admin é V1.1; se o formulário
+      gravar no D1 sem painel, a associação para de receber os cadastros que hoje
+      chegam pelo Google Forms. Pergunta P0 para a APPD.
+- [ ] Resolver a contradição entre specs: `consentimentos.usuario_id NOT NULL` versus
+      formulário preenchido sem conta.
+- [ ] Escrever os ADRs 005 a 011, reservados pelas specs (ver `docs/adr/README.md`).
 - [ ] Telas ainda não implementadas: Cadastro, Login, Área do Associado, Crachá,
       Verificação pública e Política de Privacidade. Prompts prontos em
       `docs/prompts-design/`.
@@ -150,5 +156,6 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 
 ## Dívidas conscientes
 
-- `shared/utils/registro.ts` existe como teste de fumaça da fundação; a spec de
-  verdade do número de registro nasce na change `cracha-do-associado` (Fase 3).
+- `shared/utils/registro.ts` existe como teste de fumaça da fundação. A spec do número
+  de registro está em `cadastro-e-login` (é lá que ele é gerado), não em
+  `cracha-do-associado`, que só o exibe.

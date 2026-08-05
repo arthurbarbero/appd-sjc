@@ -2,8 +2,10 @@
  * Número de registro do associado: `APPD-<ano>-<sequencial com 5 dígitos>`.
  * Único e imutável, gerado ao concluir o cadastro.
  *
- * A spec de verdade nasce na change `cracha-do-associado` (Fase 3). Aqui está só
- * a formatação, que é o teste de fumaça da fundação do projeto.
+ * A spec deste número está na change `cadastro-e-login`, não em `cracha-do-associado`:
+ * o número é gerado ao concluir o cadastro, e o crachá apenas o exibe. Aqui está só a
+ * formatação — e a unicidade precisa vir de restrição no banco, nunca de "ler o maior
+ * e somar 1", que quebra com dois cadastros simultâneos.
  */
 export function formatarNumeroRegistro(ano: number, sequencial: number): string {
   if (!Number.isInteger(ano) || ano < 2006) {
