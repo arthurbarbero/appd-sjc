@@ -493,4 +493,29 @@ Duas ressalvas ao revisor, registradas para não virarem trabalho desnecessário
    de apontar para o Google Forms enquanto não houver quem leia as inscrições continua
    valendo como condição de virada.
 
+3. **O conteúdo do site original está autorizado.** O parecer trata o texto do presidente
+   com histórico clínico e as galerias com rostos como bloqueio de publicação (B2 e o item
+   3 de "O que impede a publicação"). **O dono já autorizou**, em 2026-08-05 e de novo em
+   2026-08-06: a APPD liberou marca e conteúdo, e a liberação inclui explicitamente esse
+   texto, os dois retratos e as galerias. **B2 está fechado** e não volta à pauta.
+
 O resto do parecer permanece como está.
+
+---
+
+## Estado do parecer em 2026-08-06
+
+Este documento é o registro do gate de 2026-08-05 e **não é reescrito** — parecer de gate
+não se apaga, se responde. O que aconteceu com os 25 bloqueios está em
+`openspec/changes/modelo-de-dados/tasks.md` (T4) e nas seis specs, todas em v2. Resumo:
+
+- **10 bloqueios** caíram com o contrato de dados e as três decisões do dono
+  (ADR-012, 013 e 014): B5, B6, B7, B10, B11, B12, B16, B17, B20, B22, B23.
+- **9 bloqueios de forma** foram fechados na reescrita: B3, B4, B8, B9, B13, B14, B18,
+  B19, B21, B24.
+- **B1** (chave PIX) e **B2** (conteúdo do site original) já estavam fechados por decisão
+  do dono, registrada acima.
+- **B15** (REQ-42 órfão) deixou de existir junto com a contradição que o gerou.
+
+O gate seguinte roda sobre **sete** changes, com `modelo-de-dados` como contrato de
+referência.

@@ -86,7 +86,8 @@ da página**, do mesmo jeito que uma rota quebrada bloquearia.
   (`--foco-largura`) e folga de 2px (`--foco-folga`). Nenhuma regra `outline: none` pode
   existir sem um indicador substituto de contraste ≥ 3:1 com o fundo adjacente.
 - **REQ-12** [FEITO] Todo alvo de toque interativo (botão, link de navegação, controle de
-  formulário) DEVE medir no mínimo **44 × 44 px CSS** na área clicável, em telas de 320px
+  formulário) DEVE medir no mínimo **44 × 44 px CSS** na área clicável, com **8 px de
+  folga** entre alvos vizinhos — régua única do projeto —, em telas de 320px
   a 1920px de largura. Link dentro de parágrafo corrido está isento (exceção do critério
   2.5.8 do WCAG 2.2).
 - **REQ-13** [PARCIAL] Todo par texto/fundo DEVE atingir **4,5:1** (texto corrente) ou
@@ -533,6 +534,7 @@ Funcionalidade: Alvo de toque
     Quando eu meço a caixa de cada botão, link de navegação, link de rodapé e
       controle de formulário
     Então nenhuma medida de altura ou largura é menor que 44px
+    E a distância entre alvos vizinhos é de no mínimo 8px
     E links dentro de parágrafo corrido ficam de fora da medição
 
     Exemplos:
@@ -862,7 +864,7 @@ Funcionalidade: sitemap.xml e robots.txt
 | REQ-9  | Um h1 por página                | FEITO    | Um h1 e hierarquia     |
 | REQ-10 | Hierarquia de headings          | FEITO    | Um h1 e hierarquia     |
 | REQ-11 | Foco visível de 3px             | FEITO    | Foco e teclado         |
-| REQ-12 | Alvo de 44px                    | FEITO    | Alvo de toque          |
+| REQ-12 | Alvo de 44px com 8px de folga   | FEITO    | Alvo de toque          |
 | REQ-13 | Contraste AA medido             | PARCIAL  | Contraste renderizado  |
 | REQ-14 | Nada só por cor                 | FEITO    | Nada só por cor        |
 | REQ-15 | lang="pt-BR"                    | FEITO    | Idioma e imagem        |

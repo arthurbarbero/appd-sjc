@@ -171,8 +171,9 @@ Cada REQ é verificável por um cenário de aceite. A coluna de rastreabilidade 
   sumário igual à ordem dos `h2`.
 - **REQ-27**: Todo elemento focável DEVE ter foco visível de 3px em `#0f4c93` com 2px de folga,
   e todo o fluxo DEVE ser operável só por teclado, sem armadilha de foco.
-- **REQ-28**: Todo alvo interativo DEVE ter no mínimo 44x44 CSS px, incluindo o rótulo clicável
-  da caixa de seleção de consentimento e o da confirmação de exclusão.
+- **REQ-28**: Todo alvo interativo DEVE ter no mínimo **44 × 44 px CSS com 8 px de folga**
+  entre alvos vizinhos — régua única do projeto —, incluindo o rótulo clicável da caixa de
+  seleção de consentimento.
 - **REQ-29**: Toda mensagem de erro DEVE estar ligada ao campo por `aria-describedby`, ser
   anunciada em região `aria-live="polite"`, e usar texto + ícone — nada sinalizado só por cor.
 - **REQ-30**: Corpo de texto em 17px, nada abaixo de 15px, largura de linha entre 60 e 75
@@ -610,7 +611,7 @@ Esquema do Cenário: Estrutura de títulos e foco em cada tela
     | /privacidade          |
     | /seus-direitos        |
 
-Cenário: Todo alvo interativo tem pelo menos 44 por 44 pixels
+Cenário: Todo alvo interativo tem 44 por 44 pixels e 8 de folga
   Cobre REQ-28
   Dado que uma pessoa abre qualquer uma das cinco telas
   Quando os alvos interativos são medidos

@@ -6,6 +6,10 @@
 - Versão: v2 · Data: 2026-08-06
 - **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
 
+> **v2.1 (2026-08-06)** — a foto volta a ter entrada no formulário de atendimento, como
+> campo opcional, por decisão do dono. Esta change continua dona do componente, do limite e
+> do armazenamento; a outra apenas chama (REQ-8a).
+>
 > **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Esta change
 > passa a ser **dona única de `/area/cracha` e da foto inteira**, incluindo o envio, que
 > antes estava dividido com `cadastro-e-login`
@@ -63,9 +67,19 @@ exatamente três informações: nome, número e situação.
 
 ### Foto do crachá
 
-- **REQ-8**: A foto DEVE ser obrigatória para o crachá existir. Sem foto aceita, as ações de
-  exportação ficam desabilitadas **com o motivo escrito em texto ao lado**, nunca apenas
-  esmaecidas.
+- **REQ-8**: A foto DEVE ser obrigatória **para o crachá existir**, e opcional em todo o
+  resto. Sem foto aceita, as ações de exportação ficam desabilitadas **com o motivo escrito
+  em texto ao lado**, nunca apenas esmaecidas — e nenhuma outra função do site é bloqueada.
+- **REQ-8a**: A foto tem **duas portas de entrada e um caminho só**: o campo opcional do
+  formulário de atendimento (`formulario-atendimento` REQ-7d) e `/area/cracha`. As duas
+  usam **este** componente de recorte e compressão, **este** limite e **esta** interface de
+  armazenamento. Esta change é a dona dos três; a outra chama.
+
+  > **Como isso não vira o B11 de novo.** O bloqueio do gate não era "duas telas enviam
+  > foto" — era **dois limites diferentes**: 5 MB aceitos no cadastro contra 102.400 bytes
+  > exigidos aqui, o que fazia o cadastro gravar o que o crachá recusava. Com um componente
+  > só, o limite é o mesmo por construção, e não há como divergir de novo.
+
 - **REQ-9**: O sistema DEVE aceitar arquivos de origem `image/jpeg`, `image/png` e
   `image/webp` com até **10 MB antes do processamento no navegador**. Outro tipo ou tamanho
   maior é recusado antes de qualquer processamento, com mensagem que diz o que fazer.
@@ -159,7 +173,8 @@ exatamente três informações: nome, número e situação.
   **regra única do projeto** (`modelo-de-dados` REQ-30): `HMAC-SHA-256(ip, segredo)`, com o
   segredo em Cloudflare Secrets, na mesma tabela `envios_recentes` usada pelo formulário, com
   `escopo = 'verificacao'`. Era o bloqueio B21 — mesma categoria de dado, duas regras.
-- **REQ-33**: O sistema DEVE limitar consultas de verificação a 20 por minuto por endereço IP;
+- **REQ-33**: O sistema DEVE limitar consultas de verificação a **20 por minuto por hash
+  de IP** (nunca pelo IP em claro — ver REQ-33a);
   acima disso responde HTTP 429 com mensagem neutra, idêntica para qualquer número.
 - **REQ-34**: A página DEVE exibir, em texto corrido de corpo normal (não em nota de rodapé),
   a declaração explícita do que ela não mostra: endereço, telefone, data de nascimento,
@@ -188,7 +203,8 @@ exatamente três informações: nome, número e situação.
 - **REQ-39**: As duas telas DEVEM atender WCAG 2.2 AA, verificado por axe sem violação de
   **nível A ou AA** — a régua única do projeto, medida pela conformidade WCAG e não pela
   severidade que o axe atribui: um único `h1`, hierarquia de headings sem pulo,
-  contraste AA, foco visível de 3 px com 2 px de folga, alvos ≥ 44 px, corpo ≥ 17 px (nada
+  contraste AA, foco visível de 3 px com 2 px de folga, alvos ≥ 44 px com 8 px de folga
+  entre alvos vizinhos, corpo ≥ 17 px (nada
   abaixo de 15 px), texto não justificado, `prefers-reduced-motion` respeitado.
 - **REQ-40**: Situação do crachá e resultado da verificação DEVEM ser comunicados por ícone
   **e** texto, nunca só por cor.
@@ -312,7 +328,7 @@ Funcionalidade: Envio, recorte e compressão da foto no navegador
     Dado o recortador aberto com uma imagem carregada
     Quando o foco está na área de recorte e são pressionadas as setas e as teclas "+" e "-"
     Então a imagem se move e a aproximação muda sem uso de mouse ou gesto
-    E os botões de aproximar e afastar têm alvo de no mínimo 44 x 44 px
+    E os botões de aproximar e afastar têm alvo de no mínimo 44 x 44 px, com 8 px de folga
 
   Cenário: Foto acima do teto rígido é rejeitada com instrução
     Dado um associado fictício autenticado em /area/cracha

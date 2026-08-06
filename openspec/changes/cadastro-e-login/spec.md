@@ -191,10 +191,14 @@ inválido" e "Erro no formulário" não satisfazem este requisito.
 **data/hora do aceite**. Caixa pré-marcada, aceite implícito por uso ou aceite por
 rolagem não satisfazem este requisito.
 
-**REQ-22** — ~~Foto no cadastro.~~ **Revogado** (ADR-013). Esta change **não recebe
-foto**. A foto é inteiramente de `cracha-do-associado`, com um limite só no projeto:
-400 × 500 px e no máximo 102.400 bytes (`modelo-de-dados` REQ-26). O limite de 5 MB que
-existia aqui criava fotos que o crachá recusava — era o bloqueio B11 do gate.
+**REQ-22** — A foto é **opcional** e NÃO PODE bloquear a criação da conta. Esta change não
+a recebe nem a processa: o campo fica no formulário de atendimento
+(`formulario-atendimento` REQ-7d), e o componente, o limite e o armazenamento são de
+`cracha-do-associado` (REQ-8a de lá).
+
+> O limite de **5 MB** que existia aqui na v1 está revogado. Ele criava fotos que o crachá
+> recusava — 5 MB aceitos no cadastro contra 102.400 bytes exigidos na geração — e era o
+> bloqueio B11 do gate. Agora há um componente só, então o limite é o mesmo por construção.
 
 **REQ-23** — A tela de confirmação é do `formulario-atendimento` (REQ-32 de lá). Desta
 change vem apenas a garantia de que o `numero_registro` exibido é o gravado, e a de que
@@ -300,7 +304,8 @@ verificado por teste automatizado com axe **e** por navegação manual só por t
   `role="alert"` que recebe foco ao aparecer;
 - foco visível de 3px na cor `#0f4c93` com 2px de folga, em todo elemento interativo;
 - ordem de foco igual à ordem visual; nenhuma armadilha de teclado;
-- alvo de toque de no mínimo **44 × 44 px**, incluindo o botão "Mostrar senha", os links
+- alvo de toque de no mínimo **44 × 44 px com 8 px de folga entre alvos vizinhos** —
+  régua única do projeto —, incluindo o botão "Mostrar senha", os links
   de recuperação e as caixas de seleção da exclusão, com rótulo clicável;
 - nada sinalizado só por cor: erro e status têm ícone e texto;
 - elemento desabilitado sempre com o motivo em texto ao lado, nunca só por opacidade;
@@ -311,7 +316,7 @@ verificado por teste automatizado com axe **e** por navegação manual só por t
 - `prefers-reduced-motion` respeitado; nenhum indicador que gire indefinidamente.
 
 **REQ-37** — O botão de mostrar senha DEVE ter rótulo **em texto** ("Mostrar senha" /
-"Ocultar senha"), estado em `aria-pressed` e alvo de 44px. NÃO PODE existir campo de
+"Ocultar senha"), estado em `aria-pressed` e o alvo do REQ-36. NÃO PODE existir campo de
 confirmação de senha.
 
 ---

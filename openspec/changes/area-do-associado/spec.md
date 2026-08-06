@@ -473,7 +473,7 @@ Funcionalidade: Acessibilidade da área do associado
     Dado a largura de viewport de 360 px
     Quando cada uma das cinco telas é renderizada
     Então não há rolagem horizontal
-    E todo alvo interativo tem no mínimo 44 x 44 px
+    E todo alvo interativo tem no mínimo 44 x 44 px, com 8 px de folga entre vizinhos
 ```
 
 ## Rastreabilidade

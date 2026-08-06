@@ -143,8 +143,9 @@ linha de código com banco antes de o gate aprovar.
       faltavam (B19).
 - [ ] **T5**: rodar o `revisor-spec` sobre as sete changes juntas. Reprovou, volta.
       **É o próximo passo.**
-- [ ] B2 — requisito que segure a publicação do texto do presidente e das galerias com
-      rostos de assistidos. Único bloqueio do parecer que a rodada do T4 não fechou.
+- [x] ~~B2 — publicação do texto do presidente e das galerias.~~ **Fechado pelo dono**:
+      a APPD autorizou marca e conteúdo, e a autorização inclui o texto com histórico
+      clínico, os dois retratos e as galerias. Assunto encerrado; não reabrir.
 - [ ] Escrever os ADRs 005, 006, 008 a 011 (ver `docs/adr/README.md`). O 007 foi
       liberado: o protocolo `ATD-` perdeu a função com o cadastro embutido.
 - [ ] **Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha"

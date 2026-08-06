@@ -186,10 +186,14 @@ domínio da associação**. Fonte: `docs/pendencias-appd.md`.
       vier, o REQ-26 mantém a tela dizendo que nada foi enviado. _Dono_: APPD.
 - [ ] **B.3 Qual telefone é o WhatsApp oficial** (P1-7). Seis números circulam com rótulo
       inconsistente. _Dono_: APPD.
-- [ ] **B.4 Confirmar as fotos das pessoas em `/sobre`** — que a mulher é a fundadora e o
-      homem é o presidente é inferência, não informação. _Dono_: APPD.
-- [ ] **B.5 Autorização por escrito do texto sobre o presidente** com histórico clínico
-      (risco R2, dado sensível do Art. 11 da LGPD). _Dono_: APPD.
+- [x] **B.4 Confirmar as fotos das pessoas em `/sobre`** — **confirmado pelo dono em
+      2026-08-05**: a mulher é a fundadora Maria Claudete, o homem é o presidente Luiz
+      Carlos.
+- [x] **B.5 Autorização do conteúdo do site original** — **dada pelo dono**, em 2026-08-05
+      e reafirmada em 2026-08-06: **todo** conteúdo do site atual pode ser reaproveitado,
+      incluindo o texto sobre o presidente com histórico clínico, os dois retratos e as
+      galerias com fotos de atividades. A associação autorizou o uso da marca e do
+      conteúdo. Decisão registrada, assunto encerrado.
 - [ ] **B.6 Catálogo de serviços real em 2026** (P0-1) — enquanto não vier, o selo "A
       confirmar" segura. _Dono_: APPD.
 - [ ] **B.7 Logo em vetor** (P0-3) — o bitmap atual é provisório. _Dono_: APPD.

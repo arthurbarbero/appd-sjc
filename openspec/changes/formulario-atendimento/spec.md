@@ -9,6 +9,9 @@
   esta change não cria coluna nenhuma
 - Desenho aprovado: [prompt do formulário](../../../docs/prompts-design/formulario.md)
 
+> **v2.1 (2026-08-06)** — foto opcional de volta ao formulário, por decisão do dono, com o
+> componente e o limite únicos de `cracha-do-associado` (REQ-7d a REQ-7f).
+>
 > **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
 > o formulário passa a criar a conta ([ADR-012](../../../docs/adr/adr-012-cadastro-embutido-no-formulario.md)),
 > saem o protocolo `ATD-`, a coluna `possivel_duplicata` e as colunas duplicadas de
@@ -45,6 +48,7 @@ linha de planilha que ela nunca mais alcança.
 | D8  | Nenhum conteúdo de campo do formulário vai para log            | não      |
 | D9  | 3 campos acrescentados aos 15: e-mail, CPF e senha             | ADR-012  |
 | D10 | Um status só: `Interesse registrado`. Não há fila nem vaga     | ADR-014  |
+| D11 | Foto opcional no formulário, com o componente do crachá        | ADR-013  |
 
 **Sobre o D3** — o protocolo `ATD-<ano>-<sequencial>` existia para ancorar o aceite do
 termo de quem preenchesse sem conta. Com o D9, toda inscrição pertence a um usuário e o
@@ -100,16 +104,29 @@ não vira alteração unilateral.
 - **REQ-7** — O CPF DEVE ser validado pelos dígitos verificadores, não só pelo
   comprimento, e persistido só com dígitos. CPF já cadastrado DEVE ser recusado com 422 e
   mensagem que diga que essa pessoa já tem cadastro.
-- **REQ-7a** — A regra da senha é a do `cadastro-e-login` **REQ-9**, que é a dona: mínimo
-  de **10 caracteres**, sem exigência de símbolo, maiúscula ou dígito, sem recusar
-  espaços e sem máximo abaixo de 200. Esta change **não repete o número** — importa a
-  regra do mesmo schema Zod. O hash também é de lá (scrypt, ADR-002 e ADR-005).
+- **REQ-7a** — A regra da senha é a do `cadastro-e-login` **REQ-9**, que é a dona: sem
+  exigência de símbolo, maiúscula ou dígito, sem recusar espaços, e com o comprimento
+  mínimo definido lá. Esta change **não repete o número** — importa a regra do mesmo
+  schema Zod. O hash também é de lá (scrypt, ADR-002 e ADR-005).
 - **REQ-7b** — Nenhuma confirmação por e-mail bloqueia o envio. A pessoa termina o
   cadastro e já está dentro; verificação de e-mail, se um dia existir, é posterior e não
   condiciona o atendimento.
 - **REQ-7c** — Uma conta é de **uma pessoa atendida** (ADR-012). Quem cuida de duas
   pessoas cria dois cadastros, com dois e-mails e dois CPFs. A tela DEVE dizer isso no
   bloco do REQ-5, para a pessoa não descobrir no segundo cadastro.
+- **REQ-7d** — O formulário DEVE ter um campo de **foto, opcional**, que NÃO PODE bloquear
+  o envio em hipótese alguma. Quem não enviar agora envia depois em `/area/cracha`, e a
+  tela DEVE dizer isso ao lado do campo.
+- **REQ-7e** — A foto usa **o mesmo componente de recorte e compressão** de
+  `cracha-do-associado` (REQ-10 a REQ-12 de lá): arquivo de origem até 10 MB, recorte 4:5
+  no navegador, JPEG de 400 × 500 px e teto rígido de 102.400 bytes no que sobe. **Um
+  componente, um limite, dois lugares de entrada.** Esta change não reimplementa recorte,
+  não define limite próprio e não fala com a tabela `fotos` — chama a interface
+  `ArmazenamentoFoto` daquela change.
+- **REQ-7f** — Falha ao processar ou gravar a foto **não derruba o cadastro**: a conta, a
+  inscrição e o aceite são gravados assim mesmo, e a tela de confirmação diz que a foto não
+  entrou e oferece o caminho de enviá-la depois. A foto é a única parte do envio que fica
+  **fora** da transação do REQ-1, justamente para não custar o cadastro inteiro.
 
 ### Validação espelhada
 
@@ -430,6 +447,27 @@ Funcionalidade: Envio da inscrição de atendimento
     Então a resposta é 500 com mensagem genérica
     E não existe linha nenhuma em "usuarios"
     E não existe linha nenhuma em "inscricoes_atendimento"
+
+  Cenário: Sem foto, o cadastro é concluído normalmente
+    Dado que preenchi o formulário válido e não escolhi foto nenhuma
+    Quando envio
+    Então a resposta é 201
+    E nenhuma linha existe em "fotos" para essa conta
+    E a confirmação oferece o caminho de enviar a foto depois, em "/area/cracha"
+
+  Cenário: Com foto, sobe o que o componente do crachá produziu
+    Dado que escolhi uma imagem de 6 MB e ajustei o recorte
+    Quando envio
+    Então o que chega ao servidor tem 400 por 500 pixels
+    E no máximo 102.400 bytes
+    E o servidor revalida os bytes antes de gravar
+
+  Cenário: Falha na foto não custa o cadastro
+    Dado um formulário válido com foto
+    E que a gravação da foto falha
+    Quando envio
+    Então a conta, a inscrição e o aceite continuam gravados
+    E a confirmação avisa que a foto não entrou e diz como enviar depois
 
   Cenário: A senha exige comprimento e nada mais
     Quando envio um formulário com a senha "abcdefgh"
