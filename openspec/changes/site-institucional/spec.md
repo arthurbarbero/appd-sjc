@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Entregar as 18 páginas públicas sem banco de dados do site da APPD-SJC — informação
+Entregar as 17 páginas públicas sem banco de dados do site da APPD-SJC — informação
 encontrável em no máximo dois cliques, acessível por teclado e leitor de tela em nível
 WCAG 2.2 AA verificado por ferramenta, e sem nenhuma afirmação apresentada como fato sem
 verificação.
@@ -30,11 +30,19 @@ verde. O gate de validação (`validacao-aceite`) é item a item.
 ## A. Estrutura, rotas e navegação
 
 - **REQ-1** [FEITO] O site DEVE responder HTTP 200 nas 12 rotas públicas desta change,
-  que renderizam 18 páginas: `/`, `/atendimento`, `/atendimento/<slug>` para os 5 slugs
+  que renderizam **17 URLs**: `/`, `/atendimento`, `/atendimento/<slug>` para os 5 slugs
   `fisioterapia`, `psicologia`, `servico-social`, `orientacoes-gerais`,
   `emprestimo-equipamentos`; `/projetos`, `/projetos/<slug>` para os 4 slugs
   `bocha-paralimpica`, `mao-na-roda`, `artesao-da-inclusao`, `informatica-nota-10`;
   `/doar`, `/contato`, `/sobre`, `/regimento`, `/comtrad`.
+
+  > **A contagem é 17 URLs públicas + a 404**, e essa frase é a única válida no projeto.
+  > A v1 dizia "18 páginas" e listava 17 caminhos; três esquemas de cenário diziam "as 18
+  > páginas mais a 404", somando a 404 duas vezes; e o REQ-33 mandava o `sitemap.xml` trazer
+  > "as 18 URLs", o que colocaria a página de erro no sitemap. Quem fosse escrever o teste
+  > teria de adivinhar entre 17 e 18 (bloqueio B3 do gate). **A 404 não é URL pública:** não
+  > entra no sitemap, e nas auditorias entra como item declarado à parte.
+
 - **REQ-2** [FEITO] O menu principal DEVE ter exatamente 6 itens, nesta ordem: Início,
   Atendimento, Projetos, Doar, Sobre nós, Contato. O item correspondente à rota atual
   DEVE ter `aria-current="page"`; nenhum outro item pode ter.
@@ -69,7 +77,7 @@ verde. O gate de validação (`validacao-aceite`) é item a item.
 Esta seção não é apêndice de qualidade. Um requisito reprovado aqui **bloqueia a entrega
 da página**, do mesmo jeito que uma rota quebrada bloquearia.
 
-- **REQ-9** [FEITO] Cada uma das 18 páginas DEVE ter **exatamente um** `h1`, com texto
+- **REQ-9** [FEITO] Cada uma das 17 páginas, mais a 404, DEVE ter **exatamente um** `h1`, com texto
   não vazio, e ele DEVE nomear o assunto daquela página (não o nome do site em todas).
 - **REQ-10** [FEITO] A hierarquia de headings DEVE ser sequencial: nenhum nível pulado
   para baixo (`h1` → `h3` sem `h2` é falha), e nenhum heading vazio ou usado só para dar
@@ -108,7 +116,9 @@ da página**, do mesmo jeito que uma rota quebrada bloquearia.
 - **REQ-20** [FEITO] Com `prefers-reduced-motion: reduce`, nenhuma animação ou transição
   com duração maior que 0 pode ser executada.
 - **REQ-21** [PENDENTE] Uma auditoria automatizada com **axe-core** DEVE rodar sobre as
-  18 páginas e reportar **zero** violação de impacto `serious` ou `critical`, e o passo
+  17 páginas e a 404 e reportar **zero** violação de **nível A ou AA** — régua única do
+  projeto, definida **uma vez** na configuração do axe no CI e importada pelas outras cinco
+  changes, nunca repetida em spec (bloqueio B24) —, e o passo
   DEVE ser bloqueante no CI. **Não existe nenhum teste de acessibilidade no projeto
   hoje** — `CLAUDE.md` promete "Vitest + axe" e o `package.json` não tem axe. Violações
   `moderate`/`minor` viram lista com dono e prazo, não bloqueiam.
@@ -171,7 +181,7 @@ da página**, do mesmo jeito que uma rota quebrada bloquearia.
   por decisão registrada em `docs/arquitetura-informacao.md`. **Nada disso está
   implementado.**
 
-- **REQ-33** [PENDENTE] O site DEVE servir `sitemap.xml` com as 18 URLs públicas desta
+- **REQ-33** [PENDENTE] O site DEVE servir `sitemap.xml` com as **17** URLs públicas desta
   change e **nenhuma** URL de área autenticada, de verificação de crachá ou de
   formulário com dado de pessoa.
 - **REQ-34** [PARCIAL] O `robots.txt` DEVE proibir a indexação das rotas que exponham
@@ -430,9 +440,27 @@ Funcionalidade: Um h1 por página e hierarquia de headings
     Quando eu conto os elementos h1
     Então o total é exatamente 1
     E o texto do h1 não está vazio
-    E o texto do h1 não é igual ao das outras 17 páginas
+    E o texto do h1 não é igual ao das outras 16 páginas
 
-    Exemplos: as 18 páginas do REQ-1 mais a 404
+      | rota                                |
+      | /                                   |
+      | /atendimento                        |
+      | /atendimento/fisioterapia           |
+      | /atendimento/psicologia             |
+      | /atendimento/servico-social         |
+      | /atendimento/orientacoes-gerais     |
+      | /atendimento/emprestimo-equipamentos |
+      | /projetos                           |
+      | /projetos/bocha-paralimpica         |
+      | /projetos/mao-na-roda               |
+      | /projetos/artesao-da-inclusao       |
+      | /projetos/informatica-nota-10       |
+      | /doar                               |
+      | /contato                            |
+      | /sobre                              |
+      | /regimento                          |
+      | /comtrad                            |
+      | /uma-rota-que-nao-existe            |
 
   Esquema do Cenário: Nenhum nível de heading é pulado
     Dado que carrego "<rota>"
@@ -441,7 +469,25 @@ Funcionalidade: Um h1 por página e hierarquia de headings
     E nenhum heading sobe mais de 1 nível em relação ao anterior
     E nenhum heading tem texto vazio
 
-    Exemplos: as 18 páginas do REQ-1 mais a 404
+      | rota                                |
+      | /                                   |
+      | /atendimento                        |
+      | /atendimento/fisioterapia           |
+      | /atendimento/psicologia             |
+      | /atendimento/servico-social         |
+      | /atendimento/orientacoes-gerais     |
+      | /atendimento/emprestimo-equipamentos |
+      | /projetos                           |
+      | /projetos/bocha-paralimpica         |
+      | /projetos/mao-na-roda               |
+      | /projetos/artesao-da-inclusao       |
+      | /projetos/informatica-nota-10       |
+      | /doar                               |
+      | /contato                            |
+      | /sobre                              |
+      | /regimento                          |
+      | /comtrad                            |
+      | /uma-rota-que-nao-existe            |
 ```
 
 ```gherkin
@@ -501,14 +547,14 @@ Funcionalidade: Contraste medido no renderizado
   Cobre REQ-13 (PARCIAL)
 
   Cenário: Texto corrente atinge 4,5:1 na cor efetivamente pintada
-    Dado que carrego cada uma das 18 páginas no navegador
+    Dado que carrego cada uma das 17 páginas e a 404 no navegador
     Quando eu calculo o contraste de cada nó de texto usando a cor computada e a cor
       de fundo efetiva do ancestral que pinta
     Então nenhum nó de texto com fonte menor que 24px fica abaixo de 4,5:1
     E nenhum nó com fonte de 24px ou mais fica abaixo de 3:1
 
   Cenário: Componente, borda e foco atingem 3:1
-    Dado que carrego cada uma das 18 páginas
+    Dado que carrego cada uma das 17 páginas e a 404
     Quando eu meço borda de campo, borda de cartão, anel de foco e ícone informativo
     Então nenhum fica abaixo de 3:1 contra o fundo adjacente
 
@@ -550,27 +596,45 @@ Funcionalidade: Idioma, imagem, tamanho de texto e movimento
     Dado que requisito "<rota>"
     Então o elemento html tem lang="pt-BR"
 
-    Exemplos: as 18 páginas do REQ-1 mais a 404 e uma rota inexistente
+      | rota                                |
+      | /                                   |
+      | /atendimento                        |
+      | /atendimento/fisioterapia           |
+      | /atendimento/psicologia             |
+      | /atendimento/servico-social         |
+      | /atendimento/orientacoes-gerais     |
+      | /atendimento/emprestimo-equipamentos |
+      | /projetos                           |
+      | /projetos/bocha-paralimpica         |
+      | /projetos/mao-na-roda               |
+      | /projetos/artesao-da-inclusao       |
+      | /projetos/informatica-nota-10       |
+      | /doar                               |
+      | /contato                            |
+      | /sobre                              |
+      | /regimento                          |
+      | /comtrad                            |
+      | /uma-rota-que-nao-existe            |
 
   Cenário: Toda imagem tem alt e a decorativa é silenciosa
-    Dado que carrego as 18 páginas
+    Dado que carrego as 17 páginas e a 404
     Quando eu inspeciono cada elemento img
     Então todos têm o atributo alt presente
     E nenhuma imagem informativa tem alt vazio
     E nenhum alt repete literalmente a legenda adjacente
 
   Cenário: Texto corrente não fica abaixo de 17px
-    Dado que carrego as 18 páginas com a configuração padrão do navegador
+    Dado que carrego as 17 páginas e a 404 com a configuração padrão do navegador
     Quando eu leio o font-size computado dos parágrafos de conteúdo
     Então nenhum é menor que 17px
 
   Cenário: Reflow em 320px sem rolagem horizontal
     Dado que a viewport tem 320px de largura
-    Quando eu carrego cada uma das 18 páginas
+    Quando eu carrego cada uma das 17 páginas e a 404
     Então a largura de rolagem do documento não excede a largura da viewport
     E nenhum conteúdo ou função fica inacessível
 
-  Cenário: Zoom de 200% preserva conteúdo e função
+  Cenário: [manual] Zoom de 200% preserva conteúdo e função
     Dado que aplico zoom de 200% em viewport de 1280px
     Quando eu percorro a home
     Então todo conteúdo continua legível e todo controle continua operável
@@ -588,13 +652,15 @@ Funcionalidade: Auditoria automatizada de acessibilidade
   Cenário: axe não acusa violação séria ou crítica
     Dado que o site está servido no build de produção
     Quando eu rodo axe-core com o conjunto de regras wcag2a, wcag2aa, wcag21aa e
-      wcag22aa em cada uma das 18 páginas
-    Então o número de violações de impacto "critical" é 0
-    E o número de violações de impacto "serious" é 0
+      wcag22aa em cada uma das 17 páginas e na 404
+    E o relatório separa, em lista com dono e prazo, as violações de severidade
+      "moderate" ou "minor" que estão fora de A e AA — elas não bloqueiam
+    E o número de violações de nível A ou AA é 0
+    # Régua única do projeto, na configuração do axe no CI, nunca repetida por change.
     E o relatório é gravado como artefato do CI
 
   Cenário: A auditoria é bloqueante no CI
-    Dado que uma violação de impacto "critical" é introduzida de propósito
+    Dado que uma violação de nível AA é introduzida de propósito
     Quando o CI roda no pull request
     Então o job de acessibilidade falha
     E o merge fica bloqueado
@@ -650,7 +716,7 @@ Funcionalidade: Nada apresentado como fato sem verificação
     E o selo está adjacente à afirmação que ele qualifica
 
   Cenário: Telefone publicado bate com a fonte
-    Dado que carrego todas as 18 páginas
+    Dado que carrego todas as 17 páginas e a 404
     Quando eu coleto todos os links "tel:"
     Então todo número existe em ASSOCIACAO.telefones
     E nenhum número aparece fora dessa lista
@@ -662,13 +728,13 @@ Funcionalidade: Nada apresentado como fato sem verificação
     E o payload do QR Code decodifica para a mesma chave, com CRC válido
 
   Cenário: Nenhuma URL contém caractere invisível
-    Dado que carrego todas as 18 páginas
+    Dado que carrego todas as 17 páginas e a 404
     Quando eu inspeciono o href de todos os links
     Então nenhum contém caractere de controle bidirecional (U+202A a U+202E)
     E nenhum aponta para "/edit" de formulário externo
 
   Cenário: Conteúdo vencido não está no ar
-    Dado que carrego todas as 18 páginas
+    Dado que carrego todas as 17 páginas e a 404
     Quando eu procuro por datas de evento
     Então nenhuma página anuncia como aberto um evento com data anterior a hoje
 
@@ -686,7 +752,7 @@ Funcionalidade: Peso e estabilidade da página
   Cobre REQ-28, REQ-29, REQ-30, REQ-31
 
   Cenário: Toda imagem de conteúdo é WebP
-    Dado que carrego as 18 páginas
+    Dado que carrego as 17 páginas e a 404
     Quando eu listo o src de cada img de conteúdo
     Então todos terminam em ".webp"
 
@@ -702,12 +768,12 @@ Funcionalidade: Peso e estabilidade da página
     E rota com galeria fica em no máximo 1 MB
 
   Cenário: Layout não pula durante o carregamento
-    Dado que carrego cada uma das 18 páginas em conexão limitada a 3G rápido
+    Dado que carrego cada uma das 17 páginas em conexão limitada a 3G rápido
     Quando eu meço o deslocamento cumulativo de layout
     Então o CLS de cada página é no máximo 0,1
 
   Cenário: Nenhuma requisição sai para host de terceiro
-    Dado que carrego as 18 páginas com o registro de rede aberto
+    Dado que carrego as 17 páginas com o registro de rede aberto
     Quando eu listo os domínios requisitados
     Então todos são a própria origem do site
 ```
@@ -769,7 +835,7 @@ Funcionalidade: sitemap.xml e robots.txt
     E ele proíbe "/area/" e "/verificar/"
 
   Cenário: Cada página tem título único
-    Dado que carrego as 18 páginas
+    Dado que carrego as 17 páginas e a 404
     Quando eu coleto o elemento title de cada uma
     Então não existem dois títulos iguais
     E cada título identifica a página e a associação

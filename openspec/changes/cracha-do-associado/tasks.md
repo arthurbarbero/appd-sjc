@@ -6,7 +6,7 @@ sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Bar
 
 ## Fatia 0 — Gates que destravam o resto
 
-- [ ] **T0.1 — ADR de armazenamento de foto.** Escrever `docs/adr/adr-003-foto-como-blob-no-d1.md`
+- [x] **T0.1 — ADR de armazenamento de foto.** Já escrito: `docs/adr/adr-003-foto-do-cracha-como-blob-no-d1.md`
       com contexto (R2 exige método de pagamento, ADR-001 já aponta a lacuna), decisão (BLOB no
       D1 atrás de `ArmazenamentoFoto`), alternativas (R2, Cloudflare Images, base64 em texto,
       hospedagem doada) e consequências, incluindo os números de capacidade do REQ-37.

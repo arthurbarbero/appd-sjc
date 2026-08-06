@@ -96,20 +96,33 @@ Concluída como **código**; a prova automatizada é a Fatia 6 e ainda não exis
       _Aceite_: os 3 cenários de "Contraste medido no renderizado" passam; a planilha de
       pares medidos fica versionada em `docs/relatorios/`. _Dono_: Arthur.
 - [ ] **5.2 Auditoria de acessibilidade automatizada com axe** (REQ-21).
-      Adicionar `axe-core` + executor de navegador, rodar sobre as 18 páginas **e** sobre
-      dois estados (formulário de contato submetido vazio, menu mobile aberto), e tornar o
-      passo bloqueante no CI. Hoje o `CLAUDE.md` promete "Vitest + axe" e o `package.json`
-      **não tem axe** — a promessa está descoberta.
-      _Aceite_: os 3 cenários de "Auditoria automatizada" passam, com zero violação
-      `serious`/`critical`, e o CI falha quando uma violação é introduzida de propósito.
-      _Dono_: Arthur.
+      Adicionar `axe-core` + executor de navegador, rodar sobre as 17 páginas e a 404 e
+      sobre dois estados (formulário de contato submetido vazio, menu mobile aberto), e
+      tornar o passo bloqueante no CI. Hoje o `CLAUDE.md` promete "Vitest + axe" e o
+      `package.json` **não tem axe** — a promessa está descoberta.
+      **Esta task é a dona da régua de acessibilidade do projeto inteiro**: a configuração
+      do axe fica num arquivo só, com
+      `runOnly: ['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']`, e falha em qualquer
+      violação desses níveis; as outras cinco changes importam essa configuração, nenhuma
+      repete o número e nenhuma redefine o critério.
+      _Por quê (bloqueio B24 do gate)_: três changes exigiam "zero violação de impacto
+      `serious`/`critical`" e três exigiam "zero violação de nível A ou AA" — eixos
+      diferentes. Severidade é o peso que o axe atribui; nível é a conformidade WCAG. Uma
+      violação de AA com impacto `moderate`, como um `aria-labelledby` quebrado, reprovava
+      em três changes e passava em três, no mesmo site, para o mesmo público. O `CLAUDE.md`
+      diz que WCAG 2.2 AA é o produto, e a régua que mede isso é a de nível. Violação de
+      severidade `moderate`/`minor` fora de A/AA vira lista com dono e prazo, não bloqueio.
+      _Aceite_: os 3 cenários de "Auditoria automatizada" passam, com zero violação de
+      nível A ou AA; o CI falha quando uma violação é introduzida de propósito; e uma busca
+      no repositório não encontra nenhuma outra definição de critério de axe fora deste
+      arquivo. _Dono_: Arthur.
 - [ ] **5.3 Teste ponta a ponta do caminho crítico** (REQ-22).
       Um fluxo por público, operado só pelo teclado, mais o caso de borda da cópia do PIX
       sem `navigator.clipboard`. Hoje o projeto tem **4 testes unitários de um formatador
       de número de registro** e nada de fluxo.
       _Aceite_: os 4 cenários de "Caminho crítico ponta a ponta" passam no CI.
       _Dono_: Arthur.
-- [ ] **5.4 Teste estrutural das 18 páginas** — um `h1`, hierarquia sem salto, `alt` em
+- [ ] **5.4 Teste estrutural das 17 páginas e da 404** — um `h1`, hierarquia sem salto, `alt` em
       toda imagem, `title` único, nenhum `tel:` fora de `ASSOCIACAO.telefones`, nenhum
       caractere U+202A–U+202E em href. É barato e pega regressão de conteúdo.
       _Aceite_: os esquemas de cenário de "Um h1 e hierarquia" e de "Nada apresentado como
@@ -146,12 +159,12 @@ Concluída como **código**; a prova automatizada é a Fatia 6 e ainda não exis
       pular a Fase 3 para ter o site rodando, com o custo assumido (35 requisitos escritos
       depois do código, nenhum provado por teste na data da spec) e a condição de reversão
       (as changes com banco não repetem isso).
-      _Aceite_: `docs/adr/adr-003-*.md` com contexto, decisão, alternativas e
+      _Aceite_: `docs/adr/adr-010-*.md` com contexto, decisão, alternativas e
       consequências, dono e data. _Dono_: Arthur.
 - [ ] **7.2 ADR-011: publicar com marcação "A confirmar"** — registrar a decisão de pôr as
       9 landing pages no ar com selo em vez de esperar a revisão da associação, e a
       condição de saída (a APPD revisa antes de ir ao domínio dela).
-      _Aceite_: `docs/adr/adr-004-*.md` completo. _Dono_: Arthur.
+      _Aceite_: `docs/adr/adr-011-*.md` completo. _Dono_: Arthur.
 - [ ] **7.3 Gate de validação item a item** — rodar `validacao-aceite` contra os 35
       requisitos e emitir parecer.
       _Aceite_: nenhum requisito em [PARCIAL] ou [PENDENTE]; todo cenário com veredito

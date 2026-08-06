@@ -43,33 +43,39 @@ T5 é o gate. **Nenhuma task de outra change começa antes de T5 aprovar.**
 
 Cada item é edição de spec, não de código. Ver a tabela de impacto na `proposal.md`.
 
-- [ ] **T4.1** — `formulario-atendimento`: acrescentar e-mail, CPF e senha; remover
+- [x] **T4.1** — `formulario-atendimento`: acrescentar e-mail, CPF e senha; remover
       `protocolo`, `possivel_duplicata` e as colunas de consentimento; trocar o
       vocabulário de status; reescrever o texto da tela de confirmação (ADR-014);
       remover o REQ-42 órfão, que deixou de existir com a contradição resolvida.
-- [ ] **T4.2** — `cadastro-e-login`: remover REQ-22 (foto) e REQ-30 a REQ-35 (telas da
+- [x] **T4.2** — `cadastro-e-login`: remover REQ-22 (foto) e REQ-30 a REQ-35 (telas da
       área) e as tasks T-10 e T-11; corrigir a rastreabilidade errada apontada no
       parecer (REQ-25/26 → REQ-28/29; REQ-30 → REQ-32); manter a emissão do número.
-- [ ] **T4.3** — `consentimento-e-privacidade`: `usuario_id` NOT NULL passa a exequível;
+- [x] **T4.3** — `consentimento-e-privacidade`: `usuario_id` NOT NULL passa a exequível;
       ceder o fluxo de exclusão para `area-do-associado`, mantendo só o conteúdo que a
       tela exibe; resolver a ambiguidade do REQ-11 ("exigir" × "pedir", bloqueio B9).
-- [ ] **T4.4** — `cracha-do-associado`: remover REQ-5 (sequência consecutiva) e a T1.2
+- [x] **T4.4** — `cracha-do-associado`: remover REQ-5 (sequência consecutiva) e a T1.2
       (ler o maior e somar 1); assumir a posse da foto e de `/area/cracha`; ajustar o
       REQ-28 para o caso de conta excluída (REQ-29 daqui); escrever a seção de
       Definition of Ready que falta (B19).
-- [ ] **T4.5** — `area-do-associado`: assumir `/area/excluir` com o contrato do REQ-28;
+- [x] **T4.5** — `area-do-associado`: assumir `/area/excluir` com o contrato do REQ-28;
       acrescentar a edição da inscrição (ADR-014); remover `/area/cracha`; declarar a
       dependência que faltava; escrever a Definition of Ready (B19).
-- [ ] **T4.6** — `site-institucional`: sem impacto de dado, mas fechar os itens de forma
+- [x] **T4.6** — `site-institucional`: sem impacto de dado, mas fechar os itens de forma
       do parecer — contagem "17 URLs públicas + a 404" (B3), ADRs 010 e 011 nas tasks
       (B4), os três blocos `Exemplos:` em prosa e o critério de zoom marcado `[manual]`.
-- [ ] **T4.7** — Transversal: **uma régua só de acessibilidade** (B24) — zero violação de
+- [x] **T4.7** — Transversal: **uma régua só de acessibilidade** (B24) — zero violação de
       nível **A ou AA** no axe, escrita uma vez na configuração do CI e referenciada
       pelas changes, nunca repetida. Uniformizar o alvo de toque nas seis:
       `≥ 44 px` com `8 px` de folga entre alvos.
-- [ ] **T4.8** — Transversal: fechar o furo de enumeração do REQ-26 de `cadastro-e-login`
+- [x] **T4.8** — Transversal: fechar o furo de enumeração do REQ-26 de `cadastro-e-login`
       (B13) — o contador de tentativas vale para a chave digitada, exista conta ou não, e
       a tela de bloqueio é byte a byte idêntica nos dois casos.
+
+> **T4 concluída em 2026-08-06.** As seis changes foram reescritas contra este contrato,
+> em quatro commits. Duas contradições novas apareceram durante a reescrita e foram
+> corrigidas na hora: o mínimo da senha divergia entre duas changes (8 × 10), e os cenários
+> que fixavam a redação do vazamento de e-mail blindavam uma decisão que o dono ainda não
+> tomou — ficaram marcados como condicionais.
 
 ## T5 — Gate
 

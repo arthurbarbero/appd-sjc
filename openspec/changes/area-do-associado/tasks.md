@@ -18,9 +18,10 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       inscrição, sem foto, carregando, exclusão), com handoff bundle. **Aceite**: bundle
       entregue e checklist de aceite visual do prompt de design todo marcado. **Bloqueia toda
       tela.**
-- [ ] **T0.5 — Vocabulário de status alinhado** com `formulario-atendimento`: "Na fila", "Em
-      atendimento", "Encerrada". **Aceite**: valores idênticos nas duas specs, ou esta spec
-      atualizada antes do código.
+- [x] **T0.5 — Vocabulário de status alinhado** com `formulario-atendimento`. **Resolvido
+      em 2026-08-06 (ADR-014)**: há um único valor, `Interesse registrado`. Os três valores
+      anteriores descreviam uma fila que a APPD não opera, e dois deles eram inalcançáveis
+      na V1 — o cenário do painel completo só passava com fixture.
 
 ## Fatia 1 — Acesso e casca da área
 

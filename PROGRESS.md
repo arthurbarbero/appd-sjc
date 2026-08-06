@@ -7,11 +7,12 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 **Site institucional rodando localmente** (`npm run dev`, http://localhost:3000), com
 12 rotas públicas em Nuxt sobre o design system v2.
 
-A Fase 3 reprovou no gate (25 bloqueios) e está sendo destravada: o dono decidiu as
-três questões de fundo em 2026-08-06 (ADR-012, 013 e 014) e a change
-`modelo-de-dados` foi escrita como contrato único de dado. **Próximo passo: T4 da
-`modelo-de-dados`** — reescrever as seis changes contra esse contrato e rodar o gate
-de novo sobre as sete. Nenhuma linha de código com banco antes disso.
+A Fase 3 reprovou no gate (25 bloqueios) e foi destravada: o dono decidiu as três
+questões de fundo em 2026-08-06 (ADR-012, 013 e 014), a change `modelo-de-dados` virou o
+contrato único de dado, e **as seis changes foram reescritas contra ele** (T4 concluída).
+
+**Próximo passo: T5** — rodar o `revisor-spec` sobre as sete changes juntas. Nenhuma
+linha de código com banco antes de o gate aprovar.
 
 ## Decisões tomadas
 
@@ -133,13 +134,17 @@ de novo sobre as sete. Nenhuma linha de código com banco antes disso.
       Resolvida por construção no ADR-012: toda inscrição pertence a uma conta.
 - [x] Change `modelo-de-dados` escrita — contrato único de tabela, coluna e chave.
       Resolve 10 dos 25 bloqueios do parecer.
-- [ ] **T4 da `modelo-de-dados`**: reescrever as seis changes contra o contrato. É o
-      trabalho ativo.
+- [x] **T4 da `modelo-de-dados`** — as seis changes reescritas contra o contrato, mais os
+      dois itens transversais. Todas viraram v2.
+- [x] Bloqueios de forma do parecer fechados: régua única de acessibilidade (B24),
+      enumeração no bloqueio por tentativas (B13), contagem "17 URLs + a 404" (B3),
+      ADRs renumerados nas tasks (B4, B8, B14, B18), `Exemplos:` em prosa virando tabela,
+      zoom de 200% marcado `[manual]`, e as duas seções de Definition of Ready que
+      faltavam (B19).
 - [ ] **T5**: rodar o `revisor-spec` sobre as sete changes juntas. Reprovou, volta.
-- [ ] Resolver os bloqueios restantes do parecer que não são de dado — régua única de
-      acessibilidade (B24), enumeração no bloqueio por tentativas (B13), contagem
-      17/18 (B3), requisito que segure a publicação do texto do presidente e das
-      galerias (B2).
+      **É o próximo passo.**
+- [ ] B2 — requisito que segure a publicação do texto do presidente e das galerias com
+      rostos de assistidos. Único bloqueio do parecer que a rodada do T4 não fechou.
 - [ ] Escrever os ADRs 005, 006, 008 a 011 (ver `docs/adr/README.md`). O 007 foi
       liberado: o protocolo `ATD-` perdeu a função com o cadastro embutido.
 - [ ] **Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha"
