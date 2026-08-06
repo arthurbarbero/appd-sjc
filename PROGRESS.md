@@ -11,8 +11,13 @@ A Fase 3 reprovou no gate (25 bloqueios) e foi destravada: o dono decidiu as tr�
 questões de fundo em 2026-08-06 (ADR-012, 013 e 014), a change `modelo-de-dados` virou o
 contrato único de dado, e **as seis changes foram reescritas contra ele** (T4 concluída).
 
-**Próximo passo: T5** — rodar o `revisor-spec` sobre as sete changes juntas. Nenhuma
-linha de código com banco antes de o gate aprovar.
+O **T5 rodou** (`openspec/PARECER-GATE-T5.md`): 4 bloqueios contra os 25 do anterior, os
+quatro corrigidos no mesmo dia. Veredito READY, **com ressalva declarada** — quem revisou
+foi quem escreveu, então vale para varredura mecânica, não para leitura de mérito.
+
+**Próximo passo: T1 a T3 da `modelo-de-dados`** — schema Drizzle, migration versionada e
+os 13 testes de restrição contra o D1 local. É a primeira linha de código com banco.
+Antes dela, rodar um revisor independente sobre `modelo-de-dados`.
 
 ## Decisões tomadas
 
@@ -141,8 +146,14 @@ linha de código com banco antes de o gate aprovar.
       ADRs renumerados nas tasks (B4, B8, B14, B18), `Exemplos:` em prosa virando tabela,
       zoom de 200% marcado `[manual]`, e as duas seções de Definition of Ready que
       faltavam (B19).
-- [ ] **T5**: rodar o `revisor-spec` sobre as sete changes juntas. Reprovou, volta.
-      **É o próximo passo.**
+- [x] **T5** rodado: 4 bloqueios, todos fechados no mesmo dia. O mais grave era de
+      produto, não de spec — o site ainda dizia a quem entrava que existe fila de vagas,
+      com teste de aceite que falharia se a frase fosse removida. Corrigido em
+      `shared/conteudo.ts` e nas nove páginas de serviço.
+- [ ] **Revisor independente sobre `modelo-de-dados`** antes da primeira migration. O
+      T5 foi autorrevisão e está declarado como tal no parecer.
+- [ ] **T1 a T3 da `modelo-de-dados`**: schema, migration e os 13 testes de restrição.
+      É onde o banco finalmente aparece.
 - [x] ~~B2 — publicação do texto do presidente e das galerias.~~ **Fechado pelo dono**:
       a APPD autorizou marca e conteúdo, e a autorização inclui o texto com histórico
       clínico, os dois retratos e as galerias. Assunto encerrado; não reabrir.

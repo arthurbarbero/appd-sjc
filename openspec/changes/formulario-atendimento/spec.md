@@ -348,7 +348,7 @@ O que esta change escreve, e onde:
 | `usuarios`               | campos 1 a 11, e-mail, CPF, hash da senha       | `modelo-de-dados` REQ-7 |
 | `inscricoes_atendimento` | campos 12 a 15                                  | REQ-14                  |
 | `consentimentos`         | o aceite do Art. 11, com versão, hash e carimbo | REQ-21                  |
-| `envios_recentes`        | o hash do IP para o limite horário              | REQ-31                  |
+| `tentativas`             | o hash do IP para o limite horário              | REQ-31                  |
 
 As três primeiras, numa transação só (REQ-1). O `numero_registro` é emitido pela change
 `cadastro-e-login` (ADR-013) e esta change o consome, não o calcula.
@@ -696,9 +696,9 @@ Funcionalidade: Limite de envios e falhas de infraestrutura
 
   Cenário: IP nunca é gravado em texto claro
     Dado que um envio partiu do IP fictício "203.0.113.7"
-    Quando consulto a tabela "envios_recentes"
+    Quando consulto a tabela "tentativas"
     Então nenhuma coluna contém "203.0.113.7"
-    E "ip_hash" tem 64 caracteres hexadecimais
+    E "chave_hash" tem 64 caracteres hexadecimais
 
   Cenário: Falha do banco responde 500 sem detalhe técnico e sem linha parcial
     Dado que o D1 falha na escrita

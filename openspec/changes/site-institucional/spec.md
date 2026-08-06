@@ -56,10 +56,18 @@ verde. O gate de validação (`validacao-aceite`) é item a item.
   mesma ordem: `h1` com o nome, o que é, para quem, conteúdo sobre a área, o que esperar,
   como funciona na APPD, perguntas frequentes, chamada para cadastro, contato humano
   alternativo.
-- **REQ-6** [FEITO] As três regras do atendimento — vaga por fila, sessões **somente no
-  período da manhã** e contribuição sugerida de R$ 50,00 mensais ajustável — DEVEM estar
+- **REQ-6** [FEITO] As regras do atendimento — sessões **somente no período da manhã**,
+  telefone atualizado, e contribuição sugerida de R$ 50,00 mensais ajustável — DEVEM estar
   visíveis na página do serviço **antes** do botão que leva ao formulário, e não só
   dentro do formulário.
+
+  **Nenhuma página pode afirmar que existe fila de vagas.** A APPD não opera fila nem
+  matrícula ([ADR-014](../../../docs/adr/adr-014-inscricao-como-registro-de-interesse.md)):
+  marcar um serviço sinaliza interesse. A regra da fila veio do texto do formulário
+  oficial, que está desatualizado na origem, e sobreviveu em `shared/conteudo.ts` e nas
+  nove páginas de serviço até o gate T5 pegar (bloqueio B-T5-3). Enquanto uma tela dissesse
+  "a vaga entra em fila", ela violava o REQ-26 desta mesma spec.
+
 - **REQ-7** [FEITO] Rota desconhecida DEVE responder **HTTP 404 de verdade** no cabeçalho
   da resposta (não 200 com aparência de erro), com `h1` próprio, os atalhos "Preciso de
   atendimento" e "Quero doar", a lista dos 9 serviços e projetos com link direto, e o
@@ -199,8 +207,8 @@ da página**, do mesmo jeito que uma rota quebrada bloquearia.
 ### Caminho feliz — Público 1 (pessoa com deficiência e família)
 
 Chega por busca em qualquer página → identifica o site em uma frase → "Preciso de
-atendimento" → página do serviço, onde lê fila, período da manhã e contribuição sugerida
-**antes** do botão → formulário. Alternativa para quem não preenche formulário: WhatsApp
+atendimento" → página do serviço, onde lê período da manhã, contato por telefone e
+contribuição sugerida **antes** do botão → formulário. Alternativa para quem não preenche formulário: WhatsApp
 oficial na própria página do serviço.
 
 ### Caminho feliz — Público 2 (doador)
@@ -375,8 +383,9 @@ Funcionalidade: Anatomia comum das nove landing pages
   Cenário: As três regras aparecem antes do botão do formulário
     Dado que estou em "/atendimento/psicologia"
     Quando eu comparo a posição no documento
-    Então o texto sobre fila, período da manhã e contribuição sugerida de R$ 50,00
-      aparece antes do link para "/atendimento/inscricao"
+    Então o texto sobre período da manhã, contato por telefone e contribuição sugerida
+      de R$ 50,00 aparece antes do link para "/atendimento/inscricao"
+    E nenhuma das 17 páginas contém a expressão "entra em fila" nem "fila de vagas"
 ```
 
 ```gherkin

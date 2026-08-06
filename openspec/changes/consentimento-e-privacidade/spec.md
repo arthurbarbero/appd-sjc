@@ -199,8 +199,9 @@ existindo; o aceite anterior continua na tabela como histórico.
   hash enviado não existir no catálogo, recusa com 422 e pede releitura do termo.
 - Duas abas abertas, aceite enviado duas vezes → duas linhas de `aceite` para a mesma versão
   é ruído aceitável, não erro; a leitura sempre considera o **último** evento por `termo_id`.
-- Pedido de exclusão de quem tem inscrição ativa na fila → a tela avisa, antes de confirmar,
-  que a pessoa sai da fila e que o crachá deixa de ser verificado.
+- Pedido de exclusão de quem tem inscrição registrada → a tela avisa, antes de confirmar,
+  que a pessoa deixa de constar como interessada em atendimento e que o crachá passa a
+  aparecer como inativo na verificação pública.
 - Banco indisponível no momento do aceite → a inscrição **não** é aceita; a pessoa vê erro que
   diz para tentar de novo, e nada é gravado. Consentimento gravado pela metade é pior que
   nenhum.

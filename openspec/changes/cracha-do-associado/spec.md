@@ -171,7 +171,7 @@ exatamente três informações: nome, número e situação.
   que não o `numero_registro` completo.
 - **REQ-33a**: O endereço IP usado no limite do REQ-33 NUNCA é gravado em texto claro. Vale a
   **regra única do projeto** (`modelo-de-dados` REQ-30): `HMAC-SHA-256(ip, segredo)`, com o
-  segredo em Cloudflare Secrets, na mesma tabela `envios_recentes` usada pelo formulário, com
+  segredo em Cloudflare Secrets, na mesma tabela `tentativas` usada pelo formulário, com
   `escopo = 'verificacao'`. Era o bloqueio B21 — mesma categoria de dado, duas regras.
 - **REQ-33**: O sistema DEVE limitar consultas de verificação a **20 por minuto por hash
   de IP** (nunca pelo IP em claro — ver REQ-33a);

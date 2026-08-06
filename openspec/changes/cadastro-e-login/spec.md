@@ -188,8 +188,14 @@ inválido" e "Erro no formulário" não satisfazem este requisito.
 
 **REQ-21** — O aceite da política de privacidade DEVE ser uma caixa de seleção
 **desmarcada por padrão**, obrigatória, e o sistema DEVE gravar a **versão do termo** e a
-**data/hora do aceite**. Caixa pré-marcada, aceite implícito por uso ou aceite por
-rolagem não satisfazem este requisito.
+**data/hora do aceite** — **numa linha da tabela `consentimentos`**, nunca em coluna de
+`usuarios`. Caixa pré-marcada, aceite implícito por uso ou aceite por rolagem não
+satisfazem este requisito.
+
+> Na v1 estas eram duas colunas de `usuarios`. Duplicar o registro do aceite é o começo de
+> dois históricos que divergem, e faz a revogação não alcançar o dado — foi a raiz do B5.
+> `modelo-de-dados` REQ-19 e REQ-21 proíbem; este requisito passa a dizer onde grava para
+> que a redação não autorize o contrário (bloqueio B-T5-4).
 
 **REQ-22** — A foto é **opcional** e NÃO PODE bloquear a criação da conta. Esta change não
 a recebe nem a processa: o campo fica no formulário de atendimento

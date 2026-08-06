@@ -33,7 +33,7 @@ change de fora.
 - **Status:** esta task **não existe mais aqui**. Criar tabela e coluna é da change
   `modelo-de-dados` (T1 e T2 de lá), por decisão do ADR-013.
 - **O que resta:** conferir, antes de começar a T3, que as tabelas `usuarios`,
-  `inscricoes_atendimento`, `consentimentos` e `envios_recentes` já existem no banco
+  `inscricoes_atendimento`, `consentimentos` e `tentativas` já existem no banco
   local com as restrições da spec.
 - **Aceite:** `npm run db:aplicar:local` num banco limpo cria as cinco tabelas, e os
   testes de restrição de `modelo-de-dados` T3.1 passam.

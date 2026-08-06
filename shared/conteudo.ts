@@ -40,9 +40,15 @@ export const ASSOCIACAO = {
   ],
 } as const
 
-/** Regras declaradas pelo formulário oficial de atendimento. São fato verificado. */
+/**
+ * Regras do atendimento, confirmadas pelo dono do projeto em 2026-08-06.
+ *
+ * A regra de "fila de vagas" saiu: ela vinha do texto do formulário oficial, que está
+ * desatualizado na origem. A APPD não opera fila nem matrícula — marcar um serviço
+ * sinaliza interesse, e alguém da associação entra em contato. Ver ADR-014; a correção
+ * do texto na origem está em docs/pendencias-appd.md, item 5.
+ */
 export const REGRAS_ATENDIMENTO = [
-  'As vagas são chamadas conforme abrem — o cadastro entra em fila.',
   'As sessões acontecem somente no período da manhã.',
   'Mantenha o telefone atualizado: é por ele que vem o primeiro contato.',
 ] as const
@@ -94,13 +100,13 @@ export const SERVICOS: Oferta[] = [
     naAppd: [
       'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
       'As sessões são somente no período da manhã.',
-      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+      'Seu interesse fica registrado e a associação entra em contato pelo telefone que você informar.',
     ],
     aConfirmar: [
       'Dias e horários das sessões',
       'Quem é o fisioterapeuta responsável e o registro no CREFITO',
       'Duração e frequência das sessões',
-      'Se há critério de prioridade na fila',
+      'Como a associação organiza a ordem dos atendimentos',
       'Documentos que a pessoa precisa levar',
     ],
   },
@@ -127,7 +133,7 @@ export const SERVICOS: Oferta[] = [
     naAppd: [
       'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
       'As sessões são somente no período da manhã.',
-      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+      'Seu interesse fica registrado e a associação entra em contato pelo telefone que você informar.',
     ],
     aConfirmar: [
       'Se o atendimento inclui cuidadores e familiares, ou só a pessoa com deficiência',
@@ -165,7 +171,7 @@ export const SERVICOS: Oferta[] = [
     naAppd: [
       'O atendimento acontece na sede, na Rua Acássia Pereira, 136.',
       'Há um telefone rotulado como Serviço Social: (12) 99124-7257.',
-      'A vaga entra em fila e a associação entra em contato pelo telefone que você informar.',
+      'Seu interesse fica registrado e a associação entra em contato pelo telefone que você informar.',
     ],
     aConfirmar: [
       'Quem atende e o registro no CRESS',
@@ -190,7 +196,7 @@ export const SERVICOS: Oferta[] = [
     ],
     sobre: [
       'Nem todo mundo chega sabendo do que precisa. As orientações gerais existem para essa conversa: entender a situação, explicar o que a associação faz e apontar o caminho.',
-      'É também onde as regras do atendimento são explicadas: como funciona a fila, por que as sessões são de manhã, e o que esperar dos próximos passos.',
+      'É também onde as regras do atendimento são explicadas: por que as sessões são de manhã, como a associação entra em contato, e o que esperar dos próximos passos.',
     ],
     oQueEsperar: [
       'Uma conversa sem compromisso sobre a sua situação.',

@@ -80,7 +80,7 @@ Uma linha por pessoa atendida. Criada pelo envio do formulário de atendimento
 - **REQ-11** — A senha em texto claro NÃO PODE existir em coluna nenhuma, em nenhuma
   tabela, nem em coluna de log, nem em coluna de auditoria.
 - **REQ-12** — `situacao` nasce `ativo`. **O único escritor autorizado é o fluxo de
-  exclusão de conta** (REQ-27), que grava `inativo`. Nenhuma outra rota, tarefa ou
+  exclusão de conta** (REQ-28), que grava `inativo`. Nenhuma outra rota, tarefa ou
   migration escreve nesta coluna na V1. (Fecha B12: a coluna passa a ter autor.)
 - **REQ-13** — `email` e `cpf` são chaves de pessoas **diferentes**: duas contas nunca
   compartilham e-mail, e nunca compartilham CPF. Uma pessoa que cuida de duas pessoas
@@ -182,7 +182,7 @@ Fecha B23 — substitui as três listas divergentes.
 | `inscricoes_atendimento` | linha **apagada** — leva junto o tipo de deficiência, que é o dado sensível                                                                                                                                                                                                                                                               |
 | `usuarios`               | `nome`, `email`, `cpf`, `senha_hash`, `senha_params`, `nascimento`, `telefone`, `telefone_whatsapp`, `endereco`, `numero`, `complemento`, `bairro`, `municipio`, `cuidador_nome`, `cuidador_contato` e `chave_idempotencia` são **apagados**; `numero_registro` é **preservado**; `situacao` vira `inativo`; `atualizado_em` é atualizado |
 | `consentimentos`         | **preservado**, mais uma linha nova com `evento` = `revogacao` (REQ-22, REQ-25)                                                                                                                                                                                                                                                           |
-| `envios_recentes`        | nada — não tem vínculo com pessoa                                                                                                                                                                                                                                                                                                         |
+| `tentativas`             | nada — não tem vínculo com pessoa                                                                                                                                                                                                                                                                                                         |
 
 - **REQ-29** — `numero_registro` é preservado e **nunca reutilizado**: crachá emitido no
   passado não pode passar a identificar outra pessoa. Consequência em
@@ -191,20 +191,36 @@ Fecha B23 — substitui as três listas divergentes.
   `[A CONFIRMAR]` do REQ-27 de `area-do-associado` e ajusta o REQ-28 de
   `cracha-do-associado`, que garantia nome para todo número.
 
-## Tabela `envios_recentes` e o tratamento de IP
+## Tabela `tentativas` — limites de frequência e o que os identifica
 
-- **REQ-30** — **Uma regra de IP para o projeto inteiro** (fecha B21): endereço IP
-  NUNCA é gravado em texto claro. Onde for necessário limitar frequência, guarda-se
-  `HMAC-SHA-256(ip, segredo)`, com o segredo vindo de Cloudflare Secrets e **nunca** do
-  repositório. Vale igualmente para o envio do formulário e para a consulta pública de
-  crachá — as duas usam esta tabela e esta regra.
-- **REQ-31** — `envios_recentes` DEVE ter: `id` (INTEGER PK autoincrement), `ip_hash`
-  (TEXT NOT NULL), `escopo` (TEXT NOT NULL, CHECK ∈ (`inscricao`, `verificacao`)) e
-  `criado_em` (TEXT ISO UTC). Índice em (`ip_hash`, `escopo`, `criado_em`). Linhas com
-  mais de uma hora são apagadas a cada escrita.
-- **REQ-32** — Limites: **10 envios de inscrição por hash por hora** — escolhido para
-  não travar quem preenche na sede da associação, na mesma rede, para várias pessoas —
-  e **20 consultas de verificação por hash por minuto**.
+- **REQ-30** — **Uma regra para o projeto inteiro** (fecha B21): nada que identifique
+  quem fez a tentativa é gravado em texto claro — nem endereço IP, nem e-mail. Onde for
+  necessário limitar frequência, guarda-se `HMAC-SHA-256(<identificador>, segredo)`, com
+  o segredo vindo de Cloudflare Secrets e **nunca** do repositório.
+- **REQ-31** — A tabela `tentativas` DEVE ter: `id` (INTEGER PK autoincrement),
+  `chave_hash` (TEXT NOT NULL), `escopo` (TEXT NOT NULL, CHECK ∈ (`inscricao`,
+  `verificacao`, `login`)) e `criado_em` (TEXT ISO UTC). Índice em
+  (`chave_hash`, `escopo`, `criado_em`). Linhas com mais de uma hora são apagadas a cada
+  escrita.
+
+  **O que `chave_hash` guarda depende do escopo**: hash do **IP** em `inscricao` e
+  `verificacao`, hash do **e-mail normalizado** em `login`. O nome é neutro de propósito —
+  na v1 a coluna se chamava `ip_hash`, o que impedia o terceiro uso.
+
+  > **Bloqueio B-T5-1 do gate T5.** `cadastro-e-login` REQ-26 exige contador de tentativas
+  > de login persistido no D1, e REQ-26b exige a chave em HMAC. O contrato da v1 declarava
+  > cinco tabelas, nenhuma com lugar para isso, e o cenário de aceite reprovava quem
+  > criasse a sexta. Consumidor sem produtor — a mesma classe do B12 do parecer anterior.
+  > Resolvido alargando a tabela que já existia, em vez de criar outra: a limpeza por
+  > idade e o índice já servem aos três casos.
+
+- **REQ-32** — Limites, por escopo:
+  - `inscricao`: **10 envios por hash por hora** — escolhido para não travar quem preenche
+    na sede da associação, na mesma rede, para várias pessoas;
+  - `verificacao`: **20 consultas por hash por minuto**;
+  - `login`: **5 tentativas falhas por hash em 15 minutos**, com bloqueio de 15 minutos
+    (`cadastro-e-login` REQ-26). O contador vale para a chave digitada, exista conta ou
+    não (REQ-26a de lá) — é o que impede a enumeração de usuários.
 
 ## O que não existe
 
@@ -224,7 +240,7 @@ Funcionalidade: Integridade do modelo de dados
     Dado um banco D1 local vazio
     Quando aplico todas as migrations de "drizzle/migrations"
     Então existem exatamente as tabelas "usuarios", "inscricoes_atendimento",
-      "consentimentos", "fotos" e "envios_recentes"
+      "consentimentos", "fotos" e "tentativas"
     E não existe tabela de sessão
     E não existe tabela de log de acesso
 
@@ -278,11 +294,14 @@ Funcionalidade: Integridade do modelo de dados
     E as duas linhas originais em "consentimentos" continuam intactas
     E existe uma terceira linha em "consentimentos" com evento "revogacao"
 
-  Cenário: Nenhuma tabela guarda IP em texto claro
+  Cenário: Nenhuma tabela guarda IP nem e-mail de tentativa em texto claro
     Dado um envio de formulário vindo do IP "203.0.113.7"
+    E cinco tentativas de login falhas para "alguem@exemplo.test"
     Quando consulto todas as colunas de todas as tabelas
     Então nenhum valor contém "203.0.113.7"
-    E a coluna "ip_hash" tem 64 caracteres hexadecimais
+    E nenhuma linha de "tentativas" contém "alguem@exemplo.test"
+    E toda "chave_hash" tem 64 caracteres hexadecimais
+    E os três escopos gravados são apenas "inscricao", "verificacao" ou "login"
 
   Cenário: Toda data gravada está em UTC com sufixo Z
     Dado um usuário, uma inscrição e um consentimento recém-gravados
