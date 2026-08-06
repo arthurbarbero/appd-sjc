@@ -1,6 +1,8 @@
 # Tasks: Formulário de Atendimento
 
-- Deriva de: SPEC-formulario-atendimento (v1, 2026-08-05)
+- Deriva de: SPEC-formulario-atendimento (v2, 2026-08-06)
+- **Pré-requisito duro:** a change `modelo-de-dados` precisa estar fechada. Nenhuma task
+  daqui cria tabela ou coluna.
 - Dono padrão da execução: Claude Code · Dono das decisões: Arthur Barbero
 - Regra do fatiamento: cada fatia entrega valor verificável de ponta a ponta e fecha com
   aceite próprio. Fatia sem aceite não entra.
@@ -17,31 +19,24 @@ change de fora.
 
 ---
 
-## T0 — Assinar as três decisões (bloqueia tudo)
+## T0 — Assinar as decisões que faltam
 
 - **Dono:** Arthur Barbero (Claude Code rascunha os ADRs)
-- **O que:** transformar D3, D4 e D5 da spec em `docs/adr/adr-003`, `adr-004` e
-  `adr-005`, no formato dos ADRs existentes.
-- **Por que primeiro:** D3 muda o texto do protocolo na confirmação (`APPD-` → `ATD-`)
-  em relação ao mock aprovado. Codar antes de assinar é retrabalho garantido.
-- **Aceite:** os três arquivos existem, com status Aceito, data e decisor; a spec passa
-  para o status "APROVADA"; o `PROGRESS.md` registra a decisão do prefixo.
+- **O que:** transformar D4 e D5 da spec em `docs/adr/adr-008` e `adr-009`, no formato
+  dos ADRs existentes. **D3 e D9 já estão assinadas** no ADR-012; **D10**, no ADR-014;
+  ADR-007 foi liberado.
+- **Aceite:** os dois arquivos existem, com status Aceito, data e decisor; `docs/adr/README.md`
+  sai da lista de reservados; a spec passa para o status "APROVADA".
 
-## T1 — Tabela e migration
+## T1 — ~~Tabela e migration~~ (movida para `modelo-de-dados`)
 
-- **Dono:** Claude Code
-- **O que:** `inscricoes_atendimento` e `envios_recentes` em
-  `server/database/schema.ts`, com as colunas e restrições da seção "Modelo de dados";
-  `npm run db:generate`; aplicar com `npm run db:aplicar:local`.
-- **Cobre:** REQ-1, REQ-2, REQ-3, REQ-4 (estrutura).
-- **Aceite:**
-  - migration versionada existe em `drizzle/migrations` e está commitada;
-  - `db:aplicar:local` roda do zero num banco limpo sem erro;
-  - `protocolo` e `chave_idempotencia` são UNIQUE; existe índice em
-    (`ip_hash`, `criado_em`);
-  - nenhuma coluna guarda IP em texto claro;
-  - `server/database/schema.ts` deixa de exportar vazio e o comentário de topo aponta
-    para esta change.
+- **Status:** esta task **não existe mais aqui**. Criar tabela e coluna é da change
+  `modelo-de-dados` (T1 e T2 de lá), por decisão do ADR-013.
+- **O que resta:** conferir, antes de começar a T3, que as tabelas `usuarios`,
+  `inscricoes_atendimento`, `consentimentos` e `envios_recentes` já existem no banco
+  local com as restrições da spec.
+- **Aceite:** `npm run db:aplicar:local` num banco limpo cria as cinco tabelas, e os
+  testes de restrição de `modelo-de-dados` T3.1 passam.
 
 ## T2 — Schema Zod compartilhado
 
@@ -56,17 +51,20 @@ change de fora.
   validação duplicada fora deste arquivo (verificado por busca); listas de opções batem
   caractere a caractere com `docs/campos-formulario.md`.
 
-## T3 — Rota de servidor, protocolo e idempotência
+## T3 — Rota de servidor: a transação de três linhas
 
 - **Dono:** Claude Code
-- **O que:** `server/api/atendimento/inscricao.post.ts` — revalida com o esquema de T2,
-  grava, calcula o protocolo a partir do `id`, marca `possivel_duplicata`, trata chave
-  repetida, 405, 413, 422, 429, 500.
-- **Cobre:** REQ-5 a REQ-7, REQ-9 a REQ-13, REQ-19 a REQ-26, REQ-39 a REQ-45, REQ-53.
-- **Aceite:** testes de integração verdes para as funcionalidades "Envio da inscrição",
-  "Envio duplicado" e "O servidor não confia no cliente"; envio duplicado com a mesma
-  chave devolve 200 e mantém 1 linha; nenhum conteúdo de campo aparece em log; resposta
-  de erro sem stack trace.
+- **O que:** `server/api/atendimento/inscricao.post.ts` — revalida com o esquema de T2 e
+  grava, **numa transação só**, a conta (com o `numero_registro` pedido a
+  `cadastro-e-login`), a inscrição e o aceite. Trata e-mail/CPF já cadastrados, chave de
+  idempotência repetida, 405, 413, 422, 429, 500.
+- **Cobre:** REQ-1, REQ-5 a REQ-7c, REQ-9 a REQ-13, REQ-19 a REQ-26, REQ-39 a REQ-45a,
+  REQ-53.
+- **Aceite:** testes de integração verdes para "Envio da inscrição", "Envio duplicado" e
+  "O servidor não confia no cliente"; **falha no meio da transação não deixa conta
+  órfã**; e-mail e CPF duplicados recusados pelo banco, não por consulta prévia; nenhum
+  conteúdo de campo aparece em log; resposta de erro sem stack trace; senha em texto
+  claro não aparece em log, URL nem resposta.
 
 ## T4 — Guarda anti-abuso
 
@@ -91,15 +89,17 @@ change de fora.
   de 422 do servidor e o de falha de rede; nenhum recarregamento de página no envio; o
   botão fica desabilitado com "Enviando…" e o clique duplo gera 1 linha só.
 
-## T6 — Confirmação com protocolo
+## T6 — Confirmação honesta
 
-- **Dono:** Claude Code · **conteúdo do prazo:** APPD-SJC
-- **O que:** tela de sucesso com protocolo em destaque, o que acontece agora, canal,
-  prazo vindo de constante em `shared/conteudo.ts`, e o que fazer se o telefone mudar.
+- **Dono:** Claude Code
+- **O que:** tela de sucesso com o `numero_registro` em destaque, o que de fato acontece
+  agora, o canal do contato, o link para a pessoa entrar e editar o cadastro, e o que
+  fazer se o telefone mudar.
 - **Cobre:** REQ-32, REQ-33.
-- **Aceite:** cenários "A confirmação diz o que acontece..." e "Nenhum prazo é
-  inventado" verdes; nenhum número de dias/semanas aparece na tela enquanto a APPD não
-  responder; o telefone exibido é o que a pessoa digitou.
+- **Aceite:** cenários "A confirmação diz o que acontece..." e "A confirmação não promete
+  o que a APPD não faz" verdes; **teste que falha se as palavras "fila", "vaga",
+  "posição" ou "matrícula" aparecerem na tela**; nenhum prazo numérico; o telefone
+  exibido é o que a pessoa digitou.
 
 ## T7 — Acessibilidade verificada
 
@@ -126,19 +126,19 @@ change de fora.
 ## T9 — Gate de publicação (depende de outras changes)
 
 - **Dono:** Arthur Barbero
-- **O que:** verificar as três travas antes de qualquer deploy com dado real.
+- **O que:** verificar as travas antes de qualquer deploy com dado real.
 - **Aceite:**
+  - `modelo-de-dados` fechada e aprovada no gate;
   - `consentimento-e-privacidade` entregou a constante de versão do termo e a página de
     política (REQ-40);
-  - a APPD respondeu **quem lê as inscrições** enquanto `painel-admin` não existe
-    (risco R1);
-  - `docs/pendencias-appd.md` atualizado com o que esta change descobriu ou confirmou.
+  - ~~a APPD respondeu quem lê as inscrições~~ — **caiu** com o ADR-014;
+  - `docs/pendencias-appd.md` atualizado, incluindo a pergunta do CPF (item 4b);
   - Enquanto qualquer item estiver aberto: roda em local com dado fictício, e só.
 
 ## T10 — Validação e arquivamento
 
 - **Dono:** validador (QA), com o dono assinando o veredito
-- **O que:** rodar os 43 cenários da spec item a item, `npm run lint`,
+- **O que:** rodar os cenários da spec item a item, `npm run lint`,
   `npm run typecheck`, `npm test`, `npx prettier --check .`.
 - **Aceite:** relatório de validação com passou/falhou por cenário, sem "parcial";
   `PROGRESS.md` atualizado (decisões, dívidas, próximos passos); a pasta
@@ -148,7 +148,8 @@ change de fora.
 
 ## Fora destas tasks (para não voltar como scope creep)
 
-Salvamento parcial, conta de usuário e `usuario_id`, painel de leitura, consulta e
-edição da inscrição pela pessoa, e-mail ou WhatsApp de confirmação, inclusão dos quatro
-projetos no campo 13, e qualquer alteração de rótulo, ordem ou obrigatoriedade dos 15
-campos.
+Criar tabela ou coluna (é de `modelo-de-dados`), login e sessão (é de
+`cadastro-e-login`), a tela de edição da inscrição (é de `area-do-associado`),
+salvamento parcial, painel de leitura, e-mail ou WhatsApp de confirmação, inclusão dos
+quatro projetos no campo 13, e qualquer alteração de rótulo, ordem ou obrigatoriedade
+dos 15 campos originais.

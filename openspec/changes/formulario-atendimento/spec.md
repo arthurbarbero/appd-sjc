@@ -3,9 +3,17 @@
 - ID: SPEC-formulario-atendimento Deriva de: PROP-20260805-formulario-atendimento
 - Status: rascunho (aguarda aprovação do dono)
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
-- Versão: v1 Data: 2026-08-05
+- Versão: v2 Data: 2026-08-06
 - Fonte da verdade dos campos: [`docs/campos-formulario.md`](../../../docs/campos-formulario.md)
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md) —
+  esta change não cria coluna nenhuma
 - Desenho aprovado: [prompt do formulário](../../../docs/prompts-design/formulario.md)
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
+> o formulário passa a criar a conta ([ADR-012](../../../docs/adr/adr-012-cadastro-embutido-no-formulario.md)),
+> saem o protocolo `ATD-`, a coluna `possivel_duplicata` e as colunas duplicadas de
+> consentimento; o status passa a ter um valor só e a confirmação deixa de prometer
+> fila ([ADR-014](../../../docs/adr/adr-014-inscricao-como-registro-de-interesse.md)).
 
 > **Dado de exemplo.** Todo nome, telefone, endereço e data que aparecem nesta spec são
 > **fictícios**, criados para o teste. A única exceção é o telefone da sede,
@@ -14,23 +22,38 @@
 
 ## Objetivo
 
-Fazer o Cadastro de Atendimento 2026 gravar de verdade: persistir a inscrição no D1,
-validar com o mesmo schema no cliente e no servidor, e devolver à pessoa um número de
-protocolo com uma confirmação que diga o que acontece depois — sem nunca apagar o que
-ela digitou.
+Fazer o Cadastro de Atendimento 2026 gravar de verdade: criar a conta da pessoa,
+persistir seus interesses no D1, validar com o mesmo schema no cliente e no servidor, e
+devolver uma confirmação que diga exatamente o que acontece depois — sem nunca apagar o
+que ela digitou.
+
+O que a pessoa ganha em relação ao Google Forms de hoje: **ela volta e edita o próprio
+cadastro**. Por isso o formulário cria conta; sem conta, o cadastro seria de novo uma
+linha de planilha que ela nunca mais alcança.
 
 ## Decisões travadas (o que não se rediscute dentro desta change)
 
-| #   | Decisão                                                       | Vira ADR |
-| --- | ------------------------------------------------------------- | -------- |
-| D1  | Os 15 campos são réplica fiel; duas exceções de forma         | não      |
-| D2  | Schema Zod único; o servidor revalida e não confia no cliente | não      |
-| D3  | Protocolo `ATD-<ano>-<5 dígitos>`, do `id` autoincrement      | ADR-007  |
-| D4  | Múltipla escolha persistida como array JSON em coluna TEXT    | ADR-008  |
-| D5  | Anti-abuso por limite horário com IP hasheado; sem CAPTCHA    | ADR-009  |
-| D6  | Sem salvamento parcial na V1; aviso ao sair da página         | não      |
-| D7  | Marcar "Outro" torna obrigatório o campo de especificação     | não      |
-| D8  | Nenhum conteúdo de campo do formulário vai para log           | não      |
+| #   | Decisão                                                        | Vira ADR |
+| --- | -------------------------------------------------------------- | -------- |
+| D1  | Os 15 campos são réplica fiel; duas exceções de forma          | não      |
+| D2  | Schema Zod único; o servidor revalida e não confia no cliente  | não      |
+| D3  | ~~Protocolo `ATD-`~~ — **revogado**: o formulário cria a conta | ADR-012  |
+| D4  | Múltipla escolha persistida como array JSON em coluna TEXT     | ADR-008  |
+| D5  | Anti-abuso por limite horário com IP hasheado; sem CAPTCHA     | ADR-009  |
+| D6  | Sem salvamento parcial na V1; aviso ao sair da página          | não      |
+| D7  | Marcar "Outro" torna obrigatório o campo de especificação      | não      |
+| D8  | Nenhum conteúdo de campo do formulário vai para log            | não      |
+| D9  | 3 campos acrescentados aos 15: e-mail, CPF e senha             | ADR-012  |
+| D10 | Um status só: `Interesse registrado`. Não há fila nem vaga     | ADR-014  |
+
+**Sobre o D3** — o protocolo `ATD-<ano>-<sequencial>` existia para ancorar o aceite do
+termo de quem preenchesse sem conta. Com o D9, toda inscrição pertence a um usuário e o
+`numero_registro` já identifica a pessoa: o protocolo ficou sem função e foi removido do
+modelo. ADR-007 foi liberado.
+
+**Sobre o D9** — são **acréscimo**, não alteração: nenhum dos 15 rótulos originais muda,
+some ou troca de obrigatoriedade. O D1 continua valendo integralmente. A pergunta pelo
+CPF está em `docs/pendencias-appd.md` (item 4b) para a associação confirmar.
 
 **As duas exceções de forma do D1**, já decididas e registradas em
 `docs/campos-formulario.md`:
@@ -51,32 +74,42 @@ não vira alteração unilateral.
 
 ### Persistência
 
-- **REQ-1** — O sistema DEVE persistir cada inscrição aceita em uma linha da tabela
-  `inscricoes_atendimento` no D1, criada por schema Drizzle em
-  `server/database/schema.ts` e aplicada por **migration versionada** em
-  `drizzle/migrations` (gerada por `npm run db:generate`). Alteração de schema por
-  `push` direto no banco é proibida.
-- **REQ-2** — A tabela DEVE conter exatamente as colunas da seção "Modelo de dados",
-  com os tipos, obrigatoriedades e limites ali definidos. Coluna nova exige migration
-  nova.
-- **REQ-3** — Toda marca de tempo persistida DEVE estar em UTC, formato ISO 8601
-  (`aaaa-mm-ddThh:mm:ss.sssZ`). A exibição na tela é em `America/Sao_Paulo`.
-- **REQ-4** — O sistema NÃO DEVE persistir endereço IP em texto claro. O controle de
-  abuso usa HMAC-SHA-256 do IP com segredo lido de variável de ambiente
-  (Cloudflare Secrets), e as linhas de controle são apagadas quando passam de 1 hora.
+- **REQ-1** — Um envio aceito DEVE gravar, **numa única transação**: uma linha em
+  `usuarios` (campos 1 a 11 mais e-mail, CPF e senha), uma linha em
+  `inscricoes_atendimento` (campos 12 a 15) e uma linha em `consentimentos` (o aceite do
+  Art. 11). Falha em qualquer uma DEVE desfazer as três — nunca fica conta sem
+  inscrição, nem inscrição sem aceite.
+- **REQ-2** — As colunas, tipos, limites e restrições são os da spec
+  [`modelo-de-dados`](../modelo-de-dados/spec.md). **Esta change não cria, não renomeia e
+  não remove coluna.** Necessidade de coluna nova volta para lá antes de virar código.
+- **REQ-3** — Toda marca de tempo persistida DEVE estar em UTC, ISO-8601 com sufixo `Z`
+  (`modelo-de-dados` REQ-3). A exibição na tela é em `America/Sao_Paulo`.
+- **REQ-4** — O sistema NÃO DEVE persistir endereço IP em texto claro; vale a regra única
+  do projeto (`modelo-de-dados` REQ-30): HMAC-SHA-256 do IP com segredo de Cloudflare
+  Secrets, linhas apagadas depois de 1 hora, limite de 10 envios por hash por hora.
 
-### Protocolo
+### Cadastro embutido (campos 16, 17 e 18)
 
-- **REQ-5** — Toda inscrição aceita DEVE receber um protocolo no formato
-  `ATD-<ano com 4 dígitos>-<sequencial com no mínimo 5 dígitos, preenchido com zeros>`,
-  onde o ano é o do recebimento em `America/Sao_Paulo` e o sequencial é o `id`
-  autoincrement da linha. Exemplo: `ATD-2026-00042`.
-- **REQ-6** — O protocolo DEVE ser único, imutável e nunca reaproveitado, inclusive
-  depois de exclusão de linha. O sequencial NÃO reinicia a cada ano (o ano no protocolo
-  é informativo). Sequencial derivado de `MAX(...)+1` é proibido: gera colisão.
-- **REQ-7** — O protocolo do atendimento NÃO DEVE usar o prefixo `APPD-`, reservado ao
-  número de registro do associado (`shared/utils/registro.ts`, change
-  `cracha-do-associado`).
+- **REQ-5** — O formulário DEVE pedir **e-mail**, **CPF** e **senha**, depois dos 15
+  campos originais e antes do bloco de consentimento. São perguntas novas (D9), e o
+  bloco DEVE explicar por que existem: "para você entrar depois e corrigir seu
+  cadastro".
+- **REQ-6** — O e-mail DEVE ser normalizado (`trim` + minúsculas) antes de gravar e de
+  comparar. E-mail já cadastrado DEVE ser recusado com 422 e mensagem que ofereça o
+  caminho de entrar na conta existente.
+- **REQ-7** — O CPF DEVE ser validado pelos dígitos verificadores, não só pelo
+  comprimento, e persistido só com dígitos. CPF já cadastrado DEVE ser recusado com 422 e
+  mensagem que diga que essa pessoa já tem cadastro.
+- **REQ-7a** — A regra da senha é a do `cadastro-e-login` **REQ-9**, que é a dona: mínimo
+  de **10 caracteres**, sem exigência de símbolo, maiúscula ou dígito, sem recusar
+  espaços e sem máximo abaixo de 200. Esta change **não repete o número** — importa a
+  regra do mesmo schema Zod. O hash também é de lá (scrypt, ADR-002 e ADR-005).
+- **REQ-7b** — Nenhuma confirmação por e-mail bloqueia o envio. A pessoa termina o
+  cadastro e já está dentro; verificação de e-mail, se um dia existir, é posterior e não
+  condiciona o atendimento.
+- **REQ-7c** — Uma conta é de **uma pessoa atendida** (ADR-012). Quem cuida de duas
+  pessoas cria dois cadastros, com dois e-mails e dois CPFs. A tela DEVE dizer isso no
+  bloco do REQ-5, para a pessoa não descobrir no segundo cadastro.
 
 ### Validação espelhada
 
@@ -88,7 +121,7 @@ não vira alteração unilateral.
 - **REQ-10** — O schema DEVE ser estrito (`.strict()`): payload com campo desconhecido é
   recusado com 422, não ignorado em silêncio.
 - **REQ-11** — O servidor DEVE ignorar qualquer valor derivado enviado pelo cliente
-  (`id`, `protocolo`, `criado_em`, `possivel_duplicata`). Esses valores são sempre
+  (`id`, `numero_registro`, `situacao`, `status`, `criado_em`). Esses valores são sempre
   calculados no servidor.
 - **REQ-12** — Campo de escolha (12, 13, 14, 4, 15) DEVE ser validado contra a lista
   exata de opções de `docs/campos-formulario.md`. Valor fora da lista é recusado com 422.
@@ -120,7 +153,8 @@ não vira alteração unilateral.
 - **REQ-19** — DEVE existir a rota `POST /api/atendimento/inscricao`. Outro verbo
   responde 405. Payload maior que 16 KB responde 413.
 - **REQ-20** — Resposta de sucesso: **201** com
-  `{ "protocolo": "ATD-2026-00042", "recebidoEm": "<ISO UTC>" }`.
+  `{ "numeroRegistro": "APPD-2026-00042", "recebidoEm": "<ISO UTC>" }`. A resposta NÃO
+  DEVE conter senha, hash, CPF nem qualquer campo do bloco de deficiência.
 - **REQ-21** — Resposta de dado inválido: **422** com
   `{ "erros": { "<campo>": "<mensagem>" } }`, um par por campo com problema. O servidor
   NÃO DEVE devolver stack trace nem detalhe interno.
@@ -131,15 +165,17 @@ não vira alteração unilateral.
 ### Idempotência e duplicata
 
 - **REQ-23** — O cliente DEVE gerar uma chave de idempotência (UUID v4) no carregamento
-  do formulário e enviá-la em todo envio. A chave é UNIQUE na tabela.
-- **REQ-24** — Envio repetido com a mesma chave DEVE devolver **200** com o protocolo já
-  existente e NÃO DEVE criar segunda linha.
+  do formulário e enviá-la em todo envio. A chave é gravada em
+  `usuarios.chave_idempotencia`, que é UNIQUE.
+- **REQ-24** — Envio repetido com a mesma chave DEVE devolver **200** com o
+  `numeroRegistro` já existente e NÃO DEVE criar segunda conta.
 - **REQ-25** — Enquanto um envio está em andamento, o botão DEVE estar desabilitado, com
   o rótulo "Enviando…".
-- **REQ-26** — Inscrição com mesmo nome normalizado (minúsculas, sem acento, espaços
-  colapsados), mesma data de nascimento e mesmo telefone de outra inscrição das últimas
-  24 horas DEVE ser gravada normalmente, com `possivel_duplicata = 1`. Duplicata
-  suspeita **não bloqueia** a pessoa: quem triagem faz é gente, no painel (V1.1).
+- **REQ-26** — **Duplicata deixou de ser heurística.** `cpf` é UNIQUE
+  (`modelo-de-dados` REQ-7): a mesma pessoa não se cadastra duas vezes, e a colisão é
+  recusada pelo banco com a mensagem do REQ-7. A coluna `possivel_duplicata` e a regra
+  de "mesmo nome + nascimento + telefone nas últimas 24 h" estão **revogadas** — eram
+  aproximação para um mundo sem identificador; agora há identificador.
 
 ### Estados da tela
 
@@ -157,15 +193,20 @@ não vira alteração unilateral.
   importa. "Campo inválido" é reprovação.
 - **REQ-31** — O estado "enviando" DEVE avisar para não fechar a página e NÃO DEVE usar
   animação infinita; qualquer movimento respeita `prefers-reduced-motion`.
-- **REQ-32** — A confirmação DEVE conter, nesta ordem: o protocolo em destaque; o que
-  acontece agora (o cadastro entra na fila de vagas); **por qual canal** vem o contato
-  (ligação para o telefone informado, exibido na tela); **em quanto tempo**; e o que
-  fazer se o telefone mudar (ligar para a sede, `(12) 3346-0605`).
-- **REQ-33** — O prazo do REQ-32 DEVE vir de uma constante única em
-  `shared/conteudo.ts`. Enquanto a APPD não informar o prazo, a constante contém a frase
-  honesta acordada — "As vagas são chamadas conforme abrem; a associação não trabalha
-  com prazo fixo" — e a tela NÃO DEVE exibir nenhum prazo numérico. Inventar prazo é
-  defeito bloqueante.
+- **REQ-32** — A confirmação DEVE conter, nesta ordem: o **número de registro** em
+  destaque; o que de fato acontece agora — **os interesses ficaram registrados e alguém
+  da APPD entra em contato**; **por qual canal** vem o contato (ligação para o telefone
+  informado, exibido na tela); que a pessoa **pode entrar a qualquer momento e corrigir
+  o cadastro**, com o link para `/area`; e o que fazer se o telefone mudar (editar pela
+  área ou ligar para a sede, `(12) 3346-0605`).
+
+  **Proibido nesta tela**, por ADR-014: as palavras "fila", "vaga", "posição",
+  "matrícula", "aula" e qualquer prazo numérico. A APPD não opera fila nem matrícula, e
+  o REQ-26 de `site-institucional` proíbe tela que prometa efeito que não acontece.
+
+- **REQ-33** — Nenhum prazo é exibido. Não existe constante de prazo, não existe frase
+  de prazo, e não há o que a APPD informar aqui: sem fila, não há chamada por ordem. A
+  única promessa da tela é "alguém entra em contato", que é o que a associação faz.
 
 ### Conteúdo obrigatório da tela
 
@@ -180,50 +221,59 @@ não vira alteração unilateral.
   13 DEVE orientar quem quer entrar num projeto a marcar `Outro` e escrever o nome.
   Transformá-los em opção depende de resposta da APPD
   (`docs/pendencias-appd.md`, item 1b) e exige nova versão desta spec.
-- **REQ-37** — O bloco introdutório DEVE trazer as três regras de
-  `REGRAS_ATENDIMENTO` (fila por vaga, sessões só de manhã, telefone atualizado) e NÃO
-  DEVE mencionar contribuição nem valor.
+- **REQ-37** — O bloco introdutório DEVE trazer as regras de `REGRAS_ATENDIMENTO` que
+  continuam verdadeiras — **sessões só de manhã** e **telefone atualizado** — e NÃO DEVE
+  mencionar contribuição nem valor. A regra de "fila por vaga" **sai**: ela veio do texto
+  do formulário atual, que está desatualizado na origem (ADR-014); a correção do texto da
+  APPD está em `docs/pendencias-appd.md`, item 5.
 - **REQ-38** — O aviso "Esta é uma demonstração local" DEVE ser removido quando a rota
   estiver ligada.
 
 ### Consentimento (fronteira com outra change)
 
-- **REQ-39** — A linha gravada DEVE conter `consentimento_saude` (aceito, sempre 1),
-  `consentimento_termo`, `consentimento_versao`, `consentimento_hash` (hash do texto
-  exibido) e `consentimento_em` (ISO UTC). Sem os cinco, a escrita é recusada. O
-  vocabulário é o de `consentimento-e-privacidade`: `termo_id` = `deficiencia-art11`,
-  `versao` = string monotônica (`v1`, `v2`, …).
-- **REQ-40** — Os valores de `consentimento_termo`, `consentimento_versao` e
-  `consentimento_hash` DEVEM vir do módulo de termos exportado pela change
-  `consentimento-e-privacidade` — esta change **não define, não versiona e não escreve**
-  texto de termo. Enquanto aquela change não existir, esta **não é publicada**, nem em
-  `*.workers.dev` com dado real. Rodar em local com dado fictício é permitido.
+- **REQ-39** — O aceite DEVE ser gravado **numa linha da tabela `consentimentos`**, junto
+  com a conta e a inscrição, na mesma transação do REQ-1. As colunas duplicadas de
+  consentimento dentro de `inscricoes_atendimento` estão **revogadas**: dois registros do
+  mesmo aceite é o começo de dois históricos que divergem (`modelo-de-dados` REQ-19).
+  Vocabulário: `termo_id` = `deficiencia-art11`, `versao` monotônica (`v1`, `v2`, …),
+  `origem` = `/atendimento/inscricao`.
+- **REQ-40** — Os valores de `termo_id`, `versao` e `hash` DEVEM vir do módulo de termos
+  exportado pela change `consentimento-e-privacidade` — esta change **não define, não
+  versiona e não escreve** texto de termo. Enquanto aquela change não existir, esta
+  **não é publicada**, nem em `*.workers.dev` com dado real. Rodar em local com dado
+  fictício é permitido.
 - **REQ-41** — Payload com consentimento ausente ou falso DEVE ser recusado com 422 e
   nenhuma escrita, mesmo que todos os outros campos estejam válidos.
-- **REQ-42** — **Fronteira aberta, com dono nomeado.** A tabela `consentimentos` de
-  `consentimento-e-privacidade` tem `usuario_id TEXT NOT NULL`, e o formulário é
-  preenchido **sem conta** na V1. Enquanto essa incompatibilidade não for resolvida, o
-  registro do aceite feito no formulário mora nas colunas da própria inscrição
-  (REQ-39), que é o registro atômico daquele envio. A decisão de unificar — tornar
-  `usuario_id` opcional com `protocolo` ao lado, ou manter os dois registros — é de
-  Arthur Barbero, com as duas changes na mesa, e vira ADR. Nenhuma das duas specs pode
-  decidir sozinha.
+- **REQ-42** — ~~Fronteira aberta.~~ **Fechada** pelo
+  [ADR-012](../../../docs/adr/adr-012-cadastro-embutido-no-formulario.md): o formulário
+  cria a conta, então `consentimentos.usuario_id NOT NULL` é exequível e não há
+  incompatibilidade a resolver. O requisito órfão apontado pelo gate (B15) deixa de
+  existir junto com a contradição que o gerou.
 
 ### Status da inscrição (contrato consumido por outras changes)
 
-- **REQ-43** — A linha DEVE ter a coluna `status`, com vocabulário fechado e exatamente
-  estes três valores: `Na fila`, `Em atendimento`, `Encerrada`. É este o vocabulário que
-  `area-do-associado` (REQ-9) e `painel-admin` consomem; mudar valor aqui quebra as duas.
-- **REQ-44** — Toda inscrição aceita DEVE nascer com `status = "Na fila"`.
-- **REQ-45** — Nenhuma rota desta change DEVE aceitar alteração de `status`. Quem muda
-  status é o painel administrativo (V1.1); a pessoa nunca muda, nem por payload.
+- **REQ-43** — A coluna `status` tem **um único valor possível**: `Interesse registrado`.
+  O vocabulário anterior — `Na fila`, `Em atendimento`, `Encerrada` — está **revogado**
+  pelo [ADR-014](../../../docs/adr/adr-014-inscricao-como-registro-de-interesse.md): a
+  APPD não opera fila nem matrícula, e dois dos três valores eram inalcançáveis. Enum com
+  valor que o sistema não sabe produzir não é contrato, é ficção.
+- **REQ-44** — Toda inscrição aceita nasce com `status = "Interesse registrado"`,
+  garantido por `CHECK` no banco (`modelo-de-dados` REQ-14).
+- **REQ-45** — Nenhuma rota desta change aceita alteração de `status`. Quando existir
+  vocabulário maior, quem o escreve é o `painel-admin` (V1.1) — e a decisão volta ao
+  `modelo-de-dados`, não a esta spec.
+- **REQ-45a** — **A inscrição é editável pela própria pessoa** em `/area/inscricoes`
+  (ADR-014). A edição é da change `area-do-associado`; esta change garante apenas que a
+  gravação inicial não impeça a edição: nada aqui é write-once além do
+  `numero_registro`.
 
 ### Acessibilidade (bloqueante, WCAG 2.2 AA)
 
 - **REQ-46** — Cada grupo de rádio e de caixas de seleção DEVE estar em `fieldset` com
   `legend` igual ao rótulo do campo oficial.
 - **REQ-47** — Todo alvo de toque (opção, botão, botão do calendário) DEVE ter no mínimo
-  44 × 44 px de área clicável, incluindo o rótulo, com folga entre opções.
+  **44 × 44 px** de área clicável, incluindo o rótulo, e **8 px de folga** entre alvos
+  vizinhos. Régua única do projeto, igual nas seis changes.
 - **REQ-48** — A ordem de foco DEVE ser igual à ordem visual, e todo o formulário DEVE
   ser operável só por teclado, incluindo abrir e fechar o calendário e sair dele sem
   armadilha de foco.
@@ -238,18 +288,19 @@ não vira alteração unilateral.
 
 - **REQ-53** — Nenhum conteúdo de campo do formulário DEVE ir para log — nem nome, nem
   telefone, nem endereço, nem deficiência. O log de um envio contém, no máximo,
-  protocolo, resultado (aceito/recusado), lista de **nomes de campo** com erro e
-  duração.
+  o `numero_registro`, o resultado (aceito/recusado), a lista de **nomes de campo** com
+  erro e a duração. Senha, CPF e e-mail nunca vão para log, nem hasheados.
 - **REQ-54** — Nenhum dado de pessoa real DEVE entrar em teste, seed ou fixture; dado
   fictício é obrigatório e identificado como tal.
 
 ## Comportamento esperado
 
 **Caminho feliz.** A pessoa abre a página; o cliente gera a chave de idempotência.
-Preenche, envia. O cliente valida; passando, desabilita o botão, mostra "Enviando…" e
-faz `POST`. O servidor revalida com o mesmo schema, checa o limite horário, grava a
-linha, calcula o protocolo a partir do `id`, marca duplicata suspeita se for o caso e
-responde 201. A tela troca para a confirmação com o protocolo.
+Preenche os 15 campos, mais e-mail, CPF e senha, e envia. O cliente valida; passando,
+desabilita o botão, mostra "Enviando…" e faz `POST`. O servidor revalida com o mesmo
+schema, checa o limite horário e, numa transação só, grava a conta com o
+`numero_registro` emitido, a inscrição e o aceite — e responde 201. A tela troca para a
+confirmação com o número de registro e o caminho para entrar e editar depois.
 
 **Alternativos e bordas.**
 
@@ -257,9 +308,12 @@ responde 201. A tela troca para a confirmação com o protocolo.
   ficam.
 - Erro só no servidor (cliente contornado ou versão antiga em cache): 422, mesmos
   campos e mensagens, respostas ficam.
-- Chave de idempotência repetida: 200 com o protocolo original, nenhuma linha nova.
+- Chave de idempotência repetida: 200 com o `numeroRegistro` original, nenhuma conta nova.
+- E-mail ou CPF já cadastrado: 422 no campo correspondente, com o caminho de entrar na
+  conta existente. Nenhuma linha gravada, respostas ficam.
 - Limite horário estourado: 429 com o telefone da sede, respostas ficam.
-- Falha do D1 ou exceção: 500 genérico, nenhuma linha parcial, respostas ficam.
+- Falha do D1 ou exceção: 500 genérico, **nenhuma das três linhas** permanece — a
+  transação do REQ-1 é tudo ou nada. Respostas ficam.
 - Falha de rede (`fetch` rejeitado): mensagem de "não conseguimos enviar agora, tente de
   novo", respostas ficam, mesma chave é reusada na retentativa.
 - Pessoa tenta sair com formulário preenchido e não enviado: aviso nativo do navegador
@@ -267,43 +321,20 @@ responde 201. A tela troca para a confirmação com o protocolo.
 
 ## Modelo de dados
 
-Tabela `inscricoes_atendimento` (D1/SQLite; nome de coluna em `snake_case`).
+**Não mora aqui.** As colunas, tipos, limites e restrições estão em
+[`modelo-de-dados`](../modelo-de-dados/spec.md) — uma tabela descrita num lugar só.
 
-| Coluna                 | Tipo | Obrig. | Regra                              |
-| ---------------------- | ---- | ------ | ---------------------------------- |
-| `id`                   | INT  | sim    | PK autoincrement                   |
-| `protocolo`            | TEXT | sim    | UNIQUE, `ATD-<ano>-<5+ dígitos>`   |
-| `chave_idempotencia`   | TEXT | sim    | UNIQUE, UUID v4                    |
-| `nome`                 | TEXT | sim    | 2 a 120 caracteres (campo 1)       |
-| `nascimento`           | TEXT | sim    | `aaaa-mm-dd` (campo 2)             |
-| `telefone`             | TEXT | sim    | 10 ou 11 dígitos (campo 3)         |
-| `telefone_whatsapp`    | TEXT | sim    | `Sim` \| `Não` (campo 4)           |
-| `endereco`             | TEXT | sim    | 3 a 300 caracteres (campo 5)       |
-| `numero`               | TEXT | sim    | 1 a 20 caracteres (campo 6)        |
-| `complemento`          | TEXT | não    | até 60 caracteres (campo 7)        |
-| `bairro`               | TEXT | sim    | 2 a 80 caracteres (campo 8)        |
-| `municipio`            | TEXT | sim    | 2 a 80 caracteres (campo 9)        |
-| `cuidador_nome`        | TEXT | não    | até 120 caracteres (campo 10)      |
-| `cuidador_contato`     | TEXT | não    | vazio ou 10/11 dígitos (campo 11)  |
-| `deficiencias`         | TEXT | sim    | JSON, ≥1 item da lista (campo 12)  |
-| `deficiencia_outro`    | TEXT | não    | 2 a 100 se `Outro` marcado         |
-| `atendimentos`         | TEXT | sim    | JSON, ≥1 item da lista (campo 13)  |
-| `atendimento_outro`    | TEXT | não    | 2 a 100 se `Outro` marcado         |
-| `dias`                 | TEXT | sim    | JSON, ≥1 item da lista (campo 14)  |
-| `ciencia_contribuicao` | TEXT | sim    | `Ciente` (campo 15)                |
-| `consentimento_saude`  | INT  | sim    | sempre 1                           |
-| `consentimento_termo`  | TEXT | sim    | `deficiencia-art11`                |
-| `consentimento_versao` | TEXT | sim    | versão do termo (`v1`, `v2`, …)    |
-| `consentimento_hash`   | TEXT | sim    | hash do texto exibido              |
-| `consentimento_em`     | TEXT | sim    | ISO UTC                            |
-| `status`               | TEXT | sim    | vocabulário do REQ-43, inicia fila |
-| `possivel_duplicata`   | INT  | sim    | 0 ou 1, padrão 0                   |
-| `criado_em`            | TEXT | sim    | ISO UTC                            |
+O que esta change escreve, e onde:
 
-Tabela auxiliar `envios_recentes`: `id` (PK), `ip_hash` (TEXT, HMAC-SHA-256),
-`criado_em` (TEXT ISO UTC). Índice em (`ip_hash`, `criado_em`). Linhas com mais de 1
-hora são apagadas a cada escrita. Limite: **10 envios por hash por hora**, escolhido
-para não travar quem preenche pela associação para várias pessoas na mesma rede.
+| Tabela                   | O que esta change grava                         | Referência              |
+| ------------------------ | ----------------------------------------------- | ----------------------- |
+| `usuarios`               | campos 1 a 11, e-mail, CPF, hash da senha       | `modelo-de-dados` REQ-7 |
+| `inscricoes_atendimento` | campos 12 a 15                                  | REQ-14                  |
+| `consentimentos`         | o aceite do Art. 11, com versão, hash e carimbo | REQ-21                  |
+| `envios_recentes`        | o hash do IP para o limite horário              | REQ-31                  |
+
+As três primeiras, numa transação só (REQ-1). O `numero_registro` é emitido pela change
+`cadastro-e-login` (ADR-013) e esta change o consome, não o calcula.
 
 ## Fora de escopo
 
@@ -317,12 +348,18 @@ campo 13.
 
 - ADR-001 (Workers + D1 + Drizzle) vale; nada aqui exige serviço com cartão.
 - Zod 4 e Drizzle já estão no `package.json`; nenhuma dependência nova é necessária.
+- **`modelo-de-dados` é dependência dura**: as tabelas precisam existir antes de
+  qualquer código desta change.
 - `consentimento-e-privacidade` precisa entregar a constante de versão do termo e a
   página de política — **dependência dura**, ver REQ-40.
-- `cracha-do-associado` é dona do formato `APPD-<ano>-<sequencial>`; ver REQ-7.
-- `cadastro-e-login` destrava salvamento parcial e `usuario_id` — fora desta change.
-- `painel-admin` (V1.1) é quem lê o que esta change grava; o risco R1 da proposal
-  continua aberto até a APPD dizer quem recebe enquanto o painel não existe.
+- `cadastro-e-login` é dona do `numero_registro` e do hash de senha (ADR-013): esta
+  change chama, não reimplementa.
+- `area-do-associado` é dona da edição da inscrição; esta change só garante que a
+  gravação inicial não a impeça (REQ-45a).
+- ~~`painel-admin` (V1.1) é quem lê o que esta change grava.~~ **Deixou de ser risco de
+  publicação** (ADR-014): não há promessa de fila a cumprir, e a pessoa mantém o próprio
+  cadastro. O painel continua sendo a próxima entrega de valor para a APPD, não um
+  bloqueio.
 - Segredo do HMAC vem de Cloudflare Secrets / `.dev.vars`; nunca versionado.
 
 ## Critério de aceite (Gherkin)
@@ -338,46 +375,67 @@ Funcionalidade: Envio da inscrição de atendimento
     Dado que o banco local está migrado e vazio
     E que a versão vigente do termo do Art. 11 é "v1"
 
-  Cenário: Envio válido grava a inscrição e devolve protocolo
+  Cenário: Envio válido cria conta, inscrição e aceite numa transação
     Dado que preenchi os 15 campos com dados fictícios válidos
-      | campo      | valor                        |
-      | Nome       | Maria Fictícia da Silva      |
-      | Nascimento | 12/03/1978                   |
-      | Telefone   | (12) 90000-0001              |
-      | WhatsApp   | Sim                          |
-      | Endereço   | Rua de Teste                 |
-      | Número     | s/n                          |
-      | Bairro     | Bairro Fictício              |
-      | Município  | São José dos Campos          |
-      | Deficiência| Física                       |
-      | Atendimento| Fisioterapia                 |
-      | Dias       | Segundas                     |
-      | Ciência    | Ciente                       |
+      | campo       | valor                   |
+      | Nome        | Maria Fictícia da Silva |
+      | Nascimento  | 12/03/1978              |
+      | Telefone    | (12) 90000-0001         |
+      | WhatsApp    | Sim                     |
+      | Endereço    | Rua de Teste            |
+      | Número      | s/n                     |
+      | Bairro      | Bairro Fictício         |
+      | Município   | São José dos Campos     |
+      | Deficiência | Física                  |
+      | Atendimento | Fisioterapia            |
+      | Dias        | Segundas                |
+      | Ciência     | Ciente                  |
+    E que preenchi os 3 campos de cadastro
+      | campo  | valor                      |
+      | E-mail | maria.ficticia@exemplo.test |
+      | CPF    | 39053344705                |
+      | Senha  | senha-de-teste-123         |
     E que marquei a autorização de tratamento do dado de saúde
     Quando envio o formulário
-    Então a resposta é 201 com um protocolo no formato "ATD-2026-#####"
-    E existe exatamente 1 linha em "inscricoes_atendimento"
-    E essa linha tem "consentimento_termo" igual a "deficiencia-art11",
-      "consentimento_versao" igual a "v1", o hash do texto exibido e
-      "consentimento_em" em UTC
-    E a tela mostra a confirmação com o protocolo em destaque
+    Então a resposta é 201 com "numeroRegistro" no formato "APPD-2026-#####"
+    E existe exatamente 1 linha em "usuarios" com o e-mail normalizado
+    E existe exatamente 1 linha em "inscricoes_atendimento" ligada a ela
+    E existe exatamente 1 linha em "consentimentos" com termo "deficiencia-art11",
+      versão "v1", o hash do texto exibido, evento "aceite" e carimbo em UTC
+    E nenhuma coluna de consentimento existe em "inscricoes_atendimento"
+    E a tela mostra a confirmação com o número de registro em destaque
 
-  Cenário: Inscrição nasce "Na fila" e o status não é alterável pelo cliente
+  Cenário: Inscrição nasce com o único status possível
     Quando envio uma inscrição válida
-    Então a coluna "status" da linha gravada é "Na fila"
-    E um payload que traga "status": "Em atendimento" recebe 422
+    Então a coluna "status" da linha gravada é "Interesse registrado"
+    E um payload que traga "status": "Na fila" recebe 422
     E nenhuma rota desta change aceita alteração de status
 
-  Cenário: Protocolo é único e não reaproveita sequencial
-    Dado que já existem 2 inscrições, a última com protocolo "ATD-2026-00002"
-    E que a inscrição "ATD-2026-00002" foi apagada do banco
-    Quando envio uma nova inscrição válida
-    Então o protocolo devolvido é "ATD-2026-00003"
-    E nenhum protocolo existente foi alterado
+  Cenário: E-mail já cadastrado é recusado sem gravar nada
+    Dado que já existe uma conta com "maria.ficticia@exemplo.test"
+    Quando envio um formulário válido com esse mesmo e-mail
+    Então a resposta é 422 com erro no campo de e-mail
+    E a mensagem oferece o caminho de entrar na conta existente
+    E o banco continua com exatamente 1 linha em "usuarios"
 
-  Cenário: Protocolo não usa o prefixo do crachá
-    Quando envio uma inscrição válida
-    Então o protocolo NÃO começa com "APPD-"
+  Cenário: CPF já cadastrado é recusado sem gravar nada
+    Dado que já existe uma conta com o CPF "39053344705"
+    Quando envio um formulário válido com esse mesmo CPF e outro e-mail
+    Então a resposta é 422 com erro no campo de CPF
+    E o banco continua com exatamente 1 linha em "usuarios"
+
+  Cenário: Falha no meio da transação não deixa conta órfã
+    Dado que a gravação em "consentimentos" falha
+    Quando envio um formulário válido
+    Então a resposta é 500 com mensagem genérica
+    E não existe linha nenhuma em "usuarios"
+    E não existe linha nenhuma em "inscricoes_atendimento"
+
+  Cenário: A senha exige comprimento e nada mais
+    Quando envio um formulário com a senha "abcdefgh"
+    Então a resposta é 201
+    E nenhuma mensagem exige símbolo, maiúscula ou número
+    E a senha em texto claro não aparece em nenhuma coluna de nenhuma tabela
 ```
 
 ```gherkin
@@ -527,19 +585,19 @@ Funcionalidade: Envio duplicado
     Então o botão fica desabilitado com o rótulo "Enviando…" após o primeiro clique
     E existe exatamente 1 linha em "inscricoes_atendimento"
 
-  Cenário: Reenvio com a mesma chave devolve o mesmo protocolo
-    Dado que enviei uma inscrição válida e recebi "ATD-2026-00001"
+  Cenário: Reenvio com a mesma chave devolve o mesmo número de registro
+    Dado que enviei uma inscrição válida e recebi "APPD-2026-00001"
     Quando envio outra vez o mesmo payload, com a mesma chave de idempotência
-    Então a resposta é 200 com o protocolo "ATD-2026-00001"
+    Então a resposta é 200 com "numeroRegistro" igual a "APPD-2026-00001"
+    E continua existindo exatamente 1 linha em "usuarios"
     E continua existindo exatamente 1 linha em "inscricoes_atendimento"
 
-  Cenário: Duplicata suspeita é gravada e sinalizada, nunca bloqueada
-    Dado que existe uma inscrição de "Maria Fictícia da Silva", 12/03/1978,
-      telefone "12900000001", criada há 2 horas
-    Quando chega outra inscrição com esses mesmos três dados e chave nova
-    Então a resposta é 201
-    E a nova linha tem "possivel_duplicata" igual a 1
-    E a pessoa não vê nenhum bloqueio nem aviso de duplicidade
+  Cenário: A mesma pessoa não se cadastra duas vezes
+    Dado que existe uma conta com o CPF "39053344705"
+    Quando chega outro envio com esse CPF, chave de idempotência nova e outro e-mail
+    Então a resposta é 422 com erro no campo de CPF
+    E nenhuma segunda conta é criada
+    E nenhuma heurística de nome, nascimento ou telefone é consultada
 ```
 
 ```gherkin
@@ -561,11 +619,11 @@ Funcionalidade: O servidor não confia no cliente
     E nenhuma linha foi gravada
 
   Cenário: Valor derivado enviado pelo cliente é ignorado
-    Dado um payload válido que também traz "protocolo": "ATD-2026-99999"
-      e "possivelDuplicata": 0
+    Dado um payload válido que também traz "numeroRegistro": "APPD-2026-99999"
+      e "situacao": "inativo"
     Quando faço POST em "/api/atendimento/inscricao"
     Então a resposta é 422 por campo desconhecido
-    E, se o schema aceitasse, o protocolo gravado seria o calculado no servidor
+    E, se o schema aceitasse, os dois valores gravados seriam os do servidor
 
   Cenário: Sem consentimento do Art. 11 não há escrita
     Dado um payload com os 15 campos válidos e "consentimentoSaude": false
@@ -622,20 +680,22 @@ Funcionalidade: Limite de envios e falhas de infraestrutura
 Funcionalidade: Confirmação e conteúdo obrigatório da tela
   Cobre REQ-32, REQ-33, REQ-34, REQ-35, REQ-37, REQ-38 da SPEC-formulario-atendimento
 
-  Cenário: A confirmação diz o que acontece, por qual canal e em quanto tempo
+  Cenário: A confirmação diz o que acontece e por qual canal
     Dado que enviei uma inscrição válida com telefone "(12) 90000-0001"
     Quando a confirmação aparece
-    Então vejo o protocolo em destaque
-    E vejo que o cadastro entrou na fila de vagas
+    Então vejo o número de registro em destaque
+    E vejo que os interesses ficaram registrados e que a APPD entra em contato
     E vejo que o contato vem por ligação para "(12) 90000-0001"
-    E vejo o prazo exatamente como está na constante de conteúdo
+    E vejo que posso entrar e corrigir meu cadastro, com o link para "/area"
     E vejo o que fazer se o telefone mudar, com o número (12) 3346-0605
 
-  Cenário: Nenhum prazo é inventado
-    Dado que a APPD ainda não informou prazo de retorno
+  Cenário: A confirmação não promete o que a APPD não faz
     Quando a confirmação aparece
-    Então o texto do prazo é o da constante acordada
-    E a tela não exibe nenhuma quantidade de dias, semanas ou meses
+    Então o texto não contém "fila"
+    E não contém "vaga"
+    E não contém "posição"
+    E não contém "matrícula"
+    E não exibe nenhuma quantidade de dias, semanas ou meses
 
   Cenário: O valor da contribuição aparece uma vez só
     Quando abro o formulário no estado vazio
@@ -679,11 +739,11 @@ Funcionalidade: Acessibilidade do formulário
     E ele lista 2 links, um por campo, e cada link leva o foco ao campo
       correspondente
 
-  Cenário: Alvo de toque de 44px com rótulo clicável
+  Cenário: Alvo de toque de 44px com rótulo clicável e folga de 8px
     Quando meço a área clicável de cada opção de rádio e caixa de seleção
     Então nenhuma tem largura ou altura menor que 44 px
     E clicar no texto do rótulo alterna a opção
-    E há folga vertical entre opções vizinhas
+    E a distância entre alvos vizinhos é de no mínimo 8 px
 
   Cenário: Ordem de foco igual à ordem visual, do topo ao botão
     Quando percorro o formulário só com Tab, do início ao fim
@@ -708,39 +768,41 @@ Funcionalidade: Acessibilidade do formulário
 
 | Requisito      | Cenários de aceite                              | Onde vive o teste             |
 | -------------- | ----------------------------------------------- | ----------------------------- |
-| REQ-1 a REQ-7  | Envio da inscrição (4 cenários)                 | integração da rota + migração |
+| REQ-1 a REQ-4  | Envio grava as três linhas numa transação       | integração da rota + migração |
+| REQ-5 a REQ-7c | Cadastro embutido (4 cenários)                  | integração da rota            |
 | REQ-8 a REQ-13 | Servidor não confia no cliente (6 cenários)     | unitário do schema + rota     |
 | REQ-14         | Data de nascimento (3 cenários, 4 exemplos)     | unitário do schema + tela     |
 | REQ-15, 16     | Telefone e máscara (4 cenários, 3 exemplos)     | unitário + componente         |
 | REQ-17, 18     | Múltipla escolha e "Outro" (4 cenários)         | unitário + componente         |
 | REQ-19 a 22    | Contrato da rota + limites (4 cenários)         | integração da rota            |
-| REQ-23 a 26    | Envio duplicado (3 cenários)                    | integração da rota            |
+| REQ-23 a 26    | Idempotência e CPF único (2 cenários)           | integração da rota            |
 | REQ-27 a 31    | Erro nunca apaga resposta (4 cenários)          | componente                    |
 | REQ-32 a 38    | Confirmação e conteúdo (4 cenários)             | componente + teste de texto   |
 | REQ-39 a 41    | Consentimento (2 cenários) + gate de publicação | integração da rota            |
-| REQ-42         | fronteira aberta — sem cenário, exige decisão   | ADR (dono nomeado)            |
-| REQ-43 a 45    | Status inicial e não alterável (1 cenário)      | integração da rota            |
+| REQ-42         | resolvido pelo ADR-012 — sem cenário próprio    | —                             |
+| REQ-43 a 45a   | Status único e não alterável (1 cenário)        | integração da rota            |
 | REQ-46 a 52    | Acessibilidade (7 cenários)                     | axe + teclado                 |
 | REQ-53, 54     | Log e dado fictício (2 cenários)                | integração + revisão          |
 
 ## Veredito do gate (Definition of Ready)
 
-- Spec aprovada: **pendente** — falta a assinatura do dono nas decisões D3, D4 e D5
-  (ADR-007, ADR-008, ADR-009).
+- Spec aprovada: **pendente** — falta a assinatura do dono nas decisões D4 e D5
+  (ADR-008, ADR-009). D3 e D9 já estão assinadas no ADR-012; D10, no ADR-014.
 - Priorizada: **pendente** — prioridade é do coordenador, não desta spec.
-- Critério de aceite testável: **sim** — 43 cenários Gherkin, cobrindo caminho feliz,
+- Critério de aceite testável: **sim** — cenários Gherkin cobrindo caminho feliz,
   bordas, falha de infraestrutura, adulteração e acessibilidade.
 
 Bloqueios conhecidos, cada um com dono:
 
+- `[dependência]` **`modelo-de-dados` precisa fechar primeiro.** Nenhuma linha de código
+  desta change antes das tabelas existirem. Dono: Arthur Barbero.
 - `[dependência]` REQ-40: publicação travada até `consentimento-e-privacidade` entregar
   termo, versão e hash. Dono: Arthur Barbero.
-- `[contradição entre changes]` REQ-42: `consentimentos.usuario_id` é NOT NULL na spec
-  de `consentimento-e-privacidade`, e este formulário é preenchido sem conta. As duas
-  specs não podem fechar assim. Dono: Arthur Barbero, com as duas na mesa; vira ADR.
-- `[escopo]` Risco R1 da proposal: ninguém lê as inscrições até `painel-admin` (V1.1).
-  Dono: APPD-SJC — pergunta objetiva já registrada.
-- `[conteúdo]` REQ-33: prazo de retorno depende de resposta da APPD. Dono: APPD-SJC.
-  Sem resposta, vale a frase honesta — isso não trava a implementação.
-- `[decisão]` D3 muda o prefixo mostrado na confirmação (`APPD-` → `ATD-`) em relação
-  ao mock de design. Dono: Arthur Barbero.
+- ~~`[contradição entre changes]` REQ-42~~ — **resolvido** pelo ADR-012.
+- ~~`[escopo]` Risco R1: ninguém lê as inscrições até o `painel-admin`.~~ — **premissa
+  derrubada** pelo ADR-014: não há fila a operar, e a pessoa mantém o próprio cadastro.
+- ~~`[conteúdo]` REQ-33: prazo de retorno.~~ — **sem objeto**: a tela não exibe prazo.
+- ~~`[decisão]` D3, prefixo `ATD-` na confirmação.~~ — **sem objeto**: a confirmação
+  mostra o `numero_registro` (`APPD-`), que é o que o mock de design já trazia.
+- `[APPD]` Pedir CPF é pergunta nova para a associação
+  (`docs/pendencias-appd.md`, item 4b). Recusa custa uma migration, não uma reescrita.

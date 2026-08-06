@@ -1,25 +1,41 @@
-# Spec: Cadastro, login e área do associado
+# Spec: Conta, senha e sessão
 
 - ID: SPEC-cadastro-e-login Deriva de: PROP-20260805-cadastro-e-login
 - Status: **rascunho** — não é código enquanto não passar no gate da seção
   "Definition of Ready"
 - Dono do conteúdo: Arthur Barbero Aprovador da spec: Arthur Barbero
-- Versão: v1 Data: 2026-08-05
+- Versão: v2 Data: 2026-08-06
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
+> a conta nasce no formulário de atendimento, não em rota própria
+> ([ADR-012](../../../docs/adr/adr-012-cadastro-embutido-no-formulario.md)); saem a foto
+> e as quatro telas da área, que passam a ter dono único
+> ([ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md)); e o
+> bloqueio por tentativas deixa de enumerar usuários (bloqueio B13 do gate).
 
 ## Objetivo
 
-Permitir que uma pessoa crie uma conta na APPD-SJC, entre nela, receba um número de
-registro único e imutável, administre os próprios dados e apague a conta quando quiser —
-sem depender de e-mail, sem login social e sem que o sistema revele a terceiros quem é
-associado.
+Dar à conta da APPD-SJC uma senha guardada direito, uma sessão confiável e um número de
+registro único e imutável — sem depender de e-mail, sem login social e sem que o sistema
+revele a terceiros quem é associado.
+
+**Esta change não tem tela de cadastro e não tem tela da área.** A conta é criada pelo
+formulário de atendimento (ADR-012) e as telas de `/area/*` são de `area-do-associado` e
+`cracha-do-associado` (ADR-013). O que é daqui: a tabela `usuarios` como consumidora do
+contrato de dados, a senha, a sessão, `/entrar`, `/sair`, a redefinição de senha, a
+emissão do `numero_registro` e a **guarda de rota** de `/area/*`.
 
 ## Vocabulário (termos que teriam dupla leitura)
 
-- **Conta** — linha na tabela `usuarios`, com e-mail único e hash de senha.
-- **Associado** — pessoa com conta criada. Nesta change, criar conta é o único caminho.
+- **Conta** — linha na tabela `usuarios`, com e-mail e CPF únicos e hash de senha. Uma
+  conta é de **uma pessoa atendida** (ADR-012).
+- **Associado** — pessoa com conta criada, o que hoje acontece ao enviar o formulário de
+  atendimento.
 - **Sessão** — cookie selado por `nuxt-auth-utils`. Não há registro de sessão no servidor.
 - **Sessão expirada** — cookie ausente, adulterado ou vencido. Os três têm o mesmo efeito.
-- **Excluir conta** — ver REQ-35. Não é "apagar tudo": há dado retido por obrigação legal.
+- **Excluir conta** — o contrato está no `modelo-de-dados` REQ-28, e a tela é de
+  `area-do-associado`. Não é "apagar tudo": há dado retido por obrigação legal.
 - **Bloqueio de entrada** — recusa temporária de tentativas para um e-mail. Não desativa a
   conta nem exige liberação manual.
 - **Requisitos da senha** — o texto exibido **antes** de digitar. Nunca aparecem pela
@@ -33,13 +49,14 @@ associado.
 
 ### Grupo A — Dados e domínio
 
-**REQ-1** — O sistema DEVE criar a tabela `usuarios` no D1 através do Drizzle, com a
-migration gerada por `npm run db:generate` e versionada em `drizzle/migrations`. Aplicar
-schema por `push` direto no banco é proibido. A tabela DEVE conter, no mínimo:
-identificador interno, `numero_registro`, nome, data de nascimento, telefone, e-mail,
-hash da senha, parâmetros do hash, referência da foto (nula quando não houver), versão
-do termo de privacidade aceito, data/hora do aceite, data/hora de criação e data/hora da
-última alteração. A coluna de e-mail DEVE ter índice único.
+**REQ-1** — A tabela `usuarios` é definida pela spec
+[`modelo-de-dados`](../modelo-de-dados/spec.md) (REQ-7). **Esta change não cria, não
+renomeia e não remove coluna** — ela é a dona do **comportamento** de `usuarios`: quem
+grava a senha, quem emite o número, quem escreve `situacao`.
+
+Mudou em relação à v1: a referência da foto saiu (a foto tem tabela própria, dona de
+`cracha-do-associado`), entraram `cpf` e `situacao`, e o aceite do termo deixou de ser
+coluna aqui — ele mora em `consentimentos`, append-only.
 
 **REQ-2** — O sistema DEVE gerar o `numero_registro` no formato
 `APPD-<ano com 4 dígitos>-<sequencial com 5 dígitos, preenchido com zeros à esquerda>`,
@@ -60,7 +77,18 @@ sequencial e somar 1 sem restrição de unicidade não satisfaz este requisito.
 
 **REQ-5** — O sequencial DEVE reiniciar em `00001` a cada ano novo, e o limite de
 `99999` cadastros por ano DEVE ser tratado como erro explícito, não como estouro
-silencioso.
+silencioso. Cenário de aceite obrigatório (era órfão no gate): com o sequencial em
+`99999`, a conclusão seguinte falha com mensagem própria e evento em log, e **nenhuma
+linha parcial** permanece.
+
+**REQ-5a** — **Buraco na sequência é esperado e aceitável.** A retentativa do REQ-4 pula
+números; a exigência de sequência consecutiva do `cracha-do-associado` REQ-5 está
+revogada (ADR-013). Ninguém é prejudicado por um número faltando, e a alternativa —
+"ler o maior e somar 1" — quebra com cadastros simultâneos.
+
+**REQ-5b** — **Esta change é a dona única do `numero_registro`** (ADR-013).
+`cracha-do-associado` apenas o exibe. Existe uma função de emissão, num lugar só, e
+nenhuma outra rota calcula número.
 
 ### Grupo B — Senha
 
@@ -119,26 +147,35 @@ versionada, impressa em log, exposta em resposta ou ter valor padrão embutido n
 A aplicação DEVE recusar-se a subir se a chave estiver ausente ou menor que 32
 caracteres, com mensagem que diz o que fazer e não mostra o valor.
 
-### Grupo D — Cadastro
+### Grupo D — Criação da conta
 
-**REQ-16** — O cadastro em `/cadastro` DEVE pedir exatamente cinco campos obrigatórios —
-nome completo, data de nascimento, telefone, e-mail e senha — mais foto (opcional) e
-aceite da política de privacidade. Qualquer campo além destes exige decisão do dono do
-conteúdo e nova versão desta spec.
+**REQ-16** — **Não existe rota `/cadastro` separada.** A conta é criada pelo formulário
+de atendimento (ADR-012), que é dono da tela e dos campos. `/cadastro`, se existir,
+DEVE ser um redirecionamento 301 para `/atendimento/inscricao`.
 
-**REQ-17** — O cadastro NÃO PODE perguntar tipo de deficiência nem qualquer outro dado
-de saúde. Esse dado pertence ao formulário de atendimento, com consentimento próprio
-(Art. 11 da LGPD), na change `consentimento-e-privacidade`.
+> Duas telas criando conta com conjuntos de campo diferentes é exatamente o tipo de
+> divergência que reprovou as seis changes no gate. Se um dia a APPD quiser conta sem
+> pedido de atendimento, isso vira change nova, com a tela e os campos decididos ali —
+> não uma segunda porta improvisada aqui.
+
+**REQ-17** — Esta change NÃO PODE perguntar tipo de deficiência nem qualquer outro dado
+de saúde, e nenhuma rota daqui pode lê-lo ou devolvê-lo. Esse dado é do formulário de
+atendimento, com consentimento próprio (Art. 11 da LGPD).
 
 **REQ-18** — O e-mail DEVE ser normalizado antes de gravar (espaços removidos das
 pontas, convertido para minúsculas) e ser único. Tentativa de cadastro com e-mail já
 existente DEVE ser recusada com a mensagem "Este e-mail já tem uma conta. Entre ou
 recupere a sua senha.", acompanhada de link para `/entrar`.
 
-> **Vazamento aceito e registrado (R-6).** Esta mensagem revela que o e-mail é de um
-> associado. A alternativa sem vazamento depende de envio de e-mail, bloqueado por R-1.
-> A decisão é do dono do projeto (Q-1) e vira ADR. Se a decisão for não vazar, este
-> requisito é reescrito antes da implementação.
+> **Vazamento aceito e registrado (R-6) — `[condicional a Q-1]`.** Esta mensagem revela
+> que o e-mail é de um associado. A alternativa sem vazamento depende de envio de
+> e-mail, bloqueado por R-1. A decisão é do dono do projeto (Q-1) e vira ADR; enquanto
+> ela não sair, **o cenário de aceite que fixa esta redação fica marcado como
+> condicional** e não blinda a decisão (apontamento C.1 do gate).
+>
+> Vale para as **três** portas, não só esta: a mensagem do cadastro (aqui), a de troca
+> de e-mail (REQ-31, que saiu desta change) e o bloqueio por tentativas (REQ-26a, já
+> fechado). Fechar só uma é gastar usabilidade sem comprar privacidade.
 
 **REQ-19** — A validação DEVE ser espelhada cliente e servidor **com o mesmo schema
 Zod**, e o servidor NÃO PODE confiar em nada que venha do cliente. Um cadastro enviado
@@ -154,17 +191,14 @@ inválido" e "Erro no formulário" não satisfazem este requisito.
 **data/hora do aceite**. Caixa pré-marcada, aceite implícito por uso ou aceite por
 rolagem não satisfazem este requisito.
 
-**REQ-22** — A foto é **opcional** e NÃO PODE bloquear a criação da conta. Quando
-enviada, DEVE ser aceita nos formatos JPEG, PNG e WebP, com no máximo **5 MB** antes do
-processamento, gravada através da interface `ArmazenamentoFoto` (BLOB no D1, porque R2
-exige cartão) e substituível depois em `/area/cracha`. Arquivo fora de formato ou acima
-do limite DEVE ser recusado com mensagem que diz o limite e mantém o restante do
-formulário preenchido.
+**REQ-22** — ~~Foto no cadastro.~~ **Revogado** (ADR-013). Esta change **não recebe
+foto**. A foto é inteiramente de `cracha-do-associado`, com um limite só no projeto:
+400 × 500 px e no máximo 102.400 bytes (`modelo-de-dados` REQ-26). O limite de 5 MB que
+existia aqui criava fotos que o crachá recusava — era o bloqueio B11 do gate.
 
-**REQ-23** — Concluído o cadastro, o sistema DEVE exibir uma confirmação com o
-`numero_registro` em destaque, a frase de que ele não muda, e dois caminhos nomeados:
-ir para a área do associado e fazer o cadastro de atendimento. A confirmação NÃO PODE
-prometer envio de e-mail enquanto R-1 estiver aberto.
+**REQ-23** — A tela de confirmação é do `formulario-atendimento` (REQ-32 de lá). Desta
+change vem apenas a garantia de que o `numero_registro` exibido é o gravado, e a de que
+a confirmação NÃO PODE prometer envio de e-mail enquanto R-1 estiver aberto.
 
 ### Grupo E — Login e proteção
 
@@ -176,12 +210,28 @@ e-mail inexistente: "E-mail ou senha não confere. Confira e tente de novo." O c
 status HTTP, o corpo da resposta e o comportamento da tela DEVEM ser iguais nos dois
 casos. O e-mail digitado permanece preenchido; o campo de senha é limpo.
 
-**REQ-26** — O sistema DEVE recusar tentativas de login para um mesmo e-mail após **5
-tentativas falhas dentro de 15 minutos**, bloqueando por **15 minutos**. A tela de
-bloqueio DEVE dizer por quanto tempo, a que horas libera, e oferecer recuperação de
-senha e o telefone da secretaria. O contador DEVE ser persistido no D1 (não há KV nem
-Redis no projeto) e DEVE ser zerado em login bem-sucedido. O bloqueio NÃO PODE desativar
-a conta nem exigir intervenção humana para liberar.
+**REQ-26** — O sistema DEVE recusar tentativas de login após **5 tentativas falhas
+dentro de 15 minutos**, bloqueando por **15 minutos**. A tela de bloqueio DEVE dizer por
+quanto tempo, a que horas libera, e oferecer recuperação de senha e o telefone da
+secretaria. O contador DEVE ser persistido no D1 (não há KV nem Redis no projeto) e DEVE
+ser zerado em login bem-sucedido. O bloqueio NÃO PODE desativar a conta nem exigir
+intervenção humana para liberar.
+
+**REQ-26a** — **O contador vale para a chave digitada, exista conta ou não.** Cinco
+tentativas com um e-mail inexistente produzem exatamente o mesmo bloqueio, com a mesma
+tela, o mesmo status HTTP, o mesmo corpo e o mesmo horário de liberação que cinco
+tentativas com um e-mail existente.
+
+> **Bloqueio B13 do gate.** Na v1, o bloqueio era "para um mesmo e-mail" e só disparava
+> quando a conta existia — então cinco tentativas respondiam a mesma pergunta que o
+> REQ-25 protege. A proteção estava na mensagem de erro e o vazamento entrava pela porta
+> do lado, com o agravante de permitir **varrer uma lista** de e-mails, o que a mensagem
+> do cadastro não permite. Fechar isto é barato; deixar aberto é o pior dos dois mundos.
+
+**REQ-26b** — A chave do contador NÃO PODE ser o e-mail em texto claro na tabela. DEVE
+ser `HMAC-SHA-256(e-mail normalizado, segredo)`, pela mesma regra do IP
+(`modelo-de-dados` REQ-30) — senão o próprio mecanismo antienumeração vira uma lista de
+e-mails tentados, guardada em claro.
 
 **REQ-27** — O tempo de resposta do login NÃO PODE distinguir e-mail inexistente de
 senha errada de forma observável: quando o e-mail não existe, o sistema DEVE executar
@@ -209,52 +259,33 @@ projeto (risco R-1). Especificado para quando for liberado:
   que o cookie selado permitir, e o limite do REQ-12 DEVE ser dito na tela;
 - enquanto R-1 estiver aberto, nenhuma tela pode oferecer este fluxo nem prometer envio.
 
-### Grupo G — Área do associado
+### Grupo G — Guarda de rota (o que sobrou da área)
 
-> **Grupo em disputa (risco R-8).** A change `openspec/changes/area-do-associado/`,
-> escrita em paralelo, reivindica as mesmas quatro rotas e devolve a autenticação para
-> cá. Os requisitos abaixo ficam escritos, mas **suspensos** até o coordenador definir
-> qual das duas changes é a dona da área (T-0.5). Nenhum código de tela da área começa
-> antes disso.
+> **Disputa resolvida (risco R-8).** O
+> [ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md) deu `/area`,
+> `/area/dados`, `/area/inscricoes` e `/area/excluir` para `area-do-associado`, e
+> `/area/cracha` inteira para `cracha-do-associado`. Os **REQ-30 a REQ-35 da v1 estão
+> revogados**: eram cinco changes escrevendo contrato para as mesmas telas (bloqueios
+> B6, B20 e B22 do gate). Fica aqui só a guarda de rota, que é autenticação.
 
-**REQ-30** — O painel `/area` DEVE exibir nome e `numero_registro` da pessoa que entrou,
-e quatro blocos, cada um com título, uma linha de estado atual e uma ação nomeada que
-diz o que acontece: Minhas inscrições, Meu crachá, Meus dados e Excluir minha conta.
-Nenhum dado de saúde aparece em nenhum bloco.
+**REQ-30** — Esta change DEVE entregar a **guarda de rota** de `/area/*`: um middleware
+de servidor que verifica a sessão antes de qualquer handler de tela ou de API sob esse
+prefixo, conforme REQ-13. Ele é único e vale para as rotas das duas changes donas — nem
+`area-do-associado` nem `cracha-do-associado` implementam verificação própria.
 
-**REQ-31** — `/area/dados` DEVE exibir nome, data de nascimento, e-mail, telefone e
-endereço, cada um com rótulo visível, e permitir alterá-los com a mesma validação do
-cadastro (REQ-19). Alterar o e-mail DEVE respeitar a unicidade do REQ-18. O
-`numero_registro` aparece como leitura, nunca como campo editável (REQ-3).
+**REQ-31** — Alterar o e-mail da conta acontece em `/area/dados`, tela de
+`area-do-associado`. Desta change vem só a regra: a unicidade do REQ-18 continua valendo
+na alteração, e a mensagem de e-mail já usado é a **mesma** do cadastro — a mesma porta
+de vazamento, a mesma decisão pendente de Q-1, nunca duas redações diferentes.
 
-**REQ-32** — `/area/inscricoes` DEVE existir e funcionar **antes** de a change
-`formulario-atendimento` entregar o modelo de inscrição. Até lá, DEVE renderizar o
-estado vazio que oferece o próximo passo — título "Você ainda não pediu atendimento",
-explicação de uma linha, botão para o cadastro de atendimento e o telefone da
-secretaria. A leitura das inscrições DEVE ficar atrás de uma função de domínio única,
-que hoje devolve lista vazia e amanhã consulta a tabela, sem alterar a tela.
+**REQ-32** — Concluída a exclusão de conta (contrato em `modelo-de-dados` REQ-28), esta
+change DEVE: invalidar a sessão imediatamente, impedir novo login com aquele e-mail, e
+garantir que `numero_registro` seja preservado e **nunca reutilizado**. O que é apagado e
+o que é retido está no contrato de dados, escrito uma vez só — não aqui.
 
-**REQ-33** — `/area/cracha` DEVE, nesta change, apenas: exibir o `numero_registro`,
-indicar se há foto, permitir enviar ou substituir a foto conforme REQ-22, e dizer o que
-falta para o crachá ser impresso. A geração e o download do crachá são da change
-`cracha-do-associado`. A ausência de foto NÃO PODE bloquear nenhuma outra função.
-
-**REQ-34** — A exclusão de conta DEVE ser uma **página própria** (`/area/excluir`),
-nunca uma janela sobreposta, encontrável a partir do painel sem interação prévia, e
-DEVE exigir **duas caixas de seleção separadas**, ambas desmarcadas por padrão. O
-sistema NÃO PODE pedir que a pessoa digite uma palavra de confirmação. O botão de
-excluir é contornado em vermelho, nunca preenchido, e permanece desabilitado com o
-motivo dito em texto ao lado até as duas caixas estarem marcadas. A **ação preenchida da
-página é "Cancelar e voltar"**. A página DEVE exibir três blocos: o que é apagado, o que
-a associação precisa manter e o aviso de irreversibilidade.
-
-**REQ-35** — Concluída a exclusão, o sistema DEVE invalidar a sessão, impedir novo login
-com aquele e-mail e apagar da tabela `usuarios` os dados de identificação e contato e a
-foto. O `numero_registro` DEVE ser preservado como registro histórico e NÃO PODE ser
-reutilizado por outra pessoa. **O que exatamente é retido, e por quanto tempo, é questão
-aberta Q-2** e depende da APPD e do jurídico; a spec fixa a forma, e o conteúdo do bloco
-"o que a associação precisa manter" fica marcado `[A CONFIRMAR]` até a resposta chegar.
-Nenhuma linha de código de exclusão vai para produção antes de Q-2 ser respondida.
+**REQ-33** — `situacao` nasce `ativo` e o **único** escritor é o fluxo de exclusão, que
+grava `inativo` (`modelo-de-dados` REQ-12). Nenhuma outra rota desta change escreve nessa
+coluna. Inativação manual pela APPD é `painel-admin`, V1.1.
 
 ### Grupo H — Acessibilidade (bloqueante)
 
@@ -382,14 +413,30 @@ Cenário: Sequencial reinicia no primeiro cadastro do ano seguinte
   Quando um cadastro é concluído
   Então o número gerado é "APPD-2027-00001"
 
-Cenário: E-mail já cadastrado é recusado sem apagar as respostas
+Cenário: Sequencial esgotado no ano falha com erro explícito
+  # Cobre REQ-5, que era requisito órfão no gate
+  Dado que o sequencial do ano corrente chegou a "99999"
+  Quando mais um cadastro é concluído
+  Então a resposta é erro com mensagem própria, não estouro silencioso
+  E o evento é registrado em log
+  E nenhuma linha parcial permanece no banco
+
+Cenário: Buraco na sequência não é defeito
+  # Cobre REQ-5a — a retentativa do REQ-4 pula números por construção
+  Dado que a emissão colidiu uma vez e usou a segunda tentativa
+  Então existe um número não usado entre dois números emitidos
+  E nenhum teste falha por causa disso
+
+Cenário: [condicional a Q-1] E-mail já cadastrado é recusado sem apagar as respostas
   Dado que já existe conta com o e-mail "associada@example.com"
-  E que preenchi todos os campos, escolhi uma foto e marquei a privacidade
+  E que preenchi todos os campos e marquei a privacidade
   Quando eu envio o formulário
   Então nenhuma conta nova é criada
   E a mensagem exibida é "Este e-mail já tem uma conta. Entre ou recupere a sua senha."
   E existe um link para "/entrar"
-  E o nome, a data de nascimento, o telefone e a foto continuam preenchidos
+  E todas as respostas continuam preenchidas
+  # A redação acima fica condicional até Q-1 ser respondida: fixá-la antes da decisão
+  # blindaria uma escolha que ainda não foi feita (apontamento C.1 do gate).
 
 Cenário: E-mail é normalizado antes de gravar
   Dado que informei o e-mail "  Associada@Example.com  "
@@ -397,7 +444,7 @@ Cenário: E-mail é normalizado antes de gravar
   Então o valor gravado é "associada@example.com"
 
 Cenário: Senha curta é recusada e o requisito já estava dito antes de digitar
-  Dado que abri "/cadastro" e não digitei nada ainda
+  Dado que abri o formulário de cadastro e não digitei nada ainda
   Então o texto abaixo do rótulo do campo de senha já informa o mínimo de 10 caracteres
   Quando eu informo uma senha de 8 caracteres e envio o formulário
   Então a conta não é criada
@@ -411,23 +458,14 @@ Cenário: Senha longa com espaços é aceita
   Então a conta é criada
   E o login com a mesma senha funciona em seguida
 
-Cenário: Cadastro sem foto cria a conta normalmente
-  Dado que preenchi os cinco campos obrigatórios e marquei a privacidade
-  E que não escolhi nenhuma foto
-  Quando eu envio o formulário
-  Então a conta é criada com a referência de foto nula
-  E a tela de confirmação exibe o número de registro
-  E a área do associado indica como enviar a foto depois
-
-Cenário: Foto acima do limite é recusada sem derrubar o cadastro
-  Dado que escolhi um arquivo de imagem de 7 MB
-  Quando eu envio o formulário
-  Então a foto é recusada com mensagem que informa o limite de 5 MB
-  E os demais campos continuam preenchidos
-  E é possível concluir o cadastro sem foto
+Cenário: A criação de conta não pede nem aceita foto
+  Quando o cadastro é concluído
+  Então nenhuma linha é criada em "fotos"
+  E nenhum campo de arquivo existe na tela de cadastro
+  E o caminho para enviar a foto é "/area/cracha"
 
 Cenário: Aceite da privacidade é obrigatório e nasce desmarcado
-  Dado que abri "/cadastro"
+  Dado que abri o formulário de cadastro
   Então a caixa "Li e aceito a Política de Privacidade" está desmarcada
   Quando eu envio o formulário com todos os campos válidos e a caixa desmarcada
   Então a conta não é criada
@@ -579,32 +617,30 @@ Cenário: [condicional a R-1] Token de recuperação vale uma vez e por uma hora
   E o banco guarda apenas o hash do token, nunca o token em texto claro
 ```
 
-### Funcionalidade: Área do associado
+### Funcionalidade: Guarda de rota e efeitos da exclusão
 
-Cobre REQ-30 a REQ-33.
+Cobre REQ-30 a REQ-33. **As telas de `/area/*` não são desta change** (ADR-013): os
+cenários de painel, dados, inscrições, crachá e da página de exclusão vivem em
+`area-do-associado` e `cracha-do-associado`. Aqui só o que é autenticação.
 
 ```gherkin
-Cenário: O painel identifica a conta e mostra os quatro blocos
-  Dado que entrei com sessão válida
-  Quando eu abro "/area"
-  Então vejo o meu nome e o meu número de registro
-  E vejo os blocos Minhas inscrições, Meu crachá, Meus dados e Excluir minha conta
-  E cada bloco tem título, uma linha de estado atual e uma ação nomeada
-  E nenhum bloco exibe tipo de deficiência ou qualquer dado de saúde
+Cenário: Rota da área sem sessão é recusada no servidor
+  Dado que não tenho cookie de sessão
+  Quando peço "/area/dados" direto pela URL
+  Então sou levada para "/entrar" com a mensagem de sessão terminada
+  E o handler da tela não chega a executar
+  E nenhuma consulta ao banco foi feita com dado da conta
 
-Cenário: Inscrições vazias oferecem o próximo passo
-  Dado que ainda não fiz nenhum cadastro de atendimento
-  Quando eu abro "/area/inscricoes"
-  Então vejo o título "Você ainda não pediu atendimento"
-  E vejo o botão que leva ao Cadastro de Atendimento
-  E vejo o telefone (12) 3346-0605
-  E a página não exibe erro nem tela em branco
+Cenário: A guarda é uma só, para as rotas das duas changes donas
+  Quando percorro todas as rotas sob "/area/"
+  Então todas passam pelo mesmo middleware de sessão
+  E nenhuma rota implementa verificação própria
 
-Cenário: Alterar meus dados usa a mesma validação do cadastro
-  Dado que estou em "/area/dados"
-  Quando eu troco o telefone por um valor inválido e salvo
-  Então a alteração é recusada com o mesmo erro que o cadastro daria
-  E os demais campos continuam com os valores anteriores
+Cenário: API da área sem sessão responde 401 sem revelar existência
+  Dado que não tenho sessão válida
+  Quando chamo uma API sob "/api/area/" com um identificador que existe
+  E depois com um identificador que não existe
+  Então as duas respostas são 401, com corpo idêntico
 
 Cenário: O número de registro não pode ser alterado
   Dado que estou autenticada
@@ -613,66 +649,32 @@ Cenário: O número de registro não pode ser alterado
   E o valor no banco continua o mesmo
   E o evento é registrado em log
 
-Cenário: Trocar o e-mail respeita a unicidade
+Cenário: [condicional a Q-1] Trocar o e-mail respeita a unicidade
   Dado que existe outra conta com o e-mail "outra@example.com"
   Quando eu tento alterar o meu e-mail para "outra@example.com"
-  Então a alteração é recusada com mensagem específica do campo
+  Então a alteração é recusada com a MESMA mensagem do cadastro
+  # Mesma porta de vazamento, mesma decisão pendente: nunca duas redações diferentes.
 
-Cenário: Sem foto, o crachá explica o efeito e o resto continua funcionando
-  Dado que a minha conta não tem foto
-  Quando eu abro "/area/cracha"
-  Então vejo o meu número de registro
-  E vejo que falta a foto para o crachá ser impresso
-  E vejo a ação de enviar a foto
-  E os demais blocos da área continuam acessíveis
-```
+Cenário: Concluída a exclusão, a sessão morre e o e-mail não volta a entrar
+  Dado que o fluxo de exclusão de "/area/excluir" foi concluído
+  Então a minha sessão é encerrada imediatamente
+  E tentar entrar com o e-mail anterior falha com a mensagem única do login
+  E o meu número de registro permanece registrado
+  E ele não é atribuído a nenhuma conta nova
 
-### Funcionalidade: Exclusão de conta
-
-Cobre REQ-34 e REQ-35.
-
-```gherkin
-Cenário: Excluir conta é encontrável sem interação prévia
-  Dado que abri "/area"
-  Então o bloco "Excluir minha conta" está visível sem abrir menu ou seção avançada
-  E o botão do bloco é contornado em vermelho, não preenchido
-
-Cenário: A confirmação é página própria com dois passos
-  Dado que aciono "Excluir minha conta"
-  Então sou levada para a página "/area/excluir"
-  E não é aberta nenhuma janela sobreposta
-  E vejo os blocos "O que é apagado", "O que a associação precisa manter" e o aviso de
-    que a exclusão não pode ser desfeita
-  E vejo duas caixas de seleção separadas, ambas desmarcadas
-  E a página não pede que eu digite nenhuma palavra de confirmação
-  E a ação preenchida da página é "Cancelar e voltar"
-
-Cenário: Com uma só caixa marcada o botão continua desabilitado
-  Dado que estou em "/area/excluir"
-  Quando eu marco apenas a primeira caixa
-  Então o botão "Excluir minha conta agora" continua desabilitado
-  E ao lado dele há o texto "Marque as duas caixas para liberar"
-
-Cenário: Com as duas caixas marcadas a exclusão é concluída
-  Dado que estou em "/area/excluir" com as duas caixas marcadas
-  Quando eu aciono "Excluir minha conta agora"
-  Então a minha sessão é encerrada
-  E o meu nome, e-mail, telefone, data de nascimento e foto não estão mais na tabela
-  E tentar entrar com o meu e-mail anterior falha com a mensagem única do login
-  E o meu número de registro permanece registrado e não é atribuído a outra pessoa
-
-Cenário: Cancelar não apaga nada
-  Dado que estou em "/area/excluir" com as duas caixas marcadas
-  Quando eu aciono "Cancelar e voltar"
-  Então volto para "/area"
-  E a minha conta continua existindo com todos os dados
+Cenário: A situação só é escrita pela exclusão
+  Dado uma conta recém-criada
+  Então "situacao" é "ativo"
+  Quando qualquer outra rota desta change é executada
+  Então "situacao" continua "ativo"
+  E só o fluxo de exclusão a grava como "inativo"
 ```
 
 ### Funcionalidade: Acessibilidade
 
-Cobre REQ-36 e REQ-37. Executar em `/cadastro`, `/entrar`, `/area`, `/area/dados`,
-`/area/inscricoes`, `/area/cracha` e `/area/excluir`, nos estados vazio, com erro,
-enviando e concluído.
+Cobre REQ-36 e REQ-37. Executar nas telas **desta change** — `/entrar`, `/sair` e a de
+redefinição de senha —, nos estados vazio, com erro, enviando e concluído. As telas de
+`/area/*` são auditadas nas changes donas, com a mesma régua.
 
 ```gherkin
 Esquema do Cenário: Rótulo visível e obrigatoriedade dita em palavra
@@ -682,13 +684,12 @@ Esquema do Cenário: Rótulo visível e obrigatoriedade dita em palavra
   E cada campo obrigatório é marcado por asterisco e pela palavra "obrigatório"
 
   Exemplos:
-    | rota          |
-    | /cadastro     |
-    | /entrar       |
-    | /area/dados   |
+    | rota                  |
+    | /entrar               |
+    | /recuperar-senha      |
 
 Cenário: Erro é ligado ao campo e anunciado
-  Dado que envio "/cadastro" com dois campos inválidos
+  Dado que envio "/entrar" com dois campos inválidos
   Então o resumo de erros tem role="alert" e recebe o foco
   E cada campo com erro tem aria-invalid="true"
   E a mensagem de cada erro está ligada ao campo por aria-describedby
@@ -701,9 +702,10 @@ Cenário: Foco visível e ordem de foco
   E a ordem de foco é igual à ordem visual
   E não existe ponto em que o foco fique preso
 
-Cenário: Alvo de toque mínimo de 44px
+Cenário: Alvo de toque mínimo de 44px com folga de 8px
   Dado que abro a página em viewport de 360px de largura
   Então todo botão, link de ação e caixa de seleção tem no mínimo 44 por 44 pixels
+  E a distância entre alvos vizinhos é de no mínimo 8 pixels
   E o botão "Mostrar senha" tem no mínimo 44 por 44 pixels e atributo aria-pressed
   E o rótulo de cada caixa de seleção é clicável
 
@@ -719,50 +721,86 @@ Cenário: Verificação automatizada sem violação
   Dado que executo o axe em cada rota desta change, em cada estado
   Então não há violação de nível A nem AA
   E o resultado é bloqueante para o gate de entrega
+  # Régua única do projeto, na configuração do axe no CI, nunca repetida por change.
+```
+
+### Funcionalidade: Segredo não vaza por canal lateral
+
+Cobre REQ-10, que era requisito órfão no gate — o mais importante da change e o único
+sem cenário escrito.
+
+```gherkin
+Cenário: Senha, hash e sal não aparecem em lugar nenhum
+  Dado um cadastro concluído com a senha "senha-fictícia-de-teste"
+  Quando inspeciono o log de aplicação, o log de erro, o corpo de toda resposta HTTP,
+    toda URL gerada e todo campo oculto de formulário
+  Então nenhum deles contém a senha
+  E nenhum deles contém o hash
+  E nenhum deles contém o sal
+  E o log identifica a pessoa pelo identificador interno ou pelo número de registro
+  E o log não contém o e-mail completo
+
+Cenário: Exceção não vaza segredo na mensagem
+  Dado que a verificação de senha lança exceção
+  Quando o erro é registrado e respondido
+  Então a mensagem não contém a senha nem o hash
+  E a resposta HTTP é genérica, sem stack trace
 ```
 
 ---
 
 ## Rastreabilidade
 
-| REQ             | Coberto por (funcionalidade) | Tarefa   |
-| --------------- | ---------------------------- | -------- |
-| REQ-1 a REQ-5   | Cadastro de conta            | T-2, T-3 |
-| REQ-6 a REQ-10  | Cadastro, Login              | T-1, T-5 |
-| REQ-11 a REQ-15 | Login, sessão e logout       | T-4, T-8 |
-| REQ-16 a REQ-23 | Cadastro de conta            | T-5, T-6 |
-| REQ-24 a REQ-27 | Login, sessão e logout       | T-7      |
-| REQ-28, REQ-29  | Recuperação de senha         | T-9      |
-| REQ-30 a REQ-33 | Área do associado            | T-10     |
-| REQ-34, REQ-35  | Exclusão de conta            | T-11     |
-| REQ-36, REQ-37  | Acessibilidade               | T-12     |
+| REQ                | Coberto por (funcionalidade)       | Tarefa   |
+| ------------------ | ---------------------------------- | -------- |
+| REQ-1 a REQ-5b     | Criação da conta                   | T-2, T-3 |
+| REQ-6 a REQ-10     | Criação da conta, Login            | T-1, T-5 |
+| REQ-11 a REQ-15    | Login, sessão e logout             | T-4, T-8 |
+| REQ-16 a REQ-23    | Criação da conta (no formulário)   | T-5, T-6 |
+| REQ-24 a REQ-27    | Login, sessão e logout             | T-7      |
+| REQ-28, REQ-29     | Recuperação de senha               | T-9      |
+| REQ-30 a REQ-33    | Guarda de rota e exclusão          | T-10     |
+| REQ-36, REQ-37     | Acessibilidade                     | T-12     |
+| REQ-10 (era órfão) | Segredo não vaza por canal lateral | T-13     |
 
 ---
 
 ## Definition of Ready — auditoria desta spec
 
-| Item                          | Situação                                              |
-| ----------------------------- | ----------------------------------------------------- |
-| Spec sem ambiguidade pendente | **Não** — três bloqueios abertos, abaixo              |
-| Priorizada                    | Do coordenador; não é decisão desta spec              |
-| Critério de aceite testável   | **Sim** — 44 cenários Gherkin, todos ligados a um REQ |
+| Item                          | Situação                                                  |
+| ----------------------------- | --------------------------------------------------------- |
+| Spec sem ambiguidade pendente | **Não** — três bloqueios abertos, abaixo                  |
+| Priorizada                    | Do coordenador; não é decisão desta spec                  |
+| Critério de aceite testável   | **Sim** — todo cenário Gherkin ligado a um REQ, sem órfão |
 
 **Bloqueios que impedem a spec de virar task por inteiro:**
 
+- `[dependência]` **`modelo-de-dados` precisa fechar antes.** Esta change não cria
+  coluna. Dono: **Arthur Barbero**.
 - `[escopo] Q-1` — REQ-18 assume que o cadastro revela e-mail já existente (R-6).
-  Precisa de decisão registrada em ADR. Dono: **Arthur Barbero**.
-- `[escopo] Q-2` — REQ-35 não pode ir para produção sem a lista do que a APPD é obrigada
-  a reter e por quanto tempo. Dono: **APPD / jurídico**, levado por Arthur Barbero.
+  Precisa de decisão registrada em ADR. Enquanto não sair, os cenários que fixam a
+  redação estão marcados `[condicional a Q-1]`. Dono: **Arthur Barbero**.
+- `[escopo] Q-2` — o que a APPD é obrigada a reter, e por quanto tempo. O **contrato de
+  exclusão** já está fechado (`modelo-de-dados` REQ-28); o que falta é o **prazo de
+  retenção** exibido na tela. Dono: **APPD / jurídico**, levado por Arthur Barbero.
 - `[ambiguidade] REQ-7` — `N`, `r` e `p` do scrypt são `<a definir>` até a medição e o
   ADR-005. Dono: **arquiteto**. Bloqueia a conclusão, não o início.
-- `[escopo] Q-3` — onde persistir o contador de tentativas do REQ-26. Dono: **arquiteto**.
-- `[escopo] R-7` — nenhuma tela desta change tem design aprovado no Claude Design.
-  Dono: **Arthur Barbero**. Bloqueia toda tarefa de tela.
-- `[ambiguidade] REQ-27` — `<limite_ms>` precisa de valor medido, não estimado.
+- `[ambiguidade] REQ-27` — `<limite_ms>` precisa de valor medido, não estimado, **e** de
+  política de retentativa: 50 medições de mediana num runtime compartilhado, sem isso,
+  é teste instável por construção e será desligado no terceiro mês (apontamento do gate).
   Dono: **arquiteto**, junto com T-1.
-- `[escopo] R-8` — REQ-30 a REQ-35 estão duplicados na change `area-do-associado`.
-  Uma das duas precisa ser a dona. Dono: **coordenador com Arthur Barbero**.
+- `[escopo] R-7` — as telas desta change (`/entrar`, redefinição de senha) não têm design
+  aprovado no Claude Design. Dono: **Arthur Barbero**. Bloqueia toda tarefa de tela.
+- `[bloqueio de publicação] R-1` — **não há caminho de custo zero para enviar e-mail ou
+  SMS**, e com o cadastro embutido (ADR-012) toda pessoa passa a ter senha, logo toda
+  pessoa vai esquecê-la. O caminho humano do REQ-28 cobre o mínimo; o fluxo por e-mail
+  do REQ-29 não vai ao ar sem isso. Pesquisa em aberto no `PROGRESS.md`.
+  Dono: **Arthur Barbero**.
+- ~~`[escopo] Q-3` — onde persistir o contador de tentativas.~~ **Resolvido**: D1, com a
+  chave em HMAC (REQ-26b). Não há KV nem Redis no projeto.
+- ~~`[escopo] R-8` — REQ-30 a REQ-35 duplicados em `area-do-associado`.~~ **Resolvido**
+  pelo ADR-013: aquela change é a dona das telas, esta fica com a guarda de rota.
 
-**Veredito: NÃO-READY para as tarefas de tela e para T-11.** As tarefas de fundação
-(T-1 a T-5, T-7, T-8) estão prontas para começar assim que Q-3 tiver resposta. Ver
-`tasks.md` para o sequenciamento.
+**Veredito: NÃO-READY** enquanto `modelo-de-dados` não fechar e R-1 não tiver caminho.
+As tarefas de fundação (T-1 a T-5, T-7, T-8) começam assim que o contrato de dados
+estiver aplicado. Ver `tasks.md` para o sequenciamento.

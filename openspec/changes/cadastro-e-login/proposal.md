@@ -1,4 +1,4 @@
-# Proposal: Cadastro, login e área do associado
+# Proposal: Conta, senha e sessão
 
 - ID: PROP-20260805-cadastro-e-login Status: em discussão
 - Origem: `openspec/README.md` (change 3 das previstas para a Fase 3) · ADR-002
@@ -31,33 +31,34 @@ com que critério, e o que ele explicitamente não faz.
 
 ## Escopo (o que entra)
 
-- Tabela `usuarios` no D1, via Drizzle, com **migration versionada** (`db:generate`),
-  nunca `push` direto no banco.
-- **Cadastro de conta** em `/cadastro`: nome, data de nascimento, telefone, e-mail e
-  senha, mais foto opcional e aceite da política de privacidade com versão e data/hora.
+- O **comportamento** da tabela `usuarios`: quem grava a senha, quem emite o número,
+  quem escreve `situacao`. A tabela em si é de `modelo-de-dados`.
 - **Geração do `numero_registro`** no formato `APPD-<ano>-<sequencial de 5 dígitos>`,
-  único e imutável, ao concluir o cadastro.
-- **Login** em `/entrar`, **logout**, e guarda de rota para `/area/*`.
-- **Limite de tentativas de login** com bloqueio temporário.
+  único e imutável, ao concluir o cadastro. **Dono único** no projeto (ADR-013).
+- **Login** em `/entrar`, **logout**, e a **guarda de rota** de `/area/*` — uma só, para
+  as rotas das duas changes donas.
+- **Limite de tentativas de login** com bloqueio temporário, que **não enumera usuários**
+  (bloqueio B13 do gate).
 - **Sessão em cookie selado** com `nuxt-auth-utils`, chave em Cloudflare Secret
   (`NUXT_SESSION_PASSWORD`), nunca versionada.
 - **Recuperação de senha**: caminho humano pela secretaria (garantido) e fluxo por
   e-mail **condicional** à existência de uma solução de custo zero — ver risco R-1.
-- **Área do associado**: painel `/area` e as quatro rotas `/area/dados`,
-  `/area/inscricoes`, `/area/cracha` e `/area/excluir`.
-- **Exclusão de conta** em página própria, com dupla confirmação por caixas de seleção.
 - Fixação e medição dos **parâmetros do scrypt** (N, r, p) contra o limite de CPU do
-  Worker, com o resultado registrado em ADR.
+  Worker, com o resultado registrado em ADR-005.
+
+**Saiu do escopo na v2** (ADR-012 e ADR-013): a tela de cadastro — a conta nasce no
+formulário de atendimento; a foto — é de `cracha-do-associado`; e as quatro telas de
+`/area/*` — são de `area-do-associado`.
 
 ## Fora de escopo (o que NÃO entra)
 
-- **O crachá em si** — layout, geração da imagem, download para impressão e a página
-  pública `/verificar/<numero>`. Fica na change `cracha-do-associado`. Aqui existe
-  apenas o bloco "Meu crachá" no painel, como ponto de entrada e como destino do envio
-  de foto.
-- **O formulário de atendimento** e o modelo de dados de inscrição. Fica na change
-  `formulario-atendimento`. Aqui, "Minhas inscrições" entrega apenas o estado vazio
-  funcional descrito em REQ-30.
+- **As tabelas** — colunas, tipos e restrições são de `modelo-de-dados`.
+- **A tela que cria a conta** — é o formulário de atendimento (ADR-012). `/cadastro`
+  vira redirecionamento 301 para lá.
+- **A foto** — envio, recorte, limite e armazenamento são inteiramente de
+  `cracha-do-associado` (ADR-013), junto com `/area/cracha` e `/verificar/<numero>`.
+- **As telas de `/area/*`** — painel, dados, inscrições e exclusão são de
+  `area-do-associado` (ADR-013). Daqui vem só a guarda de rota.
 - **O texto da política de privacidade**, a página `/privacidade`, a página "Seus
   direitos" e o registro de consentimento para **dado sensível** (tipo de deficiência,
   Art. 11 da LGPD). Fica na change `consentimento-e-privacidade`. Aqui só existe o
@@ -74,21 +75,19 @@ com que critério, e o que ele explicitamente não faz.
 
 ## Impacto
 
-- **Toca dado pessoal?** Sim. Nome, data de nascimento, telefone, e-mail, endereço e
-  foto de pessoas com deficiência. **Não** toca dado sensível: tipo de deficiência não
-  é perguntado nem exibido em nenhuma tela desta change. Gate de revisão antes do
+- **Toca dado pessoal?** Sim. Nome, data de nascimento, telefone, e-mail, CPF e endereço
+  de pessoas com deficiência. **Não** toca dado sensível: tipo de deficiência não é
+  perguntado, lido nem exibido em nenhuma rota desta change. Gate de revisão antes do
   deploy.
 - **Toca produção / custo real?** Não há produção ainda (nada deployado, conta
   Cloudflare inexistente). Custo permanece R$ 0: nenhum serviço novo é contratado. Se a
   solução de e-mail exigir cartão, ela **não entra** — ver R-1.
-- **Arquitetura/stack afetada?** A decisão de fundo já está tomada (ADR-002). Três
-  decisões novas nascem aqui e **são do arquiteto**, não desta spec: os parâmetros do
-  scrypt (vira ADR-005), onde persistir o contador de tentativas de login, e o destino
-  dos dados na exclusão de conta (apagar versus anonimizar).
-- **Absorção de escopo declarada:** o `openspec/README.md` prevê `area-do-associado`
-  como change 6, separada. Por decisão do dono nesta change, a área do associado entra
-  **aqui**. O README precisa ser atualizado para não ficar com uma change fantasma na
-  lista — tarefa T-14.
+- **Arquitetura/stack afetada?** A decisão de fundo já está tomada (ADR-002). Resta uma
+  decisão do arquiteto: os parâmetros do scrypt (vira ADR-005). As outras duas da v1
+  foram resolvidas — o contador de tentativas vai para o D1 com chave em HMAC, e o
+  destino dos dados na exclusão está no `modelo-de-dados` REQ-28.
+- ~~**Absorção de escopo declarada**~~ — **desfeita** pelo ADR-013: vale a fronteira do
+  `openspec/README.md`, e `area-do-associado` continua sendo change própria.
 - **Conflito de origem declarado:** `shared/utils/registro.ts` e a seção "Dívidas
   conscientes" do `PROGRESS.md` afirmam que a spec do número de registro nasceria em
   `cracha-do-associado`. Isso muda: o número é **gerado no cadastro**, então a spec de
@@ -99,11 +98,11 @@ com que critério, e o que ele explicitamente não faz.
   - `shared/utils/registro.ts` — ganha a regra de verdade, além da formatação.
   - Dependência de biblioteca nova: `nuxt-auth-utils` (ainda não está no
     `package.json`). Precisa de verificação no workerd antes de virar tarefa fechada.
-  - Interface `ArmazenamentoFoto` (CLAUDE.md) — a foto vai como BLOB no D1, porque R2
-    exige cartão.
-  - Design das telas `/cadastro`, `/entrar` e `/area/*`: os prompts existem em
-    `docs/prompts-design/`, mas **nenhuma delas foi gerada e aprovada no Claude
-    Design**. Pela regra central do CLAUDE.md, nenhuma tela é implementada antes disso.
+  - `modelo-de-dados` — **dependência dura**: as tabelas precisam existir antes.
+  - `formulario-atendimento` — chama a emissão do número e o hash da senha desta change.
+  - Design das telas desta change (`/entrar`, redefinição de senha): os prompts existem
+    em `docs/prompts-design/`, mas **nenhuma foi gerada e aprovada no Claude Design**.
+    Pela regra central do CLAUDE.md, nenhuma tela é implementada antes disso.
 
 ## Premissas e questões abertas
 
@@ -114,11 +113,16 @@ com que critério, e o que ele explicitamente não faz.
 - **P-3**: a APPD aceita que a recuperação de senha passe pela secretaria por telefone
   enquanto não houver e-mail. **A confirmar com a associação** — é trabalho humano
   recorrente que estamos criando para elas.
+- **P-4 (nova, ADR-012)**: toda pessoa atendida passa a ter senha, porque o formulário
+  cria a conta. Isso multiplica o volume de "esqueci minha senha" e torna o R-1 mais
+  caro do que era quando a conta era opcional.
 - **Q-1** (dono do projeto): o cadastro revela que um e-mail já existe? Ver risco R-6.
-- **Q-2** (APPD + jurídico): o que exatamente a associação é obrigada a manter após a
-  exclusão da conta, e por quanto tempo? Já marcado `[A CONFIRMAR]` no prompt de design.
-- **Q-3** (arquiteto): contador de tentativas de login em coluna da própria tabela
-  `usuarios` ou em tabela separada? Não há KV nem Redis — a decisão é entre D1 e nada.
+- **Q-2** (APPD + jurídico): **o prazo de retenção** do que a associação mantém após a
+  exclusão. O que é apagado já está fechado (`modelo-de-dados` REQ-28); falta o prazo
+  que a tela exibe.
+- ~~**Q-3** (arquiteto): onde persistir o contador de tentativas.~~ **Respondida**: D1,
+  em tabela própria, com a chave em HMAC (REQ-26b) — senão o mecanismo antienumeração
+  vira ele mesmo uma lista de e-mails em texto claro.
 
 ## Riscos registrados
 
@@ -131,14 +135,13 @@ com que critério, e o que ele explicitamente não faz.
   que o logout não faz).
 - **R-4 · média** — o sequencial do número de registro pode colidir em cadastros
   simultâneos. Tratado em REQ-4, com restrição de unicidade no banco.
-- **R-5 · média** — exclusão de conta versus o dado que a associação precisa reter (Q-2).
-  Tratado em REQ-35, que não vai para produção sem a resposta.
+- **R-5 · média** — prazo de retenção após a exclusão ainda em aberto (Q-2). O contrato
+  do que é apagado está fechado; a tela não vai ao ar sem o prazo.
 - **R-6 · média** — o cadastro revela quem já é associado. Tratado em REQ-18 e detalhado
-  abaixo.
-- **R-7 · alta** — nenhuma tela desta change tem design aprovado no Claude Design.
-  Bloqueia T-6, T-10 e T-11.
-- **R-8 · alta** — **colisão de escopo com a change `area-do-associado`**, escrita em
-  paralelo nesta mesma data. Ver a seção abaixo.
+  abaixo. **Três portas, não uma** — ver a seção.
+- **R-7 · alta** — as telas desta change não têm design aprovado no Claude Design.
+- ~~**R-8 · alta** — colisão de escopo com `area-do-associado`.~~ **Fechado** pelo
+  ADR-013: vale a fronteira do README, e esta change fica com a guarda de rota.
 
 ### R-1 — o bloqueante
 
@@ -148,13 +151,20 @@ custo zero definida** para isso. O projeto opera com R$ 0 e sem cartão cadastra
 change:
 
 1. O caminho **humano** é o caminho garantido: a secretaria refaz a senha por telefone.
-   Ele não é plano B nem letra miúda — está especificado em REQ-25 e aparece em toda
+   Ele não é plano B nem letra miúda — está especificado em REQ-28 e aparece em toda
    tela de falha de login.
-2. O fluxo por e-mail está **especificado e condicional** (REQ-26): a implementação só
+2. O fluxo por e-mail está **especificado e condicional** (REQ-29): a implementação só
    começa quando existir um caminho de custo zero aprovado pelo dono. Até lá, nenhuma
    tela promete e-mail enviado, e o botão do fluxo não é publicado.
-3. Nada nesta change fica bloqueado por R-1 além do próprio REQ-26. Cadastro, login,
-   logout, área e exclusão seguem normalmente.
+3. Nada nesta change fica bloqueado por R-1 além do próprio REQ-29. Login, logout e a
+   guarda de rota seguem normalmente.
+
+**O que mudou com o ADR-012, e é sério:** quando a conta era opcional, o caminho humano
+atendia poucas pessoas. Agora **toda** pessoa que pede atendimento tem senha, e o volume
+de esquecimento passa a ser proporcional ao cadastro inteiro — trabalho recorrente que
+estamos criando para uma secretaria pequena. Por isso a pesquisa de e-mail ou SMS
+gratuito virou item nomeado do `PROGRESS.md`, com a restrição escrita: custo zero, sem
+cartão, e nenhuma conta externa criada sem o dono mandar.
 
 ### R-6 — a inconsistência que a spec expõe
 
@@ -169,34 +179,31 @@ que a conta já existe) **depende de e-mail** e cai dentro de R-1. Portanto, com
 existe hoje, as opções reais são duas: aceitar o vazamento no cadastro, ou entregar uma
 mensagem genérica que deixa a pessoa sem saber o que fazer.
 
-**Recomendação do especificador**: aceitar e registrar, porque o custo de usabilidade da
-alternativa recai sobre quem tem menos facilidade digital. **A decisão é do dono do
-projeto (Q-1)** e vira ADR — não é da spec decidir. REQ-18 está escrito com a
-recomendação e é revisado se a decisão for outra.
+**São três portas, não uma** (apontamento C.2 do gate): a mensagem do cadastro, a de
+troca de e-mail em `/area/dados`, e — a pior — o bloqueio por tentativas. A terceira já
+foi fechada no REQ-26a: o contador vale para a chave digitada, exista conta ou não.
+Ela era a mais grave porque permitia **varrer uma lista** de e-mails, enquanto a do
+cadastro exige que o atacante já saiba o alvo.
 
-### R-8 — duas changes disputam a área do associado
+**Recomendação do especificador**: aceitar o vazamento no cadastro e na troca de e-mail,
+com a mesma redação nos dois, **e** manter o bloqueio fechado. O custo de usabilidade da
+mensagem genérica recai sobre quem tem menos facilidade digital; o custo de privacidade
+do bloqueio aberto recai sobre todo mundo. **A decisão é do dono (Q-1)** e vira ADR — não
+é da spec decidir. Enquanto ela não sair, os cenários que fixam a redação estão marcados
+`[condicional a Q-1]`.
 
-Esta change recebeu a área do associado no escopo por instrução do dono. Ao mesmo tempo,
-existe em `openspec/changes/area-do-associado/` uma change própria que reivindica as
-mesmas quatro rotas (`/area`, `/area/dados`, `/area/inscricoes`, `/area/excluir`) e que,
-no seu fora-de-escopo, devolve a autenticação para cá. **As duas não podem valer ao mesmo
-tempo**: dois contratos sobre a mesma tela produzem código que obedece a um e reprova no
-gate do outro.
+### R-8 — resolvido
 
-Estado registrado, sem decisão unilateral:
+A disputa pela área do associado, aberta quando duas changes foram escritas em paralelo
+reivindicando as mesmas quatro rotas, foi decidida pelo
+[ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md): vale a
+fronteira do `openspec/README.md`. `area-do-associado` é dona das telas,
+`cracha-do-associado` é dona de `/area/cracha`, e esta change fica com a guarda de rota
+e a sessão. As tarefas T-10 e T-11 saem daqui.
 
-- REQ-30 a REQ-35 desta spec e a change `area-do-associado` **se sobrepõem quase por
-  inteiro**. A vizinha é mais detalhada em estados de tela (carregando, sem foto,
-  vocabulário de status); esta é mais detalhada no efeito da exclusão sobre os dados.
-- A fronteira que a vizinha propõe — autenticação aqui, área lá — é a mesma do
-  `openspec/README.md` original.
-- **Recomendação do especificador**: manter uma só dona da área. Se a decisão for a
-  vizinha, esta change perde REQ-30 a REQ-35 e fica com a guarda de rota de `/area/*`
-  (REQ-13) e o vínculo de sessão — e as tarefas T-10 e T-11 saem daqui. Se a decisão for
-  esta, a pasta `area-do-associado` é apagada antes de qualquer código.
-- **A decisão é do coordenador com o dono do projeto (T-0.5)**, não da spec. Enquanto ela
-  não sair, **nenhuma das duas changes libera tarefa de tela da área** — o risco não é
-  escrever duas vezes, é implementar contra o contrato errado.
+O registro fica porque a recomendação do especificador — "manter uma só dona da área" —
+era a certa, e o padrão que gerou o problema está anotado no vault como
+`aprendizados/specs-em-paralelo-colidem`.
 
 ## Próximo passo no fluxo
 
