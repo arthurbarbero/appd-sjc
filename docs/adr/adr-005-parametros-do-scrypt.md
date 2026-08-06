@@ -1,8 +1,13 @@
 # ADR-005: Parâmetros do scrypt e o teto de CPU do Workers
 
-Status: **PROPOSTO — aguarda decisão do dono.** Não é decisão tomada.
+Status: **Aceito** — opção F, decidida por Arthur Barbero em 2026-08-06.
 Data da medição: 2026-08-06
 Medição: Claude Code · Decisor: Arthur Barbero
+
+> **Decisão do dono, 2026-08-06:** vale a **opção F** — o cálculo caro roda no navegador e
+> o servidor guarda um `SHA-256` com sal próprio. O dono recusou o plano pago e recusou
+> pagar o custo de CPU no servidor. A opção B (PBKDF2 no servidor) fica sem objeto e não
+> precisa mais ser medida.
 
 ## Contexto
 
@@ -55,25 +60,70 @@ No plano gratuito do Workers, as duas não cabem juntas com scrypt.
 
 ## Opções, com o que cada uma custa
 
-| Opção                                                   | O que ganha                                 | O que custa                                                                                                                   |
-| ------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **A. Plano pago do Workers** (US$ 5/mês)                | scrypt no parâmetro do OWASP, sem gambiarra | **quebra a restrição inegociável**: exige cartão. Decisão do dono, não do projeto                                             |
-| **B. PBKDF2 pelo WebCrypto**                            | é o que a plataforma oferece nativamente    | o workerd **limita a 100.000 iterações**; o OWASP pede 210.000 para SHA-512. Fica abaixo do padrão atual, e não dá para subir |
-| **C. scrypt fraco, dentro dos 10 ms**                   | mantém custo zero e a biblioteca já provada | `N = 4.096` é 4× abaixo do mínimo do OWASP, e ainda estoura o teto. Pior dos dois mundos                                      |
-| **D. Hash em duas etapas: cliente + servidor**          | tira o custo caro do Worker                 | hash no cliente vira a senha; se o banco vazar, o hash **é** a credencial. Não resolve, muda de lugar                         |
-| **E. Autenticação sem senha** (link por e-mail, código) | some o problema do KDF                      | **depende de enviar e-mail ou SMS**, que é o risco R-1, hoje sem caminho de custo zero. Troca um bloqueio por outro           |
+| Opção                                                   | O que ganha                                                      | O que custa                                                                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **A. Plano pago do Workers** (US$ 5/mês)                | scrypt no parâmetro do OWASP, sem gambiarra                      | **quebra a restrição inegociável**: exige cartão. Decisão do dono, não do projeto                                             |
+| **B. PBKDF2 pelo WebCrypto**                            | é o que a plataforma oferece nativamente                         | o workerd **limita a 100.000 iterações**; o OWASP pede 210.000 para SHA-512. Fica abaixo do padrão atual, e não dá para subir |
+| **C. scrypt fraco, dentro dos 10 ms**                   | mantém custo zero e a biblioteca já provada                      | `N = 4.096` é 4× abaixo do mínimo do OWASP, e ainda estoura o teto. Pior dos dois mundos                                      |
+| **F. Custo no navegador, hash rápido no servidor**      | cabe folgado nos 10 ms, custo zero, e o banco continua protegido | exige JavaScript; celular fraco leva ~0,5 s no envio. Ver a seção própria                                                     |
+| ~~D. Hash em duas etapas, ingênuo~~                     | —                                                                | descartada: mandar o hash cru sem re-hash no servidor faz o hash virar a credencial                                           |
+| **E. Autenticação sem senha** (link por e-mail, código) | some o problema do KDF                                           | **depende de enviar e-mail ou SMS**, que é o risco R-1, hoje sem caminho de custo zero. Troca um bloqueio por outro           |
 
-## Recomendação do medidor, não decisão
+## Opção F, em detalhe — a recomendada
 
-**Nenhuma opção é boa, e isso precisa estar dito antes de qualquer escolha.**
+Descartei isto rápido demais na primeira versão, misturando com uma variante ingênua. O
+dono questionou, e olhando de novo é a única que atende as três restrições ao mesmo tempo.
 
-Se a decisão for manter custo zero, **B** é a menos ruim: PBKDF2 a 100.000 iterações com
-SHA-512 é abaixo do padrão de 2023 do OWASP, mas é um KDF de verdade, com sal por usuário,
-nativo da plataforma, e não depende de e-mail. A dívida ficaria escrita: um vazamento do
-banco expõe senhas a um ataque mais barato do que deveria.
+**Como funciona.** O trabalho caro sai do servidor e vai para o navegador:
 
-Se o dono aceitar cadastrar cartão, **A** resolve de vez e é a única que atende o padrão.
-Isso é decisão dele — `CLAUDE.md` proíbe que eu tome.
+1. O navegador deriva `chave = scrypt(senha, sal, N=16384, r=8)` — os ~300 ms saem do
+   celular da pessoa, uma vez, no envio. O sal é derivado do e-mail normalizado, para que
+   a mesma senha em contas diferentes produza chaves diferentes.
+2. O navegador manda `chave`, nunca a senha.
+3. O servidor **não guarda o que recebeu**. Ele aplica `SHA-256(chave + sal_do_servidor)`
+   — menos de 1 ms — e guarda só isso.
+
+**Por que o banco continua protegido.** Quem roubar o banco tem
+`SHA-256(scrypt(senha))`. Para testar um palpite, precisa rodar o scrypt de novo, na
+máquina dele, a 300 ms por tentativa. A lentidão não sumiu: mudou de máquina. É
+exatamente a proteção que o hash lento no servidor daria.
+
+**A diferença em relação à opção D descartada**: lá o valor recebido era gravado como
+está, então um vazamento entregava a credencial de login pronta. Aqui o servidor
+re-embaralha com sal próprio, e o que está no banco não serve para entrar.
+
+**O que ela custa, honestamente:**
+
+- **Depende de JavaScript no cliente.** Sem JS, não há login. Para este público, precisa
+  de caminho alternativo: a secretaria cadastra por telefone (REQ-28 já prevê).
+- **Celular fraco demora.** ~300 ms num aparelho recente, possivelmente 1 s num antigo.
+  Uma vez, no envio, com estado "Enviando…" na tela. Aceitável; precisa estar no aceite.
+- **Não é o desenho de manual.** O manual assume KDF no servidor. Este arranjo é
+  legítimo e usado, mas é decisão consciente e precisa estar escrita — está aqui.
+- **Replay do valor em trânsito.** Quem interceptar a `chave` entra na conta, igual a
+  quem interceptasse a senha. Mitigação: HTTPS obrigatório, que o Workers já impõe.
+
+## As outras, para o registro
+
+Se o dono aceitar cadastrar cartão, **A** resolve sem arranjo nenhum e é a única que
+segue o manual. Isso é decisão dele — `CLAUDE.md` proíbe que eu tome.
+
+**B** (PBKDF2 no servidor, 100.000 iterações) fica abaixo do padrão OWASP de 2023 e **nem
+foi medida** — pode não caber nos 10 ms.
+
+**C** é o pior dos dois mundos: fraca e ainda estoura o teto.
+
+**E** troca este bloqueio pelo do e-mail, que continua aberto.
+
+## Sobre rate-limit não substituir isto
+
+Registrado porque a pergunta é natural e a resposta não é óbvia: **rate-limit e hash lento
+defendem de ataques diferentes.** O rate-limit protege o formulário de login contra quem
+tenta adivinhar **pelo site** — e o projeto tem isso (`cadastro-e-login` REQ-26). O hash
+lento protege o banco **depois que ele vaza**: aí o atacante roda as tentativas na máquina
+dele, onde o rate-limit não existe. Sem custo por tentativa, uma placa de vídeo comum
+testa bilhões de senhas por segundo. Com este banco — nome, CPF, endereço e **tipo de
+deficiência** —, isso não é risco aceitável.
 
 ## O que falta medir antes de decidir
 

@@ -1,5 +1,10 @@
 # Prompt — Entrar
 
+> **v2 — 2026-08-06.** Mudou desde a primeira versão: entram dois estados novos por causa
+> do [ADR-005](../adr/adr-005-parametros-do-scrypt.md), que passou o cálculo pesado da
+> senha para o navegador — o "Entrando…" agora pode levar segundos em aparelho antigo, e
+> **sem JavaScript não há login**. Os dois precisam aparecer na tela, não virar surpresa.
+
 Rota `/entrar`. A tela mais curta do site e uma das que mais reprova: quem não
 consegue entrar não reclama, some. Inclui a recuperação de senha como estado.
 
@@ -31,8 +36,12 @@ escondido no rodapé.
   terceiros quem é associado da APPD — e associação de pessoas com deficiência é
   exatamente o lugar onde isso não pode vazar.
 
-**Estados obrigatórios:** vazio; senha errada; conta bloqueada por tentativas; "esqueci
-minha senha"; confirmação de envio da recuperação.
+**Estados obrigatórios:** vazio; **entrando**; senha errada; conta bloqueada por
+tentativas; **sem JavaScript**; "esqueci minha senha"; confirmação de envio da recuperação.
+
+**Por que "entrando" virou estado de primeira classe:** o cálculo que protege a senha roda
+no aparelho da pessoa e leva de 0,3 a 1 segundo. Num celular antigo, a tela parece
+travada. Sem aviso, ela clica de novo, desiste, ou acha que quebrou.
 
 **Pendência assumida:** a recuperação depende de envio de e-mail e **ainda não há
 solução de custo zero definida**. O fluxo é desenhado, marcado `[A CONFIRMAR]`, e
@@ -117,6 +126,20 @@ sempre acompanhado da alternativa humana: (12) 3346-0605.
 > nenhum campo lado a lado no mobile.
 
 ---
+
+> Além dos estados acima, renderize também:
+>
+> - **Entrando** — o botão vira "Entrando…", desabilitado, e abaixo dele aparece a linha
+>   "Estamos conferindo sua senha com segurança. Em celular mais antigo isso pode levar
+>   alguns segundos." O texto é anunciado por região `aria-live="polite"`. Nada gira
+>   indefinidamente e nada pulsa; se houver indicação de progresso, ela respeita
+>   `prefers-reduced-motion`. Os campos ficam visíveis e preenchidos, nunca apagados.
+> - **Sem JavaScript** — bloco de aviso em amarelo `#bbb070` com texto escuro `#14161a`,
+>   ícone e texto, dizendo "Para entrar com segurança, este site precisa de JavaScript
+>   ligado no navegador." e, logo abaixo, em destaque igual: "Se não for possível, ligue
+>   para a secretaria: (12) 3346-0605 — a gente resolve por telefone." O formulário
+>   aparece desabilitado, não escondido: sumir com ele deixa a pessoa sem entender o que
+>   houve.
 
 ## Aceite visual
 

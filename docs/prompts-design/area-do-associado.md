@@ -1,5 +1,17 @@
 # Prompt — Área do associado
 
+> **v2 — 2026-08-06.** Mudou desde a primeira versão, por decisão do dono:
+>
+> - a exclusão passou de duas caixas de seleção para **uma página com modal** (ADR-013);
+> - a inscrição virou **editável pela própria pessoa** — é o que ela ganha em relação à
+>   planilha de hoje (ADR-014);
+> - o status tem **um valor só**, `Interesse registrado`: a APPD não opera fila nem
+>   matrícula, e os outros dois valores descreviam um processo que não existe;
+> - `/area/cracha` saiu daqui e virou tela da change do crachá — aqui fica só a prévia e
+>   o link.
+>
+> São **sete** telas agora, não cinco.
+
 Rota `/area`. O painel de quem já entrou, com quatro assuntos: meus dados, minhas
 inscrições, meu crachá e excluir minha conta. As rotas de destino são
 `/area/dados`, `/area/inscricoes`, `/area/cracha` e `/area/excluir`
@@ -80,14 +92,17 @@ depende da associação e do jurídico.
 >   dados, Minhas inscrições, Meu crachá e Excluir conta, item atual marcado por
 >   sublinhado espesso **e** `aria-current="page"`, nunca só por cor.
 > - **Bloco "Minhas inscrições"** (`/area/inscricoes`) — o mais destacado dos quatro.
->   Lista de inscrições, cada uma com o tipo de atendimento pedido, a data do pedido e
->   o status em etiqueta com **ícone e texto**, nunca só cor: "Na fila", "Em
->   atendimento", "Encerrada". Ação "Ver minhas inscrições".
+>   Mostra **um** registro, não uma lista: os tipos de atendimento marcados, os melhores
+>   dias, a data do pedido, e a etiqueta de status com **ícone e texto**, nunca só cor,
+>   com o único valor que existe: "Interesse registrado". Abaixo, a linha "A associação
+>   entra em contato pelo telefone que você informou." Duas ações: "Ver meu cadastro" e
+>   **"Corrigir meu cadastro"** — esta é a novidade e é o que a pessoa mais vai querer.
 > - **Bloco "Meu crachá"** (`/area/cracha`) — prévia do crachá com foto, nome, número
 >   de registro `APPD-2026-00042` e status. **O crachá não mostra tipo de deficiência.**
 >   Abaixo, a linha "Qualquer pessoa pode conferir este crachá em
 >   appd.org.br/verificar/APPD-2026-00042 — a página mostra apenas nome, número e
->   status." Ações "Ver meu crachá" e "Baixar para imprimir".
+>   status." Ação única: **"Ver meu crachá"**, que leva para outra tela. A geração e o
+>   download não acontecem aqui.
 > - **Bloco "Meus dados"** (`/area/dados`) — nome, data de nascimento, e-mail,
 >   telefone e endereço, cada um com rótulo visível e valor abaixo. Ação "Alterar meus
 >   dados". Abaixo, uma linha discreta: "A informação sobre deficiência que você deu no
@@ -103,12 +118,12 @@ depende da associação e do jurídico.
 >
 > Renderize estas cinco telas:
 >
-> 1. **Painel completo** — como descrito acima, com duas inscrições, foto no crachá e
->    todos os dados preenchidos.
+> 1. **Painel completo** — como descrito acima, com o cadastro preenchido, foto no
+>    crachá e todos os dados presentes.
 > 2. **Sem nenhuma inscrição** — o bloco de inscrições em estado vazio que **oferece o
 >    próximo passo**, não apenas informa a ausência: título "Você ainda não pediu
->    atendimento", a linha "O cadastro é gratuito. Você entra na fila e a associação
->    entra em contato pelo telefone.", botão primário "Fazer meu Cadastro de
+>    atendimento", a linha "O cadastro é gratuito. Seus interesses ficam registrados e a
+>    associação entra em contato pelo telefone.", botão primário "Fazer meu Cadastro de
 >    Atendimento" e, em texto, "Prefere por telefone? (12) 3346-0605". Sem ilustração
 >    de caixa vazia.
 > 3. **Sem foto no crachá** — no lugar da foto, um retângulo de superfície `#f7f8f9`
@@ -120,26 +135,42 @@ depende da associação e do jurídico.
 >    mesmo tamanho do conteúdo final para a página não pular, com o texto "Carregando
 >    suas informações…" anunciado em região `aria-live="polite"`. Sem animação que gire
 >    indefinidamente e sem pulsar.
-> 5. **Confirmação de exclusão** (`/area/excluir`) — página própria, não janela
->    sobreposta, com `h1` "Excluir minha conta" e **dupla confirmação em dois passos
->    empilhados e visíveis**. Antes deles, três blocos de texto com títulos próprios:
->    "O que é apagado" (sua conta e sua senha, seu e-mail e telefone, sua foto do
->    crachá, o seu acesso a esta área); "O que a associação precisa manter" (registro
->    dos atendimentos já realizados e o número de registro, por obrigação legal —
->    marque como `[A CONFIRMAR]` em nota fora do layout, junto do prazo); e "Isto não
->    pode ser desfeito" em bloco amarelo `#bbb070` com texto escuro `#14161a`, ícone e
->    borda esquerda, dizendo "A exclusão é definitiva. Para voltar a ser atendido, você
->    precisará fazer um cadastro novo." **Passo 1**: caixa de seleção desmarcada com o
->    texto "Entendi que a exclusão é definitiva e não pode ser desfeita." **Passo 2**:
->    segunda caixa de seleção, desmarcada, com o texto "Quero apagar minha conta e meus
->    dados." **Não** peça para digitar uma palavra de confirmação: teclar "EXCLUIR" em
->    maiúsculas é barreira real para quem tem dificuldade motora ou intelectual, e este
->    site atende exatamente essas pessoas. Duas caixas separadas já dão a fricção
->    necessária. O botão "Excluir minha conta agora" é contornado em vermelho, nunca
->    preenchido, e permanece desabilitado com o motivo dito em texto ao lado —
->    "Marque as duas caixas para liberar" — até os dois passos estarem completos. Ao lado, o botão primário preenchido é **"Cancelar e voltar"**: a saída
->    segura é a ação principal desta página. No fim, a alternativa humana: "Prefere
->    resolver com uma pessoa? Ligue para (12) 3346-0605."
+> 5. **Excluir minha conta** (`/area/excluir`) — página própria com `h1` "Excluir minha
+>    conta" e três blocos de texto com títulos: "O que é apagado" (sua conta e sua senha,
+>    seu e-mail e telefone, seu cadastro de atendimento, sua foto do crachá, o seu acesso
+>    a esta área); "O que a associação precisa manter" (o número de registro e o registro
+>    de que você autorizou o tratamento dos seus dados, por obrigação legal — marque como
+>    `[A CONFIRMAR]` em nota fora do layout, junto do prazo); e "Isto não pode ser
+>    desfeito" em bloco amarelo `#bbb070` com texto escuro `#14161a`, ícone e borda
+>    esquerda, dizendo "A exclusão é definitiva. Para voltar a ser atendido, você
+>    precisará fazer um cadastro novo." No fim da página, dois botões: o preenchido é
+>    **"Voltar para a minha área"** — a saída segura é a ação principal — e o contornado
+>    em vermelho `#8b0000`, fundo transparente, é **"Excluir minha conta"**. E a
+>    alternativa humana: "Prefere resolver com uma pessoa? Ligue para (12) 3346-0605."
+> 6. **Modal de confirmação da exclusão** — acionado pelo botão vermelho da tela 5.
+>    Janela sobreposta centrada, largura máxima de 480px, fundo branco, raio de 10px,
+>    sombra, e o resto da página escurecido atrás. Dentro: `h2` "Tem certeza?", o texto
+>    "Sua conta e seus dados serão apagados agora. Isso não pode ser desfeito." e dois
+>    botões — o preenchido é **"Cancelar"**, o contornado em vermelho é **"Excluir minha
+>    conta"**, com o rótulo dizendo o que faz, nunca "OK" nem "Confirmar".
+>
+>    **Não** peça para digitar palavra de confirmação: teclar "EXCLUIR" em maiúsculas é
+>    barreira real para quem tem dificuldade motora ou intelectual, e este site atende
+>    exatamente essas pessoas. O modal já dá a fricção necessária.
+>
+>    Marque no layout, para a implementação: ao abrir, o foco vai para o texto ou para
+>    "Cancelar", **nunca** para o botão de excluir; `Esc` fecha sem apagar nada; o foco
+>    fica preso dentro do modal enquanto ele estiver aberto e volta para o botão que o
+>    abriu ao fechar.
+>
+> 7. **Corrigir meu cadastro** (`/area/inscricoes`, modo edição) — a mesma tela do
+>    registro, com os grupos de caixas de seleção editáveis: tipo de deficiência, tipo de
+>    atendimento e melhores dias, cada grupo em `fieldset` com `legend` igual ao rótulo.
+>    Botão preenchido "Salvar alterações" e, ao lado, "Cancelar". Acima, uma linha:
+>    "Corrija sempre que precisar. A associação usa esta informação para entrar em
+>    contato." Renderize também o estado de erro deste formulário: sem nenhuma opção
+>    marcada em um dos grupos, com a mensagem ligada ao grupo e **nada do que já foi
+>    marcado sendo apagado**.
 >
 > Acessibilidade como requisito de layout: um `h1` por tela; hierarquia de headings sem
 > pular nível; foco visível de 3px `#0f4c93` com 2px de folga; ordem de foco igual à

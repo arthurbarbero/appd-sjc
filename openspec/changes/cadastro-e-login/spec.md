@@ -92,23 +92,49 @@ nenhuma outra rota calcula número.
 
 ### Grupo B — Senha
 
-**REQ-6** — O sistema DEVE derivar o hash da senha com `scrypt` do `node:crypto`, com
-sal aleatório de no mínimo 16 bytes por usuário, gerado por `randomBytes`, e saída de 64
-bytes. A senha em texto claro NÃO PODE ser persistida em lugar nenhum.
+**REQ-6** — A derivação DEVE acontecer em **duas etapas, em máquinas diferentes**
+([ADR-005](../../../docs/adr/adr-005-parametros-do-scrypt.md), opção F):
 
-**REQ-7** — Os parâmetros `N`, `r` e `p` do scrypt DEVEM ser fixados em constante
-única do código, versionados junto com cada hash gravado, e **medidos no runtime workerd
-real** antes de qualquer tela ir para produção. O custo de CPU do hash DEVE ficar em no
-máximo **50 ms (p95)** por requisição, conforme o gatilho de revisão do ADR-002. O
-resultado da medição, com os valores escolhidos e o método, DEVE ser registrado em ADR
-próprio (ADR-005). Enquanto o ADR-005 não existir, este requisito está **em aberto** e
-bloqueia a conclusão da change.
+1. **No navegador**: `chave = scrypt(senha, sal_cliente, N=16384, r=8, p=1)`, saída de 32
+   bytes, com `sal_cliente = SHA-256("appd-sjc:v1:" + e-mail normalizado)`. O sal é
+   derivado do e-mail para que a mesma senha em contas diferentes produza chaves
+   diferentes, e para que o servidor não precise devolver nada antes do envio.
+2. **No servidor**: `guardado = SHA-256(chave + sal_servidor)`, com `sal_servidor`
+   aleatório de 16 bytes por usuário. Custa menos de 1 ms.
 
-**REQ-8** — A verificação de senha DEVE usar comparação em tempo constante
-(`timingSafeEqual`). Comparação com `===` sobre o hash não satisfaz este requisito.
+O servidor **NÃO PODE** guardar a `chave` que recebeu, nem derivá-la de novo com scrypt.
 
-**REQ-9** — A senha DEVE ter no mínimo **10 caracteres**, sem qualquer exigência de
-símbolo, letra maiúscula ou dígito. O sistema NÃO PODE recusar espaços nem limitar o
+> **Por que assim.** O parâmetro mínimo do OWASP custa 48 ms de CPU medidos no workerd, e
+> o plano gratuito do Workers dá **10 ms por requisição**. O trabalho caro vai para o
+> celular da pessoa; o banco continua protegido porque quem o roubar precisa refazer o
+> scrypt a cada palpite, na máquina dele. A lentidão não sumiu — mudou de máquina.
+
+**REQ-6a** — A senha em texto claro NÃO PODE sair do navegador, nem ser persistida em
+lugar nenhum. O que trafega é a `chave`; o que se guarda é o `SHA-256` dela com sal do
+servidor.
+
+**REQ-6b** — Sem JavaScript não há login, e isso DEVE estar dito: a tela informa o
+caminho pela secretaria (REQ-28) em vez de falhar em silêncio.
+
+**REQ-6c** — Enquanto o navegador deriva a chave, a tela DEVE mostrar o estado "Entrando…"
+com aviso de que pode levar alguns segundos em aparelho mais antigo. Medição de referência:
+~300 ms em aparelho recente. Nenhuma animação em laço infinito.
+
+**REQ-7** — Os parâmetros da etapa 1 DEVEM viver em **constante única compartilhada**
+(`shared/`), importada pelo cliente, e ser **versionados junto com cada linha gravada** em
+`senha_params`. Sem isso, mudar o parâmetro no futuro invalida a senha de quem já se
+cadastrou.
+
+O custo de CPU **no servidor** DEVE ficar abaixo de **1 ms**, e o teto do plano gratuito
+do Workers — **10 ms por requisição, medido em 2026-08-06** — é o que manda, não os
+"50 ms (p95)" do ADR-002, que estavam calibrados contra latência percebida e são cinco
+vezes o limite real. O gatilho do ADR-002 fica corrigido por este requisito.
+
+**REQ-8** — A verificação DEVE usar comparação em tempo constante (`timingSafeEqual`)
+sobre o valor de 32 bytes. Comparação com `===` não satisfaz este requisito.
+
+**REQ-9** — A senha DEVE ter no mínimo **10 caracteres**, conferido **no navegador antes
+da derivação**, sem qualquer exigência de símbolo, letra maiúscula ou dígito. O sistema NÃO PODE recusar espaços nem limitar o
 comprimento máximo abaixo de 200 caracteres. Os requisitos DEVEM estar visíveis abaixo
 do rótulo do campo **antes da primeira digitação**, no estado vazio da tela.
 

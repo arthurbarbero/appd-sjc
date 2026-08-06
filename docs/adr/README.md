@@ -9,23 +9,23 @@ Reversão de decisão é por ADR novo que substitui o anterior, nunca por apagam
 
 ## Escritos
 
-| Nº  | Decisão                                                                                             | Status       |
-| --- | --------------------------------------------------------------------------------------------------- | ------------ |
-| 001 | [Cloudflare Workers + D1 como plataforma](adr-001-cloudflare-workers-d1.md)                         | Aceito       |
-| 002 | [Senha com scrypt e sessão em cookie selado](adr-002-senha-com-scrypt-e-sessao-em-cookie-selado.md) | Aceito       |
-| 003 | [Foto do crachá como BLOB no D1](adr-003-foto-do-cracha-como-blob-no-d1.md)                         | Aceito       |
-| 004 | [Liberação imediata do crachá](adr-004-liberacao-imediata-do-cracha.md)                             | Aceito       |
-| 005 | [Parâmetros do scrypt e o teto de CPU](adr-005-parametros-do-scrypt.md)                             | **Proposto** |
-| 012 | [Cadastro embutido no formulário](adr-012-cadastro-embutido-no-formulario.md)                       | Aceito       |
-| 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito       |
-| 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito       |
+| Nº  | Decisão                                                                                             | Status |
+| --- | --------------------------------------------------------------------------------------------------- | ------ |
+| 001 | [Cloudflare Workers + D1 como plataforma](adr-001-cloudflare-workers-d1.md)                         | Aceito |
+| 002 | [Senha com scrypt e sessão em cookie selado](adr-002-senha-com-scrypt-e-sessao-em-cookie-selado.md) | Aceito |
+| 003 | [Foto do crachá como BLOB no D1](adr-003-foto-do-cracha-como-blob-no-d1.md)                         | Aceito |
+| 004 | [Liberação imediata do crachá](adr-004-liberacao-imediata-do-cracha.md)                             | Aceito |
+| 005 | [Parâmetros do scrypt e o teto de CPU](adr-005-parametros-do-scrypt.md)                             | Aceito |
+| 012 | [Cadastro embutido no formulário](adr-012-cadastro-embutido-no-formulario.md)                       | Aceito |
+| 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito |
+| 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito |
 
 012, 013 e 014 resolvem, juntos, os bloqueios B5, B6, B7, B10, B11, B16, B17, B20, B22 e
 B23 do [parecer do gate](../../openspec/PARECER-GATE.md).
 
-**005 é o único com status Proposto**, e a diferença importa: ele traz medição, não
-decisão. Enquanto o dono não escolher entre as cinco opções, nenhuma linha de código de
-senha entra.
+**005 nasceu de uma medição que virou problema de plataforma**: nenhum parâmetro
+defensável de scrypt cabe nos 10 ms de CPU do plano gratuito. A saída aceita foi mover o
+cálculo caro para o navegador — a proteção continua existindo, só mudou de máquina.
 
 ## Reservados pelas specs, ainda não escritos
 
