@@ -1,0 +1,60 @@
+# Publica em *.workers.dev a cada push na main.
+#
+# Duas travas de propósito:
+#
+# 1. **Só publica se a CI passar.** `needs: qualidade` significa que lint, typecheck e
+#    testes rodam antes; commit vermelho não vai para o ar. Publicação automática sem essa
+#    trava é publicação de defeito automática.
+# 2. **Só em `*.workers.dev`.** O domínio da APPD não entra aqui enquanto a associação não
+#    aprovar (regra do `CLAUDE.md`). Trocar isso é decisão do dono, não do arquivo.
+#
+# As migrations rodam antes do deploy, contra o D1 remoto. Elas são versionadas e
+# incrementais, então rodar de novo não repete o que já foi aplicado.
+name: Publicar
+
+on:
+  push:
+    branches: [main]
+  # Permite publicar à mão pela aba Actions, sem precisar de commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: Lint, typecheck e testes
+    uses: ./.github/workflows/ci.yml
+
+  publicar:
+    name: Migrations e deploy
+    needs: qualidade
+    runs-on: ubuntu-latest
+    # `concurrency` evita dois deploys ao mesmo tempo se dois pushes chegarem juntos:
+    # o segundo espera, em vez de os dois escreverem no D1 em paralelo.
+    concurrency:
+      group: publicar-workers-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Aplicar migrations no D1 remoto
+        run: npx wrangler d1 migrations apply appd-sjc --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Publicar o Worker
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
