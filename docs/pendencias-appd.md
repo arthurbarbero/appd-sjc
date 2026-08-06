@@ -133,6 +133,23 @@ tela — promessa que a gente publica, a associação cumpre.)
 
 O que trava: a tela de Contato e a mensagem de sucesso do envio.
 
+### 4b. Três perguntas novas no formulário: e-mail, CPF e senha
+
+Decisão do dono do projeto em 2026-08-06 ([ADR-012](adr/adr-012-cadastro-embutido-no-formulario.md)):
+o formulário de atendimento passa a criar a conta da pessoa no mesmo ato, para que ela
+possa depois **entrar no site e editar o próprio cadastro** — o que a planilha de hoje
+não permite. Isso acrescenta três perguntas às 15 existentes. Nenhuma das 15 muda.
+
+Pergunta: a APPD concorda em pedir **CPF**? É dado que a associação não coleta hoje.
+Ele serve para impedir cadastro duplicado da mesma pessoa; se a associação preferir não
+pedir, o e-mail sozinho passa a ser a chave e a duplicidade volta a ser possível.
+
+Segunda pergunta, operacional: **parte do público não tem e-mail** e vai precisar de
+ajuda para se cadastrar. A associação consegue fazer isso presencialmente na sede?
+
+O que trava: nada de imediato — o modelo de dados já foi escrito com CPF. Uma recusa da
+associação custa uma migration, não uma reescrita.
+
 ---
 
 ## P1 — Comprometem a qualidade
@@ -146,6 +163,14 @@ manhã descobre tarde; quem não pode contribuir descobre no fim.
 Pergunta: podemos publicar essas três regras **antes** do formulário, na página do
 serviço? Confirmam que a contribuição é sugerida e ajustável, e que não condiciona o
 atendimento?
+
+**Correção de texto na origem (2026-08-06).** O bloco de abertura do formulário atual
+diz que "os atendimentos são agendados conforme o surgimento de vagas". Segundo o dono
+do projeto, isso está desatualizado: **hoje não existe fila de vagas nem matrícula** —
+marcar "Fisioterapia" ou "Bocha" sinaliza interesse, e alguém da APPD entra em contato.
+O site novo passa a dizer isso ([ADR-014](adr/adr-014-inscricao-como-registro-de-interesse.md)).
+Pergunta: a associação confirma, e vai corrigir o texto no formulário atual enquanto ele
+estiver no ar? Não alteramos texto da APPD por conta própria.
 
 ### 6. Horário de funcionamento da sede
 
@@ -230,3 +255,6 @@ Se der para perguntar só cinco coisas, pergunte estas:
 4. Qual e-mail recebe as mensagens do site, e quem responde?
 5. O texto sobre o presidente em `/sobre-nos`, com o histórico clínico, pode ser
    republicado como está?
+
+E uma sexta, se sobrar tempo: podemos pedir **CPF** no formulário, para a pessoa ter
+conta e conseguir editar o próprio cadastro depois? (item 4b)

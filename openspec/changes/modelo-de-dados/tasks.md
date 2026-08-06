@@ -1,0 +1,85 @@
+# Tasks — `modelo-de-dados`
+
+Ordem importa: T1 a T3 produzem o contrato; T4 reescreve as seis changes contra ele;
+T5 é o gate. **Nenhuma task de outra change começa antes de T5 aprovar.**
+
+## T1 — Schema Drizzle
+
+- [ ] **T1.1** — `server/database/schema.ts` com as cinco tabelas do REQ-7, REQ-14,
+      REQ-21, REQ-26 e REQ-31. Nenhuma coluna a mais, nenhuma a menos.
+      Aceite: `npm run typecheck` verde e o arquivo declara exatamente 5 tabelas.
+- [ ] **T1.2** — Todos os `CHECK`, `UNIQUE`, `NOT NULL` e `FOREIGN KEY` do REQ-4
+      declarados no schema, incluindo `ON DELETE CASCADE` em `inscricoes_atendimento` e
+      `fotos`, e a **ausência** dele em `consentimentos` (REQ-25).
+      Aceite: inspeção do SQL gerado mostra cada restrição da spec.
+- [ ] **T1.3** — Schemas Zod compartilhados em `shared/` derivados do schema, com os
+      vocabulários fechados dos campos 12, 13 e 14 (REQ-18).
+      Aceite: valor fora do vocabulário falha na validação, com teste.
+
+## T2 — Migration
+
+- [ ] **T2.1** — `npm run db:generate` e conferência do SQL gerado, linha a linha,
+      contra a spec. Nada de `push`.
+      Aceite: arquivo versionado em `drizzle/migrations`, revisado no PR.
+- [ ] **T2.2** — `npm run db:aplicar:local` num banco vazio, sem erro.
+      Aceite: as cinco tabelas existem; nenhuma outra (cenário 1 dos critérios).
+- [ ] **T2.3** — Seed de desenvolvimento com dado fictício explícito (REQ-6), com CPFs
+      válidos por dígito verificador mas reconhecidamente falsos.
+      Aceite: gitleaks passa; nenhum nome, telefone ou CPF de pessoa real no repo.
+
+## T3 — Testes de restrição
+
+- [ ] **T3.1** — Os 13 cenários de aceite implementados em Vitest contra o D1 local.
+      Aceite: os 13 passam; e cada um **falha** se a restrição correspondente for
+      removida do schema (teste que não detecta remoção não vale).
+- [ ] **T3.2** — Teste de concorrência do `numero_registro`: 50 conclusões em paralelo,
+      50 números distintos (REQ-9).
+      Aceite: roda 10 vezes seguidas sem colisão e sem falso negativo.
+- [ ] **T3.3** — Varredura automatizada: nenhuma coluna de nenhuma tabela contém IP em
+      texto claro nem senha em texto claro (REQ-5, REQ-11).
+      Aceite: teste bloqueante no CI.
+
+## T4 — Reescrever as seis changes contra o contrato
+
+Cada item é edição de spec, não de código. Ver a tabela de impacto na `proposal.md`.
+
+- [ ] **T4.1** — `formulario-atendimento`: acrescentar e-mail, CPF e senha; remover
+      `protocolo`, `possivel_duplicata` e as colunas de consentimento; trocar o
+      vocabulário de status; reescrever o texto da tela de confirmação (ADR-014);
+      remover o REQ-42 órfão, que deixou de existir com a contradição resolvida.
+- [ ] **T4.2** — `cadastro-e-login`: remover REQ-22 (foto) e REQ-30 a REQ-35 (telas da
+      área) e as tasks T-10 e T-11; corrigir a rastreabilidade errada apontada no
+      parecer (REQ-25/26 → REQ-28/29; REQ-30 → REQ-32); manter a emissão do número.
+- [ ] **T4.3** — `consentimento-e-privacidade`: `usuario_id` NOT NULL passa a exequível;
+      ceder o fluxo de exclusão para `area-do-associado`, mantendo só o conteúdo que a
+      tela exibe; resolver a ambiguidade do REQ-11 ("exigir" × "pedir", bloqueio B9).
+- [ ] **T4.4** — `cracha-do-associado`: remover REQ-5 (sequência consecutiva) e a T1.2
+      (ler o maior e somar 1); assumir a posse da foto e de `/area/cracha`; ajustar o
+      REQ-28 para o caso de conta excluída (REQ-29 daqui); escrever a seção de
+      Definition of Ready que falta (B19).
+- [ ] **T4.5** — `area-do-associado`: assumir `/area/excluir` com o contrato do REQ-28;
+      acrescentar a edição da inscrição (ADR-014); remover `/area/cracha`; declarar a
+      dependência que faltava; escrever a Definition of Ready (B19).
+- [ ] **T4.6** — `site-institucional`: sem impacto de dado, mas fechar os itens de forma
+      do parecer — contagem "17 URLs públicas + a 404" (B3), ADRs 010 e 011 nas tasks
+      (B4), os três blocos `Exemplos:` em prosa e o critério de zoom marcado `[manual]`.
+- [ ] **T4.7** — Transversal: **uma régua só de acessibilidade** (B24) — zero violação de
+      nível **A ou AA** no axe, escrita uma vez na configuração do CI e referenciada
+      pelas changes, nunca repetida. Uniformizar o alvo de toque nas seis:
+      `≥ 44 px` com `8 px` de folga entre alvos.
+- [ ] **T4.8** — Transversal: fechar o furo de enumeração do REQ-26 de `cadastro-e-login`
+      (B13) — o contador de tentativas vale para a chave digitada, exista conta ou não, e
+      a tela de bloqueio é byte a byte idêntica nos dois casos.
+
+## T5 — Gate
+
+- [ ] **T5.1** — Rodar o `revisor-spec` sobre as **sete** changes juntas, com esta spec
+      como contrato de referência.
+      Aceite: parecer novo em `openspec/`, com veredito por change. Reprovou, volta.
+- [ ] **T5.2** — Atualizar `PROGRESS.md` e o vault com o resultado.
+
+## Fora desta change
+
+Implementar rota, tela ou componente. Parâmetros do scrypt (ADR-005). Catálogo de
+termos (ADR-006). Caminho de e-mail/SMS para redefinição de senha — pesquisa em aberto,
+condição para o login ir ao ar, não para este contrato existir.

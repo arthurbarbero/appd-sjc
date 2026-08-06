@@ -5,9 +5,13 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 ## Agora
 
 **Site institucional rodando localmente** (`npm run dev`, http://localhost:3000), com
-12 rotas públicas em Nuxt sobre o design system v2. Fases 0 a 2 concluídas; a Fase 3
-(OpenSpec) foi pulada por decisão do dono para ter algo rodando — as changes ainda
-precisam ser escritas antes da parte com banco (cadastro, login, crachá).
+12 rotas públicas em Nuxt sobre o design system v2.
+
+A Fase 3 reprovou no gate (25 bloqueios) e está sendo destravada: o dono decidiu as
+três questões de fundo em 2026-08-06 (ADR-012, 013 e 014) e a change
+`modelo-de-dados` foi escrita como contrato único de dado. **Próximo passo: T4 da
+`modelo-de-dados`** — reescrever as seis changes contra esse contrato e rodar o gate
+de novo sobre as sete. Nenhuma linha de código com banco antes disso.
 
 ## Decisões tomadas
 
@@ -21,6 +25,14 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - 2026-08-05 — Spike **aprovado**, stack confirmada: Drizzle+D1 e `scrypt` do
   `node:crypto` funcionam no workerd real. Registrado em `docs/adr/adr-001` e
   `adr-002`; código do spike removido no commit seguinte (fica no histórico, `b7e321d`).
+- 2026-08-06 — **O formulário de atendimento cria a conta** (ADR-012). Acrescenta
+  e-mail, CPF e senha às 15 perguntas; nenhuma das 15 muda. Conta é da pessoa
+  atendida, uma por pessoa: mãe com dois filhos cria duas contas.
+- 2026-08-06 — **Dono único por rota e por recurso** (ADR-013). Vale a fronteira do
+  `openspec/README.md`. Exclusão de conta: uma página, um modal, e pronto.
+- 2026-08-06 — **A inscrição é registro de interesse editável** (ADR-014). Não existe
+  fila nem matrícula na APPD; o status tem um valor só, e a pessoa edita o próprio
+  cadastro. Painel de gerenciamento por perfil fica nomeado como escopo da V1.1.
 
 ## Feito
 
@@ -110,14 +122,32 @@ precisam ser escritas antes da parte com banco (cadastro, login, crachá).
 - [x] Fase 3 — seis changes OpenSpec escritas, com 262 cenários Gherkin.
 - [x] Gate do `revisor-spec` rodado: **reprovou as seis**, com 25 bloqueios nomeados.
       Parecer em `openspec/PARECER-GATE.md`. Fase 3 **não está fechada**.
-- [ ] Resolver os 25 bloqueios do gate antes de qualquer código com banco. Os quatro
-      mais graves estão no topo do parecer.
-- [ ] **Decidir quem lê as inscrições na V1.** O painel admin é V1.1; se o formulário
-      gravar no D1 sem painel, a associação para de receber os cadastros que hoje
-      chegam pelo Google Forms. Pergunta P0 para a APPD.
-- [ ] Resolver a contradição entre specs: `consentimentos.usuario_id NOT NULL` versus
-      formulário preenchido sem conta.
-- [ ] Escrever os ADRs 005 a 011, reservados pelas specs (ver `docs/adr/README.md`).
+- [x] **As três decisões de fundo, tomadas pelo dono em 2026-08-06** — viraram
+      ADR-012 (cadastro embutido no formulário, uma conta por pessoa atendida),
+      ADR-013 (dono único por rota e por recurso) e ADR-014 (a inscrição é registro de
+      interesse editável, sem fila nem matrícula).
+- [x] ~~Decidir quem lê as inscrições na V1.~~ **Premissa caiu**: a APPD não opera fila
+      nem matrícula, e hoje só baixa a planilha. O problema não era falta de leitor, era
+      a tela prometer fila. Ver ADR-014.
+- [x] ~~Contradição `consentimentos.usuario_id NOT NULL` × formulário sem conta.~~
+      Resolvida por construção no ADR-012: toda inscrição pertence a uma conta.
+- [x] Change `modelo-de-dados` escrita — contrato único de tabela, coluna e chave.
+      Resolve 10 dos 25 bloqueios do parecer.
+- [ ] **T4 da `modelo-de-dados`**: reescrever as seis changes contra o contrato. É o
+      trabalho ativo.
+- [ ] **T5**: rodar o `revisor-spec` sobre as sete changes juntas. Reprovou, volta.
+- [ ] Resolver os bloqueios restantes do parecer que não são de dado — régua única de
+      acessibilidade (B24), enumeração no bloqueio por tentativas (B13), contagem
+      17/18 (B3), requisito que segure a publicação do texto do presidente e das
+      galerias (B2).
+- [ ] Escrever os ADRs 005, 006, 008 a 011 (ver `docs/adr/README.md`). O 007 foi
+      liberado: o protocolo `ATD-` perdeu a função com o cadastro embutido.
+- [ ] **Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha"
+      (pedido do dono, 2026-08-06). Com o cadastro embutido, toda pessoa tem senha, e
+      sem esse caminho **o login não pode ir ao ar**. Restrição: custo zero, sem cartão.
+      Comparar pelo menos serviço de e-mail transacional com plano gratuito, envio pelo
+      próprio Worker e alternativas de SMS — com data, limite mensal e se exige cartão.
+      Nenhuma conta externa criada sem o dono mandar.
 - [ ] Telas ainda não implementadas: Cadastro, Login, Área do Associado, Crachá,
       Verificação pública e Política de Privacidade. Prompts prontos em
       `docs/prompts-design/`.

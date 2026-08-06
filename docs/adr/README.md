@@ -15,6 +15,12 @@ Reversão de decisão é por ADR novo que substitui o anterior, nunca por apagam
 | 002 | [Senha com scrypt e sessão em cookie selado](adr-002-senha-com-scrypt-e-sessao-em-cookie-selado.md) | Aceito |
 | 003 | [Foto do crachá como BLOB no D1](adr-003-foto-do-cracha-como-blob-no-d1.md)                         | Aceito |
 | 004 | [Liberação imediata do crachá](adr-004-liberacao-imediata-do-cracha.md)                             | Aceito |
+| 012 | [Cadastro embutido no formulário](adr-012-cadastro-embutido-no-formulario.md)                       | Aceito |
+| 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito |
+| 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito |
+
+Os três últimos resolvem, juntos, os bloqueios B5, B6, B7, B10, B11, B16, B17, B20,
+B22 e B23 do [parecer do gate](../../openspec/PARECER-GATE.md).
 
 ## Reservados pelas specs, ainda não escritos
 
@@ -24,15 +30,19 @@ Cada um bloqueia a implementação da change que o pediu.
 | --- | ------------------------------------------------------------------- | ----------------------------- |
 | 005 | Parâmetros do scrypt (N, r, p) e o teto de CPU por requisição       | `cadastro-e-login`            |
 | 006 | Onde vive o texto das versões do termo de consentimento             | `consentimento-e-privacidade` |
-| 007 | Protocolo de inscrição em espaço de numeração próprio (`ATD-`)      | `formulario-atendimento`      |
 | 008 | Múltipla escolha guardada como JSON no D1                           | `formulario-atendimento`      |
 | 009 | Anti-abuso sem CAPTCHA, com IP hasheado                             | `formulario-atendimento`      |
 | 010 | Implementar antes de especificar: por que o site veio antes da spec | `site-institucional`          |
 | 011 | Publicar com marcação "A confirmar" em vez de esperar a APPD        | `site-institucional`          |
 
-## Por que 007 existe
+Ainda por decidir, sem número reservado: **caminho de custo zero para enviar e-mail ou
+SMS de redefinição de senha**. Vira ADR quando houver pesquisa; hoje é pergunta aberta
+no `PROGRESS.md` e condição para o login ir ao ar (ver ADR-012).
 
-`APPD-<ano>-<sequencial>` é o número de registro do associado, gerado no cadastro e
-imutável. O protocolo da inscrição de atendimento é outra coisa, de outra tabela, e não
-pode compartilhar o formato — daí `ATD-<ano>-<sequencial>`. Dois documentos diferentes
-com o mesmo formato de número viram confusão no atendimento e no suporte.
+## 007 foi liberado
+
+O número 007 estava reservado para o protocolo `ATD-<ano>-<sequencial>`, que existia
+para ancorar o aceite do termo de quem preenchesse o formulário **sem conta**. Com o
+[ADR-012](adr-012-cadastro-embutido-no-formulario.md), toda inscrição pertence a um
+usuário e o `numero_registro` já identifica a pessoa — o protocolo ficou sem função e
+foi removido do modelo. O número 007 volta a estar livre para a próxima decisão.
