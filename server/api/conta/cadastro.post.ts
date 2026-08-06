@@ -57,91 +57,83 @@ export default defineEventHandler(async (event) => {
   const senha = prepararSenha(chave)
   const id = crypto.randomUUID()
 
-  const numeroRegistro = await emitirNumeroRegistro(
-    anoCorrente(),
-    async () => {
-      const linhas = await bd.select({ n: schema.usuarios.numeroRegistro }).from(schema.usuarios)
-      const prefixo = `APPD-${anoCorrente()}-`
-      return linhas.filter((l) => l.n.startsWith(prefixo)).length
-    },
-    async (numero) => {
-      try {
-        // Transação lógica: o D1 executa `batch` como unidade atômica.
-        await bd.batch([
-          bd.insert(schema.usuarios).values({
-            id,
-            numeroRegistro: numero,
-            email,
-            cpf: d.cpf,
-            senhaHash: senha.hash,
-            senhaParams: senha.params,
-            nome: d.nome,
-            nascimento: paraDataIso(d.nascimento),
-            telefone: d.telefone,
-            telefoneWhatsapp: d.telefoneWhatsapp,
-            endereco: d.endereco,
-            numero: d.numero,
-            complemento: d.complemento ?? null,
-            bairro: d.bairro,
-            municipio: d.municipio,
-            cuidadorNome: d.cuidadorNome ?? null,
-            cuidadorContato: d.cuidadorContato ?? null,
-            situacao: 'ativo',
-            chaveIdempotencia: d.chaveIdempotencia,
-            criadoEm: agora,
-            atualizadoEm: agora,
-          }),
-          bd.insert(schema.inscricoesAtendimento).values({
-            id: crypto.randomUUID(),
-            usuarioId: id,
-            deficiencias: JSON.stringify(d.deficiencias),
-            deficienciaOutro: d.deficienciaOutro ?? null,
-            atendimentos: JSON.stringify(d.atendimentos),
-            atendimentoOutro: d.atendimentoOutro ?? null,
-            dias: JSON.stringify(d.dias),
-            cienciaContribuicao: 'Ciente',
-            status: 'Interesse registrado',
-            criadoEm: agora,
-            atualizadoEm: agora,
-          }),
-          bd.insert(schema.consentimentos).values({
-            id: crypto.randomUUID(),
-            usuarioId: id,
-            termoId: 'deficiencia-art11',
-            versao: 'v1',
-            // Placeholder até o catálogo de termos existir (ADR-006). O formato é o
-            // definitivo — 64 hexadecimais — para não mascarar erro de schema.
-            hash: '0'.repeat(64),
-            evento: 'aceite',
-            registradoEm: agora,
-            origem: '/atendimento/inscricao',
-          }),
-        ])
-        return true
-      } catch (erro) {
-        const texto = String(erro)
-        // Colisão do número: tenta o próximo. Qualquer outra coisa é erro de verdade.
-        if (texto.includes('numero_registro')) return false
-        if (texto.includes('usuarios.email')) {
-          throw createError({
-            statusCode: 422,
-            data: {
-              erros: {
-                email: 'Este e-mail já tem uma conta. Entre ou recupere a sua senha.',
-              },
+  const numeroRegistro = await emitirNumeroRegistro(anoCorrente(), async (numero) => {
+    try {
+      // Transação lógica: o D1 executa `batch` como unidade atômica.
+      await bd.batch([
+        bd.insert(schema.usuarios).values({
+          id,
+          numeroRegistro: numero,
+          email,
+          cpf: d.cpf,
+          senhaHash: senha.hash,
+          senhaParams: senha.params,
+          nome: d.nome,
+          nascimento: paraDataIso(d.nascimento),
+          telefone: d.telefone,
+          telefoneWhatsapp: d.telefoneWhatsapp,
+          endereco: d.endereco,
+          numero: d.numero,
+          complemento: d.complemento ?? null,
+          bairro: d.bairro,
+          municipio: d.municipio,
+          cuidadorNome: d.cuidadorNome ?? null,
+          cuidadorContato: d.cuidadorContato ?? null,
+          situacao: 'ativo',
+          chaveIdempotencia: d.chaveIdempotencia,
+          criadoEm: agora,
+          atualizadoEm: agora,
+        }),
+        bd.insert(schema.inscricoesAtendimento).values({
+          id: crypto.randomUUID(),
+          usuarioId: id,
+          deficiencias: JSON.stringify(d.deficiencias),
+          deficienciaOutro: d.deficienciaOutro ?? null,
+          atendimentos: JSON.stringify(d.atendimentos),
+          atendimentoOutro: d.atendimentoOutro ?? null,
+          dias: JSON.stringify(d.dias),
+          cienciaContribuicao: 'Ciente',
+          status: 'Interesse registrado',
+          criadoEm: agora,
+          atualizadoEm: agora,
+        }),
+        bd.insert(schema.consentimentos).values({
+          id: crypto.randomUUID(),
+          usuarioId: id,
+          termoId: 'deficiencia-art11',
+          versao: 'v1',
+          // Placeholder até o catálogo de termos existir (ADR-006). O formato é o
+          // definitivo — 64 hexadecimais — para não mascarar erro de schema.
+          hash: '0'.repeat(64),
+          evento: 'aceite',
+          registradoEm: agora,
+          origem: '/atendimento/inscricao',
+        }),
+      ])
+      return true
+    } catch (erro) {
+      const texto = String(erro)
+      // Colisão do número: tenta o próximo. Qualquer outra coisa é erro de verdade.
+      if (texto.includes('numero_registro')) return false
+      if (texto.includes('usuarios.email')) {
+        throw createError({
+          statusCode: 422,
+          data: {
+            erros: {
+              email: 'Este e-mail já tem uma conta. Entre ou recupere a sua senha.',
             },
-          })
-        }
-        if (texto.includes('usuarios.cpf')) {
-          throw createError({
-            statusCode: 422,
-            data: { erros: { cpf: 'Já existe um cadastro com este CPF.' } },
-          })
-        }
-        throw erro
+          },
+        })
       }
-    },
-  )
+      if (texto.includes('usuarios.cpf')) {
+        throw createError({
+          statusCode: 422,
+          data: { erros: { cpf: 'Já existe um cadastro com este CPF.' } },
+        })
+      }
+      throw erro
+    }
+  })
 
   await abrirSessao(event, {
     id,

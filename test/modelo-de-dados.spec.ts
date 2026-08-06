@@ -50,7 +50,7 @@ const HASH64 = 'a'.repeat(64)
 function criaUsuario(db: DatabaseSync, sobrescreve: Record<string, string> = {}): string {
   const dados: Record<string, string> = {
     id: 'usuario-1',
-    numero_registro: 'APPD-2026-00001',
+    numero_registro: 'APPD-2026-K7M2QX',
     email: 'maria.ficticia@exemplo.test',
     cpf: CPF,
     senha_hash: 'hash-ficticio',
@@ -147,7 +147,7 @@ describe('Integridade do modelo de dados', () => {
   it('e-mail duplicado é recusado pelo banco, não pelo código', () => {
     criaUsuario(db)
     expect(() =>
-      criaUsuario(db, { id: 'usuario-2', numero_registro: 'APPD-2026-00002', cpf: '52998224725' }),
+      criaUsuario(db, { id: 'usuario-2', numero_registro: 'APPD-2026-P4NRT9', cpf: '52998224725' }),
     ).toThrow(/UNIQUE/i)
   })
 
@@ -156,7 +156,7 @@ describe('Integridade do modelo de dados', () => {
     expect(() =>
       criaUsuario(db, {
         id: 'usuario-2',
-        numero_registro: 'APPD-2026-00002',
+        numero_registro: 'APPD-2026-P4NRT9',
         email: 'outra@exemplo.test',
       }),
     ).toThrow(/UNIQUE/i)
@@ -171,8 +171,8 @@ describe('Integridade do modelo de dados', () => {
   })
 
   it('número de registro fora do formato é recusado', () => {
-    expect(() => criaUsuario(db, { numero_registro: 'ATD-2026-00001' })).toThrow(/CHECK/i)
-    expect(() => criaUsuario(db, { numero_registro: 'APPD-2026-1' })).toThrow(/CHECK/i)
+    expect(() => criaUsuario(db, { numero_registro: 'ATD-2026-K7M2QX' })).toThrow(/CHECK/i)
+    expect(() => criaUsuario(db, { numero_registro: 'APPD-2026-K7M2Q' })).toThrow(/CHECK/i)
   })
 
   it('uma pessoa não tem duas inscrições', () => {
@@ -299,7 +299,7 @@ describe('Integridade do modelo de dados', () => {
     expect(conta.cpf).toBeNull()
     expect(conta.situacao).toBe('inativo')
     // O que sobrevive, e é o ponto: o número nunca some nem é reutilizado.
-    expect(conta.numero_registro).toBe('APPD-2026-00001')
+    expect(conta.numero_registro).toBe('APPD-2026-K7M2QX')
 
     expect(db.prepare('SELECT count(*) c FROM inscricoes_atendimento').get()!.c).toBe(0)
     expect(db.prepare('SELECT count(*) c FROM fotos').get()!.c).toBe(0)

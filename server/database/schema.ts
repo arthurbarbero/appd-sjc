@@ -49,8 +49,16 @@ const formato = (coluna: unknown, tamanho: number, molde: string, conjunto: stri
 const isoUtc = (c: unknown) => formato(c, 20, '____-__-__T__:__:__Z', '0-9:TZ-')
 /** `aaaa-mm-dd`, para data de nascimento. */
 const dataSimples = (c: unknown) => formato(c, 10, '____-__-__', '0-9-')
-/** `APPD-2026-00042` — o formato do REQ-8. */
-const numeroRegistroValido = (c: unknown) => formato(c, 15, 'APPD-____-_____', 'A-Z0-9-')
+/**
+ * `APPD-2026-K7M2QX` — o formato do REQ-8, sorteado e não sequencial (ADR-007).
+ *
+ * O conjunto exclui `0`, `O`, `1`, `I` e `L` no sufixo, porque o número é ditado por
+ * telefone. O `LIKE` confere a estrutura; o `NOT GLOB` confere que nenhum caractere fora
+ * do alfabeto entrou — e, sendo o GLOB sensível a caixa, também barra `appd-2026-k7m2qx`.
+ */
+const numeroRegistroValido = (c: unknown) =>
+  sql`${formato(c, 16, 'APPD-____-______', 'A-Z0-9-')}
+    AND substr(${c}, 11, 6) NOT GLOB '*[^A-Z2-9]*'`
 /** Só dígitos, ou só hexadecimal minúsculo, com comprimento exato. */
 const soDigitos = (c: unknown, n: number) =>
   sql`length(${c}) = ${sql.raw(String(n))} AND ${c} NOT GLOB '*[^0-9]*'`

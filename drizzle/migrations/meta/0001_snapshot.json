@@ -1,0 +1,694 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "3cb0c712-c9bc-4c4c-8b70-341fe3dc2648",
+  "prevId": "048f202a-284b-417a-ad99-464b4d830a49",
+  "tables": {
+    "consentimentos": {
+      "name": "consentimentos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "termo_id": {
+          "name": "termo_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "versao": {
+          "name": "versao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "evento": {
+          "name": "evento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "registrado_em": {
+          "name": "registrado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "consentimentos_busca": {
+          "name": "consentimentos_busca",
+          "columns": [
+            "usuario_id",
+            "termo_id",
+            "registrado_em"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "consentimentos_usuario_id_usuarios_id_fk": {
+          "name": "consentimentos_usuario_id_usuarios_id_fk",
+          "tableFrom": "consentimentos",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "consentimentos_evento": {
+          "name": "consentimentos_evento",
+          "value": "\"consentimentos\".\"evento\" IN ('aceite', 'revogacao')"
+        },
+        "consentimentos_hash_formato": {
+          "name": "consentimentos_hash_formato",
+          "value": "length(\"consentimentos\".\"hash\") = 64 AND \"consentimentos\".\"hash\" NOT GLOB '*[^0-9a-f]*'"
+        },
+        "consentimentos_registrado_em_utc": {
+          "name": "consentimentos_registrado_em_utc",
+          "value": "length(\"consentimentos\".\"registrado_em\") = 20\n    AND \"consentimentos\".\"registrado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"consentimentos\".\"registrado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        }
+      }
+    },
+    "fotos": {
+      "name": "fotos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conteudo": {
+          "name": "conteudo",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "largura": {
+          "name": "largura",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "altura": {
+          "name": "altura",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "fotos_usuario_id_unique": {
+          "name": "fotos_usuario_id_unique",
+          "columns": [
+            "usuario_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "fotos_usuario_id_usuarios_id_fk": {
+          "name": "fotos_usuario_id_usuarios_id_fk",
+          "tableFrom": "fotos",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "fotos_tamanho": {
+          "name": "fotos_tamanho",
+          "value": "length(\"fotos\".\"conteudo\") <= 102400"
+        },
+        "fotos_tipo": {
+          "name": "fotos_tipo",
+          "value": "\"fotos\".\"tipo\" = 'image/jpeg'"
+        },
+        "fotos_dimensoes": {
+          "name": "fotos_dimensoes",
+          "value": "\"fotos\".\"largura\" = 400 AND \"fotos\".\"altura\" = 500"
+        },
+        "fotos_criado_em_utc": {
+          "name": "fotos_criado_em_utc",
+          "value": "length(\"fotos\".\"criado_em\") = 20\n    AND \"fotos\".\"criado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"fotos\".\"criado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        },
+        "fotos_atualizado_em_utc": {
+          "name": "fotos_atualizado_em_utc",
+          "value": "length(\"fotos\".\"atualizado_em\") = 20\n    AND \"fotos\".\"atualizado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"fotos\".\"atualizado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        }
+      }
+    },
+    "inscricoes_atendimento": {
+      "name": "inscricoes_atendimento",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deficiencias": {
+          "name": "deficiencias",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deficiencia_outro": {
+          "name": "deficiencia_outro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "atendimentos": {
+          "name": "atendimentos",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "atendimento_outro": {
+          "name": "atendimento_outro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "dias": {
+          "name": "dias",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ciencia_contribuicao": {
+          "name": "ciencia_contribuicao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Interesse registrado'"
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "inscricoes_atendimento_usuario_id_unique": {
+          "name": "inscricoes_atendimento_usuario_id_unique",
+          "columns": [
+            "usuario_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "inscricoes_atendimento_usuario_id_usuarios_id_fk": {
+          "name": "inscricoes_atendimento_usuario_id_usuarios_id_fk",
+          "tableFrom": "inscricoes_atendimento",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "inscricoes_status": {
+          "name": "inscricoes_status",
+          "value": "\"inscricoes_atendimento\".\"status\" = 'Interesse registrado'"
+        },
+        "inscricoes_ciencia": {
+          "name": "inscricoes_ciencia",
+          "value": "\"inscricoes_atendimento\".\"ciencia_contribuicao\" = 'Ciente'"
+        },
+        "inscricoes_deficiencias_json": {
+          "name": "inscricoes_deficiencias_json",
+          "value": "json_valid(\"inscricoes_atendimento\".\"deficiencias\") AND json_type(\"inscricoes_atendimento\".\"deficiencias\") = 'array' AND json_array_length(\"inscricoes_atendimento\".\"deficiencias\") >= 1"
+        },
+        "inscricoes_atendimentos_json": {
+          "name": "inscricoes_atendimentos_json",
+          "value": "json_valid(\"inscricoes_atendimento\".\"atendimentos\") AND json_type(\"inscricoes_atendimento\".\"atendimentos\") = 'array' AND json_array_length(\"inscricoes_atendimento\".\"atendimentos\") >= 1"
+        },
+        "inscricoes_dias_json": {
+          "name": "inscricoes_dias_json",
+          "value": "json_valid(\"inscricoes_atendimento\".\"dias\") AND json_type(\"inscricoes_atendimento\".\"dias\") = 'array' AND json_array_length(\"inscricoes_atendimento\".\"dias\") >= 1"
+        },
+        "inscricoes_outro_tamanho": {
+          "name": "inscricoes_outro_tamanho",
+          "value": "(\"inscricoes_atendimento\".\"deficiencia_outro\" IS NULL OR length(\"inscricoes_atendimento\".\"deficiencia_outro\") BETWEEN 2 AND 100)\n        AND (\"inscricoes_atendimento\".\"atendimento_outro\" IS NULL OR length(\"inscricoes_atendimento\".\"atendimento_outro\") BETWEEN 2 AND 100)"
+        },
+        "inscricoes_criado_em_utc": {
+          "name": "inscricoes_criado_em_utc",
+          "value": "length(\"inscricoes_atendimento\".\"criado_em\") = 20\n    AND \"inscricoes_atendimento\".\"criado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"inscricoes_atendimento\".\"criado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        },
+        "inscricoes_atualizado_em_utc": {
+          "name": "inscricoes_atualizado_em_utc",
+          "value": "length(\"inscricoes_atendimento\".\"atualizado_em\") = 20\n    AND \"inscricoes_atendimento\".\"atualizado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"inscricoes_atendimento\".\"atualizado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        }
+      }
+    },
+    "tentativas": {
+      "name": "tentativas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "chave_hash": {
+          "name": "chave_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "escopo": {
+          "name": "escopo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "tentativas_busca": {
+          "name": "tentativas_busca",
+          "columns": [
+            "chave_hash",
+            "escopo",
+            "criado_em"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tentativas_escopo": {
+          "name": "tentativas_escopo",
+          "value": "\"tentativas\".\"escopo\" IN ('inscricao', 'verificacao', 'login')"
+        },
+        "tentativas_chave_formato": {
+          "name": "tentativas_chave_formato",
+          "value": "length(\"tentativas\".\"chave_hash\") = 64 AND \"tentativas\".\"chave_hash\" NOT GLOB '*[^0-9a-f]*'"
+        },
+        "tentativas_criado_em_utc": {
+          "name": "tentativas_criado_em_utc",
+          "value": "length(\"tentativas\".\"criado_em\") = 20\n    AND \"tentativas\".\"criado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"tentativas\".\"criado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        }
+      }
+    },
+    "usuarios": {
+      "name": "usuarios",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero_registro": {
+          "name": "numero_registro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "senha_params": {
+          "name": "senha_params",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nascimento": {
+          "name": "nascimento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telefone_whatsapp": {
+          "name": "telefone_whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "endereco": {
+          "name": "endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "municipio": {
+          "name": "municipio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cuidador_nome": {
+          "name": "cuidador_nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cuidador_contato": {
+          "name": "cuidador_contato",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "situacao": {
+          "name": "situacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'ativo'"
+        },
+        "chave_idempotencia": {
+          "name": "chave_idempotencia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "usuarios_numero_registro_unique": {
+          "name": "usuarios_numero_registro_unique",
+          "columns": [
+            "numero_registro"
+          ],
+          "isUnique": true
+        },
+        "usuarios_email_unique": {
+          "name": "usuarios_email_unique",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        },
+        "usuarios_cpf_unique": {
+          "name": "usuarios_cpf_unique",
+          "columns": [
+            "cpf"
+          ],
+          "isUnique": true
+        },
+        "usuarios_chave_idempotencia_unique": {
+          "name": "usuarios_chave_idempotencia_unique",
+          "columns": [
+            "chave_idempotencia"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "usuarios_numero_registro_formato": {
+          "name": "usuarios_numero_registro_formato",
+          "value": "length(\"usuarios\".\"numero_registro\") = 16\n    AND \"usuarios\".\"numero_registro\" LIKE 'APPD-____-______'\n    AND \"usuarios\".\"numero_registro\" NOT GLOB '*[^A-Z0-9-]*'\n    AND substr(\"usuarios\".\"numero_registro\", 11, 6) NOT GLOB '*[^A-Z2-9]*'"
+        },
+        "usuarios_situacao": {
+          "name": "usuarios_situacao",
+          "value": "\"usuarios\".\"situacao\" IN ('ativo', 'inativo')"
+        },
+        "usuarios_email_normalizado": {
+          "name": "usuarios_email_normalizado",
+          "value": "\"usuarios\".\"email\" IS NULL OR (\"usuarios\".\"email\" = lower(\"usuarios\".\"email\") AND \"usuarios\".\"email\" = trim(\"usuarios\".\"email\"))"
+        },
+        "usuarios_cpf_digitos": {
+          "name": "usuarios_cpf_digitos",
+          "value": "\"usuarios\".\"cpf\" IS NULL OR (length(\"usuarios\".\"cpf\") = 11 AND \"usuarios\".\"cpf\" NOT GLOB '*[^0-9]*')"
+        },
+        "usuarios_nome_tamanho": {
+          "name": "usuarios_nome_tamanho",
+          "value": "\"usuarios\".\"nome\" IS NULL OR length(\"usuarios\".\"nome\") BETWEEN 2 AND 120"
+        },
+        "usuarios_nascimento_formato": {
+          "name": "usuarios_nascimento_formato",
+          "value": "\"usuarios\".\"nascimento\" IS NULL OR (length(\"usuarios\".\"nascimento\") = 10\n    AND \"usuarios\".\"nascimento\" LIKE '____-__-__'\n    AND \"usuarios\".\"nascimento\" NOT GLOB '*[^0-9-]*')"
+        },
+        "usuarios_telefone_digitos": {
+          "name": "usuarios_telefone_digitos",
+          "value": "\"usuarios\".\"telefone\" IS NULL OR (\"usuarios\".\"telefone\" NOT GLOB '*[^0-9]*' AND length(\"usuarios\".\"telefone\") IN (10, 11))"
+        },
+        "usuarios_whatsapp": {
+          "name": "usuarios_whatsapp",
+          "value": "\"usuarios\".\"telefone_whatsapp\" IS NULL OR \"usuarios\".\"telefone_whatsapp\" IN ('Sim', 'Não')"
+        },
+        "usuarios_endereco_tamanho": {
+          "name": "usuarios_endereco_tamanho",
+          "value": "\"usuarios\".\"endereco\" IS NULL OR length(\"usuarios\".\"endereco\") BETWEEN 3 AND 300"
+        },
+        "usuarios_numero_tamanho": {
+          "name": "usuarios_numero_tamanho",
+          "value": "\"usuarios\".\"numero\" IS NULL OR length(\"usuarios\".\"numero\") BETWEEN 1 AND 20"
+        },
+        "usuarios_complemento_tamanho": {
+          "name": "usuarios_complemento_tamanho",
+          "value": "\"usuarios\".\"complemento\" IS NULL OR length(\"usuarios\".\"complemento\") <= 60"
+        },
+        "usuarios_bairro_tamanho": {
+          "name": "usuarios_bairro_tamanho",
+          "value": "\"usuarios\".\"bairro\" IS NULL OR length(\"usuarios\".\"bairro\") BETWEEN 2 AND 80"
+        },
+        "usuarios_municipio_tamanho": {
+          "name": "usuarios_municipio_tamanho",
+          "value": "\"usuarios\".\"municipio\" IS NULL OR length(\"usuarios\".\"municipio\") BETWEEN 2 AND 80"
+        },
+        "usuarios_cuidador_nome_tamanho": {
+          "name": "usuarios_cuidador_nome_tamanho",
+          "value": "\"usuarios\".\"cuidador_nome\" IS NULL OR length(\"usuarios\".\"cuidador_nome\") <= 120"
+        },
+        "usuarios_cuidador_contato_digitos": {
+          "name": "usuarios_cuidador_contato_digitos",
+          "value": "\"usuarios\".\"cuidador_contato\" IS NULL OR (\"usuarios\".\"cuidador_contato\" NOT GLOB '*[^0-9]*' AND length(\"usuarios\".\"cuidador_contato\") IN (10, 11))"
+        },
+        "usuarios_criado_em_utc": {
+          "name": "usuarios_criado_em_utc",
+          "value": "length(\"usuarios\".\"criado_em\") = 20\n    AND \"usuarios\".\"criado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"usuarios\".\"criado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        },
+        "usuarios_atualizado_em_utc": {
+          "name": "usuarios_atualizado_em_utc",
+          "value": "length(\"usuarios\".\"atualizado_em\") = 20\n    AND \"usuarios\".\"atualizado_em\" LIKE '____-__-__T__:__:__Z'\n    AND \"usuarios\".\"atualizado_em\" NOT GLOB '*[^0-9:TZ-]*'"
+        },
+        "usuarios_ativo_completo": {
+          "name": "usuarios_ativo_completo",
+          "value": "\"usuarios\".\"situacao\" = 'inativo' OR (\n        \"usuarios\".\"email\" IS NOT NULL AND \"usuarios\".\"cpf\" IS NOT NULL AND \"usuarios\".\"senha_hash\" IS NOT NULL\n        AND \"usuarios\".\"senha_params\" IS NOT NULL AND \"usuarios\".\"nome\" IS NOT NULL\n        AND \"usuarios\".\"nascimento\" IS NOT NULL AND \"usuarios\".\"telefone\" IS NOT NULL\n        AND \"usuarios\".\"telefone_whatsapp\" IS NOT NULL AND \"usuarios\".\"endereco\" IS NOT NULL\n        AND \"usuarios\".\"numero\" IS NOT NULL AND \"usuarios\".\"bairro\" IS NOT NULL AND \"usuarios\".\"municipio\" IS NOT NULL\n      )"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

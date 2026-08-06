@@ -3,29 +3,17 @@
  *
  * Esta change é a **dona única** do número (ADR-013). `cracha-do-associado` apenas exibe.
  *
- * A regra que parece detalhe e não é: a unicidade vem da restrição `UNIQUE` do banco, com
- * nova tentativa em caso de colisão. **Ler o maior sequencial e somar 1 é proibido** —
- * dois cadastros simultâneos leem o mesmo valor e gravam o mesmo número. A primeira versão
- * da spec do crachá mandava fazer exatamente isso, e foi o bloqueio B10 do gate.
- *
- * Consequência aceita: a retentativa **pula números**. Buraco na sequência é esperado, não
- * é defeito, e não prejudica ninguém (REQ-5a).
+ * O número é sorteado (ADR-007), não sequencial: sequencial deixaria a lista de
+ * associados montável a partir da página pública de verificação. Como é sorteado, a
+ * emissão não precisa consultar nada — sorteia e grava. A retentativa existe para o caso
+ * improvável de colisão, e quem a detecta é a restrição `UNIQUE` do banco, nunca um
+ * `SELECT` antes (que reintroduziria a corrida entre dois cadastros simultâneos).
  */
 
-import { formatarNumeroRegistro } from '~~/shared/utils/registro'
+import { gerarNumeroRegistro } from '~~/shared/utils/registro'
 
-/** Quantas colisões seguidas antes de desistir (REQ-4). */
+/** Com 887 milhões de combinações, chegar a 5 colisões seguidas é sinal de outro defeito. */
 const MAXIMO_TENTATIVAS = 5
-
-/** Maior sequencial de um ano — `99999`, pelo formato de 5 dígitos. */
-const TETO_ANUAL = 99_999
-
-export class SequencialEsgotado extends Error {
-  constructor(readonly ano: number) {
-    super(`O limite de ${TETO_ANUAL} cadastros no ano ${ano} foi atingido.`)
-    this.name = 'SequencialEsgotado'
-  }
-}
 
 export class ColisaoPersistente extends Error {
   constructor(readonly tentativas: number) {
@@ -35,30 +23,19 @@ export class ColisaoPersistente extends Error {
 }
 
 /**
- * Emite o número e grava, com retentativa sob colisão.
+ * Sorteia e grava, com retentativa sob colisão.
  *
- * `gravar` recebe o número candidato e devolve `true` se gravou. Ele **deve** deixar a
- * violação de `UNIQUE` acontecer no banco e devolver `false` — checar antes com um
- * `SELECT` reintroduz exatamente a corrida que este desenho evita.
- *
- * `contarDoAno` serve só para escolher o ponto de partida; ele pode estar desatualizado
- * sem prejuízo, porque quem garante a unicidade é o banco.
+ * `gravar` recebe o número candidato e devolve `true` se gravou, `false` se o banco
+ * recusou por número repetido. Qualquer outro erro ele deve deixar subir.
  */
 export async function emitirNumeroRegistro(
   ano: number,
-  contarDoAno: () => Promise<number>,
   gravar: (numero: string) => Promise<boolean>,
 ): Promise<string> {
-  const jaEmitidos = await contarDoAno()
-
   for (let tentativa = 0; tentativa < MAXIMO_TENTATIVAS; tentativa++) {
-    const sequencial = jaEmitidos + 1 + tentativa
-    if (sequencial > TETO_ANUAL) throw new SequencialEsgotado(ano)
-
-    const numero = formatarNumeroRegistro(ano, sequencial)
+    const numero = gerarNumeroRegistro(ano)
     if (await gravar(numero)) return numero
   }
-
   throw new ColisaoPersistente(MAXIMO_TENTATIVAS)
 }
 

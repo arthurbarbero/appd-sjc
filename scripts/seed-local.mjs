@@ -20,7 +20,7 @@ const AGORA = '2026-08-06T12:00:00Z'
 const PESSOAS = [
   {
     id: 'seed-1',
-    numero: 'APPD-2026-00001',
+    numero: 'APPD-2026-K7M2QX',
     email: 'maria.ficticia@exemplo.test',
     cpf: '39053344705',
     nome: 'Maria Fictícia da Silva',
@@ -34,7 +34,7 @@ const PESSOAS = [
   },
   {
     id: 'seed-2',
-    numero: 'APPD-2026-00002',
+    numero: 'APPD-2026-P4NRT9',
     email: 'joao.exemplo@exemplo.test',
     cpf: '52998224725',
     nome: 'João Exemplo de Teste',
@@ -49,7 +49,7 @@ const PESSOAS = [
   {
     // Conta excluída, para exercitar o estado anônimo do REQ-28 sem rodar o fluxo.
     id: 'seed-3',
-    numero: 'APPD-2026-00003',
+    numero: 'APPD-2026-W8HXJ3',
     inativa: true,
   },
 ]

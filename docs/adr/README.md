@@ -47,10 +47,13 @@ Ainda por decidir, sem número reservado: **caminho de custo zero para enviar e-
 SMS de redefinição de senha**. Vira ADR quando houver pesquisa; hoje é pergunta aberta
 no `PROGRESS.md` e condição para o login ir ao ar (ver ADR-012).
 
-## 007 foi liberado
+## Sobre o 007
 
-O número 007 estava reservado para o protocolo `ATD-<ano>-<sequencial>`, que existia
+O número 007 chegou a ser reservado para o protocolo `ATD-<ano>-<sequencial>`, que existia
 para ancorar o aceite do termo de quem preenchesse o formulário **sem conta**. Com o
-[ADR-012](adr-012-cadastro-embutido-no-formulario.md), toda inscrição pertence a um
-usuário e o `numero_registro` já identifica a pessoa — o protocolo ficou sem função e
-foi removido do modelo. O número 007 volta a estar livre para a próxima decisão.
+[ADR-012](adr-012-cadastro-embutido-no-formulario.md) toda inscrição passou a pertencer a
+um usuário, o protocolo ficou sem função, e o número voltou a ficar livre.
+
+Foi reaproveitado em 2026-08-06 para a decisão do número de registro sorteado — que, por
+coincidência, também é sobre numeração, e sobre o mesmo erro: numeração previsível expõe
+mais do que parece.
