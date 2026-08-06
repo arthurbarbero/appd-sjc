@@ -3,7 +3,15 @@
 - ID: SPEC-cracha-do-associado Deriva de: PROP-20260805-cracha-do-associado
 - Status: rascunho (aguarda gate do revisor-spec e aprovação do dono)
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
-- Versão: v1 · Data: 2026-08-05
+- Versão: v2 · Data: 2026-08-06
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Esta change
+> passa a ser **dona única de `/area/cracha` e da foto inteira**, incluindo o envio, que
+> antes estava dividido com `cadastro-e-login`
+> ([ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md)). Em troca,
+> deixa de reivindicar a **emissão** do `numero_registro`: ela é de `cadastro-e-login`, e
+> aqui o número é só exibido.
 
 > **Todos os dados de exemplo desta spec são fictícios.** "Maria Aparecida da Silva",
 > `APPD-2026-00042` e qualquer telefone ou endereço de pessoa citados em cenário são
@@ -35,17 +43,21 @@ exatamente três informações: nome, número e situação.
   quatro primeiros dígitos são o ano civil da conclusão do cadastro e os cinco últimos são o
   sequencial daquele ano, preenchido com zeros à esquerda. Exemplo fictício:
   `APPD-2026-00042`.
-- **REQ-2**: O sistema DEVE gerar o `numero_registro` exatamente uma vez, no momento em que o
-  cadastro é concluído, e nunca em outro momento. Cadastro sem número concluído não existe.
-- **REQ-3**: O `numero_registro` DEVE ser único no banco, garantido por restrição `UNIQUE` na
-  coluna, e não apenas por checagem em código.
-- **REQ-4**: O `numero_registro` DEVE ser imutável: nenhuma rota, formulário ou script de
-  aplicação pode alterá-lo depois de gravado. Tentativa de alteração retorna erro e não grava.
-- **REQ-5**: Sob duas conclusões de cadastro simultâneas no mesmo ano, o sistema DEVE emitir
-  dois números distintos e consecutivos, sem colisão e sem buraco silencioso na sequência.
-- **REQ-6**: O sequencial DEVE recomeçar em `00001` a cada ano civil, e o sistema DEVE
-  suportar no máximo 99.999 registros por ano; ao atingir o limite, falha explícita com
-  mensagem para o operador, nunca reuso de número.
+- **REQ-2 a REQ-6**: **A emissão do número não é desta change** (ADR-013). Quem gera é
+  `cadastro-e-login` (REQ-2 a REQ-5b de lá), no momento em que o cadastro é concluído. Esta
+  change **consome e exibe**, e depende daquele contrato: formato, unicidade garantida pelo
+  banco e imutabilidade.
+
+  > **Bloqueio B10 do gate.** A v1 tinha, na task T1.2, "transação que lê o maior sequencial
+  > do ano e grava o próximo", enquanto `cadastro-e-login` exigia unicidade pelo banco com
+  > retentativa e dizia, com todas as letras, que ler-o-maior-e-somar-1 **não satisfaz** o
+  > requisito. Dois emissores, dois algoritmos, cada um reprovando no gate do outro. O
+  > algoritmo que fica é o da change dona, porque o daqui quebra com cadastros simultâneos.
+  >
+  > Junto com ele cai a exigência de sequência **consecutiva sem buraco** que estava no
+  > REQ-5 da v1: retentativa pula números por construção, e um número faltando não prejudica
+  > ninguém. `cadastro-e-login` REQ-5a registra isso como comportamento esperado, não defeito.
+
 - **REQ-7**: Toda exibição do `numero_registro` na interface DEVE usar
   `font-variant-numeric: tabular-nums`.
 
@@ -55,11 +67,21 @@ exatamente três informações: nome, número e situação.
   exportação ficam desabilitadas **com o motivo escrito em texto ao lado**, nunca apenas
   esmaecidas.
 - **REQ-9**: O sistema DEVE aceitar arquivos de origem `image/jpeg`, `image/png` e
-  `image/webp` com até 10 MB. Outro tipo ou tamanho maior é recusado antes de qualquer
-  processamento, com mensagem que diz o que fazer.
+  `image/webp` com até **10 MB antes do processamento no navegador**. Outro tipo ou tamanho
+  maior é recusado antes de qualquer processamento, com mensagem que diz o que fazer.
+
+  > **Bloqueio B11 do gate, e o que ele era de verdade.** A v1 de `cadastro-e-login` aceitava
+  > **5 MB** no cadastro e gravava direto; aqui o teto de entrada era 10 MB, mas o que chega
+  > ao servidor precisa ser 400 × 500 px e ≤ 102.400 bytes (REQ-11, REQ-12, REQ-14). Uma foto
+  > aceita lá era recusada aqui. O ADR-013 resolve pela posse: **o cadastro não recebe foto**,
+  > e existe um caminho só, este. Os dois números convivem sem conflito porque medem coisas
+  > diferentes — 10 MB é o que a pessoa pode escolher do celular, 102.400 bytes é o que sai do
+  > recorte e da compressão no navegador.
+
 - **REQ-10**: O recorte DEVE ocorrer no navegador, com moldura fixa de proporção 4:5, e DEVE
   ser inteiramente operável por teclado: setas movem a imagem, `+` e `−` aproximam e afastam,
-  e existem botões visíveis de aproximar e afastar com alvo de no mínimo 44 × 44 px.
+  e existem botões visíveis de aproximar e afastar com alvo de no mínimo 44 × 44 px, com 8 px
+  de folga entre alvos vizinhos (régua única do projeto).
 - **REQ-11**: A compressão DEVE ocorrer no navegador via `canvas`, produzindo JPEG de
   exatamente 400 × 500 px com qualidade 0,75.
 - **REQ-12**: Se o resultado da compressão exceder o teto rígido de 102.400 bytes, o sistema
@@ -112,6 +134,11 @@ exatamente três informações: nome, número e situação.
 
 ### Verificação pública
 
+- **REQ-28a**: Para conta **excluída**, `/verificar/<numero>` DEVE responder HTTP 200,
+  exibir o número e a situação `inativo`, e **não exibir nome** — o nome foi apagado
+  (`modelo-de-dados` REQ-29). O `numero_registro` é preservado e nunca reutilizado, para que
+  um crachá antigo não passe a identificar outra pessoa. Isso fecha o bloqueio B23 e o
+  `[A CONFIRMAR]` que `area-do-associado` tinha no assunto.
 - **REQ-28**: `GET /verificar/<numero_registro>` DEVE responder HTTP 200 e exibir, no máximo,
   três campos de dado: nome, `numero_registro` e situação. Nenhum outro campo do cadastro
   pode aparecer no HTML, no JSON embutido, em atributo `data-*`, em comentário, em cabeçalho
@@ -128,6 +155,10 @@ exatamente três informações: nome, número e situação.
 - **REQ-32**: A página NÃO DEVE oferecer busca por nome, sugestão enquanto digita, listagem
   de associados, exportação em lote ou qualquer endpoint que aceite consulta por outro campo
   que não o `numero_registro` completo.
+- **REQ-33a**: O endereço IP usado no limite do REQ-33 NUNCA é gravado em texto claro. Vale a
+  **regra única do projeto** (`modelo-de-dados` REQ-30): `HMAC-SHA-256(ip, segredo)`, com o
+  segredo em Cloudflare Secrets, na mesma tabela `envios_recentes` usada pelo formulário, com
+  `escopo = 'verificacao'`. Era o bloqueio B21 — mesma categoria de dado, duas regras.
 - **REQ-33**: O sistema DEVE limitar consultas de verificação a 20 por minuto por endereço IP;
   acima disso responde HTTP 429 com mensagem neutra, idêntica para qualquer número.
 - **REQ-34**: A página DEVE exibir, em texto corrido de corpo normal (não em nota de rodapé),
@@ -148,14 +179,15 @@ exatamente três informações: nome, número e situação.
   - **gatilho de revisão do ADR-001, em 350 MB → ~3.400 associados**.
     Esses números DEVEM aparecer no ADR de armazenamento de foto e ser reavaliados se a APPD
     informar volume acima de 3.000 associados.
-- **REQ-38**: O sistema DEVE registrar métrica simples de ocupação (contagem de fotos ×
+- **REQ-38** `[verificado por task, não por Gherkin]`: O sistema DEVE registrar métrica simples de ocupação (contagem de fotos ×
   tamanho médio) acessível ao operador, para que o gatilho de 350 MB seja percebido antes de
   virar problema.
 
 ### Acessibilidade (bloqueante)
 
 - **REQ-39**: As duas telas DEVEM atender WCAG 2.2 AA, verificado por axe sem violação de
-  severidade `serious` ou `critical`: um único `h1`, hierarquia de headings sem pulo,
+  **nível A ou AA** — a régua única do projeto, medida pela conformidade WCAG e não pela
+  severidade que o axe atribui: um único `h1`, hierarquia de headings sem pulo,
   contraste AA, foco visível de 3 px com 2 px de folga, alvos ≥ 44 px, corpo ≥ 17 px (nada
   abaixo de 15 px), texto não justificado, `prefers-reduced-motion` respeitado.
 - **REQ-40**: Situação do crachá e resultado da verificação DEVEM ser comunicados por ícone
@@ -480,7 +512,8 @@ Funcionalidade: Acessibilidade das telas do crachá e da verificação
   Cenário: Sem violação de acessibilidade automatizável
     Dado /area/cracha em cada um dos seis estados e /verificar/<numero> em cada um dos três
     Quando axe é executado em cada tela, em 1280 px e em 360 px
-    Então não há violação de severidade "serious" nem "critical"
+    Então não há violação de nível A nem AA
+    # Régua única do projeto, na configuração do axe no CI, nunca repetida por change.
     E cada tela tem exatamente um h1 e nenhuma quebra de nível de heading
 
   Cenário: Percurso completo por teclado
@@ -512,3 +545,38 @@ Funcionalidade: Acessibilidade das telas do crachá e da verificação
 | Capacidade          | REQ-36..38 | Capacidade e limites do D1                 |
 | Acessibilidade      | REQ-39..42 | Acessibilidade das telas                   |
 | Privacidade do repo | REQ-43     | coberto por gitleaks no pre-commit e no CI |
+
+## Definition of Ready — auditoria desta spec
+
+Seção que faltava na v1 e reprovou no gate (bloqueio B19): esta change delegava a
+autoauditoria à task T0.3, "rodar o gate". Isso inverte a ordem — o gate **confere** o que
+a spec declara sobre si mesma, não escreve no lugar dela.
+
+| Item                          | Situação                                                     |
+| ----------------------------- | ------------------------------------------------------------ |
+| Spec sem ambiguidade pendente | **Não** — dois bloqueios abertos, abaixo                     |
+| Priorizada                    | Do coordenador; não é decisão desta spec                     |
+| Critério de aceite testável   | **Sim**, com uma exceção declarada: REQ-38, coberto por task |
+
+**Bloqueios, cada um com dono:**
+
+- `[dependência]` **`modelo-de-dados` e `cadastro-e-login` precisam fechar antes.** Esta
+  change não cria coluna e não emite número — consome os dois. Dono: **Arthur Barbero**.
+- `[escopo] R-7` — nem `/area/cracha` (seis estados) nem `/verificar/<numero>` (quatro
+  estados) têm design aprovado no Claude Design. Dono: **Arthur Barbero**. Bloqueia toda
+  tarefa de tela, que aqui é quase tudo.
+- `[APPD]` Se a associação pode **inativar** um crachá, e quem faz isso, continua
+  `[A CONFIRMAR]`. Não bloqueia: na V1 `situacao` só é escrita pela exclusão de conta
+  (`modelo-de-dados` REQ-12), e inativação manual é `painel-admin`, V1.1.
+
+**Resolvidos desde a v1:**
+
+- ~~B10, dois algoritmos para o `numero_registro`~~ — a emissão saiu daqui (ADR-013).
+- ~~B11, foto com dois limites~~ — esta change é dona única da foto; 10 MB é o que a pessoa
+  escolhe, 102.400 bytes é o que chega ao servidor.
+- ~~B12, `situacao` sem autor~~ — `modelo-de-dados` REQ-12 nomeou o escritor.
+- ~~B20, `/area/cracha` com três donos~~ — é desta change, inteira.
+- ~~B21, IP sem regra~~ — REQ-33a aponta para a regra única do projeto.
+
+**Veredito: NÃO-READY para tarefa de tela** (R-7), **READY para as fatias sem tela** assim
+que as duas dependências fecharem.

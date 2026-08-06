@@ -4,7 +4,7 @@
 - Origem: `openspec/README.md` (change 2 da Fase 3) · `docs/campos-formulario.md` campo 12 ·
   `docs/prompts-design/privacidade.md` · decisões do dono de 2026-08-05
 - Autor do registro: Especificador (Claude Code) Dono do conteúdo: Arthur Barbero
-- Data: 2026-08-05 Versão: v1
+- Data: 2026-08-06 Versão: v2 (reescrita contra `modelo-de-dados`, depois do gate)
 
 ## Motivação (por quê)
 

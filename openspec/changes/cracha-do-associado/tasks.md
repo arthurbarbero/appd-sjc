@@ -12,28 +12,28 @@ sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Bar
       hospedagem doada) e consequências, incluindo os números de capacidade do REQ-37.
       **Aceite**: ADR aceito e assinado pelo dono; cenários de "Capacidade e limites do D1"
       referenciam os mesmos números.
-- [ ] **T0.2 — ADR de liberação imediata.** Escrever
-      `docs/adr/adr-004-cracha-com-liberacao-imediata.md`: sem aprovação prévia nesta versão,
+- [x] **T0.2 — ADR de liberação imediata.** Já escrito:
+      `docs/adr/adr-004-liberacao-imediata-do-cracha.md`: sem aprovação prévia nesta versão,
       com o gatilho de revisão explícito (a APPD pedir moderação, ou aparecer uso indevido).
       **Aceite**: ADR aceito; REQ-27 aponta para ele.
-- [ ] **T0.3 — Gate do revisor-spec.** Rodar a auditoria de Definition of Ready sobre esta
-      spec. **Aceite**: veredito READY registrado, ou lista de bloqueios com dono.
+- [ ] **T0.3 — Gate do revisor-spec.** Rodar a auditoria sobre esta spec.
+      **Aceite**: veredito READY registrado, ou lista de bloqueios com dono.
+      **Nota**: o gate **confere** a autoauditoria, não a substitui — foi o bloqueio B19.
+      A seção "Definition of Ready" da spec agora existe e é preenchida antes de rodar.
 - [ ] **T0.4 — Design aprovado no Claude Design** para `/area/cracha` (seis estados) e
       `/verificar/<numero>` (quatro estados), com handoff bundle. **Aceite**: bundle entregue e
       checklist de aceite visual dos dois prompts de design todo marcado. **Bloqueia toda tela.**
 
-## Fatia 1 — Número de registro (sem tela)
+## Fatia 1 — Número de registro: movida para `cadastro-e-login`
 
-- [ ] **T1.1** — Coluna `numero_registro` na tabela de usuários, `TEXT NOT NULL UNIQUE`, com
-      migration versionada (`npm run db:generate`). **Aceite**: cenário "Número é único no banco".
-- [ ] **T1.2** — Emissor do número: transação que lê o maior sequencial do ano e grava o próximo,
-      com retomada em caso de conflito de UNIQUE. Reaproveita `formatarNumeroRegistro` de
-      `shared/utils/registro.ts`. **Aceite**: cenários "Número gerado ao concluir o cadastro",
-      "Sequencial preenchido com zeros", "Sequencial recomeça a cada ano" e "Duas conclusões
-      simultâneas não colidem".
-- [ ] **T1.3** — Guarda de imutabilidade: o número não entra em nenhum DTO de atualização; teste
-      que tenta alterar e falha. **Aceite**: cenário "Número é imutável".
-- [ ] **T1.4** — Falha explícita ao esgotar 99.999 no ano. **Aceite**: REQ-6 coberto por teste.
+**T1.1 a T1.4 não existem mais aqui** (ADR-013). A coluna é de `modelo-de-dados`, o emissor
+é de `cadastro-e-login`, e a T1.2 original — "lê o maior sequencial do ano e grava o
+próximo" — está **revogada**: quebra com cadastros simultâneos, e contradizia frontalmente
+o REQ-4 da change dona (bloqueio B10 do gate).
+
+- [ ] **T1.0** — Conferir que a emissão de `cadastro-e-login` está entregue e que
+      `formatarNumeroRegistro` de `shared/utils/registro.ts` é usada por ela.
+      **Aceite**: os cenários de número daquela change passam; esta change só exibe.
 
 ## Fatia 2 — Armazenamento da foto (sem tela)
 

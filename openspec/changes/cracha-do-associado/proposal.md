@@ -6,7 +6,7 @@
   [verificacao-cracha.md](../../../docs/prompts-design/verificacao-cracha.md);
   rota já prevista em [arquitetura-informacao.md](../../../docs/arquitetura-informacao.md)
 - Autor do registro: Claude Code (especificador) · Dono do conteúdo: Arthur Barbero
-- Data: 2026-08-05 Versão: v1 · Nível da régua: **Grande**
+- Data: 2026-08-06 · Versão: v2 (reescrita contra `modelo-de-dados`, depois do gate)
 
 ## Motivação (por quê)
 
@@ -82,7 +82,7 @@ dado a mais do que nome, número e situação.
 ## Premissas e questões abertas
 
 - Premissa: o volume da APPD é de ordem de centenas de associados, não dezenas de milhares
-  — ver o cálculo de capacidade na spec (REQ-24). Se a associação informar volume maior,
+  — ver o cálculo de capacidade na spec (REQ-36 e REQ-37). Se a associação informar volume maior,
   o ADR de armazenamento de foto reabre.
 - Premissa: todo associado tem acesso a um aparelho capaz de tirar ou escolher uma foto.
   A alternativa humana (telefone da associação) cobre quem não tem.

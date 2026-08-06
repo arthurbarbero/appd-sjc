@@ -2,7 +2,13 @@
 
 - ID: SPEC-consentimento-e-privacidade Deriva de: PROP-20260805-consentimento-e-privacidade
 - Dono do conteúdo: Arthur Barbero Aprovador da spec: Arthur Barbero
-- Versão: v1 Data: 2026-08-05 Status: rascunho
+- Versão: v2 Data: 2026-08-06 Status: rascunho
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
+> `usuario_id NOT NULL` passou a ser exequível (ADR-012); o fluxo de exclusão foi cedido
+> para `area-do-associado` (ADR-013), ficando aqui só o conteúdo que a tela exibe; e a
+> ambiguidade "exigir × pedir" do REQ-11 foi resolvida (bloqueio B9 do gate).
 
 ## Objetivo
 
@@ -76,9 +82,20 @@ Cada REQ é verificável por um cenário de aceite. A coluna de rastreabilidade 
 - **REQ-10**: O sistema NÃO DEVE gravar endereço IP nem user-agent no registro de consentimento
   — o registro precisa de versão, momento e origem, e nada além disso.
 - **REQ-11**: Quando a versão vigente muda e o `tipo_mudanca` é `material`, o sistema DEVE
-  exigir novo aceite de quem já tem conta, exibindo o aviso da alteração no próximo acesso
-  autenticado, com o teor do que mudou em destaque (Art. 8º, §6º; Art. 9º, §2º). Enquanto o
-  novo aceite não é dado, o tratamento anterior permanece válido e a conta continua acessível.
+  **pedir** novo aceite de quem já tem conta, exibindo o aviso da alteração no próximo acesso
+  autenticado, com o teor do que mudou em destaque (Art. 8º, §6º; Art. 9º, §2º).
+
+  O aviso é **dispensável, não bloqueante**: a pessoa fecha e continua usando a conta, e o
+  tratamento anterior permanece válido enquanto o novo aceite não vem. Ele **reaparece uma vez
+  por sessão**, no primeiro acesso autenticado, até ser aceito ou até a versão mudar de novo.
+  Não há limite de vezes: enquanto o aceite não vem, o pedido continua sendo devido.
+
+  > **Bloqueio B9 do gate.** A v1 dizia "DEVE exigir" no requisito e "o sistema pede" no
+  > cenário. Exigir e pedir são coisas diferentes: um leitor implementaria modal bloqueante,
+  > outro um aviso dispensável — e não havia cenário para o caso mais provável, que é a pessoa
+  > fechar o aviso e seguir. Bloqueante está errado aqui: travar a conta de quem não aceitou
+  > um termo novo é coagir consentimento, o oposto do que o Art. 8º pede.
+
 - **REQ-12**: Quando o `tipo_mudanca` é `editorial`, o sistema NÃO DEVE exigir novo aceite de
   quem já aceitou versão anterior.
 - **REQ-13**: A revogação do consentimento DEVE estar a no máximo **dois cliques** de
@@ -99,20 +116,31 @@ Cada REQ é verificável por um cenário de aceite. A coluna de rastreabilidade 
   embutida em endereço público.
 - **REQ-16**: A **correção** de dado DEVE gravar o valor novo e registrar data e hora da
   alteração, sem exigir contato por outro canal para os campos que a pessoa mesma preencheu.
-- **REQ-17**: O pedido de **exclusão** DEVE ocorrer em três telas — pedido, confirmação e
-  recibo — e, ao ser executado, apagar: conta, dados de contato e endereço, dados do cuidador,
-  o campo de tipo de deficiência, a foto e o crachá. O que for conservado por obrigação legal
-  (Art. 16, I) DEVE ser listado item a item na tela, com o prazo de conservação — enquanto a
-  APPD não definir (PB-1), a tela exibe `[A CONFIRMAR]` **no corpo do texto** e a change não
-  passa no gate de archive.
-- **REQ-18**: A confirmação da exclusão DEVE ser feita por **caixa de seleção desmarcada**; o
-  sistema NÃO DEVE exigir digitação de palavra de confirmação. O botão destrutivo permanece
-  desabilitado até a caixa ser marcada e DEVE declarar em texto o motivo de estar desabilitado,
-  mantendo contraste mínimo de 3:1 enquanto desabilitado.
-- **REQ-19**: O recibo DEVE mostrar data, hora e o canal pelo qual a resposta virá, e o telefone
-  para cobrar caso nada aconteça. Número de protocolo só aparece se a APPD definir o formato
-  (PB-5); até lá, `[A CONFIRMAR]`.
-- **REQ-20**: Cancelar em qualquer passo do fluxo de exclusão NÃO DEVE gravar pedido nenhum.
+- **REQ-17**: **O fluxo de exclusão não é desta change** (ADR-013). A tela `/area/excluir` é de
+  `area-do-associado` e o contrato do que é apagado está em
+  [`modelo-de-dados`](../modelo-de-dados/spec.md) REQ-28, escrito uma vez só.
+
+  > A v1 tinha três telas (pedido, confirmação, recibo) e uma caixa de seleção; `cadastro-e-login`
+  > tinha uma página e duas caixas; `area-do-associado` tinha outra coisa. Três contratos para a
+  > mesma tela — bloqueios B6 e B23 do gate. O dono decidiu em 2026-08-06: **uma página, um
+  > modal de confirmação**. E o REQ-17 da v1 era, além disso, **inexequível**: mandava apagar o
+  > tipo de deficiência sem chave para achá-lo (B7), o que só se resolveu com o ADR-012.
+
+  O que continua sendo desta change é o **conteúdo** que a tela exibe: o que é retido, por quê,
+  e a base legal de cada item (Art. 16, I), com o prazo de conservação. Enquanto a APPD não
+  definir (PB-1), o texto traz `[A CONFIRMAR]` **no corpo**, e nem esta change nem
+  `area-do-associado` passam no gate de archive.
+
+- **REQ-18**: Executada a exclusão, esta change DEVE gravar uma linha nova em `consentimentos`
+  com `evento = 'revogacao'`. As linhas anteriores **permanecem intactas** — são a prova de que
+  o tratamento teve base legal, e por isso a FK não tem `ON DELETE CASCADE`
+  (`modelo-de-dados` REQ-25).
+- **REQ-19**: Não há recibo em rota própria nem número de protocolo. A confirmação é um bloco na
+  mesma página, com data, hora e o telefone para cobrar caso algo não aconteça. **PB-5 fica sem
+  objeto**: o `numero_registro` já identifica a pessoa, e o projeto não tem segundo espaço de
+  numeração (ADR-012).
+- **REQ-20**: Cancelar NÃO DEVE gravar nada. Requisito da tela de `area-do-associado`; fica aqui
+  como contrato que aquela change consome.
 
 ### As duas páginas
 
@@ -176,21 +204,23 @@ existindo; o aceite anterior continua na tabela como histórico.
   diz para tentar de novo, e nada é gravado. Consentimento gravado pela metade é pior que
   nenhum.
 
-## Contrato de dados — tabela `consentimentos` (D1)
+## Contrato de dados — tabela `consentimentos`
 
-| Coluna          | Tipo          | Regra                                             |
-| --------------- | ------------- | ------------------------------------------------- |
-| `id`            | TEXT PK       | UUID v4                                           |
-| `usuario_id`    | TEXT NOT NULL | FK para `usuarios.id` (change `cadastro-e-login`) |
-| `termo_id`      | TEXT NOT NULL | ex.: `deficiencia-art11`                          |
-| `versao`        | TEXT NOT NULL | ex.: `v1`                                         |
-| `hash`          | TEXT NOT NULL | SHA-256 hex do texto exibido                      |
-| `evento`        | TEXT NOT NULL | `aceite` \| `revogacao`                           |
-| `registrado_em` | TEXT NOT NULL | ISO-8601 em UTC, ex.: `2026-08-05T14:03:11Z`      |
-| `origem`        | TEXT NOT NULL | rota de origem, ex.: `/atendimento/formulario`    |
+**Não mora aqui.** As colunas, tipos e restrições estão em
+[`modelo-de-dados`](../modelo-de-dados/spec.md) REQ-21 a REQ-25. Esta change é a **dona do
+comportamento**: quem grava aceite, quem grava revogação, e a garantia de que a tabela é
+append-only na aplicação.
 
-Índice em `(usuario_id, termo_id, registrado_em)`. Migration versionada por
-`npm run db:generate` — nunca `push` direto. Seed só com dado fictício explícito.
+Três coisas mudaram em relação à v1, e todas vêm do ADR-012:
+
+1. **`usuario_id NOT NULL` passou a ser exequível.** O formulário de atendimento cria a conta,
+   então toda inscrição pertence a um usuário. Era o bloqueio B5, que arrastava junto o B7
+   (apagar o tipo de deficiência sem chave) e o B17 (listar "minhas inscrições" sem vínculo).
+2. **As colunas de consentimento saíram de `inscricoes_atendimento`.** O aceite mora só aqui.
+   Dois registros do mesmo aceite é o começo de dois históricos que divergem — e faria a
+   revogação do REQ-13 não alcançar a inscrição, que é justamente onde o dado sensível está.
+3. **Não há coluna `protocolo`.** Ela existiria para ancorar o aceite de quem não tem conta;
+   com o cadastro embutido, ficou sem função.
 
 ## Fora de escopo (explícito)
 
@@ -252,10 +282,12 @@ archive desta change e a publicação no domínio da APPD.
 - **Enquanto isso**: a tela cita o prazo do Art. 19 como referência da lei e marca o
   compromisso operacional como `[A CONFIRMAR]`.
 
-### PB-5 — Formato do número de protocolo
+### PB-5 — Formato do número de protocolo (SEM OBJETO desde 2026-08-06)
 
 - **Pergunta**: existe número de protocolo para pedido de titular? Qual formato?
-- **Trava**: REQ-19, tela de recibo.
+- **Trava**: nenhuma. O ADR-012 eliminou o protocolo: com o cadastro embutido no
+  formulário, o `numero_registro` já identifica a pessoa e o projeto não tem segundo espaço
+  de numeração. Fica registrada para quem for ler o parecer do gate e procurar por ela.
 - **Enquanto isso**: `[A CONFIRMAR]`. Formato de protocolo não se inventa.
 
 ## Critério de aceite (Gherkin)
@@ -429,58 +461,36 @@ Cenário: Revogação preserva o histórico do aceite anterior
   E a leitura do estado atual considera o último evento por termo_id
 ```
 
-### Funcionalidade: Pedido de exclusão
+### Funcionalidade: O conteúdo que a tela de exclusão exibe
+
+A **tela** é de `area-do-associado` (ADR-013). Os cenários abaixo verificam só o que é
+contrato desta change: o texto do que é retido, a base legal e o registro da revogação.
 
 ```gherkin
-Cenário: A tela de pedido lista o que é apagado e o que é retido
+Cenário: O bloco do que é retido cita a base legal item a item
   Cobre REQ-17, REQ-23
-  Dado que "usuario-1" está autenticado e abre "/area/excluir"
+  Dado que "usuario-1" abre a tela de exclusão da conta
   Quando a tela é exibida
-  Então a lista do que será apagado inclui conta, dados de contato e endereço, dados do
-        cuidador, tipo de deficiência, foto e crachá
-  E a tela informa que o crachá deixa de ser verificado na página pública
-  E a tela informa que a pessoa sai da fila de atendimento
+  Então o bloco "O que a associação precisa manter" lista cada item com a base legal
   E o que a lei obriga a guardar, e por quanto tempo, aparece marcado "[A CONFIRMAR]" no
         corpo do texto enquanto a PB-1 não for respondida
+  E o texto não usa tom de ameaça nem sugere que a exclusão é desaconselhada
 
-Cenário: O botão destrutivo fica desabilitado até a caixa ser marcada, e diz por quê
+Cenário: A exclusão registra a revogação sem apagar o histórico
   Cobre REQ-18
-  Dado que "usuario-1" está na tela de confirmação da exclusão
-  Quando a tela é exibida
-  Então a caixa "Entendi que isso não pode ser desfeito" está desmarcada
-  E o botão "Excluir meus dados" está desabilitado
-  E há um texto visível explicando que ele está desabilitado até a caixa ser marcada
-  E o botão desabilitado mantém contraste de pelo menos 3:1
+  Dado que "usuario-1" tem duas linhas em "consentimentos", um aceite e uma alteração
+  Quando a exclusão da conta é executada
+  Então as duas linhas anteriores continuam intactas
+  E existe uma terceira linha com evento "revogacao"
+  E nenhuma linha de "consentimentos" foi apagada nem alterada
 
-Cenário: A confirmação não exige digitar palavra nenhuma
-  Cobre REQ-18
-  Dado que "usuario-1" está na tela de confirmação da exclusão
-  Quando ele marca a caixa de confirmação
-  Então o botão "Excluir meus dados" fica habilitado
-  E em nenhum momento é pedido que ele digite uma palavra de confirmação
-
-Cenário: O recibo mostra data, hora e canal, sem protocolo inventado
+Cenário: Não há recibo em rota própria nem protocolo inventado
   Cobre REQ-19, REQ-23
-  Dado que "usuario-1" confirmou o pedido de exclusão
-  Quando o recibo é exibido
-  Então ele mostra a data e a hora do pedido
-  E mostra por qual canal a resposta virá e o telefone para cobrar se nada acontecer
-  E, enquanto a PB-5 não for respondida, o protocolo aparece como "[A CONFIRMAR]"
-  E nenhum número de protocolo é gerado com formato inventado
-
-Cenário: Cancelar em qualquer passo não registra pedido
-  Cobre REQ-20
-  Dado que "usuario-1" está na tela de pedido ou na de confirmação
-  Quando ele aciona "Cancelar"
-  Então nenhum pedido de exclusão é gravado
-  E a conta e os dados permanecem intactos
-
-Cenário: O botão Cancelar é visualmente mais forte que a ação destrutiva
-  Cobre REQ-18
-  Dado que "usuario-1" está na tela de confirmação da exclusão
-  Quando a tela é exibida
-  Então "Cancelar" é o botão preenchido
-  E "Excluir meus dados" é contornado, com fundo transparente
+  Dado que "usuario-1" confirmou a exclusão
+  Quando a confirmação é exibida
+  Então ela é um bloco na mesma página, não uma rota nova
+  E mostra a data, a hora e o telefone para cobrar se nada acontecer
+  E nenhum número de protocolo é gerado
 ```
 
 ### Funcionalidade: Acesso, correção e portabilidade
@@ -492,7 +502,8 @@ Cenário: A cópia dos dados inclui o histórico de consentimentos
   Quando ele pede a cópia dos seus dados
   Então ele recebe um arquivo JSON com todos os campos pessoais armazenados
   E o JSON contém os dois eventos, cada um com versao, hash, evento e registrado_em
-  E o mesmo conteúdo é apresentado em tela, legível sem baixar arquivo
+  E a tela apresenta, sem baixar arquivo, os mesmos campos do JSON: para cada evento,
+        a versão, o hash, o tipo do evento e a data e hora
   E a foto do crachá vem como arquivo separado, sem endereço público
 
 Cenário: Corrigir um dado grava o valor novo com data e hora
@@ -590,14 +601,14 @@ Esquema do Cenário: Estrutura de títulos e foco em cada tela
   E a hierarquia de títulos não pula nível
   E todo elemento focável exibe foco visível de 3px em "#0f4c93" com 2px de folga
   E a auditoria automatizada com axe não aponta violação de nível A ou AA
+  # Régua única do projeto, na configuração do axe no CI, nunca repetida por change.
 
   Exemplos:
     | rota                  |
     | /privacidade          |
     | /seus-direitos        |
-    | /area/excluir         |
-    | /area/excluir/confirmar |
-    | /area/excluir/recibo  |
+    | /privacidade          |
+    | /seus-direitos        |
 
 Cenário: Todo alvo interativo tem pelo menos 44 por 44 pixels
   Cobre REQ-28
@@ -608,7 +619,7 @@ Cenário: Todo alvo interativo tem pelo menos 44 por 44 pixels
 
 Cenário: O fluxo de exclusão inteiro é operável só por teclado
   Cobre REQ-27
-  Dado que "usuario-1" está em "/area/excluir" usando apenas o teclado
+  Dado que "usuario-1" está em "/seus-direitos" usando apenas o teclado
   Quando ele percorre pedido, confirmação e recibo com Tab, Shift+Tab, Enter e Espaço
   Então ele consegue concluir o fluxo sem mouse
   E não há armadilha de foco em nenhuma das três telas
@@ -639,7 +650,7 @@ Cenário: Tipografia e movimento respeitam o público do site
 | REQ-11, REQ-12  | Versionamento (2 cenários)                   | Art. 8º §6º; Art. 9º §2º        |
 | REQ-13          | Revogação (2 cenários)                       | Art. 8º §5º; Art. 18, IX        |
 | REQ-14 a REQ-16 | Acesso, correção, portabilidade (3 cenários) | Art. 18 I, II, III, V; Art. 19  |
-| REQ-17 a REQ-20 | Pedido de exclusão (6 cenários)              | Art. 16; Art. 18, VI            |
+| REQ-17 a REQ-20 | Conteúdo da tela de exclusão (3 cenários)    | Art. 16; Art. 18, VI            |
 | REQ-21 a REQ-24 | Legibilidade da política (5 cenários)        | Art. 9º; Art. 41 §1º            |
 | REQ-25          | Dado sensível nunca público (2 cenários)     | Art. 11; `CLAUDE.md`            |
 | REQ-26 a REQ-30 | Acessibilidade (5 cenários, 5 exemplos)      | WCAG 2.2 AA; `CLAUDE.md`        |

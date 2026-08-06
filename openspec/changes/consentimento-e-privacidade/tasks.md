@@ -11,7 +11,7 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 
 - Dono da decisão: Arquiteto (Arthur Barbero assina)
 - Depende de: nada
-- Entrega: `docs/adr/adr-003-<slug>.md` decidindo entre catálogo versionado no repo (com hash
+- Entrega: `docs/adr/adr-006-<slug>.md` decidindo entre catálogo versionado no repo (com hash
   conferido em teste) e linhas em tabela no D1, com alternativas e consequências.
 - Aceite: o ADR responde como a imutabilidade da versão publicada (REQ-2) é garantida e como o
   catálogo é lido em runtime no workerd. Sem esse ADR, T4 não começa.
@@ -25,14 +25,15 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: cada PB tem resposta escrita, ou uma data marcada para a resposta. PB-1 e PB-2
   precisam de apoio jurídico da associação — não são decisão do projeto nem do dono do repo.
 
-## T3 — Gerar e aprovar as cinco telas no Claude Design
+## T3 — Gerar e aprovar as duas telas no Claude Design
 
 - Dono: Arthur Barbero (opera o canvas)
 - Depende de: nada
-- Entrega: `/privacidade`, `/seus-direitos` e as três telas do fluxo de exclusão, geradas a
-  partir de `docs/prompts-design/privacidade.md`, mais o handoff bundle.
-- Aceite: as duas listas de "Aceite visual" do prompt (15 itens) todas marcadas. Nenhuma tela
-  entra em código antes disso — é a regra central do `CLAUDE.md`.
+- Entrega: `/privacidade` e `/seus-direitos`, geradas a partir de
+  `docs/prompts-design/privacidade.md`, mais o handoff bundle. **As telas do fluxo de
+  exclusão saíram** desta change (ADR-013) e são de `area-do-associado`.
+- Aceite: as listas de "Aceite visual" do prompt, referentes a estas duas telas, todas
+  marcadas. Nenhuma tela entra em código antes disso — é a regra central do `CLAUDE.md`.
 
 ## T4 — Catálogo de termos versionado, com verificação de integridade
 
@@ -66,7 +67,8 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 
 - Depende de: T3, T4
 - Entrega: o controle separado, desmarcado por padrão, com rótulo de finalidade específica,
-  erro ligado por `aria-describedby` e região `aria-live`, alvo de 44px com rótulo clicável.
+  erro ligado por `aria-describedby` e região `aria-live`, alvo de 44px com 8px de folga e
+  rótulo clicável.
 - Aceite: passam os cenários de caixa desmarcada, querystring que não pré-marca, envio
   bloqueado no cliente com resposta preservada e foco movido, e erro identificável em escala
   de cinza.
@@ -97,16 +99,16 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: passam os 3 cenários de "Revogação do consentimento" — dois cliques, conta
   preservada, histórico do aceite intacto.
 
-## T11 — Fluxo de exclusão em três telas
+## T11 — Conteúdo da tela de exclusão (a tela é de outra change)
 
-- Depende de: T3, T5, PB-1 respondida para o texto final
-- Entrega: `/area/excluir`, `/area/excluir/confirmar`, `/area/excluir/recibo`, com confirmação
-  por caixa de seleção, botão destrutivo contornado e desabilitado com motivo em texto, e
-  "Cancelar" preenchido.
-- Aceite: passam os 6 cenários de "Pedido de exclusão" e o cenário de teclado do fluxo
-  inteiro. Teste que falha se aparecer campo de digitação de palavra de confirmação (REQ-18).
-- Nota: a **execução** da eliminação depende de PB-1 para saber o que é conservado. Enquanto a
-  resposta não vier, o pedido é registrado e a tela é honesta sobre o `[A CONFIRMAR]`.
+- Depende de: T4, e da PB-1 para sair do `[A CONFIRMAR]`.
+- Entrega: o **texto** que `area-do-associado` exibe em `/area/excluir` — o bloco "O que a
+  associação precisa manter", com base legal item a item e prazo de conservação —, mais a
+  gravação da linha de `evento = 'revogacao'` em `consentimentos`.
+- **Não entrega**: a tela, o modal, os botões nem o fluxo. São de `area-do-associado`
+  (ADR-013). Três changes escreviam esse fluxo antes; agora, uma.
+- Aceite: passam os 3 cenários de "O conteúdo que a tela de exclusão exibe"; as linhas
+  anteriores de `consentimentos` continuam intactas depois da exclusão.
 
 ## T12 — Proibição transversal do dado sensível
 
@@ -120,7 +122,8 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 
 - Dono da execução: Validador (QA)
 - Depende de: T8, T9, T11
-- Entrega: axe automatizado nas cinco rotas, mais verificação manual de foco, alvo de 44px,
+- Entrega: axe automatizado nas rotas desta change, mais verificação manual de foco, alvo de
+  44px com 8px de folga,
   ordem de foco, contraste do botão desabilitado e `prefers-reduced-motion`.
 - Aceite: passam os 5 cenários de "Acessibilidade das cinco telas", incluindo os 5 exemplos do
   esquema de cenário. Zero violação de nível A ou AA. O veredito é do QA, não de quem
