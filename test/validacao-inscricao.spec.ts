@@ -1,0 +1,124 @@
+/**
+ * Testes do schema Zod compartilhado — `modelo-de-dados` T1.3.
+ *
+ * Foco no caminho infeliz: o caminho feliz de um formulário quase sempre funciona; o que
+ * derruba a pessoa é a máscara que recusa o que ela colou, o "Outro" que não pede
+ * especificação, e o campo desconhecido aceito em silêncio.
+ */
+
+import { describe, expect, it } from 'vitest'
+import { cpfValido, esquemaInscricao } from '../shared/validacao/inscricao'
+
+/** Preenchimento válido mínimo. Todo dado é fictício. */
+const VALIDO = {
+  nome: 'Maria Fictícia da Silva',
+  nascimento: '12/03/1978',
+  telefone: '(12) 90000-0001',
+  telefoneWhatsapp: 'Sim',
+  endereco: 'Rua de Teste',
+  numero: 's/n',
+  bairro: 'Bairro Fictício',
+  municipio: 'São José dos Campos',
+  deficiencias: ['Física'],
+  atendimentos: ['Fisioterapia'],
+  dias: ['Segundas'],
+  cienciaContribuicao: 'Ciente',
+  email: 'maria.ficticia@exemplo.test',
+  cpf: '390.533.447-05',
+  senha: 'senha de teste bem longa',
+  consentimentoSaude: true,
+  chaveIdempotencia: '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
+}
+
+describe('Schema da inscrição', () => {
+  it('aceita o preenchimento válido e normaliza o que precisa', () => {
+    const r = esquemaInscricao.parse(VALIDO)
+    expect(r.telefone).toBe('12900000001')
+    expect(r.cpf).toBe('39053344705')
+    expect(r.email).toBe('maria.ficticia@exemplo.test')
+  })
+
+  it('a máscara não bloqueia: três formatos de telefone colados são aceitos', () => {
+    const casos: [string, string][] = [
+      ['12991657059', '12991657059'],
+      // Copiado do WhatsApp, com código do país: o +55 é descartado, não recusado.
+      ['+55 12 99165-7059', '12991657059'],
+      ['(12) 3346-0605', '1233460605'],
+    ]
+    for (const [colado, esperado] of casos) {
+      expect(esquemaInscricao.parse({ ...VALIDO, telefone: colado }).telefone).toBe(esperado)
+    }
+  })
+
+  it('e-mail com maiúscula e espaço é normalizado, não recusado', () => {
+    const r = esquemaInscricao.parse({ ...VALIDO, email: '  Maria@Exemplo.TEST ' })
+    expect(r.email).toBe('maria@exemplo.test')
+  })
+
+  it('recusa campo desconhecido em vez de ignorar em silêncio', () => {
+    const r = esquemaInscricao.safeParse({ ...VALIDO, prioridade: true })
+    expect(r.success).toBe(false)
+  })
+
+  it('recusa opção fora da lista oficial', () => {
+    const r = esquemaInscricao.safeParse({ ...VALIDO, atendimentos: ['Cirurgia'] })
+    expect(r.success).toBe(false)
+  })
+
+  it('exige pelo menos uma opção em cada múltipla escolha', () => {
+    for (const campo of ['deficiencias', 'atendimentos', 'dias']) {
+      expect(esquemaInscricao.safeParse({ ...VALIDO, [campo]: [] }).success).toBe(false)
+    }
+  })
+
+  it('marcar "Outro" torna o campo de especificação obrigatório', () => {
+    const semTexto = esquemaInscricao.safeParse({ ...VALIDO, deficiencias: ['Outro'] })
+    expect(semTexto.success).toBe(false)
+    expect(semTexto.error?.issues[0]?.path).toEqual(['deficienciaOutro'])
+
+    const comTexto = esquemaInscricao.safeParse({
+      ...VALIDO,
+      deficiencias: ['Outro'],
+      deficienciaOutro: 'Múltipla',
+    })
+    expect(comTexto.success).toBe(true)
+  })
+
+  it('sem o consentimento do Art. 11 não passa', () => {
+    expect(esquemaInscricao.safeParse({ ...VALIDO, consentimentoSaude: false }).success).toBe(false)
+  })
+
+  it('senha exige comprimento e nada mais', () => {
+    expect(esquemaInscricao.safeParse({ ...VALIDO, senha: 'curta123' }).success).toBe(false)
+    // Só minúsculas, com espaços, sem símbolo nem dígito: tem de passar.
+    expect(esquemaInscricao.safeParse({ ...VALIDO, senha: 'uma frase simples' }).success).toBe(true)
+  })
+
+  it('mensagem de erro diz o que fazer, não "campo inválido"', () => {
+    const r = esquemaInscricao.safeParse({ ...VALIDO, nascimento: '12-03-1978' })
+    expect(r.error?.issues[0]?.message).toContain('dia/mês/ano')
+  })
+})
+
+describe('CPF', () => {
+  it('aceita CPF com dígitos verificadores corretos, com ou sem máscara', () => {
+    expect(cpfValido('39053344705')).toBe(true)
+    expect(cpfValido('390.533.447-05')).toBe(true)
+    expect(cpfValido('52998224725')).toBe(true)
+  })
+
+  it('recusa dígito verificador errado', () => {
+    expect(cpfValido('39053344700')).toBe(false)
+  })
+
+  it('recusa sequência repetida, que passaria no cálculo ingênuo', () => {
+    for (const cpf of ['00000000000', '11111111111', '99999999999']) {
+      expect(cpfValido(cpf)).toBe(false)
+    }
+  })
+
+  it('recusa comprimento errado', () => {
+    expect(cpfValido('3905334470')).toBe(false)
+    expect(cpfValido('390533447055')).toBe(false)
+  })
+})

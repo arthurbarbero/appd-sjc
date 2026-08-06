@@ -5,39 +5,60 @@ T5 é o gate. **Nenhuma task de outra change começa antes de T5 aprovar.**
 
 ## T1 — Schema Drizzle
 
-- [ ] **T1.1** — `server/database/schema.ts` com as cinco tabelas do REQ-7, REQ-14,
+- [x] **T1.1** — `server/database/schema.ts` com as cinco tabelas do REQ-7, REQ-14,
       REQ-21, REQ-26 e REQ-31. Nenhuma coluna a mais, nenhuma a menos.
       Aceite: `npm run typecheck` verde e o arquivo declara exatamente 5 tabelas.
-- [ ] **T1.2** — Todos os `CHECK`, `UNIQUE`, `NOT NULL` e `FOREIGN KEY` do REQ-4
+- [x] **T1.2** — Todos os `CHECK`, `UNIQUE`, `NOT NULL` e `FOREIGN KEY` do REQ-4
       declarados no schema, incluindo `ON DELETE CASCADE` em `inscricoes_atendimento` e
       `fotos`, e a **ausência** dele em `consentimentos` (REQ-25).
       Aceite: inspeção do SQL gerado mostra cada restrição da spec.
-- [ ] **T1.3** — Schemas Zod compartilhados em `shared/` derivados do schema, com os
+- [x] **T1.3** — Schemas Zod compartilhados em `shared/` derivados do schema, com os
       vocabulários fechados dos campos 12, 13 e 14 (REQ-18).
       Aceite: valor fora do vocabulário falha na validação, com teste.
 
 ## T2 — Migration
 
-- [ ] **T2.1** — `npm run db:generate` e conferência do SQL gerado, linha a linha,
+- [x] **T2.1** — `npm run db:generate` e conferência do SQL gerado, linha a linha,
       contra a spec. Nada de `push`.
       Aceite: arquivo versionado em `drizzle/migrations`, revisado no PR.
-- [ ] **T2.2** — `npm run db:aplicar:local` num banco vazio, sem erro.
+- [x] **T2.2** — `npm run db:aplicar:local` num banco vazio, sem erro.
       Aceite: as cinco tabelas existem; nenhuma outra (cenário 1 dos critérios).
-- [ ] **T2.3** — Seed de desenvolvimento com dado fictício explícito (REQ-6), com CPFs
+- [x] **T2.3** — Seed de desenvolvimento com dado fictício explícito (REQ-6), com CPFs
       válidos por dígito verificador mas reconhecidamente falsos.
       Aceite: gitleaks passa; nenhum nome, telefone ou CPF de pessoa real no repo.
 
 ## T3 — Testes de restrição
 
-- [ ] **T3.1** — Os 13 cenários de aceite implementados em Vitest contra o D1 local.
+- [x] **T3.1** — Os 13 cenários de aceite implementados em Vitest contra o D1 local.
       Aceite: os 13 passam; e cada um **falha** se a restrição correspondente for
       removida do schema (teste que não detecta remoção não vale).
 - [ ] **T3.2** — Teste de concorrência do `numero_registro`: 50 conclusões em paralelo,
       50 números distintos (REQ-9).
       Aceite: roda 10 vezes seguidas sem colisão e sem falso negativo.
-- [ ] **T3.3** — Varredura automatizada: nenhuma coluna de nenhuma tabela contém IP em
+- [x] **T3.3** — Varredura automatizada: nenhuma coluna de nenhuma tabela contém IP em
       texto claro nem senha em texto claro (REQ-5, REQ-11).
       Aceite: teste bloqueante no CI.
+
+> **T1 a T3 concluídas em 2026-08-06**, com uma exceção declarada: **T3.2** (concorrência
+> do `numero_registro`) depende do emissor, que é de `cadastro-e-login`, e fica lá.
+>
+> Duas coisas que só a execução revelou, e que nenhuma revisão de spec pegaria:
+>
+> 1. **Interpolar string JS num `sql` do Drizzle vira parâmetro.** A primeira migration saiu
+>    com `GLOB ?` — placeholder em arquivo de migration não roda. Corrigido com `sql.raw`.
+> 2. **O D1 aceita no máximo 10 classes de caractere por padrão GLOB.** O molde de data ISO
+>    tinha 19 e o do hash de HMAC teria 64; o D1 responde `LIKE or GLOB pattern too complex`.
+>    Pior: o `node:sqlite` dos testes é mais permissivo e **aceitava** — o teste ficava verde
+>    e o banco de verdade recusava. Só apareceu ao rodar o seed.
+>
+> As duas viraram guarda automatizada sobre o arquivo da migration, não só sobre o
+> comportamento: um teste falha se aparecer `GLOB ?`, outro se algum padrão passar de 10
+> classes. Teste de comportamento não teria pego nenhuma das duas.
+>
+> Divergência de contrato encontrada na implementação, resolvida na spec antes do código:
+> as colunas de identidade de `usuarios` **não podem ser NOT NULL**, senão a exclusão do
+> REQ-28 é impossível de executar. Viraram NULL-áveis com um `CHECK` condicionado à
+> situação — conta `ativo` tem tudo, conta `inativo` é anônima.
 
 ## T4 — Reescrever as seis changes contra o contrato
 

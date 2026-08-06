@@ -44,6 +44,14 @@ Uma linha por pessoa atendida. Criada pelo envio do formulário de atendimento
 
 - **REQ-7** — A tabela `usuarios` DEVE ter exatamente as colunas abaixo.
 
+  **As colunas de identidade e contato são NULL-áveis, e isso não é frouxidão.** Declará-las
+  `NOT NULL` tornaria a exclusão do REQ-28 impossível de executar: ela apaga nome, e-mail,
+  CPF e contato, mas **preserva o `numero_registro`**, então a linha continua existindo. Em
+  vez de afrouxar a regra, ela fica condicionada: enquanto `situacao = 'ativo'`, todas são
+  obrigatórias por `CHECK` (`usuarios_ativo_completo`). Não existe conta ativa sem nome, e
+  continua sendo possível anonimizar. Divergência encontrada na implementação da T1 e
+  resolvida aqui antes do código.
+
 | Coluna               | Tipo | Obrig. | Restrição / regra                                         | Campo do formulário |
 | -------------------- | ---- | ------ | --------------------------------------------------------- | ------------------- |
 | `id`                 | TEXT | sim    | PK, UUID v4                                               | —                   |
