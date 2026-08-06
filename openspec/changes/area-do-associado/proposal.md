@@ -5,7 +5,12 @@
   [area-do-associado.md](../../../docs/prompts-design/area-do-associado.md); rotas já
   previstas em [arquitetura-informacao.md](../../../docs/arquitetura-informacao.md)
 - Autor do registro: Claude Code (especificador) · Dono do conteúdo: Arthur Barbero
-- Data: 2026-08-05 Versão: v1 · Nível da régua: **Grande**
+- Data: 2026-08-06 Versão: v2 · Nível da régua: **Grande**
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Esta change
+> passa a ser dona única de `/area`, `/area/dados`, `/area/inscricoes` e `/area/excluir`
+> (ADR-013), perde `/area/cracha`, ganha a edição da inscrição (ADR-014) e troca a dupla
+> caixa de seleção por um modal, por decisão do dono.
 
 ## Motivação (por quê)
 
@@ -28,13 +33,14 @@ uma linha e oferecendo uma ação nomeada.
 
 - **Painel `/area`** com quatro blocos — Minhas inscrições, Meu crachá, Meus dados e Excluir
   minha conta — e a identificação (nome e `numero_registro`) no topo.
-- **`/area/inscricoes`**: lista das inscrições com tipo de atendimento, data do pedido e
-  status por ícone **e** texto.
+- **`/area/inscricoes`**: consulta **e edição** da inscrição — quais deficiências, quais
+  tipos de atendimento e quais dias —, com status por ícone **e** texto. A edição é
+  requisito novo do ADR-014: é o que a pessoa ganha em relação à planilha de hoje.
 - **`/area/dados`**: consulta e alteração dos dados de contato e endereço.
-- **`/area/excluir`**: página própria de exclusão, com dupla confirmação **por caixas de
-  seleção** e "Cancelar e voltar" como ação principal.
+- **`/area/excluir`**: página própria, com **modal** de confirmação e "Cancelar" como ação
+  preenchida.
 - **Estados obrigatórios**: painel completo, sem nenhuma inscrição, sem foto no crachá,
-  carregando e confirmação de exclusão.
+  carregando, edição com erro, e confirmação de exclusão.
 - **Estado vazio que oferece o próximo passo**, nunca só a ausência.
 - **Regra de dado sensível**: o tipo de deficiência não aparece em nenhum bloco da área.
 - Acessibilidade WCAG 2.2 AA como aceite bloqueante de todas as telas.
@@ -45,14 +51,16 @@ uma linha e oferecendo uma ação nomeada.
   Esta change assume a sessão pronta e só a consome.
 - **Consentimento do Art. 11, política de privacidade e página "Seus direitos"** — change
   `consentimento-e-privacidade`. A área linka para elas; não escreve o texto legal.
-- **Geração, exportação e verificação do crachá** — change `cracha-do-associado`. Aqui existe
-  apenas a **prévia** do crachá e o link para a tela dele.
-- **Criação e edição de inscrição de atendimento** — change `formulario-atendimento`. A área
-  só lê e lista.
-- **Alteração do status de inscrição pela pessoa.** Quem move a fila é a associação
-  (`painel-admin`).
-- **Alteração das respostas do campo 12** (tipo de deficiência) pela área. O caminho é "Seus
-  direitos" ou telefone, conforme decidido no prompt de design.
+- **`/area/cracha` inteira** — change `cracha-do-associado`, incluindo o envio da foto, a
+  geração, a exportação e `/verificar/<numero>` (ADR-013). Aqui existe apenas a **prévia** no
+  painel e o link para a tela dela.
+- **As tabelas** — change `modelo-de-dados`. Esta change não cria coluna.
+- **A guarda de rota de `/area/*`** — change `cadastro-e-login`. Esta change não implementa
+  verificação de sessão própria.
+- **Criação** da inscrição e os 15+3 campos — change `formulario-atendimento`. A **edição**
+  passou a ser desta change (ADR-014).
+- **Alteração do status da inscrição pela pessoa.** Na V1 o status tem um valor só; quando
+  houver mais, quem move é `painel-admin`.
 - **Exportação de dados pessoais em arquivo** (portabilidade da LGPD) — fica para depois, com
   decisão própria.
 - **Notificação por e-mail ou SMS** de qualquer mudança de estado.

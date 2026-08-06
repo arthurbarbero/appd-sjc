@@ -3,7 +3,16 @@
 - ID: SPEC-area-do-associado Deriva de: PROP-20260805-area-do-associado
 - Status: rascunho (aguarda gate do revisor-spec e aprovação do dono)
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
-- Versão: v1 · Data: 2026-08-05
+- Versão: v2 · Data: 2026-08-06
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+
+> **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Esta change
+> passa a ser **dona única** de `/area`, `/area/dados`, `/area/inscricoes` e
+> `/area/excluir` ([ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md)),
+> e perde `/area/cracha`, que é de `cracha-do-associado`. A exclusão vira **uma página com
+> modal**, por decisão do dono. Ganha a **edição da inscrição**
+> ([ADR-014](../../../docs/adr/adr-014-inscricao-como-registro-de-interesse.md)) e um
+> vocabulário de status com um valor só.
 
 > **Todos os dados de exemplo desta spec são fictícios.** "Maria Aparecida da Silva" e
 > `APPD-2026-00042` são invenção para teste. Nenhum dado de pessoa real entra em spec, seed,
@@ -17,14 +26,14 @@ nomeada e nunca exibe dado de saúde.
 
 ## Glossário (termos que não podem ter dupla leitura)
 
-| Termo             | Definição desta spec                                                       |
-| ----------------- | -------------------------------------------------------------------------- |
-| Painel            | A rota `/area`, com os quatro blocos e a identificação no topo.            |
-| Estado vazio      | Bloco sem conteúdo que oferece o próximo passo nomeado, não só a ausência. |
-| Dupla confirmação | Duas caixas de seleção distintas, ambas desmarcadas, ambas obrigatórias.   |
-| Excluir conta     | Apagamento definitivo dos dados listados no REQ-26, sem desfazer.          |
-| Dado sensível     | Campo 12 do formulário (tipo de deficiência), Art. 11 da LGPD.             |
-| Prévia do crachá  | Miniatura de leitura dentro de `/area`; a tela do crachá é `/area/cracha`. |
+| Termo            | Definição desta spec                                                       |
+| ---------------- | -------------------------------------------------------------------------- |
+| Painel           | A rota `/area`, com os quatro blocos e a identificação no topo.            |
+| Estado vazio     | Bloco sem conteúdo que oferece o próximo passo nomeado, não só a ausência. |
+| Confirmação      | Modal na própria página `/area/excluir`. Não há palavra a digitar.         |
+| Excluir conta    | Apagamento definitivo dos dados listados no REQ-26, sem desfazer.          |
+| Dado sensível    | Campo 12 do formulário (tipo de deficiência), Art. 11 da LGPD.             |
+| Prévia do crachá | Miniatura de leitura dentro de `/area`; a tela do crachá é `/area/cracha`. |
 
 ## Requisitos
 
@@ -55,18 +64,40 @@ nomeada e nunca exibe dado de saúde.
 
 - **REQ-8**: O bloco DEVE listar as inscrições da pessoa, cada uma com tipo de atendimento
   pedido, data do pedido e status.
-- **REQ-9**: O status DEVE ser apresentado por ícone **e** texto, com os valores "Na fila",
-  "Em atendimento" e "Encerrada". Nunca só por cor.
+- **REQ-9**: O status DEVE ser apresentado por ícone **e** texto, nunca só por cor. Na V1 há
+  **um único valor possível**: `Interesse registrado` (`formulario-atendimento` REQ-43).
+
+  > **Contradição D do gate.** A v1 consumia três valores — `Na fila`, `Em atendimento`,
+  > `Encerrada` — e o caminho feliz descrevia "duas inscrições com status Na fila e Em
+  > atendimento". Só que nenhuma rota da V1 sabia produzir os outros dois: era cenário que
+  > só passa com fixture, nunca com o sistema. O ADR-014 resolveu na raiz — a APPD não opera
+  > fila nem matrícula, então o vocabulário descrevia um processo inexistente.
+
 - **REQ-10**: Sem nenhuma inscrição, o bloco DEVE apresentar estado vazio que oferece o
   próximo passo: título "Você ainda não pediu atendimento", uma linha explicando que o cadastro
   é gratuito e que o contato vem por telefone, botão primário "Fazer meu Cadastro de
   Atendimento" e a alternativa humana com o telefone da associação. É proibido usar ilustração
   de caixa vazia ou texto que apenas informa a ausência.
-- **REQ-11**: A pessoa NÃO DEVE poder alterar o status de nenhuma inscrição.
+- **REQ-11**: A pessoa NÃO DEVE poder alterar o status da inscrição.
+- **REQ-11a**: A pessoa **DEVE poder editar a própria inscrição** em `/area/inscricoes`:
+  quais deficiências, quais tipos de atendimento e quais dias (campos 12 a 14), mais o
+  campo de especificação do `Outro`. Requisito novo do ADR-014 — as seis changes da v1
+  assumiam inscrição escrita uma vez e nunca mais tocada, o que deixava a pessoa presa a um
+  dado errado sem canal de correção.
+- **REQ-11b**: A edição DEVE usar **o mesmo schema Zod** do formulário de inscrição, com as
+  mesmas mensagens, e atualizar `atualizado_em`. Não há histórico de versões na V1 — dívida
+  consciente registrada no ADR-014.
+- **REQ-11c**: Há **no máximo uma inscrição por pessoa** (`modelo-de-dados` REQ-15). A tela
+  é de edição de um registro, não de lista com vários itens; o plural do REQ-8 vale para os
+  interesses dentro dela, não para inscrições.
 
 ### Bloco "Meu crachá"
 
-- **REQ-12**: O bloco DEVE exibir prévia com foto, nome, `numero_registro` e situação, mais a
+> **`/area/cracha` não é desta change** (ADR-013, bloqueio B20): a tela inteira, incluindo o
+> envio da foto, é de `cracha-do-associado`. O que fica aqui é o **bloco do painel** que
+> leva até lá. Os REQ-12 a REQ-14 abaixo descrevem só esse bloco, não a tela de destino.
+
+- **REQ-12**: O bloco do painel DEVE exibir prévia com foto, nome, `numero_registro` e situação, mais a
   linha que informa o endereço público de verificação e que ele mostra apenas nome, número e
   situação.
 - **REQ-13**: A prévia NÃO DEVE exibir tipo de deficiência, independentemente do opt-in da
@@ -97,26 +128,43 @@ nomeada e nunca exibe dado de saúde.
   próprios: "O que é apagado", "O que a associação precisa manter" (com marcação
   `[A CONFIRMAR]` visível enquanto o jurídico não responder, incluindo o prazo) e "Isto não
   pode ser desfeito".
-- **REQ-22**: A dupla confirmação DEVE ser feita por **duas caixas de seleção distintas**,
-  ambas desmarcadas por padrão, empilhadas e visíveis ao mesmo tempo:
-  - passo 1: "Entendi que a exclusão é definitiva e não pode ser desfeita.";
-  - passo 2: "Quero apagar minha conta e meus dados."
+- **REQ-22**: A confirmação DEVE ser **um modal**, aberto pelo botão de excluir na própria
+  página `/area/excluir`. Uma página, um modal, e pronto — decisão do dono em 2026-08-06
+  (ADR-013), substituindo tanto as três telas de `consentimento-e-privacidade` quanto as duas
+  caixas de seleção decididas na Fase 2.
+- **REQ-22a**: O modal DEVE cumprir, como critério **bloqueante**:
+  - foco preso dentro dele enquanto estiver aberto;
+  - `Esc` fecha sem excluir;
+  - ao abrir, o foco vai para o texto ou para o botão de cancelar — **nunca** para o de
+    confirmar;
+  - ao fechar, o foco volta para o botão que o abriu;
+  - `role="dialog"`, `aria-modal="true"` e rótulo acessível ligado ao título;
+  - `prefers-reduced-motion` respeitado na abertura.
 - **REQ-23**: É **proibido** exigir digitação de palavra de confirmação (por exemplo, teclar
   "EXCLUIR"). Digitar palavra em caixa alta é barreira real para quem tem dificuldade motora ou
-  intelectual, e este site atende exatamente essas pessoas. Duas caixas dão a fricção necessária.
-- **REQ-24**: O botão "Excluir minha conta agora" DEVE permanecer desabilitado **com o motivo
-  escrito ao lado** ("Marque as duas caixas para liberar") até que as duas caixas estejam
-  marcadas; e DEVE ser contornado, nunca preenchido.
-- **REQ-25**: A ação preenchida — a ação principal da página — DEVE ser **"Cancelar e voltar"**.
-  A saída segura é a mais fácil de acertar.
-- **REQ-26**: Confirmada a exclusão, o sistema DEVE apagar: credenciais e senha, e-mail,
-  telefone, endereço, dados de contato do cuidador, foto do crachá (via
-  `ArmazenamentoFoto.apagar`) e o acesso à área; e DEVE encerrar a sessão. O que a associação
-  precisa manter por obrigação legal fica pendente de `[A CONFIRMAR]` e não pode ser inventado
-  no código.
-- **REQ-27**: Após a exclusão, a rota `/verificar/<numero_registro>` daquele número NÃO DEVE
-  mais exibir o nome da pessoa. O comportamento exato — deixar de existir ou passar a inativo —
-  depende da resposta `[A CONFIRMAR]` e é decidido antes da task de exclusão.
+  intelectual, e este site atende exatamente essas pessoas.
+- **REQ-24**: O botão que confirma dentro do modal DEVE dizer o que faz — "Excluir minha
+  conta" —, nunca "OK" nem "Confirmar", e DEVE ser contornado, nunca preenchido.
+- **REQ-25**: A ação preenchida do modal DEVE ser **"Cancelar"**. A saída segura é a mais
+  fácil de acertar.
+- **REQ-26**: O que a exclusão apaga está em [`modelo-de-dados`](../modelo-de-dados/spec.md)
+  **REQ-28**, escrito uma vez só e válido para o projeto inteiro. Esta change **executa** esse
+  contrato e encerra a sessão.
+
+  > **Bloqueio B23 do gate.** Havia três listas divergentes do que a exclusão apaga: esta não
+  > mencionava preservar o `numero_registro`, `cadastro-e-login` exigia preservá-lo, e
+  > `consentimento-e-privacidade` mandava apagar "conta e crachá". Três contratos para os
+  > mesmos dados.
+
+  O que a associação precisa manter por obrigação legal, e por quanto tempo, segue
+  `[A CONFIRMAR]` (PB-1 de `consentimento-e-privacidade`) e **não pode ser inventado** no
+  código nem no texto da tela.
+
+- **REQ-27**: Após a exclusão, `/verificar/<numero_registro>` responde **HTTP 200**, mostra o
+  número e a situação `inativo`, e **não mostra nome** — o nome deixou de existir. O
+  `numero_registro` é preservado e nunca reutilizado, para que um crachá antigo não passe a
+  identificar outra pessoa (`modelo-de-dados` REQ-29, `cracha-do-associado` REQ-28a). O
+  `[A CONFIRMAR]` da v1 está **fechado**.
 - **REQ-28**: A página DEVE oferecer a alternativa humana com o telefone da associação.
 
 ### Estados de tela
@@ -130,7 +178,8 @@ nomeada e nunca exibe dado de saúde.
 ### Acessibilidade (bloqueante)
 
 - **REQ-31**: Todas as telas DEVEM atender WCAG 2.2 AA, verificado por axe sem violação de
-  severidade `serious` ou `critical`: um `h1` por tela, hierarquia de headings sem pulo,
+  **nível A ou AA** — a régua única do projeto, medida pela conformidade WCAG e não pela
+  severidade que o axe atribui: um `h1` por tela, hierarquia de headings sem pulo,
   contraste AA, foco visível de 3 px com 2 px de folga, ordem de foco igual à ordem visual,
   alvos ≥ 44 px com 8 px de folga, corpo ≥ 17 px (nada abaixo de 15 px),
   `prefers-reduced-motion` respeitado.
@@ -147,7 +196,7 @@ nomeada e nunca exibe dado de saúde.
 ## Comportamento esperado
 
 **Caminho feliz.** A pessoa entra e cai em `/area`. Vê o próprio nome e `APPD-2026-00042` no
-topo, duas inscrições com status "Na fila" e "Em atendimento", a prévia do crachá com foto, os
+topo, a inscrição com o status "Interesse registrado", a prévia do crachá com foto, os
 dados de contato e, no fim, o bloco de excluir conta com borda vermelha e botão contornado.
 Clica em "Ver minhas inscrições" e confere a data do pedido. Depois, em "Alterar meus dados",
 corrige o telefone e salva.
@@ -159,24 +208,32 @@ corrige o telefone e salva.
 - Sem foto: prévia com espaço reservado, explicação e "Enviar minha foto"; o resto funciona.
 - Carregando: espaço reservado do mesmo tamanho, com anúncio em `aria-live`.
 - Bloco de inscrições falha e os outros carregam: só ele mostra o erro e o que fazer.
-- Exclusão com uma só caixa marcada: botão continua desabilitado, com o motivo ao lado.
+- Modal de exclusão aberto e fechado por Esc: nada é apagado e o foco volta ao botão.
 - Exclusão confirmada: dados do REQ-26 apagados, sessão encerrada, e a pessoa vai para uma
   página pública de confirmação que não exige login.
 - Tentativa de reabrir `/area/*` após excluir: comporta-se como sessão inexistente.
 
 ## Fora de escopo
 
-Repetido de propósito: autenticação e sessão (`cadastro-e-login`); consentimento do Art. 11,
-política de privacidade e "Seus direitos" (`consentimento-e-privacidade`); geração, exportação
-e verificação do crachá (`cracha-do-associado`); criação e edição de inscrição
-(`formulario-atendimento`); mudança de status pela pessoa e moderação (`painel-admin`);
-alteração do campo 12 pela área; exportação de dados em arquivo; notificação por e-mail ou SMS.
+Repetido de propósito: autenticação, sessão e guarda de rota (`cadastro-e-login`); as tabelas
+(`modelo-de-dados`); consentimento do Art. 11, política de privacidade e "Seus direitos"
+(`consentimento-e-privacidade`); `/area/cracha` inteira, incluindo o envio da foto, a geração,
+a exportação e `/verificar/<numero>` (`cracha-do-associado`); a **criação** da inscrição e os
+15+3 campos (`formulario-atendimento`); mudança de status e moderação (`painel-admin`);
+exportação de dados em arquivo; notificação por e-mail ou SMS.
+
+**Mudou na v2:** a **edição** da inscrição entrou no escopo (REQ-11a, ADR-014) — só a criação
+continua sendo de `formulario-atendimento`. E o **campo 12** passa a ser editável aqui, porque
+é justamente o dado que a pessoa precisa corrigir; o que continua proibido é **exibi-lo** em
+qualquer tela que não seja a de edição (REQ-5).
 
 ## Premissas e dependências
 
-- Sessão e tabela de usuários entregues por `cadastro-e-login`.
-- Tabela de inscrições e vocabulário de status entregues por `formulario-atendimento`.
-- `numero_registro`, foto e interface `ArmazenamentoFoto` entregues por `cracha-do-associado`.
+- **`modelo-de-dados` fechada** — dependência dura; esta change não cria coluna.
+- Sessão e **guarda de rota de `/area/*`** entregues por `cadastro-e-login`, que também emite
+  o `numero_registro`. Esta change não implementa verificação de sessão própria.
+- Inscrição criada e schema Zod compartilhado entregues por `formulario-atendimento`.
+- Foto e interface `ArmazenamentoFoto` entregues por `cracha-do-associado`.
 - Texto da política e da página "Seus direitos" entregues por `consentimento-e-privacidade`.
 - Design das cinco telas aprovado no Claude Design antes de qualquer HTML.
 - Resposta `[A CONFIRMAR]` da APPD e do jurídico sobre retenção pós-exclusão.
@@ -220,8 +277,23 @@ Funcionalidade: Painel da área do associado
     Então ele é redirecionado para a tela de login com o destino preservado
     E o HTML entregue não contém nome, número de registro nem qualquer dado do associado
 
+  Cenário: A pessoa edita a própria inscrição
+    Dado o associado fictício com uma inscrição gravada
+    Quando ele abre /area/inscricoes e troca os dias e os tipos de atendimento
+    E salva
+    Então a linha existente é alterada, e nenhuma linha nova é criada
+    E "atualizado_em" passa a ser mais recente que "criado_em"
+    E os valores novos aparecem na tela sem recarregar a página
+
+  Cenário: A edição usa o mesmo schema da inscrição
+    Dado o associado fictício editando a inscrição
+    Quando ele desmarca todos os tipos de atendimento e salva
+    Então a alteração é recusada com a mesma mensagem que o formulário daria
+    E os valores anteriores continuam gravados no banco
+    E nada do que ele digitou na tela é apagado
+
   Cenário: Pessoa não altera status de inscrição
-    Dado o associado fictício com uma inscrição em "Na fila"
+    Dado o associado fictício com uma inscrição em "Interesse registrado"
     Quando ele percorre toda a área
     Então não existe controle que altere o status
     E nenhuma rota da área aceita alteração de status
@@ -268,14 +340,14 @@ Funcionalidade: Dado sensível não aparece na área
 
   Cenário: Tipo de deficiência não aparece em nenhuma tela
     Dado o associado fictício "APPD-2026-00042" com "Física" respondido no campo 12
-    Quando são renderizadas /area, /area/dados, /area/inscricoes, /area/cracha e /area/excluir
+    Quando são renderizadas /area, /area/dados, /area/inscricoes e /area/excluir
     Então nenhuma delas contém as palavras "Física", "Intelectual ou Neurodivergentes",
       "Sensorial (visão, audição, fala)" ou "Outro" referidas à pessoa
     E o valor não aparece em HTML oculto, atributo data-*, comentário nem JSON embutido
     E nenhuma resposta de API consumida pela área traz o campo
 
   Cenário: Opt-in do crachá não vaza para a prévia da área
-    Dado o associado fictício com o opt-in de tipo de deficiência marcado em /area/cracha
+    Dado o associado fictício com o opt-in de tipo de deficiência marcado no crachá
     Quando /area é renderizada
     Então a prévia do crachá continua sem nenhuma menção a deficiência
 
@@ -290,12 +362,12 @@ Funcionalidade: Dado sensível não aparece na área
 Funcionalidade: Excluir minha conta
   Cobre REQ-18 a REQ-28 da SPEC-area-do-associado
 
-  Cenário: Confirmação acontece em página própria, não em modal
+  Cenário: A exclusão mora numa página só
     Dado o associado fictício "APPD-2026-00042" em /area
     Quando ele aciona "Excluir minha conta"
     Então o navegador vai para a rota /area/excluir
     E a tela tem h1 "Excluir minha conta"
-    E não há janela sobreposta nem elemento com papel "dialog"
+    E não existe segunda rota de confirmação nem rota de recibo
 
   Cenário: A página explica o que sai, o que fica e que é irreversível
     Quando o associado fictício abre /area/excluir
@@ -304,42 +376,45 @@ Funcionalidade: Excluir minha conta
     E o bloco do que a associação mantém está marcado com [A CONFIRMAR], incluindo o prazo
     E o bloco de irreversibilidade traz ícone e texto, além da cor
 
-  Cenário: Dupla confirmação por caixas de seleção, nunca por digitação
-    Quando o associado fictício abre /area/excluir
-    Então existem exatamente duas caixas de seleção, ambas desmarcadas
-    E a primeira diz "Entendi que a exclusão é definitiva e não pode ser desfeita."
-    E a segunda diz "Quero apagar minha conta e meus dados."
+  Cenário: O modal confirma, e nunca pede para digitar palavra
+    Dado o associado fictício em /area/excluir
+    Quando ele aciona "Excluir minha conta"
+    Então abre um elemento com role="dialog" e aria-modal="true"
+    E o rótulo acessível do modal está ligado ao título dele
     E não existe nenhum campo de texto que peça digitar palavra de confirmação
 
-  Cenário: Com uma só caixa marcada, o botão continua bloqueado e diz por quê
-    Dado o associado fictício em /area/excluir
-    Quando ele marca apenas a primeira caixa
-    Então o botão "Excluir minha conta agora" continua desabilitado
-    E ao lado dele aparece o texto "Marque as duas caixas para liberar"
+  Cenário: O foco do modal nunca começa no botão destrutivo
+    Dado que o modal de exclusão acabou de abrir
+    Então o foco está no texto do modal ou no botão "Cancelar"
+    E nunca no botão "Excluir minha conta"
+    E o botão que confirma diz o que faz, nunca "OK" nem "Confirmar"
 
-  Cenário: Com as duas caixas marcadas, o botão libera e continua contornado
-    Dado o associado fictício em /area/excluir
-    Quando ele marca as duas caixas
-    Então o botão "Excluir minha conta agora" fica habilitado
-    E ele continua contornado em vermelho, com fundo transparente
+  Cenário: O modal prende o foco e devolve ao fechar
+    Dado que o modal de exclusão está aberto
+    Quando percorro a página inteira com Tab
+    Então o foco nunca sai do modal
+    Quando aciono Esc
+    Então o modal fecha, nada é apagado, e o foco volta ao botão que o abriu
 
   Cenário: A ação preenchida é a saída segura
-    Quando o associado fictício abre /area/excluir
-    Então o único botão preenchido da página é "Cancelar e voltar"
-    E acioná-lo devolve para /area sem apagar nada
+    Dado que o modal de exclusão está aberto
+    Então o único botão preenchido é "Cancelar"
+    E "Excluir minha conta" é contornado em vermelho, com fundo transparente
 
-  Cenário: Exclusão confirmada apaga os dados e a foto
-    Dado o associado fictício "APPD-2026-00042" com foto gravada e as duas caixas marcadas
-    Quando ele aciona "Excluir minha conta agora"
-    Então credenciais, e-mail, telefone, endereço e contato de cuidador são apagados
-    E a foto é apagada pelo método "apagar" de ArmazenamentoFoto
+  Cenário: Exclusão confirmada executa o contrato do modelo de dados
+    Dado o associado fictício "APPD-2026-00042" com inscrição, foto e dois consentimentos
+    Quando ele confirma no modal
+    Então o efeito é exatamente o do REQ-28 de modelo-de-dados, sem lista própria aqui
     E a sessão é encerrada
-    E ele chega a uma página de confirmação que não exige login
+    E ele chega a uma confirmação na mesma página, que não exige login
 
-  Cenário: Depois de excluir, a verificação pública não mostra mais o nome
+  Cenário: Depois de excluir, a verificação pública responde sem nome
     Dado que o associado fictício "APPD-2026-00042" excluiu a conta
     Quando alguém abre /verificar/APPD-2026-00042
-    Então a resposta não contém o nome da pessoa
+    Então a resposta é HTTP 200
+    E mostra o número e a situação "inativo"
+    E não contém o nome da pessoa
+    E o número nunca é atribuído a outra conta
 
   Cenário: Depois de excluir, a área não abre
     Dado que o associado fictício excluiu a conta
@@ -376,14 +451,15 @@ Funcionalidade: Acessibilidade da área do associado
   Cenário: Sem violação de acessibilidade automatizável
     Dado os cinco estados: painel completo, sem inscrição, sem foto, carregando e exclusão
     Quando axe é executado em cada um, em 1280 px e em 360 px
-    Então não há violação de severidade "serious" nem "critical"
+    Então não há violação de nível A nem AA
+    # Régua única do projeto, na configuração do axe no CI, nunca repetida por change.
     E cada tela tem exatamente um h1 e nenhuma quebra de nível de heading
 
   Cenário: Percurso completo de exclusão só com teclado
     Dado /area aberta e apenas o teclado disponível
     Quando são usados Tab, Shift+Tab, Enter e Espaço
-    Então é possível chegar a /area/excluir, marcar as duas caixas, habilitar o botão e
-      acionar "Cancelar e voltar"
+    Então é possível chegar a /area/excluir, abrir o modal, percorrê-lo sem sair dele,
+      e acionar "Cancelar" — tudo sem mouse
     E o anel de foco de 3 px com 2 px de folga é visível em todos os elementos focáveis
     E a ordem de foco acompanha a ordem visual
 
@@ -413,3 +489,42 @@ Funcionalidade: Acessibilidade da área do associado
 | Estados de tela     | REQ-29..30 | Estados vazios e de carregamento           |
 | Acessibilidade      | REQ-31..34 | Acessibilidade da área do associado        |
 | Privacidade do repo | REQ-35     | coberto por gitleaks no pre-commit e no CI |
+
+## Definition of Ready — auditoria desta spec
+
+Seção que faltava na v1 e reprovou no gate (bloqueio B19, junto com `cracha-do-associado`):
+esta change não se autoauditava e não emitia veredito próprio.
+
+| Item                          | Situação                                                  |
+| ----------------------------- | --------------------------------------------------------- |
+| Spec sem ambiguidade pendente | **Não** — dois bloqueios abertos, abaixo                  |
+| Priorizada                    | Do coordenador; não é decisão desta spec                  |
+| Critério de aceite testável   | **Sim** — todo cenário ligado a um REQ, sem órfão         |
+| Escopo fechado                | **Sim** — quatro rotas na proposal, quatro nos requisitos |
+
+**Bloqueios, cada um com dono:**
+
+- `[dependência]` `modelo-de-dados`, `cadastro-e-login` (sessão e guarda de rota) e
+  `formulario-atendimento` (a inscrição existir) precisam fechar antes. É a change com mais
+  dependências do conjunto, e a que menos sofre por esperar. Dono: **Arthur Barbero**.
+- `[escopo] R-7` — nenhuma das quatro telas tem design aprovado no Claude Design.
+  Dono: **Arthur Barbero**. Bloqueia toda tarefa de tela.
+- `[APPD]` O prazo de retenção exibido no bloco "O que a associação precisa manter" segue
+  `[A CONFIRMAR]` (PB-1 de `consentimento-e-privacidade`). Não bloqueia a implementação;
+  bloqueia a publicação com dado real.
+
+**Resolvidos desde a v1:**
+
+- ~~B22, escopo declarava 4 rotas e os requisitos entregavam 5~~ — `/area/cracha` saiu
+  (ADR-013). Agora são quatro dos dois lados.
+- ~~B23, três listas divergentes do que a exclusão apaga~~ — uma lista só, em
+  `modelo-de-dados` REQ-28.
+- ~~B17, listar inscrições sem chave que ligue inscrição a associado~~ — resolvido pelo
+  ADR-012: toda inscrição pertence a uma conta.
+- ~~B6, `/area/excluir` com três donos~~ — é desta change.
+- ~~B20, `/area/cracha` com três donos~~ — é de `cracha-do-associado`.
+- ~~Contradição D, status inalcançável na V1~~ — um valor só (ADR-014).
+- ~~Dependência não declarada com `cadastro-e-login`~~ — declarada acima.
+
+**Veredito: NÃO-READY para tarefa de tela** (R-7), e **bloqueada por três dependências**.
+É a última change da fila, por construção.

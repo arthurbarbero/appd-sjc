@@ -34,22 +34,27 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       "Este número é seu e não muda." **Aceite**: cenários "Painel completo" e "Número aparece
       igual em todos os blocos".
 
-## Fatia 2 — Blocos de leitura (inscrições e crachá)
+## Fatia 2 — Inscrição: leitura, edição e o bloco do crachá
 
-- [ ] **T2.1** — Consulta de inscrições da pessoa, com projeção que **não** traz o campo 12.
+- [ ] **T2.1** — Consulta da inscrição da pessoa, com projeção que **não** traz o campo 12 em
+      nenhuma tela que não seja a de edição.
       **Aceite**: cenário "Tipo de deficiência não aparece em nenhuma tela".
+- [ ] **T2.1b** — **Edição da inscrição** (REQ-11a, REQ-11b), reusando o schema Zod de
+      `formulario-atendimento` — nenhuma regra de validação duplicada. Atualiza a linha
+      existente e o `atualizado_em`; nunca cria linha nova.
+      **Aceite**: cenários "A pessoa edita a própria inscrição" e "A edição usa o mesmo schema
+      da inscrição". Um teste falha se a edição criar segunda linha.
 - [ ] **T2.2** — Bloco e página `/area/inscricoes`: tipo, data do pedido, status com ícone e
       texto; sem nenhum controle de alteração de status. **Aceite**: cenários "Painel completo"
       e "Pessoa não altera status de inscrição".
 - [ ] **T2.3** — Estado vazio de inscrições que oferece o próximo passo, com botão para o
       formulário e a alternativa por telefone. **Aceite**: cenário "Sem nenhuma inscrição, o
       estado vazio oferece o próximo passo".
-- [ ] **T2.4** — Bloco "Meu crachá": prévia com foto, nome, número, situação, a linha sobre o
-      endereço público de verificação, e as ações "Ver meu crachá" e "Baixar para imprimir".
-      **Aceite**: cenário "Painel completo".
-- [ ] **T2.5** — Estado sem foto: espaço reservado "Sem foto", explicação e "Enviar minha foto",
-      com o resto do painel intacto. **Aceite**: cenário "Sem foto no crachá, o painel continua
-      funcionando".
+- [ ] **T2.4 e T2.5 — movidas para `cracha-do-associado`.** `/area/cracha` inteira, incluindo
+      o envio da foto, é daquela change (ADR-013). Aqui fica só o **bloco do painel** que
+      leva até lá: prévia com foto, nome, número, situação, e o estado "Sem foto" com o
+      link "Enviar minha foto". **Aceite**: cenários "Painel completo" e "Sem foto no
+      crachá, o painel continua funcionando".
 - [ ] **T2.6** — Garantia de que o opt-in do crachá não afeta a prévia da área. **Aceite**:
       cenário "Opt-in do crachá não vaza para a prévia da área".
 
@@ -68,22 +73,26 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
 - [ ] **T4.1** — Bloco no painel: último, com divisória, borda vermelha, `h2` próprio, visível
       sem interação, botão contornado. **Aceite**: cenário "Painel completo".
-- [ ] **T4.2** — Página `/area/excluir` própria, sem modal e sem elemento com papel `dialog`.
-      **Aceite**: cenário "Confirmação acontece em página própria, não em modal".
+- [ ] **T4.2** — Página `/area/excluir` própria, com **modal** de confirmação que cumpre os
+      seis critérios do REQ-22a (foco preso, Esc fecha, foco inicial nunca no destrutivo, foco
+      devolvido ao fechar, `role="dialog"` com rótulo, `prefers-reduced-motion`).
+      **Aceite**: cenários "A exclusão mora numa página só", "O foco do modal nunca começa no
+      botão destrutivo" e "O modal prende o foco e devolve ao fechar".
 - [ ] **T4.3** — Os três blocos explicativos, com `[A CONFIRMAR]` visível no que a associação
       mantém. **Aceite**: cenário "A página explica o que sai, o que fica e que é irreversível".
-- [ ] **T4.4** — Dupla confirmação por duas caixas de seleção desmarcadas; **teste que falha se
-      aparecer qualquer campo de texto pedindo palavra de confirmação**. **Aceite**: cenários
-      "Dupla confirmação por caixas de seleção, nunca por digitação" e "Com uma só caixa marcada,
-      o botão continua bloqueado e diz por quê".
-- [ ] **T4.5** — "Cancelar e voltar" como único botão preenchido da página. **Aceite**: cenário
-      "A ação preenchida é a saída segura".
-- [ ] **T4.6** — Rotina de exclusão: apaga credenciais, e-mail, telefone, endereço, contato de
-      cuidador e a foto via `ArmazenamentoFoto.apagar`; encerra a sessão; leva a uma página de
-      confirmação pública. **Aceite**: cenários "Exclusão confirmada apaga os dados e a foto" e
-      "Depois de excluir, a área não abre". **Depende de T0.2.**
+- [ ] **T4.4** — Confirmação só pelo modal; **teste que falha se aparecer qualquer campo de
+      texto pedindo palavra de confirmação**. **Aceite**: cenário "O modal confirma, e nunca
+      pede para digitar palavra".
+- [ ] **T4.5** — "Cancelar" como único botão preenchido do modal; o que confirma diz o que faz
+      e é contornado. **Aceite**: cenário "A ação preenchida é a saída segura".
+- [ ] **T4.6** — Rotina de exclusão que executa **o contrato do `modelo-de-dados` REQ-28**, sem
+      lista própria: apaga inscrição e foto, anonimiza `usuarios` preservando o
+      `numero_registro`, grava a revogação em `consentimentos`, marca `situacao` como `inativo`
+      e encerra a sessão. Tudo numa transação.
+      **Aceite**: cenários "Exclusão confirmada executa o contrato do modelo de dados" e
+      "Depois de excluir, a área não abre". **Depende de `modelo-de-dados` fechada.**
 - [ ] **T4.7** — Efeito na verificação pública: o nome deixa de aparecer em
-      `/verificar/<numero>`. **Aceite**: cenário "Depois de excluir, a verificação pública não
+      `/verificar/<numero>`. **Aceite**: cenário "Depois de excluir, a verificação pública
       mostra mais o nome". **Depende de T0.2** para decidir entre remover ou inativar.
 - [ ] **T4.8** — Alternativa humana com o telefone da associação. **Aceite**: cenário
       "Alternativa humana disponível".
@@ -122,5 +131,5 @@ Fatias 2, 3, 4 e 5  →  Fatia 6
 ```
 
 Esta change depende de `cadastro-e-login` (sessão), `formulario-atendimento` (inscrições) e
-`cracha-do-associado` (número, foto, `ArmazenamentoFoto`). A Fatia 4 é a única que pode ser
+`cracha-do-associado` (foto e `ArmazenamentoFoto`) e `modelo-de-dados` (as tabelas). A Fatia 4 é a única que pode ser
 bloqueada por resposta externa (T0.2) — as demais avançam sem ela.
