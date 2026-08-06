@@ -152,8 +152,13 @@ Antes dela, rodar um revisor independente sobre `modelo-de-dados`.
       `shared/conteudo.ts` e nas nove páginas de serviço.
 - [ ] **Revisor independente sobre `modelo-de-dados`** antes da primeira migration. O
       T5 foi autorrevisão e está declarado como tal no parecer.
-- [ ] **T1 a T3 da `modelo-de-dados`**: schema, migration e os 13 testes de restrição.
-      É onde o banco finalmente aparece.
+- [x] **T1 a T3 da `modelo-de-dados`** — schema com as 5 tabelas, migration versionada
+      aplicada no D1 local, seed fictício e 39 testes. `npm run db:aplicar:local` e
+      `npm run db:seed:local` funcionam.
+- [ ] **DECISÃO DO DONO, bloqueante: como guardar senha.** A medição do scrypt no workerd
+      real (ADR-005) mostrou que **nenhum parâmetro defensável cabe nos 10 ms de CPU do
+      plano gratuito** do Workers — o mínimo do OWASP gasta 48 ms. Cinco opções na mesa,
+      todas com custo; nenhuma linha de código de senha antes disso.
 - [x] ~~B2 — publicação do texto do presidente e das galerias.~~ **Fechado pelo dono**:
       a APPD autorizou marca e conteúdo, e a autorização inclui o texto com histórico
       clínico, os dois retratos e as galerias. Assunto encerrado; não reabrir.
@@ -173,8 +178,9 @@ Antes dela, rodar um revisor independente sobre `modelo-de-dados`.
       `<html>` sem `lang` e links de rede social inventados.
 - [ ] Levar `docs/pendencias-appd.md` à associação — 4 respostas são P0 e travam
       telas: catálogo de serviços real, chave PIX, logo em vetor, e-mail do contato.
-- [ ] Definir parâmetros do scrypt (N, r, p) na change `cadastro-e-login` — o spike usou
-      os padrões do `node:crypto`, que não foram medidos contra o limite de CPU do Worker.
+- [x] ~~Definir parâmetros do scrypt.~~ **Medido em 2026-08-06** e virou problema maior:
+      ver ADR-005. O gatilho de "50 ms p95" do ADR-002 estava calibrado contra a coisa
+      errada — o teto real é 10 ms de CPU por requisição no plano gratuito.
 - [ ] Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).
 - [ ] AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita. NÃO ativar R2.
 
