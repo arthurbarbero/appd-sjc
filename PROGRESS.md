@@ -175,10 +175,10 @@ porque hoje quem esquece a senha perde a conta.
 - [x] **T1 a T3 da `modelo-de-dados`** — schema com as 5 tabelas, migration versionada
       aplicada no D1 local, seed fictício e 39 testes. `npm run db:migrate` e
       `npm run db:seed` funcionam.
-- [ ] **DECISÃO DO DONO, bloqueante: como guardar senha.** A medição do scrypt no workerd
-      real (ADR-005) mostrou que **nenhum parâmetro defensável cabe nos 10 ms de CPU do
-      plano gratuito** do Workers — o mínimo do OWASP gasta 48 ms. Cinco opções na mesa,
-      todas com custo; nenhuma linha de código de senha antes disso.
+- [x] ~~**DECISÃO DO DONO, bloqueante: como guardar senha.**~~ **Decidida em 2026-08-06**:
+      opção F do ADR-005 — o `scrypt` caro roda no navegador e o servidor guarda um
+      SHA-256 com sal próprio. Está implementada e em produção. Este item continuou
+      escrito como pendência bloqueante por um dia; corrigido em 2026-08-07.
 - [x] ~~B2 — publicação do texto do presidente e das galerias.~~ **Fechado pelo dono**:
       a APPD autorizou marca e conteúdo, e a autorização inclui o texto com histórico
       clínico, os dois retratos e as galerias. Assunto encerrado; não reabrir.

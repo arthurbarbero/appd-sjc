@@ -43,9 +43,9 @@ cálculo caro para o navegador — a proteção continua existindo, só mudou de
 > tabela existir de forma legível por máquina: enquanto ela era só prosa, a lista crescia
 > sem ninguém notar.
 
-**ADR-005 está escrito mas NÃO decidido**: a medição no workerd mostrou que nenhum
-parâmetro defensável de scrypt cabe nos 10 ms de CPU do plano gratuito. As cinco opções
-estão na mesa, com o custo de cada uma, e a escolha é do dono.
+> **Correção de 2026-08-07**: esta seção dizia que o **ADR-005 estava escrito mas não
+> decidido**. Estava errado desde 2026-08-06 — o dono escolheu a opção F naquele dia, está
+> no cabeçalho do próprio ADR, e o código que roda em produção é ela.
 
 Ainda por decidir, sem número reservado: **caminho de custo zero para enviar e-mail ou
 SMS de redefinição de senha**. Vira ADR quando houver pesquisa; hoje é pergunta aberta
