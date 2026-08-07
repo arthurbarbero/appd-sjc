@@ -44,6 +44,16 @@ const PUBLICAS = [
 
 const LARGURAS = [360, 414, 768, 880, 1024, 1280, 1440]
 
+/**
+ * JPEG válido de 1 × 1 pixel, em base64.
+ *
+ * Serve de retrato fictício para o componente de recorte. É o menor arquivo que ainda
+ * passa por tudo que o caminho real exige — tipo aceito, decodificação no navegador,
+ * recorte 4:5, compressão para 400 × 500 e revalidação dos bytes no servidor.
+ */
+const JPEG_MINIMO =
+  '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q=='
+
 const resultados = []
 const ok = (rotulo, condicao, extra = '') =>
   resultados.push({ rotulo, passou: Boolean(condicao), extra })
@@ -202,6 +212,119 @@ try {
   const malFormatado = await bloco('nada-disso')
   ok('inexistente e mal formatado respondem igual', inexistente === malFormatado, inexistente)
   ok('nenhum dos dois dá dica de formato', !/formato|dígito|caracter/i.test(inexistente ?? ''))
+
+  await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
+
+  // ── 1c. O crachá ──────────────────────────────────────────────────────────
+  await p.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
+  const cracha = await p.textContent('body')
+  ok('sem foto, a tela pede a foto', cracha.includes('Falta a sua foto'))
+  ok(
+    'sem foto, baixar fica desabilitado com o motivo escrito',
+    (await p.getAttribute('.acoes-baixar button', 'disabled')) !== null &&
+      cracha.includes('Para baixar, primeiro envie a sua foto'),
+  )
+  ok(
+    'nada de análise, aprovação ou selo de validação',
+    !/em análise|aguardando aprovação|aguarde a aprovação|validado pela associação/i.test(cracha),
+  )
+  ok(
+    'a tela diz que o arquivo é gerado no navegador',
+    cracha.includes('gerado aqui no seu navegador'),
+  )
+
+  // Opt-in: desmarcado por padrão, e sem linguagem que empurre a marcar (REQ-25).
+  const optin = await p.$('#optin-deficiencia')
+  ok('opt-in do tipo de deficiência existe', Boolean(optin))
+  ok('opt-in nasce desmarcado', !(await optin.isChecked()))
+  ok(
+    'o texto do opt-in não empurra a marcar',
+    !/recomendad|ajuda a|facilita|melhor experiência/i.test(cracha),
+  )
+
+  // Envia uma foto de verdade pelo componente de recorte, para o crachá existir.
+  await p.setInputFiles('input[type=file]', {
+    name: 'retrato.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from(JPEG_MINIMO, 'base64'),
+  })
+  await p.waitForSelector('.foto-moldura', { timeout: 15000 })
+  ok('o recorte 4:5 abre depois de escolher a foto', true)
+  await p.click('button:has-text("Usar esta foto")')
+  await p.waitForSelector('.lados', { timeout: 30000 })
+
+  const pronto = await p.textContent('body')
+  ok(
+    'com foto, o crachá aparece com frente e verso',
+    pronto.includes('Frente') && pronto.includes('Verso'),
+  )
+  ok(
+    'o crachá traz a ressalva de documento oficial',
+    pronto.includes('não substitui documento oficial'),
+  )
+  /*
+    Lê o **cartão**, não a página inteira. O endereço e o CEP da associação aparecem no
+    rodapé do site e no verso do crachá, de propósito — foi exatamente aqui que uma
+    asserção minha passou por engano em 2026-08-07, casando com o CEP do rodapé. O que
+    não pode aparecer é o dado **da pessoa**.
+  */
+  const cartoes = await p.textContent('.lados')
+  ok(
+    'o crachá NÃO traz endereço, telefone nem nascimento da pessoa',
+    !cartoes.includes('Rua Fictícia') &&
+      !cartoes.includes('12/03/1978') &&
+      !cartoes.includes('99165-7059'),
+  )
+  ok('sem o opt-in, o crachá NÃO traz o tipo de deficiência', !cartoes.includes('Física'))
+
+  /*
+    A exportação acontece inteira no aparelho (REQ-23). A prova é contar requisições de
+    rede enquanto ela roda: tem de ser zero. Sem a contagem, "é no navegador" é afirmação
+    de comentário — e comentário não falha quando alguém acrescenta um `fetch`.
+  */
+  /*
+    `/_nuxt/builds/meta/*.json` é o Nuxt conferindo periodicamente se o build mudou —
+    tarefa do framework, que roda esteja a exportação acontecendo ou não. Fica de fora da
+    contagem, e por isso está nomeado aqui: filtro sem motivo escrito é o começo de um
+    teste que não prova mais nada.
+
+    O que a contagem pega, e é o que interessa: chamada a serviço de conversão, fonte por
+    CDN, rota de renderização no servidor, ou a foto sendo buscada por URL em vez de sair
+    do `data:` URI.
+  */
+  const RUIDO = /\/_nuxt\/builds\/meta\//
+  let pedidos = 0
+  const urls = []
+  const contar = (r) => {
+    if (RUIDO.test(r.url())) return
+    pedidos += 1
+    urls.push(r.url().slice(0, 90))
+  }
+  p.on('request', contar)
+  const baixado = p.waitForEvent('download', { timeout: 30000 })
+  await p.click('button:has-text("Baixar em PNG")')
+  const arquivo = await baixado
+  await p.waitForTimeout(500)
+  p.off('request', contar)
+  ok('exportar PNG não faz nenhuma requisição de rede', pedidos === 0, urls.join(' | '))
+  ok('o PNG baixa com o número no nome', arquivo.suggestedFilename().includes(numeroRegistro))
+
+  // A pré-visualização de impressão é estado próprio, e o axe precisa vê-la aberta.
+  await p.click('button:has-text("Ver como fica impresso")')
+  await p.waitForSelector('.folha')
+  ok(
+    'a impressão avisa para não ajustar à página',
+    (await p.textContent('.impressao')).includes('Não use a opção de ajustar à página'),
+  )
+
+  const axeCracha = await new AxeBuilder({ page: p })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  ok(
+    'axe A/AA em /area/cracha, com o crachá e a impressão abertos',
+    axeCracha.violations.length === 0,
+    axeCracha.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
+  )
 
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
 

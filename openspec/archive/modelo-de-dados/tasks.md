@@ -128,3 +128,24 @@ Cada item é edição de spec, não de código. Ver a tabela de impacto na `prop
 Implementar rota, tela ou componente. Parâmetros do scrypt (ADR-005). Catálogo de
 termos (ADR-006). Caminho de e-mail/SMS para redefinição de senha — pesquisa em aberto,
 condição para o login ir ao ar, não para este contrato existir.
+
+---
+
+## Adendo de 2026-08-07 — uma coluna acrescentada depois do arquivamento
+
+`usuarios.cracha_mostra_deficiencia` (INTEGER, `NOT NULL DEFAULT 0`), migration
+`0003_organic_tiger_shark.sql`.
+
+**Por que está registrado aqui.** Coluna é desta change por
+[ADR-013](../../../docs/adr/adr-013-fronteira-de-rotas-entre-changes.md), e esta change já
+estava arquivada quando a T4.5 de `cracha-do-associado` precisou persistir o opt-in do
+REQ-25. Reabrir o arquivo para uma coluna booleana seria cerimônia; deixar a tabela ganhar
+coluna que o contrato não menciona seria pior — é exatamente o tipo de divergência que
+este documento existe para impedir.
+
+**O que a coluna faz**: guarda a escolha de imprimir o tipo de deficiência **no crachá**.
+Nasce em 0 e só muda por ação explícita da pessoa. Nenhuma outra rota a lê — sem a marca, a
+rota do crachá não chega a consultar o campo 12.
+
+**Regra que fica**: coluna nova numa change arquivada é aceitável quando cabe numa linha e
+não muda contrato existente. Se precisar de mais que isso, a change volta de `archive/`.

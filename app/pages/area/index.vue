@@ -162,6 +162,12 @@ function cepBr(cep?: string | null) {
           </div>
           <p v-if="!data.temFoto" class="aviso-foto">O crachá precisa de foto para ser impresso.</p>
 
+          <div class="acoes">
+            <NuxtLink class="botao botao-primario" to="/area/cracha">
+              {{ data.temFoto ? 'Ver e baixar meu crachá' : 'Enviar minha foto' }}
+            </NuxtLink>
+          </div>
+
           <!--
             O mesmo código que vai no verso do crachá (`cracha-do-associado` REQ-21). A URL
             aparece escrita por extenso ao lado, e isso é requisito e não redundância: quem

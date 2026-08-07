@@ -31,9 +31,8 @@ sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Bar
 próximo" — está **revogada**: quebra com cadastros simultâneos, e contradizia frontalmente
 o REQ-4 da change dona (bloqueio B10 do gate).
 
-- [ ] **T1.0** — Conferir que a emissão de `cadastro-e-login` está entregue e que
-      `formatarNumeroRegistro` de `shared/registro.ts` é usada por ela.
-      **Aceite**: os cenários de número daquela change passam; esta change só exibe.
+- [x] **T1.0** — Conferido: a emissão é de `cadastro-e-login` e roda no cadastro; esta change só
+      exibe o número. _Feito em 2026-08-07._
 
 ## Fatia 2 — Armazenamento da foto (sem tela)
 
@@ -65,27 +64,31 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 - [x] **T3.4** — As duas recusas acontecem antes de qualquer processamento. _Feito em 2026-08-07._
 - [x] **T3.5** — `role="progressbar"` com `aria-valuenow`, dentro da região `aria-live` que
       envolve os cinco estados. _Feito em 2026-08-07._
-- [ ] **T3.6** — Falha de rede no envio preserva o recorte e oferece "Tentar de novo".
+- [x] **T3.6** — Falha no envio preserva o recorte: o blob continua em memória e a tela oferece
+      "Tentar de novo". Recortar de novo é o passo em que se desiste. _Feito em 2026-08-07._
 - [x] **T3.7** — Sem `canvas.toBlob`, a tela orienta e **não** envia a original. _Feito em
       2026-08-07._
 
 ## Fatia 4 — Crachá e exportação
 
-- [ ] **T4.1** — Componente do crachá em HTML/CSS, frente e verso, proporção 54 × 85,6 mm, com os
-      campos do REQ-20 e REQ-21 e nada além. **Aceite**: cenário "Crachá não expõe dado além do
-      previsto".
-- [ ] **T4.2** — QR Code gerado apontando para `/verificar/<numero_registro>`, com a URL por
-      extenso. **Aceite**: cenário "QR Code resolve para a verificação pública".
-- [ ] **T4.3** — Exportação PNG e PDF no navegador, com teste que conta requisições de rede.
-      **Aceite**: cenário "Exportação acontece sem servidor".
-- [ ] **T4.4** — Pré-visualização de impressão A4 em 100%, com marcas de corte e a instrução de não
-      ajustar à página.
-- [ ] **T4.5** — Opt-in do tipo de deficiência: caixa separada, desmarcada por padrão, texto neutro,
-      persistência da escolha, efeito restrito ao crachá. **Aceite**: cenários "Opt-in vem
-      desmarcado por padrão" e "Opt-in marcado afeta só o crachá".
-- [ ] **T4.6** — Estado sem foto com ações desabilitadas **e motivo escrito**; ausência de qualquer
-      texto de análise ou aprovação. **Aceite**: cenários "Sem foto, baixar fica desabilitado" e
-      "Liberação é imediata".
+- [x] **T4.1** — `AppdCracha.vue`, frente e verso, medidas em **milímetros** para a impressão sair
+      no tamanho de verdade. **Aceite**: o gate lê o cartão (não a página) e falha se aparecer
+      endereço, telefone ou nascimento da pessoa. _Feito em 2026-08-07._
+- [x] **T4.2** — QR no verso, com a URL por extenso ao lado. _Feito em 2026-08-07._
+- [x] **T4.3** — PNG e PDF desenhados em `canvas` e montados byte a byte, sem dependência nova:
+      as bibliotecas de HTML-para-imagem baixam fonte em tempo de execução, o que quebraria o
+      REQ-23 de forma invisível. **Aceite**: o gate conta requisições durante a exportação e exige
+      zero — descontando o polling de manifesto do Nuxt, nomeado no teste. _Feito em 2026-08-07._
+- [x] **T4.4** — Folha A4 com marcas de corte e a instrução de imprimir em 100%. _Feito em
+      2026-08-07._
+- [x] **T4.5** — Caixa única e separada, desmarcada por padrão, persistida em
+      `usuarios.cracha_mostra_deficiencia`. **Efeito restrito por construção**: sem a marca, a
+      rota do crachá **nem consulta** o campo 12 — a proteção está na consulta, não no template.
+      **Aceite**: o gate confere que nasce desmarcada e que o texto não usa "recomendado",
+      "ajuda" ou "facilita". _Feito em 2026-08-07._
+- [x] **T4.6** — Sem foto, baixar fica desabilitado com o motivo em `aria-describedby`. O gate
+      falha se aparecer "em análise", "aguardando aprovação" ou selo de validação. _Feito em
+      2026-08-07._
 
 ## Fatia 5 — Verificação pública
 

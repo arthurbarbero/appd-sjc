@@ -1,0 +1,1 @@
+ALTER TABLE `usuarios` ADD `cracha_mostra_deficiencia` integer DEFAULT false NOT NULL;

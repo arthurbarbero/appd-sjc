@@ -6,7 +6,7 @@
   cor. Quem não distingue as cores continua sabendo onde está, e o leitor de tela anuncia.
 */
 
-defineProps<{ atual: 'painel' | 'dados' | 'inscricoes' | 'excluir' }>()
+defineProps<{ atual: 'painel' | 'cracha' | 'dados' | 'inscricoes' | 'excluir' }>()
 
 /*
   "Sair" fica aqui, e não no cabeçalho do site: sair é ação de quem está na área, e o
@@ -39,6 +39,11 @@ async function sair() {
       <li>
         <NuxtLink to="/area" :aria-current="atual === 'painel' ? 'page' : undefined">
           Início
+        </NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/area/cracha" :aria-current="atual === 'cracha' ? 'page' : undefined">
+          Meu crachá
         </NuxtLink>
       </li>
       <li>

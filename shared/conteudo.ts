@@ -41,6 +41,16 @@ export const ASSOCIACAO = {
 } as const
 
 /**
+ * O endereço da sede numa linha só.
+ *
+ * Existe porque três lugares precisam dele **exatamente igual**: o rodapé, o verso do
+ * crachá em HTML e o verso do crachá desenhado em canvas para exportação. Montado em cada
+ * um, seria questão de tempo até um deles ficar com a pontuação diferente do documento
+ * impresso — e crachá que discorda do rodapé do site é crachá que alguém questiona.
+ */
+export const enderecoEmLinha = `${ASSOCIACAO.endereco.logradouro} — ${ASSOCIACAO.endereco.bairro}, ${ASSOCIACAO.endereco.cidade}/${ASSOCIACAO.endereco.uf}`
+
+/**
  * Regras do atendimento, confirmadas pelo dono do projeto em 2026-08-06.
  *
  * A regra de "fila de vagas" saiu: ela vinha do texto do formulário oficial, que está

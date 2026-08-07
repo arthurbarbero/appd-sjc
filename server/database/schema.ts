@@ -105,6 +105,22 @@ export const usuarios = sqliteTable(
     cuidadorContato: text('cuidador_contato'),
 
     situacao: text('situacao').notNull().default('ativo'),
+    /**
+     * Opt-in de imprimir o tipo de deficiência **no crachá** (`cracha-do-associado`
+     * REQ-25 e REQ-26).
+     *
+     * Nasce em 0 e assim permanece até a pessoa marcar, de propósito: é a escolha de
+     * expor dado sensível do Art. 11 num documento que qualquer pessoa vê. Vale
+     * **exclusivamente** para o crachá renderizado e exportado — nenhum efeito em
+     * `/verificar`, na área ou em resposta de API pública.
+     *
+     * A coluna é de `modelo-de-dados` por ADR-013, e aquela change já estava arquivada
+     * quando esta precisou existir. Está registrado no `tasks.md` de lá, com a data e o
+     * motivo, em vez de a tabela ganhar coluna que o contrato não menciona.
+     */
+    crachaMostraDeficiencia: integer('cracha_mostra_deficiencia', { mode: 'boolean' })
+      .notNull()
+      .default(false),
     /** UUID v4 gerado pelo cliente; dedupe de clique duplo. NULL depois da exclusão. */
     chaveIdempotencia: text('chave_idempotencia').unique(),
 
