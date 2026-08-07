@@ -8,16 +8,33 @@ import { ASSOCIACAO } from '~~/shared/conteudo'
   específico (ver se o cadastro está certo, mostrar o crachá, corrigir um telefone), e
   cartão de métrica com número gigante não ajuda nisso.
 
-  **Nenhum bloco exibe tipo de deficiência** (REQ-5). A rota que alimenta esta tela nem
-  devolve o campo — a proteção está na projeção do SQL, não na disciplina de quem escreve
-  o template.
+  **Nenhum bloco exibe tipo de deficiência** (REQ-5). Nenhuma das três rotas que alimentam
+  esta tela devolve o campo — a proteção está na projeção do SQL, não na disciplina de quem
+  escreve o template.
 */
 
 useHead({ title: 'Minha área — APPD São José dos Campos' })
 
 const sede = ASSOCIACAO.telefones[0]!
 const rota = useRoute()
+/*
+  **Uma chamada por bloco** — decisão do dono em 2026-08-07.
+
+  Antes era uma só, agregando conta, inscrição e foto. O argumento que decidiu: com chamada
+  única, se ela falhar a pessoa não vê **nada**; com três, ela vê o que deu certo e o erro
+  fica dentro do bloco que o causou.
+
+  As três saem em paralelo — `useFetch` não bloqueia uma na outra —, então o custo é de
+  conexões abertas, não de tempo em fila.
+
+  A conta é a única indispensável: sem ela não há área, e a página inteira vira erro.
+*/
 const { data, pending, error } = await useFetch('/api/area/meus-dados')
+const { data: dadosInscricao, error: erroInscricao } = await useFetch('/api/area/resumo-inscricao')
+const { data: dadosFoto, error: erroFoto } = await useFetch('/api/area/tem-foto')
+
+const inscricao = computed(() => dadosInscricao.value?.inscricao ?? null)
+const temFoto = computed(() => dadosFoto.value?.temFoto === true)
 
 /** Chega preenchido quando a pessoa acabou de concluir o cadastro. */
 const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
@@ -109,7 +126,7 @@ function cepBr(cep?: string | null) {
           que crachá, dados e exclusão continuam funcionando, e faria a pessoa achar que
           perdeu tudo por causa de uma consulta.
         -->
-        <AppdAviso v-if="data.inscricaoFalhou" tipo="erro" titulo="Não carregou">
+        <AppdAviso v-if="erroInscricao" tipo="erro" titulo="Não carregou">
           <span>
             Não conseguimos carregar suas inscrições agora. O resto da página continua funcionando —
             recarregue em instantes, ou ligue para
@@ -118,21 +135,21 @@ function cepBr(cep?: string | null) {
           </span>
         </AppdAviso>
 
-        <template v-else-if="data.inscricao">
+        <template v-else-if="inscricao">
           <p class="linha-estado">
             <span class="selo selo-sucesso">
-              <span aria-hidden="true">✓</span> {{ data.inscricao.status }}
+              <span aria-hidden="true">✓</span> {{ inscricao.status }}
             </span>
-            <span class="quando">Pedido em {{ dataBr(data.inscricao.criadoEm) }}</span>
+            <span class="quando">Pedido em {{ dataBr(inscricao.criadoEm) }}</span>
           </p>
           <dl>
             <div>
               <dt>Atendimentos marcados</dt>
-              <dd>{{ data.inscricao.atendimentos.join(', ') }}</dd>
+              <dd>{{ inscricao.atendimentos.join(', ') }}</dd>
             </div>
             <div>
               <dt>Melhores dias</dt>
-              <dd>{{ data.inscricao.dias.join(', ') }}</dd>
+              <dd>{{ inscricao.dias.join(', ') }}</dd>
             </div>
           </dl>
           <p>A associação entra em contato pelo telefone que você informou.</p>
@@ -166,19 +183,30 @@ function cepBr(cep?: string | null) {
       <div class="duas-colunas">
         <section class="cartao" aria-labelledby="t-cracha">
           <h2 id="t-cracha">Meu crachá</h2>
+          <!--
+            Terceira chamada, terceiro erro contido. Se só esta falhar, o bloco diz que não
+            conseguiu conferir a foto — e não finge que não existe, que mandaria a pessoa
+            enviar de novo uma foto que já está lá.
+          -->
+          <p v-if="erroFoto" class="aviso-foto" role="status">
+            Não conseguimos conferir se a sua foto está guardada. Abra "Meu crachá" para ver.
+          </p>
+
           <div class="previa">
-            <div v-if="data.temFoto" class="foto" aria-hidden="true">Foto</div>
+            <div v-if="temFoto" class="foto" aria-hidden="true">Foto</div>
             <div v-else class="foto sem-foto">Sem foto</div>
             <div>
               <p class="nome-cracha">{{ data.conta.nome }}</p>
               <p>{{ data.conta.numeroRegistro }}</p>
             </div>
           </div>
-          <p v-if="!data.temFoto" class="aviso-foto">O crachá precisa de foto para ser impresso.</p>
+          <p v-if="!temFoto && !erroFoto" class="aviso-foto">
+            O crachá precisa de foto para ser impresso.
+          </p>
 
           <div class="acoes">
             <NuxtLink class="botao botao-primario" to="/area/cracha">
-              {{ data.temFoto ? 'Ver e baixar meu crachá' : 'Enviar minha foto' }}
+              {{ temFoto ? 'Ver e baixar meu crachá' : 'Enviar minha foto' }}
             </NuxtLink>
           </div>
 

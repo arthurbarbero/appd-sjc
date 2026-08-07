@@ -507,6 +507,49 @@ try {
   }
   await p.setViewportSize({ width: 1280, height: 900 })
 
+  /*
+    T6.2 de `area-do-associado` — axe nas quatro telas da área, nas **duas** larguras.
+
+    A exigência das duas larguras já achou defeito real no crachá: região que rola e não
+    recebe foco só existe quando o conteúdo estoura, e a 1280 px ele não estoura.
+  */
+  for (const rota of ['/area', '/area/dados', '/area/inscricoes', '/area/excluir']) {
+    for (const largura of [1280, 360]) {
+      await p.setViewportSize({ width: largura, height: 900 })
+      await p.goto(BASE + rota, { waitUntil: 'networkidle' })
+      const r = await new AxeBuilder({ page: p })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .analyze()
+      ok(
+        `axe A/AA em ${rota} a ${largura}px`,
+        r.violations.length === 0,
+        r.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
+      )
+    }
+  }
+  await p.setViewportSize({ width: 1280, height: 900 })
+
+  /*
+    T6.1 — o tipo de deficiência não pode aparecer nas telas do painel, nem em HTML oculto,
+    atributo ou JSON embutido. `/area/inscricoes` fica **fora** da varredura: é a tela de
+    correção, e é lá que a pessoa vê o que respondeu para poder mudar (REQ-5, corrigido em
+    2026-08-07 — o cenário antigo listava essa tela por engano).
+  */
+  for (const rota of ['/area', '/area/dados', '/area/excluir']) {
+    await p.goto(BASE + rota, { waitUntil: 'networkidle' })
+    const html = await p.content()
+    ok(
+      `${rota} não vaza o tipo de deficiência`,
+      !/Física|Intelectual ou Neurodivergentes|Sensorial \(visão/.test(html),
+    )
+  }
+
+  await p.goto(`${BASE}/area/inscricoes`, { waitUntil: 'networkidle' })
+  ok(
+    'a tela de correção exibe o tipo de deficiência, porque é onde se corrige',
+    (await p.content()).includes('Física'),
+  )
+
   // ── 5b. Sair e voltar a entrar ────────────────────────────────────────────
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
   await p.click('nav .sair')
@@ -547,6 +590,44 @@ try {
   await p.keyboard.press('Escape')
   await p.waitForTimeout(300)
   ok('Esc fecha sem excluir', !(await p.$('[role=dialog]')))
+
+  /*
+    T6.3 — o percurso de exclusão **só pelo teclado**.
+
+    É a tela onde teclado importa mais: quem não usa mouse precisa conseguir apagar a
+    própria conta sem pedir ajuda a ninguém. E o foco tem de voltar para o botão que abriu
+    o modal quando ele fecha — sem isso a pessoa é jogada para o início da página e perde
+    o lugar.
+  */
+  const porTeclado = await (async () => {
+    // Recarrega para o foco começar do topo: ao fechar o modal com Esc, ele foi devolvido
+    // ao botão que abriu — e daí o `Tab` seguinte já sai dele, nunca volta.
+    await p.goto(`${BASE}/area/excluir`, { waitUntil: 'networkidle' })
+    for (let i = 0; i < 40; i++) {
+      await p.keyboard.press('Tab')
+      const texto = await p.evaluate(() => (document.activeElement?.textContent ?? '').trim())
+      if (texto.includes('Excluir minha conta') || texto === 'Excluir') {
+        await p.keyboard.press('Enter')
+        await p.waitForSelector('[role=dialog]', { timeout: 5000 }).catch(() => {})
+        return Boolean(await p.$('[role=dialog]'))
+      }
+    }
+    return false
+  })()
+  ok('só pelo teclado, dá para abrir a confirmação de exclusão', porTeclado)
+
+  if (porTeclado) {
+    const focoNoModal = await p.evaluate(() => (document.activeElement?.textContent ?? '').trim())
+    ok('ao abrir pelo teclado, o foco entra no modal em Cancelar', focoNoModal === 'Cancelar')
+    await p.keyboard.press('Escape')
+    await p.waitForTimeout(300)
+    const focoDevolvido = await p.evaluate(() => (document.activeElement?.textContent ?? '').trim())
+    ok(
+      'ao fechar, o foco volta para o botão que abriu',
+      focoDevolvido.includes('Excluir'),
+      focoDevolvido,
+    )
+  }
 
   await p.click('.acoes button')
   await p.waitForSelector('[role=dialog]')

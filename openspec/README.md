@@ -12,8 +12,8 @@ antes do design aprovado no Claude Design.
 ## Estado das changes — 2026-08-07
 
 **Arquivadas** (`archive/`): `modelo-de-dados`, `revisao-de-interface`,
-`cracha-do-associado` (2026-08-07, com os 39 cenários validados item a item em
-[VALIDACAO.md](archive/cracha-do-associado/VALIDACAO.md)).
+`cracha-do-associado` e `area-do-associado` — as duas últimas com os cenários validados
+item a item, em `VALIDACAO.md` dentro de cada pasta.
 
 **Abertas** (`changes/`), todas com a spec **APROVADA** na forma pelo gate de 2026-08-07:
 
@@ -22,7 +22,6 @@ antes do design aprovado no Claude Design.
 | `site-institucional`          | 17 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
 | `cadastro-e-login`            | percorrer os cenários; redefinição de senha depende de e-mail gratuito    |
 | `formulario-atendimento`      | percorrer os cenários; foto opcional do campo 16 não foi implementada     |
-| `area-do-associado`           | Fatias 1, 2, 5 e 6 sem veredito; a Fatia 4 destravou com o ADR-017        |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,

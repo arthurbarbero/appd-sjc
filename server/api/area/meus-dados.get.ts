@@ -35,50 +35,17 @@ export default defineEventHandler(async (event) => {
       situacao: true,
     },
   })
-  // A conta é o único bloco sem o qual a página não existe: sem ela não há área.
   if (!conta) throw createError({ statusCode: 401 })
 
   /*
-    Degradação por bloco (REQ-33, cenário "Falha em um bloco não derruba os outros").
+    Devolve **só a conta**, desde 2026-08-07.
 
-    A chamada continua sendo **uma só** — três requisições numa conexão ruim são três
-    chances de falhar, e o público deste site tem conexão ruim. O que muda é que cada
-    trecho falha por conta própria aqui dentro: se a consulta de inscrições cair, o painel
-    ainda mostra crachá, dados e exclusão, com o erro contido no bloco que o causou.
+    Antes esta rota juntava conta, inscrição e foto numa resposta só. O dono decidiu por
+    **uma chamada por bloco**: se a inscrição falhar, o painel mostra o erro dentro daquele
+    bloco e o resto continua utilizável, em vez de a tela inteira virar "não conseguimos
+    carregar". As outras duas são `resumo-inscricao` e `tem-foto`.
 
-    Sem isto, um `findFirst` que estoura derruba a tela inteira e a pessoa vê "não
-    conseguimos carregar" sem saber que só uma parte falhou.
+    A conta é o único bloco sem o qual a página não existe — se ela cair, não há área.
   */
-  const inscricao = await bd.query.inscricoesAtendimento
-    .findFirst({
-      where: eq(schema.inscricoesAtendimento.usuarioId, sessao.id),
-      columns: { atendimentos: true, dias: true, status: true, criadoEm: true },
-    })
-    .catch(() => 'falhou' as const)
-
-  const foto = await bd.query.fotos
-    .findFirst({
-      where: eq(schema.fotos.usuarioId, sessao.id),
-      columns: { id: true },
-    })
-    .catch(() => 'falhou' as const)
-
-  const inscricaoFalhou = inscricao === 'falhou'
-  const fotoFalhou = foto === 'falhou'
-
-  return {
-    conta,
-    inscricaoFalhou,
-    fotoFalhou,
-    inscricao:
-      inscricaoFalhou || !inscricao
-        ? null
-        : {
-            atendimentos: JSON.parse(inscricao.atendimentos) as string[],
-            dias: JSON.parse(inscricao.dias) as string[],
-            status: inscricao.status,
-            criadoEm: inscricao.criadoEm,
-          },
-    temFoto: !fotoFalhou && Boolean(foto),
-  }
+  return { conta }
 })

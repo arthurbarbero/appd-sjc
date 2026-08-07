@@ -58,6 +58,12 @@ nomeada e nunca exibe dado de saúde.
 
 ### Regra de dado sensível (a mais dura desta change)
 
+> **Correção de 2026-08-07.** O cenário do REQ-5 listava `/area/inscricoes` entre as telas
+> que não podem exibir o tipo de deficiência. Estava defasado: foi escrito antes de a
+> inscrição virar **editável** (ADR-014, 2026-08-06), e `/area/inscricoes` é justamente a
+> tela de correção — sem ver o que respondeu, ninguém corrige. O requisito continua o
+> mesmo; o cenário é que descrevia um produto anterior.
+
 - **REQ-5**: Nenhuma tela de `/area/*` DEVE renderizar o tipo de deficiência da pessoa — nem
   em "Meus dados", nem na prévia do crachá, nem em tela de exclusão, nem em HTML oculto,
   atributo `data-*`, comentário, JSON embutido ou resposta de API consumida pela área.
@@ -394,13 +400,14 @@ Funcionalidade: Estados vazios e de carregamento
 Funcionalidade: Dado sensível não aparece na área
   Cobre REQ-5, REQ-6, REQ-7 e REQ-13 da SPEC-area-do-associado
 
-  Cenário: Tipo de deficiência não aparece em nenhuma tela
+  Cenário: Tipo de deficiência não aparece fora da tela de correção
+    Cobre REQ-5, corrigido em 2026-08-07
     Dado o associado fictício "APPD-2026-00042" com "Física" respondido no campo 12
-    Quando são renderizadas /area, /area/dados, /area/inscricoes e /area/excluir
-    Então nenhuma delas contém as palavras "Física", "Intelectual ou Neurodivergentes",
-      "Sensorial (visão, audição, fala)" ou "Outro" referidas à pessoa
-    E o valor não aparece em HTML oculto, atributo data-*, comentário nem JSON embutido
-    E nenhuma resposta de API consumida pela área traz o campo
+    Quando são renderizadas /area, /area/dados e /area/excluir
+    Então nenhuma delas contém o valor respondido, nem em HTML oculto, atributo data-*,
+      comentário ou JSON embutido
+    E nenhuma das três rotas de API que alimentam o painel traz o campo
+    Mas /area/inscricoes exibe o valor, porque é a tela em que a pessoa o corrige
 
   Cenário: Opt-in do crachá não vaza para a prévia da área
     Dado o associado fictício com o opt-in de tipo de deficiência marcado no crachá

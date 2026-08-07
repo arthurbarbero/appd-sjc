@@ -131,6 +131,31 @@ describe('a tela pública não carrega o que a rota não manda', () => {
   })
 })
 
+describe('as rotas do painel da área não trazem o campo 12 (area REQ-5, T6.1)', () => {
+  /*
+    O painel faz três chamadas — conta, resumo da inscrição e situação da foto. Nenhuma
+    das três pode devolver o tipo de deficiência, e a garantia está na **projeção**: as três
+    listam coluna por coluna, então acrescentar o campo exigiria editá-las de propósito.
+
+    A tela de correção (`inscricao.get.ts`) é a exceção declarada, e continua fora daqui.
+  */
+  const DO_PAINEL = ['meus-dados.get.ts', 'resumo-inscricao.get.ts', 'tem-foto.get.ts']
+
+  it.each(DO_PAINEL)('%s não menciona o campo 12', (arquivo) => {
+    expect(ler(join(API, 'area', arquivo))).not.toMatch(/\bdeficiencias\b|deficienciaOutro/)
+  })
+
+  it.each(DO_PAINEL)('%s projeta coluna a coluna, nunca a linha inteira', (arquivo) => {
+    const rota = ler(join(API, 'area', arquivo))
+    expect(rota).toMatch(/columns:\s*\{/)
+  })
+
+  it('o painel não exibe o campo 12 no template', () => {
+    const painel = ler(join(RAIZ, 'app', 'pages', 'area', 'index.vue'))
+    expect(painel).not.toMatch(/deficiencia/i)
+  })
+})
+
 describe('seed e fixtures não carregam dado de pessoa real (REQ-43, T6.4)', () => {
   it('o seed se declara fictício e usa domínio reservado', () => {
     const seed = ler(join(RAIZ, 'scripts', 'seed-local.mjs'))

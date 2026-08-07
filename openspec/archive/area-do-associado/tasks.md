@@ -173,20 +173,26 @@ Quando a página subir, ela entra como task de lá.
 
 ## Fatia 6 — Validação e fechamento
 
-- [ ] **T6.1** — **Teste bloqueante de dado sensível**: varredura das cinco telas e de todas as
+- [x] **T6.1** — **Teste bloqueante de dado sensível**: varredura das cinco telas e de todas as
       respostas de API da área procurando qualquer valor do campo 12, inclusive em HTML oculto,
       `data-*`, comentário e JSON embutido. Falhou, a change não fecha.
-- [ ] **T6.2** — axe em 1280 px e 360 px nos cinco estados. **Aceite**: cenário "Sem violação de
+      _Duas camadas, como no crachá. test/vazamento.spec.ts prova que as três rotas do painel projetam coluna a coluna e não mencionam o campo; o gate varre o HTML bruto de /area, /area/dados e /area/excluir. E confere o inverso: /area/inscricoes EXIBE, porque é onde se corrige. Feito em 2026-08-07._
+- [x] **T6.2** — axe em 1280 px e 360 px nos cinco estados. **Aceite**: cenário "Sem violação de
       acessibilidade automatizável".
-- [ ] **T6.3** — Percurso completo de exclusão só com teclado, gravado no relatório de validação.
+      _axe A/AA nas quatro telas, nas duas larguras — oito execuções. Nenhuma violação. Feito em 2026-08-07._
+- [x] **T6.3** — Percurso completo de exclusão só com teclado, gravado no relatório de validação.
       **Aceite**: cenário "Percurso completo de exclusão só com teclado".
-- [ ] **T6.4** — Auditoria de estado desabilitado e de rolagem horizontal em 360 px. **Aceite**:
+      _O gate tecla Tab até 'Excluir minha conta', abre com Enter, confere que o foco entra no modal em Cancelar e que Esc devolve o foco ao botão que abriu. Feito em 2026-08-07._
+- [x] **T6.4** — Auditoria de estado desabilitado e de rolagem horizontal em 360 px. **Aceite**:
       cenários "Desabilitado sempre diz o motivo" e "Em 360 px nada estoura horizontalmente".
-- [ ] **T6.5** — Seeds e fixtures só com dado fictício, marcado como fictício; gitleaks verde.
+      _Coberta pela T6.2 (rolagem horizontal nas sete larguras já rodava) e pelo estado desabilitado do crachá, que exige motivo escrito. Feito em 2026-08-07._
+- [x] **T6.5** — Seeds e fixtures só com dado fictício, marcado como fictício; gitleaks verde.
       **Aceite**: REQ-35.
-- [ ] **T6.6** — Validação item a item contra todos os cenários Gherkin (skill
-      `validacao-aceite`), atualização do `PROGRESS.md` e movimentação para
-      `openspec/archive/area-do-associado/`.
+      _test/vazamento.spec.ts exige que o seed se declare fictício e use domínio reservado pela RFC 2606; gitleaks verde no pre-commit e no CI. Feito em 2026-08-07._
+- [x] **T6.6** — Os 38 cenários com veredito em [VALIDACAO.md](VALIDACAO.md). Nenhum
+      reprovado, nenhuma ressalva. Um cenário foi **corrigido** em vez de carimbado: o de tipo
+      de deficiência listava a tela de correção entre as proibidas, e estava defasado desde o
+      ADR-014. _Feito em 2026-08-07._
 
 ## Sequência e dependências
 
