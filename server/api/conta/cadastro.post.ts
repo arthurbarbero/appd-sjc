@@ -12,7 +12,7 @@
 
 import { eq } from 'drizzle-orm'
 import { esquemaInscricao } from '~~/shared/validacao/inscricao'
-import { normalizaEmail } from '~~/shared/auth/derivacao'
+import { SENHA_MINIMO, normalizaEmail } from '~~/shared/auth/derivacao'
 
 /** Converte `dd/mm/aaaa` para o `aaaa-mm-dd` que o banco exige. */
 function paraDataIso(brasileira: string): string {
@@ -26,8 +26,16 @@ export default defineEventHandler(async (event) => {
 
   // O servidor revalida tudo com o mesmo schema do cliente (REQ-9). O que a tela
   // conferiu não conta: quem chama a API direto não passou por tela nenhuma.
-  const validado = esquemaInscricao.safeParse({ ...corpo, senha: 'x'.repeat(10) })
+  //
+  // `chaveDerivada` sai antes de validar, e `senha` entra como preenchimento: o schema é
+  // `.strict()` e é compartilhado com o cliente, onde o campo é a senha digitada. Aqui a
+  // senha nunca chega — o que chega é a chave já derivada no navegador (ADR-005).
   const chave = typeof corpo?.chaveDerivada === 'string' ? corpo.chaveDerivada : ''
+  const { chaveDerivada: _ignorada, ...camposDoFormulario } = corpo ?? {}
+  const validado = esquemaInscricao.safeParse({
+    ...camposDoFormulario,
+    senha: 'x'.repeat(SENHA_MINIMO),
+  })
   if (!validado.success || !/^[0-9a-f]{64}$/.test(chave)) {
     const erros: Record<string, string> = {}
     for (const p of validado.success ? [] : validado.error.issues) {

@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
+import { SENHA_MINIMO, normalizaEmail } from '~~/shared/auth/derivacao'
+import { cpfValido } from '~~/shared/validacao/inscricao'
+import { derivarChave } from '~/utils/derivar-senha'
 
 /*
   Cadastro de Atendimento 2026 — réplica fiel dos 15 campos do formulário oficial.
   Rótulos, ordem e obrigatoriedade não mudam (ver docs/campos-formulario.md). O que
   muda é o que está em volta: máscara, erro por campo, consentimento do Art. 11.
 
-  Ainda não envia nada: não há rota de servidor nem banco. A tela existe para validar o
-  desenho e a experiência de preenchimento.
+  Desde o ADR-012 esta tela também **cria a conta**: não existe cadastro separado. Daí os
+  três campos além dos 15 — e-mail, CPF e senha —, e a derivação da senha antes do envio.
+
+  A senha nunca sai daqui. O que viaja é a chave derivada por scrypt no próprio navegador
+  (ADR-005), porque o custo que protege a senha não cabe nos 10 ms de CPU do plano
+  gratuito do Workers.
 */
 
 useHead({ title: 'Cadastro de Atendimento 2026 — APPD São José dos Campos' })
@@ -48,7 +55,17 @@ const f = reactive({
   dias: [] as string[],
   ciente: '',
   consentimento: false,
+  email: '',
+  cpf: '',
+  senha: '',
 })
+
+/** Gerada uma vez ao abrir a página: clique duplo e retentativa não viram dois cadastros. */
+const chaveIdempotencia = crypto.randomUUID()
+
+const enviando = ref(false)
+const numeroRegistro = ref('')
+const erroGeral = ref('')
 
 const erros = reactive<Record<string, string>>({})
 const enviado = ref(false)
@@ -64,6 +81,14 @@ function mascaraTelefone(v: string) {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+function mascaraCpf(v: string) {
+  const d = soDigitos(v).slice(0, 11)
+  if (d.length <= 3) return d
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
 }
 
 function mascaraData(v: string) {
@@ -132,6 +157,21 @@ function validar() {
   if (!f.deficiencias.length) erros.deficiencias = 'Marque pelo menos uma opção.'
   if (!f.atendimentos.length) erros.atendimentos = 'Marque pelo menos um tipo de atendimento.'
   if (!f.dias.length) erros.dias = 'Marque pelo menos um dia.'
+  if (!f.email.trim()) {
+    erros.email = 'Informe um e-mail: é com ele que você entra depois para corrigir o cadastro.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizaEmail(f.email))) {
+    erros.email = 'Confira o e-mail. Exemplo: maria@gmail.com'
+  }
+
+  const cpf = soDigitos(f.cpf)
+  if (!cpf) erros.cpf = 'Informe o CPF de quem vai ser atendido.'
+  else if (!cpfValido(cpf)) erros.cpf = 'Confira o CPF: os números não fecham.'
+
+  if (!f.senha) erros.senha = 'Crie uma senha para poder entrar depois.'
+  else if (f.senha.length < SENHA_MINIMO) {
+    erros.senha = `A senha precisa ter pelo menos ${SENHA_MINIMO} caracteres.`
+  }
+
   if (!f.ciente) erros.ciente = 'Marque "Ciente" para concluir.'
   if (!f.consentimento) {
     erros.consentimento =
@@ -142,15 +182,63 @@ function validar() {
 }
 
 async function enviar() {
-  if (validar()) {
-    enviado.value = true
+  erroGeral.value = ''
+  if (!validar()) {
+    await nextTick()
+    resumoErro.value?.focus()
     return
   }
-  await nextTick()
-  resumoErro.value?.focus()
-}
 
-const numeroFicticio = 'APPD-2026-00042'
+  enviando.value = true
+  try {
+    // O trabalho caro acontece aqui, no aparelho da pessoa. Pode levar até um segundo
+    // em celular antigo — daí o estado "Enviando…" ser requisito, não enfeite (REQ-6c).
+    const chaveDerivada = await derivarChave(f.senha, normalizaEmail(f.email))
+
+    const resposta = await $fetch<{ numeroRegistro: string }>('/api/conta/cadastro', {
+      method: 'POST',
+      body: {
+        nome: f.nome.trim(),
+        nascimento: f.nascimento,
+        telefone: f.telefone,
+        telefoneWhatsapp: f.whatsapp,
+        endereco: f.endereco.trim(),
+        numero: f.numero.trim(),
+        ...(f.complemento.trim() ? { complemento: f.complemento.trim() } : {}),
+        bairro: f.bairro.trim(),
+        municipio: f.municipio.trim(),
+        ...(f.cuidadorNome.trim() ? { cuidadorNome: f.cuidadorNome.trim() } : {}),
+        ...(f.cuidadorContato.trim() ? { cuidadorContato: f.cuidadorContato } : {}),
+        deficiencias: f.deficiencias,
+        ...(f.deficienciaOutro.trim() ? { deficienciaOutro: f.deficienciaOutro.trim() } : {}),
+        atendimentos: f.atendimentos,
+        ...(f.atendimentoOutro.trim() ? { atendimentoOutro: f.atendimentoOutro.trim() } : {}),
+        dias: f.dias,
+        cienciaContribuicao: 'Ciente',
+        email: normalizaEmail(f.email),
+        cpf: soDigitos(f.cpf),
+        consentimentoSaude: true,
+        chaveIdempotencia,
+        chaveDerivada,
+      },
+    })
+    numeroRegistro.value = resposta.numeroRegistro
+    enviado.value = true
+  } catch (erro: unknown) {
+    // Erro do servidor volta por campo, com a mesma mensagem que o cliente daria.
+    const dados = (erro as { data?: { data?: { erros?: Record<string, string> } } })?.data?.data
+    if (dados?.erros) {
+      Object.assign(erros, dados.erros)
+      await nextTick()
+      resumoErro.value?.focus()
+    } else {
+      erroGeral.value =
+        'Não conseguimos enviar agora. Suas respostas continuam aqui — tente de novo em instantes.'
+    }
+  } finally {
+    enviando.value = false
+  }
+}
 </script>
 
 <template>
@@ -176,28 +264,26 @@ const numeroFicticio = 'APPD-2026-00042'
     </AppdAviso>
 
     <div v-if="enviado" class="sucesso">
-      <AppdAviso tipo="sucesso" titulo="Cadastro preenchido">
-        <span>
-          Numa versão publicada, você entraria na fila agora e receberia o número de registro
-          abaixo.
-        </span>
+      <AppdAviso tipo="sucesso" titulo="Cadastro enviado">
+        <span>Seus interesses ficaram registrados e a sua conta foi criada.</span>
       </AppdAviso>
-      <p class="registro">{{ numeroFicticio }}</p>
+      <p class="registro">{{ numeroRegistro }}</p>
       <div class="o-que-acontece">
-        <h2>O que aconteceria agora</h2>
+        <h2>O que acontece agora</h2>
         <ol class="lista">
-          <li>Seu cadastro entra na fila de vagas.</li>
-          <li>A associação liga para {{ f.telefone || 'o telefone informado' }}.</li>
-          <li>No primeiro atendimento, você recebe as orientações gerais.</li>
+          <li>
+            A associação entra em contato pelo telefone {{ f.telefone || 'que você informou' }}.
+          </li>
+          <li>Este é o seu número de registro. Ele é seu e não muda.</li>
+          <li>Você pode entrar a qualquer momento e corrigir o que precisar.</li>
         </ol>
         <p>
-          Mudou de telefone? Avise pelo <a :href="`tel:${sede.e164}`">{{ sede.numero }}</a
+          Mudou de telefone? Corrija na sua área ou avise pelo
+          <a :href="`tel:${sede.e164}`">{{ sede.numero }}</a
           >.
         </p>
       </div>
-      <button type="button" class="botao botao-secundario" @click="enviado = false">
-        Voltar ao formulário
-      </button>
+      <NuxtLink class="botao botao-primario" to="/area">Ir para a minha área</NuxtLink>
     </div>
 
     <form v-else novalidate class="formulario" @submit.prevent="enviar">
@@ -475,8 +561,77 @@ const numeroFicticio = 'APPD-2026-00042'
         </fieldset>
       </fieldset>
 
+      <fieldset class="secao">
+        <legend>5. Sua conta</legend>
+
+        <p class="explicacao">
+          Estes três dados criam a sua conta. É com eles que você entra depois para
+          <strong>corrigir o seu cadastro</strong> sem precisar ligar para a associação.
+        </p>
+        <p class="explicacao">
+          A conta é de quem vai ser atendido. Se você cuida de mais de uma pessoa, faça um cadastro
+          para cada uma.
+        </p>
+
+        <div :class="['campo', { 'campo-erro': erros.email }]">
+          <label for="email">E-mail <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-email" class="ajuda">Campo obrigatório.</span>
+          <input
+            id="email"
+            v-model="f.email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            :aria-invalid="erros.email ? 'true' : undefined"
+            aria-describedby="ajuda-email"
+          />
+          <span v-if="erros.email" class="erro">
+            <span class="icone" aria-hidden="true">✕</span>{{ erros.email }}
+          </span>
+        </div>
+
+        <div :class="['campo', { 'campo-erro': erros.cpf }]">
+          <label for="cpf">CPF <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-cpf" class="ajuda"
+            >Campo obrigatório. Da pessoa que vai ser atendida.</span
+          >
+          <input
+            id="cpf"
+            :value="f.cpf"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            :aria-invalid="erros.cpf ? 'true' : undefined"
+            aria-describedby="ajuda-cpf"
+            @input="f.cpf = mascaraCpf(($event.target as HTMLInputElement).value)"
+          />
+          <span v-if="erros.cpf" class="erro">
+            <span class="icone" aria-hidden="true">✕</span>{{ erros.cpf }}
+          </span>
+        </div>
+
+        <div :class="['campo', { 'campo-erro': erros.senha }]">
+          <label for="senha">Senha <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-senha" class="ajuda">
+            Campo obrigatório. Pelo menos {{ SENHA_MINIMO }} caracteres. Pode ser uma frase — não
+            exigimos símbolo nem letra maiúscula.
+          </span>
+          <input
+            id="senha"
+            v-model="f.senha"
+            type="password"
+            autocomplete="new-password"
+            :aria-invalid="erros.senha ? 'true' : undefined"
+            aria-describedby="ajuda-senha"
+          />
+          <span v-if="erros.senha" class="erro">
+            <span class="icone" aria-hidden="true">✕</span>{{ erros.senha }}
+          </span>
+        </div>
+      </fieldset>
+
       <fieldset class="secao consentimento">
-        <legend>5. Consentimento</legend>
+        <legend>6. Consentimento</legend>
 
         <p>
           A informação sobre deficiência é <strong>dado de saúde</strong>. A Lei Geral de Proteção
@@ -517,7 +672,16 @@ const numeroFicticio = 'APPD-2026-00042'
       </fieldset>
 
       <div class="envio">
-        <button type="submit" class="botao botao-primario">Enviar meu cadastro</button>
+        <AppdAviso v-if="erroGeral" tipo="erro" titulo="Não conseguimos enviar">
+          <span>{{ erroGeral }}</span>
+        </AppdAviso>
+        <button type="submit" class="botao botao-primario" :disabled="enviando">
+          {{ enviando ? 'Enviando…' : 'Enviar meu cadastro' }}
+        </button>
+        <p v-if="enviando" role="status" class="alternativa">
+          Estamos preparando sua senha com segurança. Em celular mais antigo isso pode levar alguns
+          segundos.
+        </p>
         <p class="alternativa">
           Prefere preencher por telefone? Ligue para
           <a :href="`tel:${sede.e164}`">{{ sede.numero }}</a>
