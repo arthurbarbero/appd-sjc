@@ -1,4 +1,4 @@
-# ADR-016: como a pessoa recupera a senha — o admin primeiro, o e-mail depois
+# ADR-016: recuperação de senha por e-mail e por painel administrativo
 
 Status: Aceito
 Data: 2026-08-07
@@ -55,26 +55,46 @@ e acesso do dono e da associação, não meus.
 
 ## Decisão
 
-**A recuperação de senha tem dois estágios, e o primeiro não usa e-mail.**
+**As duas coisas, e não uma ou outra** — decisão do dono em 2026-08-07: _"independente de
+ter painel de admin, precisamos ter uma forma via e-mail para o usuário se auto-atender.
+Vamos usar o SendGrid gratuito mais simples, independente de barrar no Gmail; depois que eu
+tiver o domínio certinho fazemos o resto para parar de cair no spam."_
 
-**1. Painel administrativo (decisão do dono, 2026-08-07).** Vai existir um perfil
-administrador que gerencia usuários e refaz senha. É o caminho que resolve **hoje**, sem
-provedor, sem credencial de terceiro e sem depender de a mensagem escapar do spam — e é o
-que faz o caminho humano deixar de ser promessa vazia: a secretaria atende o telefone
-**porque tem a ferramenta**.
+**1. Redefinição por e-mail via SendGrid**, plano gratuito (100/dia), com **verificação de
+remetente avulso** — sem DNS, sem domínio. A entrega imperfeita é **custo aceito e
+consciente**, não descuido: autoatendimento que funciona para parte das pessoas vale mais
+que nenhum, e esperar o domínio adiaria indefinidamente algo que já custa contas hoje.
+
+O que a implementação faz para o custo doer menos:
+
+- a tela avisa, **antes do envio**, que a mensagem pode chegar na caixa de spam, e manda
+  procurar lá;
+- oferece, no mesmo lugar e com o mesmo peso visual, o telefone da associação — caminho que
+  não depende de e-mail nenhum;
+- a chave da API vive em **Cloudflare Secrets**, nunca no repositório.
+
+**2. Painel administrativo.** Também decidido pelo dono, e não é substituto: é o caminho de
+quem não recebeu o e-mail, não tem e-mail acessível ou não consegue operar o fluxo sozinho
+— que, no público deste site, não é caso de borda.
 
 Isto **supersede** a parte do [ADR-014](adr-014-inscricao-como-registro-de-interesse.md)
 que empurrava o painel de gerenciamento para a V1.1. Ele volta para a V1, e vira change
 própria.
 
-**2. Redefinição por e-mail, quando houver caminho de entrega confiável.** Duas rotas, nesta
-ordem de preferência:
+**3. Quando houver `appd.org.br`**, verificar o domínio no próprio SendGrid — SPF, DKIM e
+DMARC. O spam se resolve sem trocar de provedor nem reescrever código: muda o remetente.
 
-| Rota                                             | O que exige                    | Entregabilidade                            |
-| ------------------------------------------------ | ------------------------------ | ------------------------------------------ |
-| **API do Gmail com a conta da APPD**             | credencial OAuth da associação | boa — Google assina e entrega              |
-| **Resend ou Brevo com `appd.org.br` verificado** | publicação no domínio da APPD  | boa                                        |
-| ~~ESP com remetente `@gmail.com` avulso~~        | nada                           | **spam**, por `p=quarantine` desde 02/2024 |
+| Rota                                      | O que exige                      | Entregabilidade                | Quando                            |
+| ----------------------------------------- | -------------------------------- | ------------------------------ | --------------------------------- |
+| **SendGrid, remetente avulso**            | verificar um endereço por código | ruim no Gmail (`p=quarantine`) | **agora**                         |
+| **SendGrid com `appd.org.br` verificado** | publicação no domínio da APPD    | boa                            | depois                            |
+| API do Gmail com a conta da APPD          | credencial OAuth da associação   | boa                            | alternativa, se o domínio demorar |
+
+### O que preciso de você para ligar isto
+
+A conta no SendGrid e a chave de API são suas para criar — não crio conta em serviço
+externo por iniciativa própria. Preciso da chave e de qual endereço será verificado como
+remetente. Nada disso entra no repositório.
 
 ## O que a pesquisa achou sobre os provedores
 
@@ -93,8 +113,10 @@ cortou o dela em 83% em oito meses.
 
 ## Alternativas consideradas
 
-**ESP com o Gmail da associação como remetente avulso.** Recusada pelo `p=quarantine`
-acima. É a alternativa que parece resolver e entrega o problema com passo a mais.
+~~**ESP com o Gmail da associação como remetente avulso.** Recusada pelo `p=quarantine`.~~
+**Virou a decisão**, por escolha do dono no mesmo dia: entrega imperfeita agora vale mais
+que entrega perfeita depois. Eu tinha tratado "pode cair em spam" como impeditivo; é
+custo, e quem decide se o custo compensa é ele.
 
 **Registrar domínio próprio por R$ 40/ano.** Recusada: não é custo zero, e um
 `appdsjc.org.br` paralelo ao `appd.org.br` confunde quem procura a APPD.
@@ -107,8 +129,8 @@ acima. É a alternativa que parece resolver e entrega o problema com passo a mai
 real de uma associação pequena — a pessoa liga, a secretaria refaz — e o e-mail vira
 melhoria, não pré-requisito.
 
-**Contra, e assumido**: até o painel existir, quem esquece a senha continua sem saída
-automática. É a lacuna mais séria do que está no ar, e agora tem dono e caminho.
+**Contra, e assumido**: parte das mensagens vai cair em spam enquanto o remetente for
+avulso, e a tela precisa dizer isso em vez de deixar a pessoa esperando.
 
 **Gatilho de revisão**: credencial do Google da APPD disponível, ou publicação em
 `appd.org.br`. Nos dois casos, remedir os planos antes de escolher.

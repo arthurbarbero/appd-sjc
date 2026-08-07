@@ -37,10 +37,10 @@ Resolvidas antes: **T-0.2** (contador em D1, chave em HMAC — REQ-26b) e **T-0.
 - **T-0.3** — o site não retém nada: ele nunca guardou prontuário, só registro de
   interesse. O prazo de 5 anos do COFFITO e do CFP vale para o papel da sede, e a tela diz
   isso em vez de fingir que o botão alcança o arquivo de lá.
-- **T-0.4** — a recuperação tem dois estágios: **painel administrativo primeiro**, e-mail
-  depois. Enviar não exige DNS (Mailjet e SendGrid verificam remetente avulso); o que o DNS
-  compra é não cair em spam, e remetente `@gmail.com` por provedor de terceiro cai, por
-  `p=quarantine` desde 02/2024. O painel resolve sem nada disso.
+- **T-0.4** — **as duas coisas**: redefinição por e-mail via SendGrid gratuito, com
+  remetente avulso e sem DNS, aceitando que parte cai em spam; **mais** painel
+  administrativo. Enviar nunca exigiu DNS — o que ele compra é alinhamento, ou seja, não
+  cair em spam. **T-9.2 destravada**, faltando só a chave de API, que é do dono.
 
 **Sequência que sobra**: a T-9.1 (caminho humano) vai ao ar **junto com o painel
 administrativo**, que é a ferramenta que faz a secretaria conseguir cumprir o que o
