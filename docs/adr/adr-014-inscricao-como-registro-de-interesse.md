@@ -1,8 +1,14 @@
 # ADR-014: A inscrição é registro de interesse, editável, sem fila e sem matrícula
 
 Status: Aceito
-Data: 2026-08-06
-Decisores: Arthur Barbero (dono do projeto)
+
+> **Superseção parcial em 2026-08-07.** A parte que empurrava o **painel de
+> gerenciamento** para a V1.1 caiu: o dono decidiu que o acesso de administrador —
+> gerenciar usuários, refazer senha — entra na V1, e é a próxima change. Ver
+> [ADR-016](adr-016-recuperacao-de-senha.md). O resto do ADR continua
+> valendo: não existe fila nem matrícula, e o status tem um valor só.
+> Data: 2026-08-06
+> Decisores: Arthur Barbero (dono do projeto)
 
 ## Contexto
 

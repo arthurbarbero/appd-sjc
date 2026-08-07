@@ -20,11 +20,11 @@
 
 **As três foram delegadas a mim pelo dono em 2026-08-07** e viraram ADR no mesmo dia.
 
-| #     | O que decidir                                  | Onde ficou                                                                    |
-| ----- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
-| T-0.1 | Q-1: a mensagem revela que o e-mail tem conta? | [ADR-018](../../../docs/adr/adr-018-mensagem-de-erro-e-enumeracao.md)         |
-| T-0.3 | Q-2: prazo de retenção após a exclusão         | [ADR-017](../../../docs/adr/adr-017-retencao-apos-exclusao.md)                |
-| T-0.4 | R-1: caminho gratuito de e-mail ou SMS         | [ADR-016](../../../docs/adr/adr-016-redefinicao-de-senha-espera-o-dominio.md) |
+| #     | O que decidir                                  | Onde ficou                                                            |
+| ----- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| T-0.1 | Q-1: a mensagem revela que o e-mail tem conta? | [ADR-018](../../../docs/adr/adr-018-mensagem-de-erro-e-enumeracao.md) |
+| T-0.3 | Q-2: prazo de retenção após a exclusão         | [ADR-017](../../../docs/adr/adr-017-retencao-apos-exclusao.md)        |
+| T-0.4 | R-1: caminho gratuito de e-mail ou SMS         | [ADR-016](../../../docs/adr/adr-016-recuperacao-de-senha.md)          |
 
 Resolvidas antes: **T-0.2** (contador em D1, chave em HMAC — REQ-26b) e **T-0.5**
 (ADR-013 deu a área para `area-do-associado`).
@@ -37,13 +37,14 @@ Resolvidas antes: **T-0.2** (contador em D1, chave em HMAC — REQ-26b) e **T-0.
 - **T-0.3** — o site não retém nada: ele nunca guardou prontuário, só registro de
   interesse. O prazo de 5 anos do COFFITO e do CFP vale para o papel da sede, e a tela diz
   isso em vez de fingir que o botão alcança o arquivo de lá.
-- **T-0.4** — o bloqueio nunca foi o provedor, é o **domínio**: todo plano gratuito exige
-  verificação por DNS para escrever a destinatário arbitrário. Destrava com a publicação
-  em `appd.org.br`.
+- **T-0.4** — a recuperação tem dois estágios: **painel administrativo primeiro**, e-mail
+  depois. Enviar não exige DNS (Mailjet e SendGrid verificam remetente avulso); o que o DNS
+  compra é não cair em spam, e remetente `@gmail.com` por provedor de terceiro cai, por
+  `p=quarantine` desde 02/2024. O painel resolve sem nada disso.
 
-**Trava que sobra**: a T-9.1 (caminho humano) **não vai ao ar sozinha** — ver a ressalva
-dentro do ADR-016. Oferecer o telefone da secretaria sem a associação ter ferramenta para
-refazer a senha é prometer o que ninguém cumpre.
+**Sequência que sobra**: a T-9.1 (caminho humano) vai ao ar **junto com o painel
+administrativo**, que é a ferramenta que faz a secretaria conseguir cumprir o que o
+telefone promete. Change própria, a próxima da fila.
 
 ## T-1 [FEITO 2026-08-06, ver ADR-005] — Fixar e medir os parâmetros do scrypt (REQ-6, REQ-7, REQ-27)
 

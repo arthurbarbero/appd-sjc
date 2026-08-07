@@ -20,10 +20,14 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       documento em papel da sede, e a tela diz isso. **Some o `[A CONFIRMAR]` da T4.3.**
       A APPD revisa depois; o gatilho de revisão está dentro do ADR. **T4.6 e T4.7
       destravadas.**
-- [x] **T0.3 — Exclusão imediata**, sem janela de arrependimento. Decidido em 2026-08-07, com a
-      decisão delegada pelo dono. Fica a redação da spec v1. Motivo: janela de arrependimento
-      exige guardar dado de quem pediu para apagar, e o ADR-017 acabou de decidir que o site
-      não retém nada. Uma coisa contradiria a outra no mesmo dia.
+- [x] **T0.3 — A confirmação continua; o apagamento é imediato.** Decidido em 2026-08-07.
+      **A tela de confirmação e o modal ficam** — são a proteção contra excluir sem querer, e
+      nunca estiveram em questão. O que "imediato" quer dizer é o que acontece **depois** do
+      Excluir: o dado sai na hora, sem período de carência em que a conta continua existindo
+      esperando arrependimento. Carência exigiria guardar dado de quem pediu para apagar, o
+      oposto do [ADR-017](../../../docs/adr/adr-017-retencao-apos-exclusao.md).
+      _Correção do mesmo dia: a redação anterior dizia "sem janela de arrependimento" e dava a
+      entender que a tela de confirmação sairia. Nunca foi isso._
 - [x] **T0.4 — Design aprovado no Claude Design** para os cinco estados (painel completo, sem
       inscrição, sem foto, carregando, exclusão), com handoff bundle. **Aceite**: bundle
       entregue e checklist de aceite visual do prompt de design todo marcado.

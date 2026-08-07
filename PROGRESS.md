@@ -26,22 +26,27 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
 `openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**Próximo passo**: `cracha-do-associado`, fatias 4 e 5. A 5 é prioridade porque o QR que
+**Próximas duas changes**: `cracha-do-associado` (fatias 4 e 5) e o **painel
+administrativo**, decidido pelo dono em 2026-08-07 — gerenciar usuários e refazer senha.
+O painel é o que faz a recuperação de senha existir sem depender de e-mail.
+
+Começo pelo crachá, fatias 4 e 5. A 5 é prioridade porque o QR que
 está **no ar hoje** aponta para `/verificar/<numero>`, que ainda não existe e devolve 404 —
 é o único defeito publicado. As duas telas foram aprovadas no Claude Design em 2026-08-07
 e a Fatia 2 e quase toda a Fatia 3 já estão entregues.
 
 **Seis decisões saíram do caminho em 2026-08-07**, todas delegadas pelo dono e registradas
 como ADR: conteúdo no código (006), foto e cuidador na verificação (015), redefinição de
-senha (016), retenção após exclusão (017), mensagem de erro e enumeração (018) e exclusão
-imediata sem janela de arrependimento (T0.3 de `area-do-associado`).
+senha (016), retenção após exclusão (017) e mensagem de erro e enumeração (018). Mais a
+T0.3 de `area-do-associado`: a tela de confirmação da exclusão **fica**; o que é imediato é
+o apagamento depois do Excluir, sem período de carência.
 
 **O que trava o resto**:
 
-- **Redefinição de senha** — não é falta de provedor, é falta de **domínio** (ADR-016).
-  Destrava com a publicação em `appd.org.br`. Até lá, quem esquece a senha depende de
-  contato com a associação, e o caminho humano não vai ao ar sem a APPD ter ferramenta
-  para refazer a senha.
+- **Redefinição de senha** — resolvida em dois estágios pelo ADR-016: **painel
+  administrativo primeiro** (change própria, a próxima da fila), e-mail depois. Enviar
+  e-mail não exige DNS; o que exige é não cair em spam, e remetente `@gmail.com` por
+  provedor de terceiro cai desde que o Gmail passou a `p=quarantine`, em 02/2024.
 - **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
   associação. As duas telas esperam o canvas.
 - **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
@@ -65,7 +70,8 @@ imediata sem janela de arrependimento (T0.3 de `area-do-associado`).
   `openspec/README.md`. Exclusão de conta: uma página, um modal, e pronto.
 - 2026-08-06 — **A inscrição é registro de interesse editável** (ADR-014). Não existe
   fila nem matrícula na APPD; o status tem um valor só, e a pessoa edita o próprio
-  cadastro. Painel de gerenciamento por perfil fica nomeado como escopo da V1.1.
+  cadastro. ~~Painel de gerenciamento fica na V1.1.~~ **Superado em 2026-08-07**: o
+  acesso de administrador entra na V1 e é a próxima change (ADR-016).
 
 ## Feito
 

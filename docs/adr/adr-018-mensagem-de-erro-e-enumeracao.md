@@ -35,10 +35,13 @@ mais do que entrega.
 ## Por que o cadastro é diferente
 
 Uma mensagem genérica no cadastro não protege: **deixa a pessoa presa**. Ela preencheu 15
-campos, não consegue concluir, não sabe por quê, e — sem redefinição de senha por e-mail,
-que o [ADR-016](adr-016-redefinicao-de-senha-espera-o-dominio.md) mostrou depender do
-domínio — não tem para onde ir. O público deste site é justamente quem menos vai insistir
-diante de um erro que não explica nada.
+campos, não consegue concluir e não sabe por quê. O público deste site é justamente quem
+menos vai insistir diante de um erro que não explica nada.
+
+A recuperação de senha está sendo construída — painel administrativo primeiro, e-mail
+depois ([ADR-016](adr-016-recuperacao-de-senha.md)). Mesmo com ela
+pronta, a conta é do cadastro: dizer "já existe conta com este e-mail" é a informação que
+faz a pessoa ir para o lugar certo em vez de tentar de novo com outro dado.
 
 E a proteção seria fraca de qualquer jeito: quem quer enumerar tenta o cadastro, e um
 "não foi possível concluir" genérico ainda distingue sucesso de fracasso. Mentir aqui
@@ -57,11 +60,13 @@ O que **mitiga**, e é o que fica implementado:
 ## Alternativas consideradas
 
 **Uniformizar as três.** Recusada pelo que está acima: proteção fraca contra atacante
-dirigido, custo alto para a pessoa legítima, e nenhuma rota de escape enquanto não houver
-e-mail.
+dirigido e custo alto para a pessoa legítima.
 
 **Cadastro em duas etapas, confirmando o e-mail antes de mostrar o formulário.** É a saída
-correta e não cabe: depende de envio de e-mail, que é exatamente o que não existe.
+tecnicamente correta, e fica para quando houver envio de e-mail — ver o gatilho abaixo.
+Acrescentar uma etapa de confirmação a um formulário de 15 campos, num site cujo público
+tem dificuldade de leitura e de motricidade, não é escolha barata: entra quando o ganho de
+privacidade for medido contra a desistência que ela causa, não por reflexo.
 
 ## Consequências
 

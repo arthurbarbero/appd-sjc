@@ -21,11 +21,16 @@ Reversão de decisão é por ADR novo que substitui o anterior, nunca por apagam
 | 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito |
 | 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito |
 | 015 | [Verificação pública exibe foto e cuidador](adr-015-verificacao-publica-exibe-foto-e-cuidador.md)   | Aceito |
-| 016 | [Redefinição de senha espera o domínio](adr-016-redefinicao-de-senha-espera-o-dominio.md)           | Aceito |
+| 016 | [Recuperação de senha: admin primeiro, e-mail depois](adr-016-recuperacao-de-senha.md)              | Aceito |
 | 017 | [O site não retém nada após a exclusão](adr-017-retencao-apos-exclusao.md)                          | Aceito |
 | 018 | [Mensagem de erro e enumeração de conta](adr-018-mensagem-de-erro-e-enumeracao.md)                  | Aceito |
 
-**016, 017 e 018 foram decididos por mim, não pelo dono** — ele delegou os três em
+> **O ADR-016 foi reescrito no mesmo dia.** A primeira redação concluía que enviar e-mail
+> exigia verificar domínio por DNS. Estava errado — confundi **enviar** com **chegar na
+> caixa de entrada**. O dono apontou, a apuração foi refeita com oito buscas a mais, e a
+> decisão mudou: o painel administrativo resolve primeiro.
+
+**017 e 018 foram decididos por mim, não pelo dono** — ele delegou os três em
 2026-08-07 ("a pesquisa que fará é você mesmo", "tanto faz, faz o que achar melhor", "você
 quem decide agora, depois a APPD revisa"). Estão marcados como aceitos porque a delegação
 foi explícita, e o 017 tem revisão da APPD marcada dentro dele.
@@ -57,9 +62,9 @@ cálculo caro para o navegador — a proteção continua existindo, só mudou de
 > decidido**. Estava errado desde 2026-08-06 — o dono escolheu a opção F naquele dia, está
 > no cabeçalho do próprio ADR, e o código que roda em produção é ela.
 
-Ainda por decidir, sem número reservado: **caminho de custo zero para enviar e-mail ou
-SMS de redefinição de senha**. Vira ADR quando houver pesquisa; hoje é pergunta aberta
-no `PROGRESS.md` e condição para o login ir ao ar (ver ADR-012).
+> **Correção de 2026-08-07**: esta seção listava o caminho de e-mail de redefinição de
+> senha como "ainda por decidir, sem número reservado". Decidido no mesmo dia — é o
+> ADR-016.
 
 ## Sobre o 007
 
