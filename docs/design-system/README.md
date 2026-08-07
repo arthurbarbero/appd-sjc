@@ -1,18 +1,21 @@
 # Design system — APPD-SJC
 
-Implementação dos tokens e componentes descritos no [DESIGN.md](../DESIGN.md), que é a
-fonte da verdade. Aqui é onde eles viram CSS de verdade e previews que a gente consegue
-olhar.
+Galeria de previews dos tokens e componentes descritos no [DESIGN.md](../../DESIGN.md),
+que é a fonte da verdade.
+
+**O CSS não mora aqui.** Desde a limpeza de 2026-08-07 ele vive em
+[`app/assets/css/`](../../app/assets/css/), que é onde o Nuxt espera folha global — os
+previews leem de lá, para nunca divergirem do que o site de verdade usa.
 
 ## Arquivos
 
-| Arquivo        | O que é                                                      |
-| -------------- | ------------------------------------------------------------ |
-| `tokens.css`   | As variáveis. Todo valor auditado contra WCAG 2.2 AA.        |
-| `base.css`     | Base e componentes. Nenhum valor cru — tudo sai de variável. |
-| `componentes/` | Fragmentos de preview, um por grupo.                         |
-| `montar.mjs`   | Embute o CSS em cada fragmento e gera `build/`.              |
-| `build/`       | Gerado, fora do git. É o que sobe para o Claude Design.      |
+| Arquivo                           | O que é                                                      |
+| --------------------------------- | ------------------------------------------------------------ |
+| `../../app/assets/css/tokens.css` | As variáveis. Todo valor auditado contra WCAG 2.2 AA.        |
+| `../../app/assets/css/base.css`   | Base e componentes. Nenhum valor cru — tudo sai de variável. |
+| `componentes/`                    | Fragmentos de preview, um por grupo.                         |
+| `montar.mjs`                      | Embute o CSS em cada fragmento e gera `build/`.              |
+| `build/`                          | Gerado, fora do git. É o que sobe para o Claude Design.      |
 
 ```bash
 node docs/design-system/montar.mjs

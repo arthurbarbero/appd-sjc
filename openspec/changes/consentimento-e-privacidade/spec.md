@@ -2,8 +2,8 @@
 
 - ID: SPEC-consentimento-e-privacidade Deriva de: PROP-20260805-consentimento-e-privacidade
 - Dono do conteúdo: Arthur Barbero Aprovador da spec: Arthur Barbero
-- Versão: v2 Data: 2026-08-06 Status: rascunho
-- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+- Versão: v2 Data: 2026-08-06 Status: **APROVADA** — gate de forma READY em 2026-08-07
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md)
 
 > **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
 > `usuario_id NOT NULL` passou a ser exequível (ADR-012); o fluxo de exclusão foi cedido
@@ -118,7 +118,7 @@ Cada REQ é verificável por um cenário de aceite. A coluna de rastreabilidade 
   alteração, sem exigir contato por outro canal para os campos que a pessoa mesma preencheu.
 - **REQ-17**: **O fluxo de exclusão não é desta change** (ADR-013). A tela `/area/excluir` é de
   `area-do-associado` e o contrato do que é apagado está em
-  [`modelo-de-dados`](../modelo-de-dados/spec.md) REQ-28, escrito uma vez só.
+  [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md) REQ-28, escrito uma vez só.
 
   > A v1 tinha três telas (pedido, confirmação, recibo) e uma caixa de seleção; `cadastro-e-login`
   > tinha uma página e duas caixas; `area-do-associado` tinha outra coisa. Três contratos para a
@@ -209,7 +209,7 @@ existindo; o aceite anterior continua na tabela como histórico.
 ## Contrato de dados — tabela `consentimentos`
 
 **Não mora aqui.** As colunas, tipos e restrições estão em
-[`modelo-de-dados`](../modelo-de-dados/spec.md) REQ-21 a REQ-25. Esta change é a **dona do
+[`modelo-de-dados`](../../archive/modelo-de-dados/spec.md) REQ-21 a REQ-25. Esta change é a **dona do
 comportamento**: quem grava aceite, quem grava revogação, e a garantia de que a tabela é
 append-only na aplicação.
 

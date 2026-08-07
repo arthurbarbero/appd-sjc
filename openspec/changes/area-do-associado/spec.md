@@ -1,10 +1,10 @@
 # Spec: Área do associado
 
 - ID: SPEC-area-do-associado Deriva de: PROP-20260805-area-do-associado
-- Status: rascunho (aguarda gate do revisor-spec e aprovação do dono)
+- Status: **APROVADA** — gate de forma READY em 2026-08-07
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
 - Versão: v3 · Data: 2026-08-07
-- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md)
 
 > **v3 (2026-08-07)** — três correções vindas da sessão de uso do dono, não de refino de
 > escrivaninha. O bloco do crachá troca a linha de texto sobre a verificação por um **QR
@@ -202,7 +202,7 @@ nomeada e nunca exibe dado de saúde.
   de 44 px vence o alinhamento, nunca o contrário.
 - **REQ-25**: A ação preenchida do modal DEVE ser **"Cancelar"**. A saída segura é a mais
   fácil de acertar.
-- **REQ-26**: O que a exclusão apaga está em [`modelo-de-dados`](../modelo-de-dados/spec.md)
+- **REQ-26**: O que a exclusão apaga está em [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md)
   **REQ-28**, escrito uma vez só e válido para o projeto inteiro. Esta change **executa** esse
   contrato e encerra a sessão.
 

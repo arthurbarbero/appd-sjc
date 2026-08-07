@@ -1,11 +1,11 @@
 # Spec: Formulário de Atendimento
 
 - ID: SPEC-formulario-atendimento Deriva de: PROP-20260805-formulario-atendimento
-- Status: rascunho (aguarda aprovação do dono)
+- Status: **APROVADA** — gate de forma READY em 2026-08-07, ADR-008 e ADR-009 escritos
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
 - Versão: v2 Data: 2026-08-06
 - Fonte da verdade dos campos: [`docs/campos-formulario.md`](../../../docs/campos-formulario.md)
-- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md) —
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md) —
   esta change não cria coluna nenhuma
 - Desenho aprovado: [prompt do formulário](../../../docs/prompts-design/formulario.md)
 
@@ -84,7 +84,7 @@ não vira alteração unilateral.
   Art. 11). Falha em qualquer uma DEVE desfazer as três — nunca fica conta sem
   inscrição, nem inscrição sem aceite.
 - **REQ-2** — As colunas, tipos, limites e restrições são os da spec
-  [`modelo-de-dados`](../modelo-de-dados/spec.md). **Esta change não cria, não renomeia e
+  [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md). **Esta change não cria, não renomeia e
   não remove coluna.** Necessidade de coluna nova volta para lá antes de virar código.
 - **REQ-3** — Toda marca de tempo persistida DEVE estar em UTC, ISO-8601 com sufixo `Z`
   (`modelo-de-dados` REQ-3). A exibição na tela é em `America/Sao_Paulo`.
@@ -339,7 +339,7 @@ confirmação com o número de registro e o caminho para entrar e editar depois.
 ## Modelo de dados
 
 **Não mora aqui.** As colunas, tipos, limites e restrições estão em
-[`modelo-de-dados`](../modelo-de-dados/spec.md) — uma tabela descrita num lugar só.
+[`modelo-de-dados`](../../archive/modelo-de-dados/spec.md) — uma tabela descrita num lugar só.
 
 O que esta change escreve, e onde:
 

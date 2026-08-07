@@ -99,12 +99,13 @@ Decisão do dono em 2026-08-07: **"não vou analisar a mão mesmo não, voce mes
 Está certo. 276 cenários Gherkin percorridos por uma pessoa é um gate que nunca acontece,
 e gate que não acontece é carimbo.
 
-O aceite passou a viver em dois lugares que rodam sozinhos:
+O aceite do **produto** passou a viver em dois lugares que rodam sozinhos — o do **rito**
+não, e a fronteira entre os dois foi decidida pelo dono em 2026-08-07:
 
 - **`npm test`** — `test/revisao-de-interface.spec.ts` lê o código-fonte das telas e falha
   se qualquer frase que o dono mandou tirar voltar. Lê o fonte, e não o HTML renderizado,
   porque o jeito de essas frases voltarem não é bug de renderização: é alguém digitar de
-  novo.
+  novo. Isso é produto, e por isso fica.
 - **`npm run aceite`** — `test/aceite/percurso.mjs` sobe o workerd de verdade e percorre
   cadastrar → área → corrigir → sair → entrar → excluir, mede rolagem horizontal em sete
   larguras e roda `axe` A/AA em dez telas. **78 de 78 em 2026-08-07.**
@@ -126,12 +127,16 @@ requisito a requisito) e `revisao-de-interface` (15 tasks, os 21 pontos da sess�
 do dono).
 
 **O que destravou o arquivamento** foi resolver a pendência que o próprio parecer anterior
-tinha declarado: o gate era autorrevisão. A saída não foi ler de novo — foi
-`test/gate-spec.spec.ts`, que audita a parte mecânica da Definition of Ready e roda no
-`npm test` de quem quer que escreva a spec. Na primeira execução reprovou dez checagens,
-nove delas defeito real: quatro ADRs citados e nunca escritos, nove requisitos sem
-critério de aceite. Uma era falha do próprio gate, e vale registrar — gate com falso
-negativo é pior que gate nenhum, porque dá sensação de cobertura.
+tinha declarado: o gate era autorrevisão. A saída não foi ler de novo — foi uma auditoria
+mecânica da Definition of Ready. Na primeira execução reprovou dez checagens, nove delas
+defeito real: quatro ADRs citados e nunca escritos, nove requisitos sem critério de
+aceite. Uma era falha da própria auditoria, e vale registrar — gate com falso negativo é
+pior que gate nenhum, porque dá sensação de cobertura.
+
+> **Correção de 2026-08-07, fim do dia.** Essa auditoria vivia em `test/gate-spec.spec.ts`
+> e **foi removida por decisão do dono**: `npm test` é para código, não para o rito nem
+> para arquivo de markdown. O que ela conferia está listado em
+> `PARECER-GATE-AUTOMATICO.md` como checklist da próxima passada, e a passada é manual.
 
 **Continua valendo**: `[FEITO]` não é `[VALIDADO]`, e task marcada no mesmo commit da
 entrega. As duas regras sobreviveram ao dia e são o que permitiu fechar sem maquiar.

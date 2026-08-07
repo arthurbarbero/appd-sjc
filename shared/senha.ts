@@ -2,7 +2,7 @@
  * Contrato da derivação de senha — as duas etapas do REQ-6 de `cadastro-e-login`.
  *
  * O trabalho caro roda **no navegador**; o servidor só re-embaralha o resultado, rápido.
- * A razão está no [ADR-005](../../docs/adr/adr-005-parametros-do-scrypt.md): o parâmetro
+ * A razão está no [ADR-005](../docs/adr/adr-005-parametros-do-scrypt.md): o parâmetro
  * mínimo do OWASP custa 48 ms de CPU medidos no workerd, e o plano gratuito do Workers dá
  * 10 ms por requisição. Passando o custo para o cliente, a proteção continua existindo —
  * quem roubar o banco precisa refazer o scrypt a cada palpite, na máquina dele — e cabe

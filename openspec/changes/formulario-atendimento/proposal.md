@@ -53,7 +53,7 @@ O que dói, em ordem:
   CAPTCHA.
 
 **Não entra mais no escopo desta change:** criar tabela ou coluna. Isso é de
-[`modelo-de-dados`](../modelo-de-dados/spec.md), que passou a ser dependência dura.
+[`modelo-de-dados`](../../archive/modelo-de-dados/spec.md), que passou a ser dependência dura.
 
 ## Fora de escopo (o que NÃO entra)
 

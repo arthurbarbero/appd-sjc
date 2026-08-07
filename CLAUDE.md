@@ -7,9 +7,11 @@ associação para usar marca e conteúdo. Repo **público**; custo de operação
 ## Stack
 
 Nuxt 4 + Vue 3 + TS strict · Nitro preset `cloudflare_module` · Cloudflare D1 +
-Drizzle (migrations versionadas) · auth com `nuxt-auth-utils` + scrypt (`node:crypto`,
-`nodejs_compat`) · foto do crachá como BLOB no D1 (R2 exige cartão) atrás da interface
-`ArmazenamentoFoto` · Vitest + axe.
+Drizzle (migrations versionadas) · sessão com `nuxt-auth-utils` em cookie selado ·
+**senha derivada em duas etapas**: `scrypt` no navegador (`@noble/hashes`) e SHA-256 com
+sal próprio no servidor — o scrypt **não** roda no Worker, não cabe nos 10 ms de CPU do
+plano gratuito ([ADR-005](docs/adr/adr-005-parametros-do-scrypt.md)) · foto do crachá
+como BLOB no D1 (R2 exige cartão) atrás da interface `ArmazenamentoFoto` · Vitest + axe.
 
 ## Comandos
 
@@ -22,6 +24,7 @@ npm run lint             # ESLint
 npm run typecheck        # vue-tsc
 npm run db:generate      # Drizzle → drizzle/migrations
 npm run db:migrate       # aplica as migrations no D1 local
+npm run db:seed          # popula o banco local com dado fictício
 ```
 
 ## Regra central
@@ -72,5 +75,7 @@ scripts/      # utilitários de desenvolvimento chamados pelos comandos npm
 - Não trocar D1/Workers por serviço que peça cartão (inclui R2).
 - Não alterar os 15 campos do formulário de atendimento — réplica fiel do form real
   (rótulos, ordem, obrigatoriedade). Fonte: `docs/campos-formulario.md`.
-- Não expor no `/verificar/<numero>` nada além de nome, número e status.
+- Não expor no `/verificar/<numero>` **o campo 12 (tipo de deficiência)** — dado sensível
+  do Art. 11, e a página é pública. Nome, número, situação, foto e contato de cuidador
+  entram, por decisão do dono ([ADR-015](docs/adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md)).
 - Não commitar `.output`, `.wrangler`, banco local ou foto.

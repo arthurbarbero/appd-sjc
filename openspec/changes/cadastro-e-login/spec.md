@@ -1,11 +1,10 @@
 # Spec: Conta, senha e sessão
 
 - ID: SPEC-cadastro-e-login Deriva de: PROP-20260805-cadastro-e-login
-- Status: **rascunho** — não é código enquanto não passar no gate da seção
-  "Definition of Ready"
+- Status: **APROVADA** — gate de forma READY em 2026-08-07
 - Dono do conteúdo: Arthur Barbero Aprovador da spec: Arthur Barbero
 - Versão: v2 Data: 2026-08-06
-- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md)
 
 > **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Mudou:
 > a conta nasce no formulário de atendimento, não em rota própria
@@ -50,7 +49,7 @@ emissão do `numero_registro` e a **guarda de rota** de `/area/*`.
 ### Grupo A — Dados e domínio
 
 **REQ-1** — A tabela `usuarios` é definida pela spec
-[`modelo-de-dados`](../modelo-de-dados/spec.md) (REQ-7). **Esta change não cria, não
+[`modelo-de-dados`](../../archive/modelo-de-dados/spec.md) (REQ-7). **Esta change não cria, não
 renomeia e não remove coluna** — ela é a dona do **comportamento** de `usuarios`: quem
 grava a senha, quem emite o número, quem escreve `situacao`.
 

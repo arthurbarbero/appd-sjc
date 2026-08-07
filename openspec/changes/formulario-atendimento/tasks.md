@@ -24,14 +24,16 @@ change de fora.
 
 ---
 
-## T0 — Assinar as decisões que faltam
+## T0 [FEITO 2026-08-07] — Assinar as decisões que faltam
 
 - **Dono:** Arthur Barbero (Claude Code rascunha os ADRs)
 - **O que:** transformar D4 e D5 da spec em `docs/adr/adr-008` e `adr-009`, no formato
   dos ADRs existentes. **D3 e D9 já estão assinadas** no ADR-012; **D10**, no ADR-014;
   ADR-007 foi liberado.
-- **Aceite:** os dois arquivos existem, com status Aceito, data e decisor; `docs/adr/README.md`
-  sai da lista de reservados; a spec passa para o status "APROVADA".
+- **Aceite:** atendido — [adr-008](../../../docs/adr/adr-008-multipla-escolha-como-json-em-texto.md)
+  e [adr-009](../../../docs/adr/adr-009-anti-abuso-sem-captcha.md) existem com status
+  Aceito, saíram da lista de reservados, e a spec está **APROVADA**. Escritos em
+  2026-08-07; a task só foi marcada na auditoria do mesmo dia.
 
 ## T1 — ~~Tabela e migration~~ (movida para `modelo-de-dados`)
 

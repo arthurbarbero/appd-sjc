@@ -20,9 +20,11 @@ Reversão de decisão é por ADR novo que substitui o anterior, nunca por apagam
 | 012 | [Cadastro embutido no formulário](adr-012-cadastro-embutido-no-formulario.md)                       | Aceito |
 | 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito |
 | 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito |
+| 015 | [Verificação pública exibe foto e cuidador](adr-015-verificacao-publica-exibe-foto-e-cuidador.md)   | Aceito |
 
 012, 013 e 014 resolvem, juntos, os bloqueios B5, B6, B7, B10, B11, B16, B17, B20, B22 e
-B23 do [parecer do gate](../../openspec/PARECER-GATE.md).
+B23 do primeiro parecer do gate (`openspec/PARECER-GATE.md`, apagado em 2026-08-07 depois
+de os bloqueios estarem fechados; está no histórico do git).
 
 **005 nasceu de uma medição que virou problema de plataforma**: nenhum parâmetro
 defensável de scrypt cabe nos 10 ms de CPU do plano gratuito. A saída aceita foi mover o

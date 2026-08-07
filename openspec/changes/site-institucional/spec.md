@@ -1,7 +1,7 @@
 # Spec: Site institucional público da APPD-SJC
 
 - ID: SPEC-site-institucional · Deriva de: PROP-20260805-site-institucional
-- Status: rascunho (aguarda gate do revisor de spec)
+- Status: **APROVADA** — gate de forma READY em 2026-08-07
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
 - Versão: v1 · Data: 2026-08-05
 

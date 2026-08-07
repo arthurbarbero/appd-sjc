@@ -14,23 +14,28 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 
 **Duas changes arquivadas**, as primeiras: `modelo-de-dados` e `revisao-de-interface`.
 
-**O gate deixou de depender de leitura.** Três comandos dizem o estado em dois minutos:
+**O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
 | Comando          | O que cobre                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm test`       | 155 testes — restrição de banco, emissão concorrente, regressão de interface e a auditoria mecânica das specs                        |
+| `npm test`       | 109 testes — restrição de banco, emissão concorrente e regressão de interface                                                        |
 | `npm run aceite` | 78 verificações no workerd real: ciclo de conta, sete larguras, axe A/AA em dez telas. Aceita `APPD_BASE` para rodar contra produção |
 | CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                       |
 
-**Próximo passo**: fechar `site-institucional` (19 tasks, quase todas de medição e SEO,
-nenhuma dependendo de terceiro) e mapear os cenários de `cadastro-e-login`,
-`formulario-atendimento` e `area-do-associado` para onde eles já rodam — o caminho está
-em `openspec/PARECER-GATE-AUTOMATICO.md`.
+**`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
+spec que morava ali foi removida; o que ela conferia virou checklist manual em
+`openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**O que trava o resto**: `cracha-do-associado` espera o design das dez telas (T0.4);
-`consentimento-e-privacidade` espera o ADR-006; a redefinição de senha espera um caminho
-de e-mail ou SMS gratuito, ainda em pesquisa — e é a lacuna mais séria do que está no ar,
-porque hoje quem esquece a senha perde a conta.
+**Próximo passo**: fechar `site-institucional` (17 tasks, quase todas de medição e SEO,
+nenhuma dependendo de terceiro), começar a Fatia 2 de `cracha-do-associado` (armazenamento
+da foto, sem tela, destravada) e mapear os cenários de `cadastro-e-login`,
+`formulario-atendimento` e `area-do-associado` para onde eles já rodam.
+
+**O que trava o resto**: o desenho de `/verificar` precisa ser refeito no Claude Design
+(o ADR-015 mudou o que a página mostra); `consentimento-e-privacidade` espera PB-1 a PB-5
+com a APPD e o jurídico; e a redefinição de senha espera um caminho de e-mail ou SMS
+gratuito, ainda em pesquisa — a lacuna mais séria do que está no ar, porque hoje quem
+esquece a senha perde a conta.
 
 ## Decisões tomadas
 
@@ -170,8 +175,9 @@ porque hoje quem esquece a senha perde a conta.
       produto, não de spec — o site ainda dizia a quem entrava que existe fila de vagas,
       com teste de aceite que falharia se a frase fosse removida. Corrigido em
       `shared/conteudo.ts` e nas nove páginas de serviço.
-- [ ] **Revisor independente sobre `modelo-de-dados`** antes da primeira migration. O
-      T5 foi autorrevisão e está declarado como tal no parecer.
+- [x] ~~**Revisor independente sobre `modelo-de-dados`** antes da primeira migration.~~
+      **Sem objeto**: a migration foi aplicada em 2026-08-06 e a change foi arquivada em
+      2026-08-07. Ficou como dívida assumida, não como pendência — está no parecer.
 - [x] **T1 a T3 da `modelo-de-dados`** — schema com as 5 tabelas, migration versionada
       aplicada no D1 local, seed fictício e 39 testes. `npm run db:migrate` e
       `npm run db:seed` funcionam.
@@ -182,17 +188,19 @@ porque hoje quem esquece a senha perde a conta.
 - [x] ~~B2 — publicação do texto do presidente e das galerias.~~ **Fechado pelo dono**:
       a APPD autorizou marca e conteúdo, e a autorização inclui o texto com histórico
       clínico, os dois retratos e as galerias. Assunto encerrado; não reabrir.
-- [ ] Escrever os ADRs 005, 006, 008 a 011 (ver `docs/adr/README.md`). O 007 foi
-      liberado: o protocolo `ATD-` perdeu a função com o cadastro embutido.
+- [x] ~~Escrever os ADRs 005, 006, 008 a 011.~~ **Todos escritos.** 005 em 2026-08-06;
+      008 a 011 em 2026-08-07; 006 em 2026-08-07, com a decisão do dono de que conteúdo de
+      página vive no código. A lista de reservados em `docs/adr/README.md` está zerada.
 - [ ] **Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha"
       (pedido do dono, 2026-08-06). Com o cadastro embutido, toda pessoa tem senha, e
       sem esse caminho **o login não pode ir ao ar**. Restrição: custo zero, sem cartão.
       Comparar pelo menos serviço de e-mail transacional com plano gratuito, envio pelo
       próprio Worker e alternativas de SMS — com data, limite mensal e se exige cartão.
       Nenhuma conta externa criada sem o dono mandar.
-- [ ] Telas ainda não implementadas: Cadastro, Login, Área do Associado, Crachá,
-      Verificação pública e Política de Privacidade. Prompts prontos em
-      `docs/prompts-design/`.
+- [ ] Telas ainda não implementadas: **Crachá** (`/area/cracha`), **Verificação pública**
+      (`/verificar/<numero>`), **Política de Privacidade** e **Seus direitos**. Cadastro,
+      Login e Área do Associado foram implementados em 2026-08-06 e estão no ar — este
+      item os listava como pendentes até 2026-08-07.
 - [ ] Auditoria completa das 9 telas do handoff: só a 404 foi revisada a fundo. Achados
       dela que valem para todas: Google Fonts por CDN (já corrigido na implementação),
       `<html>` sem `lang` e links de rede social inventados.
@@ -201,18 +209,27 @@ porque hoje quem esquece a senha perde a conta.
 - [x] ~~Definir parâmetros do scrypt.~~ **Medido em 2026-08-06** e virou problema maior:
       ver ADR-005. O gatilho de "50 ms p95" do ADR-002 estava calibrado contra a coisa
       errada — o teto real é 10 ms de CPU por requisição no plano gratuito.
-- [ ] Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).
-- [ ] AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita. NÃO ativar R2.
-
-## Atrito de ambiente resolvido (2026-08-06)
+- [x] ~~Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).~~
+      Item duplicado — o mesmo assunto está acima, com o detalhe do que comparar.
+- [x] ~~AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita.~~ **Feita.**
+      A conta existe, o D1 remoto está criado com id real em `wrangler.jsonc`, o
+      subdomínio `appd-sjc.workers.dev` está registrado e o R2 continua desligado.
+- [ ] **A foto opcional do formulário não foi implementada.** A spec de
+      `formulario-atendimento` v2.1 registra, como decisão do dono de 2026-08-06, que a
+      foto volta ao formulário como campo opcional (REQ-7d a REQ-7f). Não existe no código
+      nem em `docs/campos-formulario.md`. Depende do componente de recorte, que é da Fatia
+      3 de `cracha-do-associado`.
+- [ ] **Levar à APPD o contato de cuidador na verificação pública** (ADR-015). O cuidador
+      é terceiro: não usou o site, não aceitou termo e não tem caminho de titular para
+      pedir remoção. Precisa ser avisado, e o cadastro precisa deixar o campo em branco.
 
 ## Bugs / riscos conhecidos
 
 - `npm audit` aponta 7 vulnerabilidades **só em dependência de desenvolvimento**
   (esbuild via drizzle-kit; undici via miniflare/wrangler). Nenhuma entra no bundle
   de produção. Revisar quando drizzle-kit/wrangler publicarem correção.
-- `wrangler.jsonc` tem `database_id` de placeholder — trocar pelo id real depois de
-  `wrangler d1 create appd-sjc`.
+- ~~`wrangler.jsonc` tem `database_id` de placeholder.~~ **Resolvido em 2026-08-06**: o id
+  do D1 real está lá e o deploy usa ele.
 - **A logo diz "PESSOAS PORTADORAS DE DEFICIÊNCIAS"**. É a razão social registrada e
   não muda; mas o texto do site usa "pessoa com deficiência". Marca e texto vão
   divergir, e isso é conversa para a associação.
@@ -256,9 +273,21 @@ que redeclarava as três listas de escolha em vez de importá-las.
 `workers.dev` — o Worker subia inteiro e morria no último passo. Registrado, com
 `preview_urls` desligado.
 
-**Rito**: o gate de spec virou `test/gate-spec.spec.ts` e deixou de ser autorrevisão. Na
-primeira execução reprovou dez checagens, nove defeito real — quatro ADRs citados e nunca
-escritos, nove requisitos sem critério de aceite.
+**Rito**: o gate de spec virou auditoria mecânica e deixou de ser autorrevisão. Na primeira
+execução reprovou dez checagens, nove defeito real — quatro ADRs citados e nunca escritos,
+nove requisitos sem critério de aceite. Ela chegou a viver em `test/gate-spec.spec.ts` e
+**saiu no fim do dia, por decisão do dono**: `npm test` é para código, não para o rito. O
+checklist ficou em `openspec/PARECER-GATE-AUTOMATICO.md`, para a passada manual.
+
+**Decidido pelo dono no fim do dia**: conteúdo de página vive no código, nunca em banco
+(ADR-006). E a verificação pública passa a exibir foto e contato de cuidador, mantendo o
+tipo de deficiência fora (ADR-015).
+
+**Auditoria do registro**: 18 achados de documento desatualizado, todos corrigidos —
+15 links relativos quebrados (12 apontando para `modelo-de-dados` depois de ela ir para
+`archive/`), o `CLAUDE.md` descrevendo o scrypt no servidor quando ele roda no navegador,
+o montador do design system lendo CSS de uma pasta que a limpeza esvaziou, as seis specs
+ainda em "rascunho" depois do gate, e quatro tasks feitas e não marcadas.
 
 **Limpeza**: `design-system/` saiu da raiz (CSS para `app/assets/css/`, galeria para
 `docs/design-system/`); `shared/` achatado em quatro arquivos sem pasta; scripts do

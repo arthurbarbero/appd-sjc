@@ -17,8 +17,11 @@ const raiz = dirname(fileURLToPath(import.meta.url))
 const origem = join(raiz, 'componentes')
 const destino = join(raiz, 'build')
 
-const tokens = await readFile(join(raiz, 'tokens.css'), 'utf8')
-const base = await readFile(join(raiz, 'base.css'), 'utf8')
+// O CSS mora em app/assets/css/ desde a limpeza de 2026-08-07 — é lá que o Nuxt espera
+// folha global. Os previews leem de lá para nunca divergirem do que o site usa.
+const css = join(raiz, '..', '..', 'app', 'assets', 'css')
+const tokens = await readFile(join(css, 'tokens.css'), 'utf8')
+const base = await readFile(join(css, 'base.css'), 'utf8')
 const estilos = `<style>\n${tokens}\n${base}\n</style>`
 
 const titulos = {

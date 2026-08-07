@@ -155,16 +155,17 @@ Concluída como **código**; a prova automatizada é a Fatia 6 e ainda não exis
 
 ## Fatia 7 — Registro e fechamento [PENDENTE]
 
-- [ ] **7.1 ADR-010: implementar antes de especificar** — registrar a decisão do dono de
+- [x] **7.1 ADR-010: implementar antes de especificar** — registrar a decisão do dono de
       pular a Fase 3 para ter o site rodando, com o custo assumido (35 requisitos escritos
       depois do código, nenhum provado por teste na data da spec) e a condição de reversão
       (as changes com banco não repetem isso).
-      _Aceite_: `docs/adr/adr-010-*.md` com contexto, decisão, alternativas e
-      consequências, dono e data. _Dono_: Arthur.
-- [ ] **7.2 ADR-011: publicar com marcação "A confirmar"** — registrar a decisão de pôr as
+      _Aceite_: atendido — [adr-010](../../../docs/adr/adr-010-implementar-antes-de-especificar.md),
+      escrito em 2026-08-07. Task marcada na auditoria do mesmo dia.
+- [x] **7.2 ADR-011: publicar com marcação "A confirmar"** — registrar a decisão de pôr as
       9 landing pages no ar com selo em vez de esperar a revisão da associação, e a
       condição de saída (a APPD revisa antes de ir ao domínio dela).
-      _Aceite_: `docs/adr/adr-011-*.md` completo. _Dono_: Arthur.
+      _Aceite_: atendido — [adr-011](../../../docs/adr/adr-011-publicar-com-marcacao-a-confirmar.md),
+      escrito em 2026-08-07. Task marcada na auditoria do mesmo dia.
 - [ ] **7.3 Gate de validação item a item** — rodar `validacao-aceite` contra os 35
       requisitos e emitir parecer.
       _Aceite_: nenhum requisito em [PARCIAL] ou [PENDENTE]; todo cenário com veredito

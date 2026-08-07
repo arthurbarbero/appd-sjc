@@ -1,10 +1,10 @@
 # Spec: Crachá do associado e verificação pública
 
 - ID: SPEC-cracha-do-associado Deriva de: PROP-20260805-cracha-do-associado
-- Status: rascunho (aguarda gate do revisor-spec e aprovação do dono)
+- Status: **APROVADA** — gate de forma READY em 2026-08-07 · v3 em 2026-08-07 (ADR-015)
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
 - Versão: v2 · Data: 2026-08-06
-- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+- **Fonte da verdade das tabelas**: [`modelo-de-dados`](../../archive/modelo-de-dados/spec.md)
 
 > **v2.1 (2026-08-06)** — a foto volta a ter entrada no formulário de atendimento, como
 > campo opcional, por decisão do dono. Esta change continua dona do componente, do limite e
@@ -25,7 +25,8 @@
 
 Dar a cada associado um número de registro imutável e um crachá que ele mesmo gera, baixa e
 imprime pelo navegador, conferível por qualquer pessoa em um endereço público que expõe
-exatamente três informações: nome, número e situação.
+cinco informações e só elas: foto, nome, número, situação e contato de cuidador quando
+houver ([ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md)).
 
 ## Glossário (termos que não podem ter dupla leitura)
 
@@ -109,13 +110,19 @@ exatamente três informações: nome, número e situação.
 - **REQ-15**: A foto DEVE ser gravada como BLOB no D1, através da interface
   `ArmazenamentoFoto` (`gravar`, `ler`, `apagar`), de modo que trocar o meio de armazenamento
   no futuro não exija tocar em rota, componente ou tela.
-- **REQ-16**: A foto DEVE ser servida apenas por rota autenticada. Requisição sem sessão
-  válida recebe HTTP 401 e nenhum byte de imagem.
+- **REQ-16** `[v3, 2026-08-07 — ADR-015]`: A foto DEVE ser servida por **duas** rotas e
+  nenhuma outra: a rota autenticada da área, que responde HTTP 401 sem sessão válida, e a
+  página de verificação pública, que a serve **embutida na própria resposta HTML**, sem URL
+  de imagem endereçável e dentro do limite de 20 consultas por minuto do REQ-33.
 - **REQ-17**: Requisição autenticada pedindo a foto de outro associado DEVE receber HTTP 404
   — o mesmo código de uma foto inexistente —, para não confirmar a existência do cadastro
   alheio.
-- **REQ-18**: A foto NÃO DEVE ser servida, embutida, referenciada ou cacheada em nenhuma
-  rota pública, incluindo `/verificar/<numero_registro>`.
+- **REQ-18** `[v3, 2026-08-07 — ADR-015]`: ~~A foto NÃO DEVE ser servida em nenhuma rota
+  pública.~~ **Revogado**: a verificação pública exibe a foto, e é a razão de ela existir —
+  sem rosto, a página prova que o número existe, não que o portador é o dono. O que
+  permanece: a foto não vira arquivo estático endereçável, não é cacheada por
+  intermediário (`Cache-Control: private, no-store`) e não aparece em nenhuma outra rota
+  pública.
 
 ### Crachá e exportação
 
@@ -149,14 +156,19 @@ exatamente três informações: nome, número e situação.
 ### Verificação pública
 
 - **REQ-28a**: Para conta **excluída**, `/verificar/<numero>` DEVE responder HTTP 200,
-  exibir o número e a situação `inativo`, e **não exibir nome** — o nome foi apagado
+  exibir o número e a situação `inativo`, e **não exibir nome, foto nem cuidador** — os três
+  foram apagados
   (`modelo-de-dados` REQ-29). O `numero_registro` é preservado e nunca reutilizado, para que
   um crachá antigo não passe a identificar outra pessoa. Isso fecha o bloqueio B23 e o
   `[A CONFIRMAR]` que `area-do-associado` tinha no assunto.
-- **REQ-28**: `GET /verificar/<numero_registro>` DEVE responder HTTP 200 e exibir, no máximo,
-  três campos de dado: nome, `numero_registro` e situação. Nenhum outro campo do cadastro
-  pode aparecer no HTML, no JSON embutido, em atributo `data-*`, em comentário, em cabeçalho
-  HTTP ou em qualquer resposta de API consumida pela página.
+- **REQ-28** `[v3, 2026-08-07 — ADR-015]`: `GET /verificar/<numero_registro>` DEVE responder
+  HTTP 200 e exibir, no máximo, cinco campos de dado: nome, `numero_registro`, situação,
+  **foto** e **contato de cuidador quando houver**. Nenhum outro campo do cadastro pode
+  aparecer no HTML, no JSON embutido, em atributo `data-*`, em comentário, em cabeçalho HTTP
+  ou em qualquer resposta de API consumida pela página — **em especial o campo 12 (tipo de
+  deficiência), que permanece proibido** e continua guardado pelos testes bloqueantes de
+  vazamento. A foto é servida apenas por esta rota, sem URL direta, dentro do limite do
+  REQ-33.
 - **REQ-29**: A resposta para número inexistente e para número fora do formato DEVE ser
   **byte a byte idêntica** no bloco de resultado: mesmo status HTTP 200, mesmo texto, mesma
   estrutura. É proibido dizer que o formato está errado, apontar quantos dígitos faltam,
@@ -176,9 +188,10 @@ exatamente três informações: nome, número e situação.
 - **REQ-33**: O sistema DEVE limitar consultas de verificação a **20 por minuto por hash
   de IP** (nunca pelo IP em claro — ver REQ-33a);
   acima disso responde HTTP 429 com mensagem neutra, idêntica para qualquer número.
-- **REQ-34**: A página DEVE exibir, em texto corrido de corpo normal (não em nota de rodapé),
-  a declaração explícita do que ela não mostra: endereço, telefone, data de nascimento,
-  contato de cuidador, tipo de deficiência e foto.
+- **REQ-34** `[v3, 2026-08-07 — ADR-015]`: A página DEVE exibir, em texto corrido de corpo
+  normal (não em nota de rodapé), a declaração explícita do que ela não mostra: endereço,
+  telefone, data de nascimento e tipo de deficiência. **Foto e contato de cuidador saíram
+  desta lista** porque passaram a ser exibidos.
 - **REQ-35**: A página DEVE ser legível e responder sem JavaScript: o resultado da rota
   `/verificar/<numero_registro>` é renderizado no servidor.
 
@@ -454,10 +467,12 @@ Funcionalidade: Verificação pública do crachá
     Dado o associado fictício "Maria Aparecida da Silva", "APPD-2026-00042", situação ativo
     Quando alguém sem sessão abre /verificar/APPD-2026-00042
     Então a resposta é HTTP 200
-    E o bloco de resposta mostra exatamente três campos: Nome, Número de registro e Situação
+    E o bloco de resposta mostra a foto e os campos Nome, Número de registro, Situação e,
+      quando houver, Contato de cuidador
     E a situação aparece com ícone e com o texto "Associado ativo"
-    E o HTML não contém endereço, telefone, data de nascimento, cuidador, e-mail, tipo de
-      deficiência nem imagem da pessoa
+    E a foto vem embutida na resposta HTML, sem URL de imagem endereçável
+    E o HTML não contém endereço, telefone, data de nascimento, e-mail nem qualquer valor do
+      campo 12 do formulário (tipo de deficiência)
 
   Cenário: Número válido de cadastro inativo
     Dado o associado fictício "APPD-2026-00043" com situação inativo
@@ -483,7 +498,7 @@ Funcionalidade: Verificação pública do crachá
   Cenário: Página declara o que não mostra
     Quando alguém abre /verificar/APPD-2026-00042
     Então existe, em texto de corpo normal, a declaração de que a página não mostra endereço,
-      telefone, data de nascimento, contato de cuidador, tipo de deficiência nem foto
+      telefone, data de nascimento nem tipo de deficiência
     E essa declaração está imediatamente abaixo do bloco de resposta
 
   Cenário: Não existe busca por nome nem sugestão

@@ -1,6 +1,6 @@
 # Tasks: Crachá do associado e verificação pública
 
-Deriva de SPEC-cracha-do-associado v1. Fatias verticais: cada uma entrega algo verificável
+Deriva de SPEC-cracha-do-associado v3. Fatias verticais: cada uma entrega algo verificável
 sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Barbero
 (decisão) / Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
@@ -16,13 +16,16 @@ sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Bar
       `docs/adr/adr-004-liberacao-imediata-do-cracha.md`: sem aprovação prévia nesta versão,
       com o gatilho de revisão explícito (a APPD pedir moderação, ou aparecer uso indevido).
       **Aceite**: ADR aceito; REQ-27 aponta para ele.
-- [ ] **T0.3 — Gate do revisor-spec.** Rodar a auditoria sobre esta spec.
-      **Aceite**: veredito READY registrado, ou lista de bloqueios com dono.
-      **Nota**: o gate **confere** a autoauditoria, não a substitui — foi o bloqueio B19.
-      A seção "Definition of Ready" da spec agora existe e é preenchida antes de rodar.
-- [ ] **T0.4 — Design aprovado no Claude Design** para `/area/cracha` (seis estados) e
-      `/verificar/<numero>` (quatro estados), com handoff bundle. **Aceite**: bundle entregue e
-      checklist de aceite visual dos dois prompts de design todo marcado. **Bloqueia toda tela.**
+- [x] **T0.3 — Gate do revisor-spec.** Rodado em 2026-08-07: veredito **READY** na forma,
+      registrado em `openspec/PARECER-GATE-AUTOMATICO.md`. Mérito continua sendo do dono.
+- [ ] **T0.4 — Design aprovado no Claude Design. Metade feita.**
+      **(a)** `/area/cracha`, seis estados: **gerado pelo dono em 2026-08-07**. Falta puxar
+      o bundle e conferir contra o "Aceite visual" de `docs/prompts-design/cracha.md`.
+      **(b)** `/verificar/<numero>`, quatro estados: **regerar**, porque o prompt mudou em
+      2026-08-07 com o
+      [ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md) — a
+      página passa a exibir foto e contato de cuidador.
+      **Bloqueia as fatias 3, 4 e 5. Não bloqueia a Fatia 2**, que não tem tela.
 
 ## Fatia 1 — Número de registro: movida para `cadastro-e-login`
 
@@ -40,7 +43,10 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 - [ ] **T2.1** — Interface `ArmazenamentoFoto` em `shared/` com `gravar`, `ler` e `apagar`, mais a
       implementação D1/BLOB em `server/`. **Aceite**: cenário "Gravação passa pela interface
       ArmazenamentoFoto"; nenhuma rota referencia a tabela direto.
-- [ ] **T2.2** — Migration da tabela de foto (BLOB, dono, tipo, bytes, criado_em).
+- [x] **T2.2** — Migration da tabela de foto (BLOB, dono, tipo, bytes, criado_em).
+      _Feita dentro de `modelo-de-dados` e aplicada no D1: `fotos` em
+      `server/database/schema.ts`, com os `CHECK` de 102.400 bytes, `image/jpeg` e
+      400 × 500. Marcada em 2026-08-07, ao ser conferida na auditoria._
 - [ ] **T2.3** — Rota de gravação com revalidação server-side: MIME pelos bytes iniciais,
       dimensões 400 × 500, tamanho ≤ 102.400. **Aceite**: cenário "Servidor não confia no cliente".
 - [ ] **T2.4** — Rota autenticada de leitura da foto, com 401 sem sessão e 404 para foto alheia.
@@ -87,8 +93,9 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 ## Fatia 5 — Verificação pública
 
 - [ ] **T5.1** — Rota `/verificar/<numero>` renderizada no servidor, com projeção que **seleciona
-      apenas** nome, número e situação (nunca `SELECT *`). **Aceite**: cenários "Número válido de
-      associado ativo" e "Verificação funciona sem JavaScript".
+      apenas** nome, número, situação, foto e contato de cuidador (nunca `SELECT *`, e **nunca** o
+      campo 12 — ADR-015). **Aceite**: cenários "Número válido de associado ativo" e "Verificação
+      funciona sem JavaScript".
 - [ ] **T5.2** — Resposta única para inexistente e mal formatado, com a mesma consulta ao banco nos
       dois casos. **Aceite**: cenários "Número inexistente e número mal formatado respondem igual"
       e "Consulta ao banco também ocorre para entrada mal formatada".
@@ -106,8 +113,8 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 ## Fatia 6 — Validação e fechamento
 
 - [ ] **T6.1** — Teste de vazamento: varredura do HTML e das respostas de API de
-      `/verificar/<numero>` procurando qualquer campo do cadastro fora dos três permitidos.
-      **Bloqueante**: falhou, a change não fecha.
+      `/verificar/<numero>` procurando qualquer campo do cadastro fora dos cinco permitidos
+      (ADR-015), **em especial o campo 12**. **Bloqueante**: falhou, a change não fecha.
 - [ ] **T6.2** — axe em 1280 px e 360 px nas dez telas (seis do crachá, quatro da verificação).
       **Aceite**: cenário "Sem violação de acessibilidade automatizável".
 - [ ] **T6.3** — Percurso completo por teclado gravado no relatório de validação. **Aceite**:

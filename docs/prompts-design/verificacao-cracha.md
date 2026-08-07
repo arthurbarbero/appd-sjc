@@ -14,12 +14,16 @@ menos de cinco segundos, de pé, na porta da sede ou na calçada, com uma mão s
 2. O nome e o número conferidos.
 3. Nada. E esse "nada" é o requisito mais importante das quatro telas.
 
-**A tela mostra três informações e só três: nome, número de registro e situação.**
-Nunca endereço, telefone, cuidador, data de nascimento, tipo de deficiência ou foto. A
-foto do crachá jamais é servida em rota pública. Isso não é uma restrição que a tela
-respeita em silêncio — o desenho tem que **tornar óbvio** que não existe mais nada ali:
-o cartão termina, e logo abaixo há uma declaração explícita do que esta página nunca
-mostra. Quem chega desconfiado precisa sair sabendo que não vazou nada de ninguém.
+**A tela mostra cinco informações: foto, nome, número de registro, situação e, quando
+houver, o contato de cuidador** — decisão do dono em 2026-08-07,
+[ADR-015](../adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md). A foto está aqui
+porque sem rosto a página prova que o número existe, não que quem está na frente do
+verificador é o dono dele.
+
+**O tipo de deficiência continua terminantemente fora**, e com ele endereço, telefone e
+data de nascimento. O campo 12 é dado sensível do Art. 11 da LGPD e a página é pública:
+não é preferência de desenho, é a única restrição desta tela que não se negocia. Ela
+continua declarando, em texto normal logo abaixo do bloco de resposta, o que não mostra.
 
 **Não ajude quem está adivinhando número.** A resposta para um número que não existe é
 idêntica à resposta para um número mal digitado ou fora de formato: mesma frase, mesmo
@@ -51,11 +55,12 @@ existe; e a chegada por leitura de QR Code no celular, em 360px.
 > A tela é lida em pé, no celular, em poucos segundos, muitas vezes por alguém idoso e
 > desconfiado. A estética é de **consulta pública oficial**: uma resposta grande e curta,
 > centrada, cercada de espaço vazio — pense em tela de conferência de documento em
-> repartição bem-feita, não em painel de sistema. **Evite** cartão com foto, dados
-> pessoais em tabela, selo de segurança falso, escudo, cadeado ilustrado, degradê, fundo
-> colorido na tela inteira, animação de confirmação e qualquer campo além do de consulta.
-> **Prefira** um bloco único de resposta com no máximo três linhas de dado, muito
-> respiro em volta, e uma declaração explícita do que a página **não** mostra.
+> repartição bem-feita, não em painel de sistema. **Evite** dados pessoais em tabela, selo
+> de segurança falso, escudo, cadeado ilustrado, degradê, fundo colorido na tela inteira,
+> animação de confirmação e qualquer campo além do de consulta.
+> **Prefira** um bloco único de resposta — retrato à esquerda, quatro linhas de dado à
+> direita —, muito respiro em volta, e uma declaração explícita do que a página **não**
+> mostra.
 >
 > Conteúdo, nesta ordem:
 >
@@ -64,16 +69,17 @@ existe; e a chegada por leitura de QR Code no celular, em 360px.
 >    menu completo: quem chega aqui veio conferir uma coisa só.
 > 2. **`h1`** "Verificação de crachá".
 > 3. **Bloco de resposta**, o elemento dominante da tela: fundo `#f7f8f9`, borda
->    `#e2e5e9`, raio de 10px, sombra discreta, com no máximo três linhas de informação,
->    cada uma com rótulo pequeno acima do valor: "Nome", "Número de registro" (em fonte
->    tabular, `APPD-2026-00042`) e "Situação". A situação aparece como selo com ícone e
->    texto, nunca só cor.
+>    `#e2e5e9`, raio de 10px, sombra discreta. À esquerda a **foto em proporção 4:5**, do
+>    tamanho de um retrato de documento, com `alt` que diz apenas "Foto de <nome>". À
+>    direita, cada linha com rótulo pequeno acima do valor: "Nome", "Número de registro"
+>    (em fonte tabular, `APPD-2026-00042`), "Situação" e, quando existir, "Contato de
+>    cuidador". A situação aparece como selo com ícone e texto, nunca só cor. Em 360px a
+>    foto vai acima e o texto abaixo.
 > 4. **Declaração do que não é mostrado**, imediatamente abaixo do bloco de resposta,
->    em texto normal e não em nota de rodapé miúda: "Esta página mostra apenas o nome, o
->    número de registro e a situação. Ela não mostra endereço, telefone, data de
->    nascimento, contato de cuidador, tipo de deficiência nem foto." Segunda linha: "A
->    associação não publica esses dados em nenhum endereço público." Com link "Ler a
->    Política de Privacidade".
+>    em texto normal e não em nota de rodapé miúda: "Esta página não mostra endereço,
+>    telefone, data de nascimento nem tipo de deficiência." Segunda linha: "A associação
+>    não publica esses dados em nenhum endereço público." Com link "Ler a Política de
+>    Privacidade".
 > 5. **Consulta manual** — um campo único rotulado "Digite o número do crachá", com
 >    exemplo no texto de ajuda, `inputmode` de texto, 52px de altura, e o botão
 >    "Verificar". Existe porque nem todo mundo consegue usar a câmera. Não há busca por
@@ -119,9 +125,11 @@ existe; e a chegada por leitura de QR Code no celular, em 360px.
 
 ## Aceite visual
 
-- [ ] A tela mostra **nome, número e situação**, e mais nada. Se aparecer qualquer outro
-      dado da pessoa, reprova sem discussão.
-- [ ] Não há foto em lugar nenhum da página.
+- [ ] A tela mostra **foto, nome, número, situação e cuidador quando houver**, e mais
+      nada. Qualquer outro dado da pessoa reprova sem discussão.
+- [ ] **Tipo de deficiência não aparece em lugar nenhum** — nem no texto, nem em atributo,
+      nem em comentário. Este item sozinho reprova a tela.
+- [ ] A foto tem `alt` que diz só "Foto de <nome>", sem descrever a pessoa.
 - [ ] Existe uma declaração explícita, em texto normal, do que a página não mostra.
 - [ ] As respostas de "não existe" e de "formato errado" são idênticas.
 - [ ] Não há busca por nome, sugestão de número nem lista de associados.
@@ -133,9 +141,9 @@ existe; e a chegada por leitura de QR Code no celular, em 360px.
 
 ## Se sair errado
 
-- **Apareceu foto, endereço, data de nascimento ou tipo de deficiência**: reprovação
-  dura. Peça a renderização de novo com "a página mostra três campos: nome, número e
-  situação; remova todos os outros".
+- **Apareceu endereço, data de nascimento ou tipo de deficiência**: reprovação dura. Peça
+  a renderização de novo com "a página mostra foto, nome, número, situação e contato de
+  cuidador; remova todos os outros campos".
 - **A tela ficou parecendo um painel de sistema** (tabela, vários blocos, metadados):
   peça "um bloco de resposta só, centrado, com muito espaço vazio em volta".
 - **O erro de número inexistente virou didático demais** ("o formato correto é

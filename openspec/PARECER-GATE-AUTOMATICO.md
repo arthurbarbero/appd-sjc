@@ -5,38 +5,45 @@ Terceira passada do `revisor-spec`. As duas anteriores (`PARECER-GATE.md` e
 segundo parecer registrou por escrito que isso não vale como gate e exigiu um revisor
 independente. Ao ser informado da pendência, o dono respondeu **"se arrume"**.
 
-## Como isto foi arrumado
+## Como isto foi arrumado, e como não foi
 
-Não por ler de novo. Quem escreveu não enxerga o buraco na segunda leitura mais do que na
-primeira — foi exatamente o que aconteceu nas duas passadas anteriores.
+A passada de 2026-08-07 foi feita por um teste que auditava a parte mecânica da Definition
+of Ready. Ele encontrou o que está registrado abaixo, e **foi removido no mesmo dia**, por
+decisão do dono:
 
-Foi tirando o julgamento do caminho. A parte da Definition of Ready que não depende de
-opinião virou `test/gate-spec.spec.ts`, que roda no `npm test` **de quem quer que tenha
-escrito a spec**, hoje e daqui a seis meses.
+> "Atualizar PROGRESS e coisa dos ritos não é código para se utilizar de `npm test`, sou
+> terminantemente contra isso. `npm test` é para código, não regra de negócio ou arquivo
+> md de IA."
 
-| O que a máquina confere                                       | Regra da skill           |
+A decisão está aceita e não se rediscute: **`npm test` cobre o produto, não o rito**. O
+gate volta a ser trabalho de quem escreve — e o registro de hoje serve para que a próxima
+passada saiba o que conferir:
+
+| O que conferir                                                | Regra da skill           |
 | ------------------------------------------------------------- | ------------------------ |
 | Toda change tem proposal, spec e tasks                        | estrutura do fluxo       |
 | Todo requisito é coberto por cenário ou por rastreabilidade   | DoR item 3 (aceite)      |
 | Nenhuma linha de requisito usa adjetivo sem medida            | DoR item 1 (ambiguidade) |
 | Toda change declara fora de escopo                            | DoR item 3 (escopo)      |
 | Toda change nomeia dono                                       | DoR item 3 (escopo)      |
-| Todo ADR citado existe, ou está reservado no índice           | DoR item 3 (ADR)         |
+| Todo ADR citado existe e não está listado como "não escrito"  | DoR item 3 (ADR)         |
 | Nenhuma spec carrega segredo                                  | DoR item 3 (credencial)  |
 | Nenhuma change está em `changes/` e `archive/` ao mesmo tempo | coerência do rito        |
 | Change arquivada não tem task em aberto                       | coerência do rito        |
+| Nenhum link relativo aponta para arquivo que não existe       | coerência do registro    |
+| Nenhuma task depende de change já arquivada                   | coerência do registro    |
 
-**60 checagens, todas verdes** em 2026-08-07.
+As duas últimas linhas entraram na auditoria manual de 2026-08-07, e as duas acharam
+defeito na primeira passada: 15 links quebrados e uma task esperando change arquivada.
 
-## O que a máquina NÃO cobre, e nenhuma cobriria
+## O que nenhuma checagem cobre
 
 Mérito. Se o requisito é o certo, se o escopo é o que a APPD precisa, se a decisão de
 produto está boa, se o texto da tela serve para quem vai lê-lo. Isso continua sendo do
 dono da área, como os dois pareceres anteriores já diziam.
 
-O que mudou é a **fronteira**: antes, forma e mérito dependiam os dois da minha leitura, e
-25 dos bloqueios do primeiro gate eram de forma. Agora a forma não depende de ninguém
-lembrar.
+O que a lista acima faz é separar **forma** de **mérito** — 25 dos bloqueios do primeiro
+gate eram de forma, e forma se confere por checklist. O mérito não.
 
 ## O que o gate achou nesta passada
 
@@ -49,10 +56,11 @@ defeito real:
 documento nenhum. Duas dessas decisões já estavam **implementadas** havia dois dias. Os
 quatro foram escritos.
 
-**`ADR-006` continua sem existir, e continua citado** — mas é decisão que o dono ainda não
-tomou, e escrevê-lo para calar o teste seria pior do que a citação órfã. O gate passou a
-aceitar reserva declarada no índice, com a change dona nomeada, e falha se a lista de
-reservas crescer.
+**`ADR-006` continuava sem existir, e continuava citado.** Era decisão que o dono não tinha
+tomado, e escrevê-lo para calar o teste seria pior do que a citação órfã. **Fechado no fim
+do mesmo dia**: conteúdo de página vive no código, não em banco
+([ADR-006](../docs/adr/adr-006-conteudo-de-pagina-vive-no-codigo.md)). A lista de ADRs
+reservados e não escritos está zerada.
 
 **Nove requisitos sem critério de aceite.** Quatro em `area-do-associado` (os de edição da
 inscrição, REQ-11 e derivados — implementados e nunca traçados), três em
@@ -67,16 +75,16 @@ sensação de cobertura.
 
 ## Veredito por change
 
-| Change                        | Forma | Pode arquivar?                                                          |
-| ----------------------------- | ----- | ----------------------------------------------------------------------- |
-| `modelo-de-dados`             | READY | **sim** — tasks fechadas, 169 testes, rastreabilidade completa          |
-| `revisao-de-interface`        | READY | **sim** — 15/15, gate de aceite 78/78 rodado contra produção            |
-| `site-institucional`          | READY | não — 19 tasks abertas (peso por rota, redirecionamentos, sitemap, 404) |
-| `cadastro-e-login`            | READY | não — critérios de aceite não percorridos                               |
-| `formulario-atendimento`      | READY | não — critérios de aceite não percorridos                               |
-| `area-do-associado`           | READY | não — 29 tasks abertas, incluindo o bloco do crachá                     |
-| `cracha-do-associado`         | READY | não — sem implementação; T0.4 (design) trava as fatias 3 a 5            |
-| `consentimento-e-privacidade` | READY | não — sem implementação; ADR-006 é pré-requisito                        |
+| Change                        | Forma | Pode arquivar?                                                           |
+| ----------------------------- | ----- | ------------------------------------------------------------------------ |
+| `modelo-de-dados`             | READY | **arquivada** em 2026-08-07                                              |
+| `revisao-de-interface`        | READY | **arquivada** em 2026-08-07                                              |
+| `site-institucional`          | READY | não — 17 tasks abertas (peso por rota, redirecionamentos, sitemap, 404)  |
+| `cadastro-e-login`            | READY | não — critérios de aceite não percorridos                                |
+| `formulario-atendimento`      | READY | não — critérios não percorridos; a foto opcional do REQ-7d não existe    |
+| `area-do-associado`           | READY | não — 28 tasks abertas, incluindo o bloco do crachá                      |
+| `cracha-do-associado`         | READY | não — sem implementação; a Fatia 2 está livre, as 3 a 5 esperam o design |
+| `consentimento-e-privacidade` | READY | não — sem implementação; T4 destravada pelo ADR-006 em 2026-08-07        |
 
 **READY na forma não é pronto para arquivar.** As duas coisas se confundiram na primeira
 passada e é bom deixar dito: READY significa que a spec pode virar task. Arquivar exige a
@@ -97,9 +105,17 @@ consentimento), que depende de `consentimento-e-privacidade`.
 linha "Seus direitos" depende de `consentimento-e-privacidade`. As duas Fatias 3 e 4 estão
 entregues; as Fatias 1, 2, 5 e 6 têm código rodando sem veredito registrado.
 
-**`site-institucional`** — 19 tasks, quase todas de medição (peso por rota, CLS, contraste
+**`site-institucional`** — 17 tasks, quase todas de medição (peso por rota, CLS, contraste
 renderizado) e de SEO (301 das 7 URLs antigas, sitemap, robots). Nenhuma depende de
-terceiro.
+terceiro. As duas que saíram da lista eram os ADR-010 e ADR-011, escritos em 2026-08-07 e
+marcados na auditoria do mesmo dia.
 
-**`cracha-do-associado`** e **`consentimento-e-privacidade`** — sem implementação. A
-primeira trava na T0.4 (design das dez telas); a segunda, no ADR-006.
+**`cracha-do-associado`** — sem implementação, mas **a Fatia 2 não está travada**: o
+armazenamento da foto não tem tela nenhuma e pode começar hoje (a T2.2 já está feita
+dentro de `modelo-de-dados`). A T0.4 trava as fatias 3, 4 e 5, e está pela metade: o
+desenho de `/area/cracha` foi entregue pelo dono em 2026-08-07; o de `/verificar` precisa
+ser refeito, porque o ADR-015 mudou o que a página mostra.
+
+**`consentimento-e-privacidade`** — sem implementação. O ADR-006 **destravou a T4** em
+2026-08-07. Continuam parados: as telas (esperam o canvas) e o archive (espera PB-1 a PB-5
+com a APPD e o jurídico).
