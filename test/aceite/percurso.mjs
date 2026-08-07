@@ -100,6 +100,14 @@ function encerrar(processo) {
 
 let servidor
 if (SOBE_SERVIDOR) {
+  /*
+    O build mora aqui, e não no `package.json`, por um motivo medido em 2026-08-07: com
+    `APPD_BASE` apontando para produção, o `npm run build` do script rodava assim mesmo,
+    tentava limpar `.output` e falhava com `EBUSY` — construía um bundle que ninguém ia
+    usar, e derrubava um percurso que nem precisava de servidor local.
+  */
+  execFileSync('npm', ['run', 'build'], { stdio: 'inherit', shell: process.platform === 'win32' })
+
   servidor = spawn('npx', ['wrangler', 'dev'], {
     stdio: 'ignore',
     shell: process.platform === 'win32',

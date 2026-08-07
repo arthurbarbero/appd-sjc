@@ -16,21 +16,24 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 
 **O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
-| Comando          | O que cobre                                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm test`       | 119 testes — restrição de banco, emissão concorrente, revalidação da foto e regressão de interface                                   |
-| `npm run aceite` | 78 verificações no workerd real: ciclo de conta, sete larguras, axe A/AA em dez telas. Aceita `APPD_BASE` para rodar contra produção |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                       |
+| Comando          | O que cobre                                                                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`       | 119 testes — restrição de banco, emissão concorrente, revalidação da foto e regressão de interface                                                         |
+| `npm run aceite` | 89 verificações no workerd real: ciclo de conta, verificação pública, sete larguras, axe A/AA em onze telas. Aceita `APPD_BASE` para rodar contra produção |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                             |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
 `openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**Próximas duas changes**: `cracha-do-associado` (fatias 4 e 5) e o **painel
+**Próximas duas changes**: `cracha-do-associado` (**Fatia 5 entregue em 2026-08-07** — o QR
+deixou de levar a 404; falta a Fatia 4, o crachá em si e a exportação) e o **painel
 administrativo**, decidido pelo dono em 2026-08-07 — gerenciar usuários e refazer senha.
 O painel é o que faz a recuperação de senha existir sem depender de e-mail.
 
-Começo pelo crachá, fatias 4 e 5. A 5 é prioridade porque o QR que
+A recuperação de senha por e-mail entra com **SendGrid gratuito** (decisão do dono,
+2026-08-07): remetente avulso, sem DNS, aceitando que parte cai em spam até haver domínio.
+Falta a chave de API, que é do dono para criar. A 5 é prioridade porque o QR que
 está **no ar hoje** aponta para `/verificar/<numero>`, que ainda não existe e devolve 404 —
 é o único defeito publicado. As duas telas foram aprovadas no Claude Design em 2026-08-07
 e a Fatia 2 e quase toda a Fatia 3 já estão entregues.

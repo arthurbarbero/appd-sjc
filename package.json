@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "aceite": "npm run build && node test/aceite/percurso.mjs",
+    "aceite": "node test/aceite/percurso.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply appd-sjc --local",
     "db:seed": "node scripts/seed-local.mjs > .wrangler/seed.sql && wrangler d1 execute appd-sjc --local --file=.wrangler/seed.sql"
