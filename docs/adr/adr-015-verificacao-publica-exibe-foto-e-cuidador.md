@@ -1,6 +1,9 @@
 # ADR-015: a verificação pública exibe foto e contato de cuidador
 
-Status: Aceito
+Status: **Aceito, com a parte do tipo de deficiência superada** pelo
+[ADR-019](adr-019-consentimento-governa-a-verificacao-publica.md) em 2026-08-07 — o opt-in
+passou a governar também a página pública. O resto do ADR (foto e cuidador) continua
+valendo.
 Data: 2026-08-07
 Decisores: Arthur Barbero (dono do projeto)
 

@@ -180,9 +180,9 @@ Concluída como **código**; a prova automatizada é a Fatia 6 e ainda não exis
 Nenhuma destas impede a entrega técnica desta change, mas todas impedem a **publicação no
 domínio da associação**. Fonte: `docs/pendencias-appd.md`.
 
-- [ ] **B.1 Escanear o QR do PIX com o app do banco** (P0-2). A estrutura do payload BR
-      Code e o CRC foram conferidos; que o banco aceite, não. _Dono_: Arthur (teste
-      prático) — o dado em si já é o CNPJ real.
+- [x] **B.1 Escanear o QR do PIX com o app do banco** (P0-2). **Conferido pelo dono em
+      2026-08-07**: escaneou e o banco aceitou. A estrutura do payload BR Code e o CRC já
+      tinham sido conferidos por código; o que faltava era o banco de verdade, e passou.
 - [ ] **B.2 E-mail que recebe a mensagem do formulário de contato** (P0-4). Enquanto não
       vier, o REQ-26 mantém a tela dizendo que nada foi enviado. _Dono_: APPD.
 - [ ] **B.3 Qual telefone é o WhatsApp oficial** (P1-7). Seis números circulam com rótulo
@@ -197,7 +197,13 @@ domínio da associação**. Fonte: `docs/pendencias-appd.md`.
       conteúdo. Decisão registrada, assunto encerrado.
 - [ ] **B.6 Catálogo de serviços real em 2026** (P0-1) — enquanto não vier, o selo "A
       confirmar" segura. _Dono_: APPD.
-- [ ] **B.7 Logo em vetor** (P0-3) — o bitmap atual é provisório. _Dono_: APPD.
+- [x] **B.7 Logo em vetor** (P0-3). **Encerrada em 2026-08-07 por decisão do dono**: não vai
+      haver vetor vindo da APPD. Avaliei vetorizar por conta própria e **não vale**: o
+      arquivo é um PNG de 600 × 344 com a razão social escrita dentro, e traçado automático
+      sobre bitmap desse tamanho devolve contorno trêmulo e texto ilegível quando ampliado —
+      sairia pior que o original. O bitmap atende o que existe hoje (cabeçalho a 48 px e
+      rodapé); onde faltaria é **impressão em tamanho grande**, e aí o caminho é pedir a arte
+      original a quem desenhou a logo, não traçar por cima.
 
 ---
 

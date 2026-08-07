@@ -31,6 +31,8 @@ export interface RespostaVerificacao {
   situacao?: 'ativo' | 'inativo'
   cuidador?: string
   foto?: string
+  /** Só vem preenchido quando a pessoa autorizou (ADR-019). Vazio é o padrão. */
+  deficiencias?: string[]
 }
 
 export default defineEventHandler(async (event): Promise<RespostaVerificacao> => {
@@ -61,6 +63,8 @@ export default defineEventHandler(async (event): Promise<RespostaVerificacao> =>
       situacao: schema.usuarios.situacao,
       cuidadorNome: schema.usuarios.cuidadorNome,
       cuidadorContato: schema.usuarios.cuidadorContato,
+      // Não é o dado: é a autorização para buscá-lo (ADR-019).
+      mostraDeficiencia: schema.usuarios.crachaMostraDeficiencia,
     })
     .from(schema.usuarios)
     .where(eq(schema.usuarios.numeroRegistro, numero))
@@ -76,6 +80,22 @@ export default defineEventHandler(async (event): Promise<RespostaVerificacao> =>
   const anonimizada = !conta.nome
 
   const foto = anonimizada ? null : await armazenamentoFoto(bd).ler(conta.id)
+
+  /*
+    O tipo de deficiência só é **consultado** quando a pessoa autorizou (ADR-019). Sem a
+    marca, o dado não sai do banco — a proteção está na consulta, e não em filtrar depois.
+
+    Conta anonimizada não consulta nem com a marca: a inscrição foi apagada junto.
+  */
+  const deficiencias =
+    anonimizada || !conta.mostraDeficiencia
+      ? []
+      : await bd.query.inscricoesAtendimento
+          .findFirst({
+            where: eq(schema.inscricoesAtendimento.usuarioId, conta.id),
+            columns: { deficiencias: true },
+          })
+          .then((i) => (i ? (JSON.parse(i.deficiencias) as string[]) : []))
 
   setHeader(event, 'Cache-Control', 'private, no-store')
 
@@ -93,6 +113,7 @@ export default defineEventHandler(async (event): Promise<RespostaVerificacao> =>
         }),
     // Embutida na resposta, sem URL de imagem endereçável (ADR-015, correção 4 do handoff).
     ...(foto ? { foto: `data:${TIPO_ARMAZENADO};base64,${paraBase64(foto.conteudo)}` } : {}),
+    ...(deficiencias.length ? { deficiencias } : {}),
   }
 })
 

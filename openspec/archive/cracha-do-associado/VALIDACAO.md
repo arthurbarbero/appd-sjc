@@ -2,6 +2,12 @@
 
 Data: 2026-08-07 · Executor: Claude Code · T6.5
 
+> **Reaberta no mesmo dia.** O [ADR-019](../../../docs/adr/adr-019-consentimento-governa-a-verificacao-publica.md)
+> mudou três requisitos depois do arquivamento: o consentimento passou a governar também a
+> página pública. Mudança de contrato não cabe em adendo — a change voltou de `archive/`,
+> foi reimplementada e revalidada. São **40 cenários** agora, com o novo de consentimento na
+> verificação.
+
 Os **39 cenários** da spec, cada um com onde é verificado e o veredito. A regra do
 `ESTADO.md` vale aqui: `[FEITO]` não é `[VALIDADO]`, e este documento existe para a
 diferença sumir.
@@ -14,8 +20,8 @@ o mesmo defeito que o parecer de ontem apontou.
 
 | Sigla | O quê                                                              |
 | ----- | ------------------------------------------------------------------ |
-| **U** | `npm test` — 130 testes, leem código-fonte e banco local           |
-| **A** | `npm run aceite` — 117 verificações no workerd real, com navegador |
+| **U** | `npm test` — 131 testes, leem código-fonte e banco local           |
+| **A** | `npm run aceite` — 120 verificações no workerd real, com navegador |
 | **M** | conferência manual, com a data                                     |
 
 ## Número de registro (7 cenários)
@@ -54,17 +60,17 @@ Esta funcionalidade é de `cadastro-e-login`; aqui ela só é consumida (ADR-013
 
 ## Crachá, exportação e opt-in (9 cenários)
 
-| Cenário                                               | Onde                                                                                                                | Veredito                |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Exportação acontece sem servidor                      | A — o gate **conta requisições** durante a exportação e exige zero                                                  | **passou**              |
-| QR Code resolve para a verificação pública            | A — o QR do verso e o do painel apontam para `/verificar/<numero>`, e a página responde                             | **passou**              |
-| Crachá não expõe dado além do previsto                | A — lê o cartão, não a página: sem endereço, telefone nem nascimento da pessoa                                      | **passou**              |
-| Opt-in de deficiência vem desmarcado por padrão       | A — nasce desmarcado, e o texto não usa "recomendado", "ajuda" nem "facilita"                                       | **passou**              |
-| Opt-in marcado afeta só o crachá                      | U + A — sem a marca a rota **nem consulta** o campo 12; marcado, ele entra no cartão e continua fora da verificação | **passou**              |
-| Liberação é imediata                                  | A — o gate falha se aparecer "em análise", "aguardando aprovação" ou selo de validação                              | **passou**              |
-| Sem foto, baixar fica desabilitado com motivo escrito | A — `disabled` com `aria-describedby` apontando para o motivo                                                       | **passou**              |
-| Pré-visualização de impressão em 100%                 | A — a folha A4 traz a instrução de não ajustar à página                                                             | **passou**              |
-| Marcas de corte na folha                              | **M, 2026-08-07** — conferidas na tela; a régua de verdade é papel, e ninguém imprimiu ainda                        | **passou com ressalva** |
+| Cenário                                                 | Onde                                                                                                                                  | Veredito                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Exportação acontece sem servidor                        | A — o gate **conta requisições** durante a exportação e exige zero                                                                    | **passou**              |
+| QR Code resolve para a verificação pública              | A — o QR do verso e o do painel apontam para `/verificar/<numero>`, e a página responde                                               | **passou**              |
+| Crachá não expõe dado além do previsto                  | A — lê o cartão, não a página: sem endereço, telefone nem nascimento da pessoa                                                        | **passou**              |
+| Opt-in de deficiência vem desmarcado por padrão         | A — nasce desmarcado, e o texto não usa "recomendado", "ajuda" nem "facilita"                                                         | **passou**              |
+| Opt-in marcado afeta crachá **e** verificação (ADR-019) | U + A — sem a marca nenhuma das duas rotas consulta; marcado, entra no cartão **e** na página pública, e a declaração para de citá-lo | **passou**              |
+| Liberação é imediata                                    | A — o gate falha se aparecer "em análise", "aguardando aprovação" ou selo de validação                                                | **passou**              |
+| Sem foto, baixar fica desabilitado com motivo escrito   | A — `disabled` com `aria-describedby` apontando para o motivo                                                                         | **passou**              |
+| Pré-visualização de impressão em 100%                   | A — a folha A4 traz a instrução de não ajustar à página                                                                               | **passou**              |
+| Marcas de corte na folha                                | **M, 2026-08-07** — conferidas na tela; a régua de verdade é papel, e ninguém imprimiu ainda                                          | **passou com ressalva** |
 
 ## Verificação pública (8 cenários)
 
@@ -110,7 +116,7 @@ reprova o inocente e ensina a ignorar o vermelho.
 
 ## Veredito
 
-**39 de 39 cenários com veredito. Nenhum reprovado.**
+**40 de 40 cenários com veredito. Nenhum reprovado.**
 
 Duas ressalvas ficam escritas, e nenhuma bloqueia:
 

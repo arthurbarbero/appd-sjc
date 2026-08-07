@@ -126,6 +126,14 @@ function consultar() {
               <dt>Contato de cuidador</dt>
               <dd>{{ data.cuidador }}</dd>
             </div>
+            <!--
+              Só aparece quando a pessoa autorizou (ADR-019). Sem a marca, a rota nem
+              consulta o campo — este bloco nunca chega a ter o que mostrar.
+            -->
+            <div v-if="data?.deficiencias?.length">
+              <dt>Tipo de deficiência</dt>
+              <dd>{{ data.deficiencias.join(' · ') }}</dd>
+            </div>
           </dl>
         </div>
 
@@ -150,9 +158,15 @@ function consultar() {
       sabendo que não vazou nada de ninguém.
     -->
     <div class="declaracao">
+      <!--
+        A declaração acompanha o que a página de fato mostra. Dizer "não mostra tipo de
+        deficiência" logo abaixo de um bloco que mostra seria o pior dos mundos: a pessoa
+        que confere para de acreditar no resto da frase.
+      -->
       <p>
-        Esta página não mostra endereço, telefone da pessoa associada, data de nascimento nem tipo
-        de deficiência.
+        Esta página não mostra endereço, telefone da pessoa associada nem data de nascimento{{
+          data?.deficiencias?.length ? '' : ' nem tipo de deficiência'
+        }}.
       </p>
       <!--
         O desenho do canvas trazia link para "Ler a Política de Privacidade". A página é de

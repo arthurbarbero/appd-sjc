@@ -37,9 +37,9 @@ const fotoFalhou = computed(() => rota.query.foto === 'falhou')
   domínio da APPD o valor é diferente, e um QR apontando para o ambiente errado é um QR
   que leva a lugar nenhum na mão de quem confere.
 
-  **A página `/verificar/<numero>` ainda não existe** — é a Fatia 5 de
-  `cracha-do-associado`, travada pela T0.4 (design aprovado). Até ela subir, este código
-  leva a um 404. Está registrado em `openspec/ESTADO.md`.
+  A página `/verificar/<numero>` subiu em 2026-08-07 com a Fatia 5 de `cracha-do-associado`.
+  Este comentário registrava, até então, que o código levava a um 404 — ficou um dia assim,
+  e foi essa ressalva escrita que fez a página virar prioridade.
 */
 const origem = useRequestURL().origin
 const urlVerificacao = (numero: string) => `${origem}/verificar/${numero}`
@@ -104,7 +104,21 @@ function cepBr(cep?: string | null) {
       <section class="cartao destaque" aria-labelledby="t-inscricao">
         <h2 id="t-inscricao">Minhas inscrições</h2>
 
-        <template v-if="data.inscricao">
+        <!--
+          O erro fica **dentro** do bloco que o causou. Substituir a tela toda esconderia
+          que crachá, dados e exclusão continuam funcionando, e faria a pessoa achar que
+          perdeu tudo por causa de uma consulta.
+        -->
+        <AppdAviso v-if="data.inscricaoFalhou" tipo="erro" titulo="Não carregou">
+          <span>
+            Não conseguimos carregar suas inscrições agora. O resto da página continua funcionando —
+            recarregue em instantes, ou ligue para
+            <a :href="`tel:${sede.e164}`">{{ sede.numero }}</a
+            >.
+          </span>
+        </AppdAviso>
+
+        <template v-else-if="data.inscricao">
           <p class="linha-estado">
             <span class="selo selo-sucesso">
               <span aria-hidden="true">✓</span> {{ data.inscricao.status }}
@@ -180,7 +194,8 @@ function cepBr(cep?: string | null) {
               <p class="explicacao">Quem receber seu crachá confere aqui que ele é seu:</p>
               <p class="endereco-verificacao">{{ urlVerificacao(data.conta.numeroRegistro) }}</p>
               <p class="explicacao">
-                A página mostra sua foto, nome, número e situação. Nunca o tipo de deficiência.
+                A página mostra sua foto, nome, número e situação — e o tipo de deficiência só se
+                você autorizar em Meu crachá.
               </p>
             </div>
           </div>

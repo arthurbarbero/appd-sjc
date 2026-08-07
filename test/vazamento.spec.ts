@@ -38,6 +38,8 @@ const PERMITIDAS_VERIFICACAO = [
   'situacao',
   'cuidadorNome',
   'cuidadorContato',
+  // Não é o dado sensível: é a autorização para ir buscá-lo (ADR-019).
+  'crachaMostraDeficiencia',
 ]
 
 describe('a verificação pública não vaza (REQ-28, ADR-015)', () => {
@@ -54,8 +56,15 @@ describe('a verificação pública não vaza (REQ-28, ADR-015)', () => {
     expect(colunas.sort()).toEqual([...PERMITIDAS_VERIFICACAO].sort())
   })
 
-  it('não menciona o campo 12 em lugar nenhum, nem em comentário', () => {
-    expect(rota).not.toMatch(/\bdeficiencias\b|deficienciaOutro/)
+  it('só consulta o tipo de deficiência com o consentimento marcado (ADR-019)', () => {
+    /*
+      Antes do ADR-019 este teste exigia que a palavra não aparecesse na rota. Agora ela
+      aparece — e o que precisa ser garantido é mais estrito: a consulta tem de estar
+      **dentro** da condicional do consentimento. Filtrar depois de buscar não serve, o
+      dado já teria saído do banco, e é essa a proteção que interessa.
+    */
+    expect(rota).toMatch(/mostraDeficiencia\s*\n?\s*\?\s*\[\]/)
+    expect(rota).not.toMatch(/deficienciaOutro/)
   })
 
   it('não devolve e-mail, CPF, nascimento nem endereço', () => {
@@ -84,6 +93,8 @@ describe('o campo 12 tem um caminho só para sair do banco', () => {
     join('area', 'inscricao.get.ts'),
     join('area', 'inscricao.put.ts'),
     join('conta', 'cadastro.post.ts'),
+    // Desde o ADR-019, condicionada ao consentimento — provado pelo teste acima.
+    join('verificar', '[numero].get.ts'),
   ]
 
   it('nenhuma rota fora da lista menciona o campo 12', () => {
@@ -107,13 +118,16 @@ describe('o campo 12 tem um caminho só para sair do banco', () => {
 })
 
 describe('a tela pública não carrega o que a rota não manda', () => {
-  it('a página de verificação não menciona o campo 12 nem dado de contato da pessoa', () => {
+  it('a página de verificação não traz dado de contato nem documento da pessoa', () => {
     const pagina = ler(join(RAIZ, 'app', 'pages', 'verificar', '[numero].vue'))
-    // "tipo de deficiência" aparece na frase que declara o que a página NÃO mostra — essa
-    // é a única ocorrência aceita, e é requisito (REQ-34).
-    const semDeclaracao = pagina.replace(/não mostra[^<]*/g, '')
-    expect(semDeclaracao).not.toMatch(/deficiencias|campo12|tipoDeficiencia/i)
     expect(pagina).not.toMatch(/data\.(email|cpf|nascimento|endereco|cep)\b/)
+  })
+
+  it('o tipo de deficiência nunca é exibido sem condicional na página pública', () => {
+    // Desde o ADR-019 ele pode aparecer — mas só quando a rota o mandou, e a rota só manda
+    // com o consentimento. O template não pode ter um caminho incondicional.
+    const pagina = ler(join(RAIZ, 'app', 'pages', 'verificar', '[numero].vue'))
+    expect(pagina).toMatch(/v-if="data\?\.deficiencias\?\.length"/)
   })
 })
 

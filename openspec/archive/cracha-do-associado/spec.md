@@ -142,13 +142,17 @@ houver ([ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cui
   zero requisições de rede.
 - **REQ-24**: A tela DEVE informar em texto visível, com corpo ≥ 15 px, que o arquivo é
   gerado no próprio navegador e não é enviado para fora.
-- **REQ-25**: O opt-in de tipo de deficiência DEVE ser uma caixa de seleção única, **separada
-  das demais**, **desmarcada por padrão**, com texto que descreve só a consequência de marcar
-  e a de não marcar. É proibido usar as palavras "recomendado", "ajuda", "facilita" ou
+- **REQ-25** `[v4, 2026-08-07 — ADR-019]`: O opt-in de tipo de deficiência DEVE ser uma caixa
+  de seleção única, **separada das demais**, **desmarcada por padrão**, com texto que descreve
+  só a consequência de marcar e a de não marcar — e que **nomeia os dois destinos**, o crachá
+  impresso e a página pública de verificação. É proibido usar as palavras "recomendado", "ajuda", "facilita" ou
   equivalentes, pré-marcar, destacar com cor de ação ou acompanhar de emoji ou selo.
-- **REQ-26**: Marcar o opt-in DEVE afetar **exclusivamente** o crachá renderizado e exportado.
-  Nenhum efeito em `/verificar/<numero_registro>`, na área do associado ou em qualquer
-  resposta de API pública.
+- **REQ-26** `[v4, 2026-08-07 — ADR-019]`: Marcar o opt-in DEVE fazer o tipo de deficiência
+  aparecer em **dois lugares, e só nesses dois**: o crachá renderizado e exportado, e
+  `/verificar/<numero_registro>`. Desmarcado — que é o padrão — não aparece em nenhum.
+  **Nenhum efeito na área do associado**, que nunca exibe o campo fora da tela de correção.
+  O texto do consentimento DEVE nomear os dois destinos: consentimento colhido com
+  informação errada não é consentimento.
 - **REQ-27**: O crachá DEVE ficar disponível assim que a foto for aceita — liberação imediata.
   A interface NÃO DEVE exibir estado "em análise", "aguardando aprovação", selo de validação
   ou promessa de revisão pela associação.
@@ -163,12 +167,12 @@ houver ([ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cui
   `[A CONFIRMAR]` que `area-do-associado` tinha no assunto.
 - **REQ-28** `[v3, 2026-08-07 — ADR-015]`: `GET /verificar/<numero_registro>` DEVE responder
   HTTP 200 e exibir, no máximo, cinco campos de dado: nome, `numero_registro`, situação,
-  **foto** e **contato de cuidador quando houver**. Nenhum outro campo do cadastro pode
-  aparecer no HTML, no JSON embutido, em atributo `data-*`, em comentário, em cabeçalho HTTP
-  ou em qualquer resposta de API consumida pela página — **em especial o campo 12 (tipo de
-  deficiência), que permanece proibido** e continua guardado pelos testes bloqueantes de
-  vazamento. A foto é servida apenas por esta rota, sem URL direta, dentro do limite do
-  REQ-33.
+  **foto**, **contato de cuidador quando houver** e **tipo de deficiência quando a pessoa
+  tiver marcado o opt-in do REQ-25** (ADR-019). Nenhum outro campo do cadastro pode aparecer
+  no HTML, no JSON embutido, em atributo `data-*`, em comentário, em cabeçalho HTTP ou em
+  qualquer resposta de API consumida pela página. **Sem o opt-in, a rota não consulta o campo
+  12** — a proteção está na consulta, não em filtrar depois. A foto é servida apenas por esta
+  rota, sem URL direta, dentro do limite do REQ-33.
 - **REQ-29**: A resposta para número inexistente e para número fora do formato DEVE ser
   **byte a byte idêntica** no bloco de resultado: mesmo status HTTP 200, mesmo texto, mesma
   estrutura. É proibido dizer que o formato está errado, apontar quantos dígitos faltam,
@@ -190,8 +194,10 @@ houver ([ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cui
   acima disso responde HTTP 429 com mensagem neutra, idêntica para qualquer número.
 - **REQ-34** `[v3, 2026-08-07 — ADR-015]`: A página DEVE exibir, em texto corrido de corpo
   normal (não em nota de rodapé), a declaração explícita do que ela não mostra: endereço,
-  telefone, data de nascimento e tipo de deficiência. **Foto e contato de cuidador saíram
-  desta lista** porque passaram a ser exibidos.
+  telefone e data de nascimento — **mais o tipo de deficiência, quando ele não estiver sendo
+  exibido**. A declaração DEVE acompanhar o que a página de fato mostra: dizer "não mostra
+  tipo de deficiência" logo abaixo de um bloco que mostra faria quem confere parar de
+  acreditar no resto da frase.
 - **REQ-35**: A página DEVE ser legível e responder sem JavaScript: o resultado da rota
   `/verificar/<numero_registro>` é renderizado no servidor.
 
@@ -473,8 +479,17 @@ Funcionalidade: Verificação pública do crachá
       quando houver, Contato de cuidador
     E a situação aparece com ícone e com o texto "Associado ativo"
     E a foto vem embutida na resposta HTML, sem URL de imagem endereçável
-    E o HTML não contém endereço, telefone, data de nascimento, e-mail nem qualquer valor do
-      campo 12 do formulário (tipo de deficiência)
+    E o HTML não contém endereço, telefone, data de nascimento nem e-mail
+    E, sem o opt-in marcado, o HTML não contém nenhum valor do campo 12
+
+  Cenário: Com o consentimento marcado, a verificação exibe o tipo de deficiência
+    Cobre REQ-26 v4, ADR-019
+    Dado o associado fictício "APPD-2026-00042" com o opt-in do REQ-25 marcado
+    Quando alguém sem sessão abre /verificar/APPD-2026-00042
+    Então o bloco de resposta exibe o tipo de deficiência
+    E a declaração do que a página não mostra deixa de citar tipo de deficiência
+    Quando a pessoa desmarca o opt-in
+    Então a verificação deixa de exibir o tipo de deficiência na consulta seguinte
 
   Cenário: Número válido de cadastro inativo
     Dado o associado fictício "APPD-2026-00043" com situação inativo
@@ -500,7 +515,8 @@ Funcionalidade: Verificação pública do crachá
   Cenário: Página declara o que não mostra
     Quando alguém abre /verificar/APPD-2026-00042
     Então existe, em texto de corpo normal, a declaração de que a página não mostra endereço,
-      telefone, data de nascimento nem tipo de deficiência
+      telefone e data de nascimento
+    E, quando o opt-in está desmarcado, a declaração cita também o tipo de deficiência
     E essa declaração está imediatamente abaixo do bloco de resposta
 
   Cenário: Não existe busca por nome nem sugestão

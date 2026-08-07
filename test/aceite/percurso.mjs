@@ -194,11 +194,11 @@ try {
   */
   const bruto = await p.content()
   ok(
-    'tipo de deficiência NÃO aparece na verificação pública',
+    'sem o consentimento, o tipo de deficiência NÃO aparece na verificação pública',
     !/Física|Intelectual|Sensorial|Neurodivergente/.test(bruto),
   )
   ok(
-    'a verificação declara o que não mostra',
+    'sem consentimento, a declaração cita o tipo de deficiência',
     publica.includes('não mostra endereço') && publica.includes('tipo de deficiência'),
   )
   ok('endereço e nascimento não vazam', !bruto.includes('Rua Fictícia') && !bruto.includes('1978'))
@@ -305,13 +305,37 @@ try {
     (await p.textContent('.escolha-optin')).includes('Hoje o seu crachá mostra'),
   )
 
-  // Desmarca de volta: as verificações seguintes contam com o crachá sem o campo 12.
+  /*
+    ADR-019: o consentimento governa os **dois** destinos. Com a caixa marcada, a página
+    pública passa a exibir — e a declaração de "o que não mostramos" precisa parar de citar
+    o tipo de deficiência, senão a frase contradiz o bloco logo acima dela.
+  */
+  await p.goto(`${BASE}/verificar/${numeroRegistro}`, { waitUntil: 'networkidle' })
+  const comConsentimento = await p.textContent('body')
+  ok(
+    'com o consentimento, a verificação pública exibe o tipo de deficiência',
+    comConsentimento.includes('Física'),
+  )
+  ok(
+    'com o consentimento, a declaração para de citar tipo de deficiência',
+    !(await p.textContent('.declaracao')).includes('tipo de deficiência'),
+  )
+
+  // Desmarca de volta: as verificações seguintes contam com o crachá sem o tipo.
+  await p.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
   await p.uncheck('#optin-deficiencia')
   await p.waitForSelector('.confirmacao', { timeout: 15000 })
   ok(
     'desmarcar tira o tipo de deficiência do crachá',
     !(await p.textContent('.lados')).includes('Física'),
   )
+
+  await p.goto(`${BASE}/verificar/${numeroRegistro}`, { waitUntil: 'networkidle' })
+  ok(
+    'desmarcar tira o tipo de deficiência da página pública também',
+    !(await p.textContent('body')).includes('Física'),
+  )
+  await p.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
 
   /*
     T6.1 — a mesma varredura na **resposta de API**, e não só no HTML.

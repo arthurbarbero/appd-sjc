@@ -100,8 +100,8 @@ async function alternarOptIn(evento: Event) {
     await $fetch('/api/area/cracha', { method: 'PUT', body: { mostraDeficiencia: marcado } })
     await refresh()
     confirmacaoOptIn.value = marcado
-      ? 'Escolha guardada: o seu crachá passa a mostrar o tipo de deficiência.'
-      : 'Escolha guardada: o seu crachá não mostra o tipo de deficiência.'
+      ? 'Escolha guardada: o tipo de deficiência passa a aparecer no crachá e na página pública de verificação.'
+      : 'Escolha guardada: o tipo de deficiência não aparece no crachá nem na página pública.'
   } catch {
     caixa.checked = !marcado
     erroOptIn.value = 'Não conseguimos guardar a sua escolha agora. Nada mudou — tente de novo.'
@@ -310,18 +310,27 @@ async function exportar(formato: 'png' | 'pdf') {
           </label>
 
           <div id="consequencias">
+            <!--
+              Esta redação mudou em 2026-08-07 com o ADR-019, e a mudança não é cosmética:
+              antes ela prometia que a página pública nunca mostraria. Consentimento colhido
+              com informação errada não é consentimento — o texto precisa dizer os **dois**
+              destinos, sem rodeio e sem letra miúda.
+            -->
             <p>
               Se você marcar, a palavra Física, Intelectual ou Neurodivergentes, Sensorial (visão,
-              audição, fala) ou Outro fica impressa na frente do crachá, visível para qualquer
-              pessoa que veja o documento.
+              audição, fala) ou Outro passa a aparecer em <strong>dois lugares</strong>: impressa na
+              frente do crachá, visível para quem vir o documento, e na
+              <strong>página de verificação, que é pública</strong> — qualquer pessoa com o seu
+              número de registro abre e vê.
             </p>
             <p>
-              Se você não marcar, o crachá não diz nada sobre isso. A página pública de verificação
-              nunca mostra essa informação, marcando ou não.
+              Se você não marcar, essa informação não aparece em nenhum dos dois. É assim que a sua
+              conta começa, e continua assim até você mudar.
             </p>
             <p>
-              A sua escolha fica <strong>guardada na sua conta</strong> e vale para os próximos
-              crachás que você baixar. Você pode mudá-la aqui quando quiser.
+              A sua escolha fica <strong>guardada na sua conta</strong> e vale a partir de agora, no
+              crachá e na página pública. Você pode mudá-la aqui quando quiser, e desmarcar tira dos
+              dois lugares na hora.
             </p>
           </div>
 

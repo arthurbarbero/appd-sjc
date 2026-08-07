@@ -35,28 +35,50 @@ export default defineEventHandler(async (event) => {
       situacao: true,
     },
   })
+  // A conta é o único bloco sem o qual a página não existe: sem ela não há área.
   if (!conta) throw createError({ statusCode: 401 })
 
-  const inscricao = await bd.query.inscricoesAtendimento.findFirst({
-    where: eq(schema.inscricoesAtendimento.usuarioId, sessao.id),
-    columns: { atendimentos: true, dias: true, status: true, criadoEm: true },
-  })
+  /*
+    Degradação por bloco (REQ-33, cenário "Falha em um bloco não derruba os outros").
 
-  const foto = await bd.query.fotos.findFirst({
-    where: eq(schema.fotos.usuarioId, sessao.id),
-    columns: { id: true },
-  })
+    A chamada continua sendo **uma só** — três requisições numa conexão ruim são três
+    chances de falhar, e o público deste site tem conexão ruim. O que muda é que cada
+    trecho falha por conta própria aqui dentro: se a consulta de inscrições cair, o painel
+    ainda mostra crachá, dados e exclusão, com o erro contido no bloco que o causou.
+
+    Sem isto, um `findFirst` que estoura derruba a tela inteira e a pessoa vê "não
+    conseguimos carregar" sem saber que só uma parte falhou.
+  */
+  const inscricao = await bd.query.inscricoesAtendimento
+    .findFirst({
+      where: eq(schema.inscricoesAtendimento.usuarioId, sessao.id),
+      columns: { atendimentos: true, dias: true, status: true, criadoEm: true },
+    })
+    .catch(() => 'falhou' as const)
+
+  const foto = await bd.query.fotos
+    .findFirst({
+      where: eq(schema.fotos.usuarioId, sessao.id),
+      columns: { id: true },
+    })
+    .catch(() => 'falhou' as const)
+
+  const inscricaoFalhou = inscricao === 'falhou'
+  const fotoFalhou = foto === 'falhou'
 
   return {
     conta,
-    inscricao: inscricao
-      ? {
-          atendimentos: JSON.parse(inscricao.atendimentos) as string[],
-          dias: JSON.parse(inscricao.dias) as string[],
-          status: inscricao.status,
-          criadoEm: inscricao.criadoEm,
-        }
-      : null,
-    temFoto: Boolean(foto),
+    inscricaoFalhou,
+    fotoFalhou,
+    inscricao:
+      inscricaoFalhou || !inscricao
+        ? null
+        : {
+            atendimentos: JSON.parse(inscricao.atendimentos) as string[],
+            dias: JSON.parse(inscricao.dias) as string[],
+            status: inscricao.status,
+            criadoEm: inscricao.criadoEm,
+          },
+    temFoto: !fotoFalhou && Boolean(foto),
   }
 })

@@ -42,39 +42,49 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
 ## Fatia 1 — Acesso e casca da área
 
-- [ ] **T1.1** — Middleware de rota que exige sessão em `/area/*`, redireciona ao login com o
+- [x] **T1.1** — Middleware de rota que exige sessão em `/area/*`, redireciona ao login com o
       destino preservado e não renderiza nada do associado no caminho. **Aceite**: cenário
       "Acesso sem sessão não vaza nada".
-- [ ] **T1.2** — Layout da área com cabeçalho (primeiro nome + "Sair"), rodapé padrão e
+      _Feito em 2026-08-06, marcado em 2026-08-07. server/middleware/area.ts, guarda única das duas changes._
+- [x] **T1.2** — Layout da área com cabeçalho (primeiro nome + "Sair"), rodapé padrão e
       navegação com `aria-current="page"` e sublinhado espesso. **Aceite**: cenário "Item atual
       da navegação marcado por mais que cor".
-- [ ] **T1.3** — Bloco de identificação com nome, `numero_registro` em `tabular-nums` e a linha
+      _Feito em 2026-08-06, marcado em 2026-08-07. AreaNavegacao.vue, com aria-current e sublinhado._
+- [x] **T1.3** — Bloco de identificação com nome, `numero_registro` em `tabular-nums` e a linha
       "Este número é seu e não muda." **Aceite**: cenários "Painel completo" e "Número aparece
       igual em todos os blocos".
 
+      _Feito em 2026-08-06, marcado em 2026-08-07. Número em tabular-nums, com a linha fixa._
+
 ## Fatia 2 — Inscrição: leitura, edição e o bloco do crachá
 
-- [ ] **T2.1** — Consulta da inscrição da pessoa, com projeção que **não** traz o campo 12 em
+- [x] **T2.1** — Consulta da inscrição da pessoa, com projeção que **não** traz o campo 12 em
       nenhuma tela que não seja a de edição.
       **Aceite**: cenário "Tipo de deficiência não aparece em nenhuma tela".
-- [ ] **T2.1b** — **Edição da inscrição** (REQ-11a, REQ-11b), reusando o schema Zod de
+      _Feito em 2026-08-06, marcado em 2026-08-07. A projeção de meus-dados nem cita o campo 12 — provado por test/vazamento.spec.ts._
+- [x] **T2.1b** — **Edição da inscrição** (REQ-11a, REQ-11b), reusando o schema Zod de
       `formulario-atendimento` — nenhuma regra de validação duplicada. Atualiza a linha
       existente e o `atualizado_em`; nunca cria linha nova.
       **Aceite**: cenários "A pessoa edita a própria inscrição" e "A edição usa o mesmo schema
       da inscrição". Um teste falha se a edição criar segunda linha.
-- [ ] **T2.2** — Bloco e página `/area/inscricoes`: tipo, data do pedido, status com ícone e
+      _Feito em 2026-08-07 com a Fatia 3: esquemaMeusDados importado pelos dois lados, e a edição atualiza a linha existente._
+- [x] **T2.2** — Bloco e página `/area/inscricoes`: tipo, data do pedido, status com ícone e
       texto; sem nenhum controle de alteração de status. **Aceite**: cenários "Painel completo"
       e "Pessoa não altera status de inscrição".
-- [ ] **T2.3** — Estado vazio de inscrições que oferece o próximo passo, com botão para o
+      _Feito em 2026-08-06, marcado em 2026-08-07. /area/inscricoes, sem controle de alteração de status._
+- [x] **T2.3** — Estado vazio de inscrições que oferece o próximo passo, com botão para o
       formulário e a alternativa por telefone. **Aceite**: cenário "Sem nenhuma inscrição, o
       estado vazio oferece o próximo passo".
-- [ ] **T2.4 e T2.5 — movidas para `cracha-do-associado`.** `/area/cracha` inteira, incluindo
+      _Feito em 2026-08-06, marcado em 2026-08-07. Estado vazio com o próximo passo e o telefone._
+      **T2.4 e T2.5 — movidas para `cracha-do-associado`.** `/area/cracha` inteira, incluindo
       o envio da foto, é daquela change (ADR-013). Aqui fica só o **bloco do painel** que
       leva até lá: prévia com foto, nome, número, situação, e o estado "Sem foto" com o
       link "Enviar minha foto". **Aceite**: cenários "Painel completo" e "Sem foto no
       crachá, o painel continua funcionando".
-- [ ] **T2.6** — Garantia de que o opt-in do crachá não afeta a prévia da área. **Aceite**:
+- [x] **T2.6** — Garantia de que o opt-in do crachá não afeta a prévia da área. **Aceite**:
       cenário "Opt-in do crachá não vaza para a prévia da área".
+
+      _Satisfeita por construção: /api/area/meus-dados não devolve o campo 12 em hipótese alguma, então o opt-in não tem por onde vazar para a prévia._
 
 ## Fatia 3 — Meus dados
 
@@ -87,9 +97,13 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 - [x] **T3.1b** — Bloco "Meus dados" do painel exibindo o **CEP** e a ação "Alterar meus
       dados" (REQ-15). **Aceite**: cenário "O endereço exibido inclui o CEP".
       _Feito em 2026-08-07._
-- [ ] **T3.2** — Linha explicativa apontando "Seus direitos" e o telefone da associação.
-      **Pendente**: a página "Seus direitos" é de `consentimento-e-privacidade` e ainda não
-      existe; apontar para ela agora seria repetir o erro do QR que leva a 404.
+      **T3.2 — removida da change por decisão do dono, 2026-08-07.**
+
+A linha apontaria para "Seus direitos", página de `consentimento-e-privacidade` que não
+existe. Apontar para ela agora repetiria o erro do QR que levava a 404, e segurar esta
+change por causa de uma linha de texto de outra change é fronteira errada (ADR-013).
+Quando a página subir, ela entra como task de lá.
+
 - [x] **T3.3** — Formulário de alteração com schema Zod compartilhado cliente/servidor, erro por
       campo, `aria-describedby` e `aria-live`. **Aceite**: cenário "Servidor valida com o mesmo
       schema do cliente". _Feito em 2026-08-07 — `esquemaMeusDados` é importado pelos dois
@@ -106,44 +120,56 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
 ## Fatia 4 — Excluir minha conta
 
-- [ ] **T4.1** — Bloco no painel: último, com divisória, borda vermelha, `h2` próprio, visível
+- [x] **T4.1** — Bloco no painel: último, com divisória, borda vermelha, `h2` próprio, visível
       sem interação, botão contornado. **Aceite**: cenário "Painel completo".
-- [ ] **T4.2** — Página `/area/excluir` própria, com **modal** de confirmação que cumpre os
+      _Feito em 2026-08-06, marcado em 2026-08-07. Bloco último, com divisória e botão contornado._
+- [x] **T4.2** — Página `/area/excluir` própria, com **modal** de confirmação que cumpre os
       seis critérios do REQ-22a (foco preso, Esc fecha, foco inicial nunca no destrutivo, foco
       devolvido ao fechar, `role="dialog"` com rótulo, `prefers-reduced-motion`).
       **Aceite**: cenários "A exclusão mora numa página só", "O foco do modal nunca começa no
       botão destrutivo" e "O modal prende o foco e devolve ao fechar".
-- [ ] **T4.3** — Os três blocos explicativos. **O `[A CONFIRMAR]` saiu** com o ADR-017: o
+      _Feito em 2026-08-06, marcado em 2026-08-07. Os seis critérios do modal percorridos pelo gate de aceite._
+- [x] **T4.3** — Os três blocos explicativos. **O `[A CONFIRMAR]` saiu** com o ADR-017: o
       texto definitivo dos três blocos está escrito lá, inclusive a frase sobre o documento em
       papel da sede. **Aceite**: cenário "A página explica o que sai, o que fica e que é
       irreversível".
-- [ ] **T4.4** — Confirmação só pelo modal; **teste que falha se aparecer qualquer campo de
+      _Feito em 2026-08-07: o texto definitivo dos três blocos veio do ADR-017, e o [A CONFIRMAR] saiu._
+- [x] **T4.4** — Confirmação só pelo modal; **teste que falha se aparecer qualquer campo de
       texto pedindo palavra de confirmação**. **Aceite**: cenário "O modal confirma, e nunca
       pede para digitar palavra".
+      _Feito em 2026-08-06, marcado em 2026-08-07. O gate falha se aparecer campo de texto no modal._
 - [x] **T4.5a** — Os dois botões do modal na mesma linha, rótulo do destrutivo encurtado para
       "Excluir" (REQ-24 v3, REQ-24a). _Feito em 2026-08-07, a pedido do dono._
-- [ ] **T4.5** — "Cancelar" como único botão preenchido do modal; o que confirma diz o que faz
+- [x] **T4.5** — "Cancelar" como único botão preenchido do modal; o que confirma diz o que faz
       e é contornado. **Aceite**: cenário "A ação preenchida é a saída segura".
-- [ ] **T4.6** — Rotina de exclusão que executa **o contrato do `modelo-de-dados` REQ-28**, sem
+      _Feito em 2026-08-06, marcado em 2026-08-07. Cancelar é o único preenchido, e o gate confere o foco inicial._
+- [x] **T4.6** — Rotina de exclusão que executa **o contrato do `modelo-de-dados` REQ-28**, sem
       lista própria: apaga inscrição e foto, anonimiza `usuarios` preservando o
       `numero_registro`, grava a revogação em `consentimentos`, marca `situacao` como `inativo`
       e encerra a sessão. Tudo numa transação.
       **Aceite**: cenários "Exclusão confirmada executa o contrato do modelo de dados" e
       "Depois de excluir, a área não abre". ~~Depende de `modelo-de-dados` fechada.~~
       **Destravado**: aquela change foi arquivada em 2026-08-07.
-- [ ] **T4.7** — Efeito na verificação pública: o nome deixa de aparecer em
+      _Feito em 2026-08-06, marcado em 2026-08-07. Executa o contrato do modelo-de-dados REQ-28 em transação._
+- [x] **T4.7** — Efeito na verificação pública: o nome deixa de aparecer em
       `/verificar/<numero>`. **Aceite**: cenário "Depois de excluir, a verificação pública
       mostra mais o nome". **Depende de T0.2** para decidir entre remover ou inativar.
-- [ ] **T4.8** — Alternativa humana com o telefone da associação. **Aceite**: cenário
+      _Feito em 2026-08-07 com a Fatia 5 do crachá: o gate confere que, depois de excluir, a verificação não mostra nome nem foto._
+- [x] **T4.8** — Alternativa humana com o telefone da associação. **Aceite**: cenário
       "Alternativa humana disponível".
+
+      _Feito em 2026-08-06, marcado em 2026-08-07. Telefone da associação na página de exclusão._
 
 ## Fatia 5 — Estados de carregamento e falha
 
-- [ ] **T5.1** — Espaço reservado com a mesma altura do conteúdo final, texto anunciado em
+- [x] **T5.1** — Espaço reservado com a mesma altura do conteúdo final, texto anunciado em
       `aria-live="polite"`, sem animação em laço. **Aceite**: cenário "Carregando não faz a
       página pular".
-- [ ] **T5.2** — Degradação por bloco: falha isolada não derruba os demais. **Aceite**: cenário
+      _Feito em 2026-08-06, marcado em 2026-08-07. Texto de carregamento anunciado por role=status, sem animação em laço._
+- [x] **T5.2** — Degradação por bloco: falha isolada não derruba os demais. **Aceite**: cenário
       "Falha em um bloco não derruba os outros".
+
+      _Feito em 2026-08-07 — era a única lacuna real de código desta change. O painel fazia uma consulta só e o erro derrubava a tela inteira. Agora cada trecho falha por conta própria no servidor, e a chamada continua sendo uma só: três requisições numa conexão ruim são três chances de falhar._
 
 ## Fatia 6 — Validação e fechamento
 
