@@ -16,7 +16,11 @@ import { ASSOCIACAO } from '~~/shared/conteudo'
 useHead({ title: 'Minha área — APPD São José dos Campos' })
 
 const sede = ASSOCIACAO.telefones[0]!
+const rota = useRoute()
 const { data, pending, error } = await useFetch('/api/area/meus-dados')
+
+/** Chega preenchido quando a pessoa acabou de concluir o cadastro. */
+const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
 
 function dataBr(iso?: string | null) {
   if (!iso) return ''
@@ -28,6 +32,14 @@ function dataBr(iso?: string | null) {
 <template>
   <div class="area">
     <h1>Minha área</h1>
+
+    <AppdAviso v-if="recemCadastrada" tipo="sucesso" titulo="Cadastro enviado">
+      <span>
+        Seus interesses ficaram registrados e a sua conta foi criada. Seu número de registro é
+        <strong>{{ recemCadastrada }}</strong> — ele é seu e não muda. A associação entra em contato
+        pelo telefone que você informou.
+      </span>
+    </AppdAviso>
 
     <p v-if="pending" role="status" class="carregando">Carregando suas informações…</p>
 

@@ -160,9 +160,18 @@ const atual = (para: string) =>
 .cabecalho nav .conta {
   display: flex;
   align-items: center;
-  padding-left: var(--e3);
-  margin-left: var(--e2);
+  padding-left: var(--e2);
   border-left: 1px solid var(--borda-suave);
+}
+/* No celular a divisória vertical não faz sentido: a navegação vira coluna. */
+@media (width <= 900px) {
+  .cabecalho nav .conta {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--borda-suave);
+    padding-top: var(--e2);
+    width: 100%;
+  }
 }
 .cabecalho nav .conta a {
   font-weight: 700;

@@ -133,12 +133,32 @@ tela — promessa que a gente publica, a associação cumpre.)
 
 O que trava: a tela de Contato e a mensagem de sucesso do envio.
 
+### 4a. As opções de escolha múltipla vão mudar
+
+Decisão do dono em 2026-08-07: o que hoje só existe como texto livre dentro de "Outro"
+vira **opção própria** na lista — incluindo os quatro projetos (Bocha Paralímpica, Oficina
+Mão na Roda, Artesão da Inclusão, Informática Nota 10). O "Outro" fica para o que é
+realmente outro.
+
+**Isto altera as perguntas do formulário oficial**, contra a regra de réplica fiel de
+[campos-formulario.md](campos-formulario.md). É decisão do dono e vale — e a associação
+precisa saber, porque **o atendimento foi construído em cima das perguntas atuais**: quem
+lê a planilha hoje sabe interpretar "Outro: bocha", e passa a ver uma coluna nova.
+
+Pergunta: a APPD confirma a lista nova? Faltou alguma opção que hoje chega escrita à mão?
+
+O que trava: nada de imediato. Mas mudar opção depois que houver inscrição real significa
+decidir o que fazer com o que já foi respondido.
+
 ### 4b. Três perguntas novas no formulário: e-mail, CPF e senha
 
 Decisão do dono do projeto em 2026-08-06 ([ADR-012](adr/adr-012-cadastro-embutido-no-formulario.md)):
 o formulário de atendimento passa a criar a conta da pessoa no mesmo ato, para que ela
 possa depois **entrar no site e editar o próprio cadastro** — o que a planilha de hoje
 não permite. Isso acrescenta três perguntas às 15 existentes. Nenhuma das 15 muda.
+
+**Além delas, o CEP** virou obrigatório (decisão do dono, 2026-08-06), com busca
+automática de rua, bairro e cidade. São **quatro** campos novos no total.
 
 Pergunta: a APPD concorda em pedir **CPF**? É dado que a associação não coleta hoje.
 Ele serve para impedir cadastro duplicado da mesma pessoa; se a associação preferir não

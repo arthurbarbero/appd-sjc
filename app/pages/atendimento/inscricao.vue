@@ -297,8 +297,11 @@ async function enviar() {
         chaveDerivada,
       },
     })
+    // Concluir o cadastro já entra na conta: a sessão foi aberta pelo servidor no mesmo
+    // pedido. Mandar para a área é o que a pessoa espera, e evita uma tela intermediária
+    // que só existia porque o cadastro não gravava nada.
     numeroRegistro.value = resposta.numeroRegistro
-    enviado.value = true
+    await navigateTo({ path: '/area', query: { cadastro: resposta.numeroRegistro } })
   } catch (erro: unknown) {
     // Erro do servidor volta por campo, com a mesma mensagem que o cliente daria.
     const dados = (erro as { data?: { data?: { erros?: Record<string, string> } } })?.data?.data

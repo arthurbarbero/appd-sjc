@@ -1,5 +1,10 @@
 # Tasks: Formulário de Atendimento
 
+> **Reconciliação de 2026-08-07.** T3 (rota), T5 (tela) e o campo CEP foram implementados em 2026-08-06 **sem passar
+> por estas tasks** — o rito foi abandonado naquele dia. O código roda e o ciclo passou
+> ponta a ponta, mas **os critérios de aceite desta change não foram percorridos**, então
+> nada aqui está marcado como concluído. Ver `openspec/ESTADO.md`.
+
 - Deriva de: SPEC-formulario-atendimento (v2, 2026-08-06)
 - **Pré-requisito duro:** a change `modelo-de-dados` precisa estar fechada. Nenhuma task
   daqui cria tabela ou coluna.

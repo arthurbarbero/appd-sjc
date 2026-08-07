@@ -1,5 +1,11 @@
 # Tasks: Conta, senha e sessão
 
+> **Reconciliação de 2026-08-07.** As tasks marcadas `[FEITO]` foram implementadas em
+> 2026-08-06 **sem passar por aqui** — o rito foi abandonado naquele dia. Elas estão
+> marcadas agora para o registro parar de mentir, mas **`[FEITO]` aqui não quer dizer
+> validado**: os critérios de aceite Gherkin não foram percorridos. Ver
+> `openspec/ESTADO.md`.
+
 - Deriva de: SPEC-cadastro-e-login (v2, 2026-08-06)
 - **Pré-requisito duro:** a change `modelo-de-dados` precisa estar fechada. Nenhuma task
   daqui cria tabela ou coluna.
@@ -32,7 +38,7 @@ proporcional ao cadastro inteiro.
 `[condicional a Q-1]`. T-0.3 bloqueia a exibição do prazo na tela de exclusão, que é de
 `area-do-associado`. **T-0.4 bloqueia o login ir ao ar**, não só o T-9.2.
 
-## T-1 — Fixar e medir os parâmetros do scrypt (REQ-6, REQ-7, REQ-27)
+## T-1 [FEITO 2026-08-06, ver ADR-005] — Fixar e medir os parâmetros do scrypt (REQ-6, REQ-7, REQ-27)
 
 Dono: Arquiteto. Depende de: nada.
 
@@ -54,7 +60,7 @@ o `CHECK` de `situacao`.
 
 **Aceite**: os testes de restrição de `modelo-de-dados` T3.1 passam.
 
-## T-3 — Geração do número de registro (REQ-2 a REQ-5)
+## T-3 [FEITO 2026-08-06] — Geração do número de registro (REQ-2 a REQ-5)
 
 Dono: Dev. Depende de: T-2.
 
@@ -67,7 +73,7 @@ exigido", "Dois cadastros simultâneos não recebem o mesmo número de registro"
 se a restrição de unicidade for removida do schema — se não falhar, o teste não está
 provando nada.
 
-## T-4 — Sessão em cookie selado (REQ-11 a REQ-15)
+## T-4 [FEITO 2026-08-06] — Sessão em cookie selado (REQ-11 a REQ-15)
 
 Dono: Dev. Depende de: nada. **Contém risco**: `nuxt-auth-utils` ainda não foi provado
 no workerd.
@@ -81,7 +87,7 @@ revisão do ADR-002, não de improviso.
 sessão" e "A aplicação não sobe sem a chave de sessão". `.dev.vars.example` continua com
 valor vazio e o gitleaks segue verde.
 
-## T-5 — Serviço de criação de conta (REQ-16 a REQ-23)
+## T-5 [FEITO 2026-08-06] — Serviço de criação de conta (REQ-16 a REQ-23)
 
 Dono: Dev. Depende de: T-1, T-3, T-0.1.
 
@@ -98,7 +104,7 @@ rota, não é tela** — a tela é de lá (ADR-012). `/cadastro`, se existir, é
 **Status**: não existe mais aqui (ADR-012). A tela que cria a conta é
 `/atendimento/inscricao`, com os 15 campos mais e-mail, CPF e senha.
 
-## T-7 — Login e limite de tentativas (REQ-24 a REQ-27)
+## T-7 [FEITO 2026-08-06, sem os cenários percorridos] — Login e limite de tentativas (REQ-24 a REQ-27)
 
 Dono: Dev. Depende de: T-4, T-5. **Exige o design de `/entrar` aprovado (R-7).**
 
@@ -110,7 +116,7 @@ e-mail existente. A chave do contador está em HMAC, nunca em texto claro. Um te
 compara as duas medianas de tempo contra o `<limite_ms>` definido em T-1, com a política
 de retentativa daquela task.
 
-## T-8 — Logout e guarda de rota (REQ-13, REQ-14, REQ-30)
+## T-8 [FEITO 2026-08-06] — Logout e guarda de rota (REQ-13, REQ-14, REQ-30)
 
 Dono: Dev. Depende de: T-4.
 

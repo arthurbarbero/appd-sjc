@@ -487,6 +487,18 @@ thead th {
   flex-wrap: wrap;
 }
 
+/*
+  A navegação é uma linha só: os itens do site e, separado por divisória, o link da conta.
+  Sem isto o bloco da conta cai para baixo da lista e o cabeçalho parece quebrado — foi o
+  que aconteceu quando o link "Entrar" entrou sem ajustar o container.
+*/
+.cabecalho nav {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  flex-wrap: wrap;
+}
+
 .cabecalho nav ul {
   display: flex;
   gap: var(--e2);

@@ -1,5 +1,10 @@
 # Tasks: Área do associado
 
+> **Reconciliação de 2026-08-07.** as Fatias 1 a 4 e as rotas de API foram implementados em 2026-08-06 **sem passar
+> por estas tasks** — o rito foi abandonado naquele dia. O código roda e o ciclo passou
+> ponta a ponta, mas **os critérios de aceite desta change não foram percorridos**, então
+> nada aqui está marcado como concluído. Ver `openspec/ESTADO.md`.
+
 Deriva de SPEC-area-do-associado v1. Fatias verticais: cada uma entrega algo verificável
 sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Barbero (decisão) /
 Claude Code (execução). Nada começa antes do gate do revisor-spec.
