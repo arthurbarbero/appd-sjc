@@ -118,7 +118,8 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       `numero_registro`, grava a revogação em `consentimentos`, marca `situacao` como `inativo`
       e encerra a sessão. Tudo numa transação.
       **Aceite**: cenários "Exclusão confirmada executa o contrato do modelo de dados" e
-      "Depois de excluir, a área não abre". **Depende de `modelo-de-dados` fechada.**
+      "Depois de excluir, a área não abre". ~~Depende de `modelo-de-dados` fechada.~~
+      **Destravado**: aquela change foi arquivada em 2026-08-07.
 - [ ] **T4.7** — Efeito na verificação pública: o nome deixa de aparecer em
       `/verificar/<numero>`. **Aceite**: cenário "Depois de excluir, a verificação pública
       mostra mais o nome". **Depende de T0.2** para decidir entre remover ou inativar.

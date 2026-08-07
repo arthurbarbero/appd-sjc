@@ -229,3 +229,68 @@ describe('o estado do rito não mente', () => {
     }
   })
 })
+
+describe('o registro não fica para trás do código', () => {
+  /*
+    Estas três checagens nascem de uma pergunta do dono em 2026-08-07: "todo dia voce diz
+    que tem arquivo desatualizado, e todo dia eu peço para atualizar — por que continua?"
+
+    A resposta honesta é que "atualizar o PROGRESS" virou **acrescentar o que aconteceu
+    hoje**, e nunca **auditar o que o arquivo já afirma**. O acréscimo é barato e dá
+    sensação de completo; a mentira mora nas seções que ninguém reabre. Foi assim que o
+    ADR-005 passou um dia inteiro listado como decisão pendente do dono, dois dias depois
+    de ele ter decidido e com o código dessa decisão em produção.
+
+    Por isso não vira promessa de prestar atenção: vira teste. Mesma lição de
+    `gate-que-se-le-nao-acontece` — critério que depende de leitura humana nunca roda.
+  */
+  const PASTA_ADR = join(import.meta.dirname, '..', 'docs', 'adr')
+  const RAIZ = join(import.meta.dirname, '..')
+
+  /** Número → status, lido do cabeçalho de cada ADR escrito. */
+  const adrs = new Map(
+    readdirSync(PASTA_ADR)
+      .filter((a) => /^adr-\d{3}/.test(a))
+      .map((a) => [
+        a.slice(4, 7),
+        /^Status:\s*\**\s*Aceito/m.test(readFileSync(join(PASTA_ADR, a), 'utf8')),
+      ]),
+  )
+
+  const aceitos = [...adrs].filter(([, ok]) => ok).map(([n]) => n)
+
+  it('a lista de "reservados, ainda não escritos" não contém ADR que existe', () => {
+    const indice = readFileSync(join(PASTA_ADR, 'README.md'), 'utf8')
+    const secao = indice.split(/^##\s+Reservados/m)[1]?.split(/^##\s/m)[0] ?? ''
+    const listados = [...secao.matchAll(/^\|\s*(\d{3})\s*\|/gm)].map((m) => m[1])
+    const escritos = listados.filter((n) => adrs.has(n))
+    expect(escritos, `reservado como "não escrito" mas o arquivo existe: ${escritos}`).toEqual([])
+  })
+
+  it('nenhum item em aberto do PROGRESS.md cita decisão que já foi aceita', () => {
+    const texto = readFileSync(join(RAIZ, 'PROGRESS.md'), 'utf8')
+    // Um item vai de "- [ ]" até o próximo item ou título — as continuações indentadas
+    // pertencem a ele, e é justamente nelas que o ADR costuma ser citado.
+    const itens = texto.split(/^(?=\s*-\s+\[[ x]\]|#)/m).filter((b) => /^\s*-\s+\[ \]/.test(b))
+    const presos = itens.flatMap((item) =>
+      [...item.matchAll(/ADR-(\d{3})/g)]
+        .map((m) => m[1])
+        .filter((n) => aceitos.includes(n))
+        .map((n) => `ADR-${n} em "${item.split('\n')[0].trim().slice(0, 70)}"`),
+    )
+    expect(presos, `item aberto citando ADR já aceito:\n${presos.join('\n')}`).toEqual([])
+  })
+
+  it('nenhuma task declara depender de change já arquivada', () => {
+    const arquivo = join(RAIZ, 'openspec', 'archive')
+    if (!existsSync(arquivo)) return
+    const arquivadas = readdirSync(arquivo)
+    const presas = NOMES.flatMap((nome) =>
+      [...tasks(nome).matchAll(/^.*\b[Dd]epende de:?\b.*$/gm)]
+        .map((m) => m[0])
+        .filter((linha) => arquivadas.some((a) => linha.includes(a) && !linha.includes('~~')))
+        .map((linha) => `${nome}: ${linha.trim().slice(0, 90)}`),
+    )
+    expect(presas, `dependência de change já arquivada:\n${presas.join('\n')}`).toEqual([])
+  })
+})
