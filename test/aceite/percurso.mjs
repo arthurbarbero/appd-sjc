@@ -186,20 +186,33 @@ try {
     O teste usa um IP fictício próprio para não gastar a cota do percurso real.
   */
   const grande = await p.request.post(`${BASE}/api/conta/cadastro`, {
-    headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.77' },
+    headers: { 'content-type': 'application/json' },
     data: { lixo: 'x'.repeat(20000) },
   })
   ok('corpo maior que o esperado é recusado com 413', grande.status() === 413, `${grande.status()}`)
 
-  let bloqueou = 0
-  for (let i = 0; i < 14; i++) {
-    const r = await p.request.post(`${BASE}/api/conta/cadastro`, {
-      headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.88' },
-      data: { nada: true },
-    })
-    if (r.status() === 429) bloqueou += 1
+  /*
+    O limite por IP só é exercitável **localmente**, e a razão é uma boa notícia.
+
+    Para provar o corte sem gastar a cota do percurso real, o teste precisa fingir um IP —
+    e em produção a Cloudflare **recusa com 403** qualquer requisição que traga
+    `cf-connecting-ip` posto pelo cliente. Ou seja: o cabeçalho em que o contador se apoia
+    não é falsificável de fora, que é exatamente a propriedade que se quer.
+
+    Medido em 2026-08-07 contra produção: com o cabeçalho forjado, 403; sem ele, o fluxo
+    normal responde 413 e 422 como deve.
+  */
+  if (SOBE_SERVIDOR) {
+    let bloqueou = 0
+    for (let i = 0; i < 14; i++) {
+      const r = await p.request.post(`${BASE}/api/conta/cadastro`, {
+        headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.88' },
+        data: { nada: true },
+      })
+      if (r.status() === 429) bloqueou += 1
+    }
+    ok('rajada de cadastros do mesmo IP é cortada com 429', bloqueou > 0, `${bloqueou} bloqueios`)
   }
-  ok('rajada de cadastros do mesmo IP é cortada com 429', bloqueou > 0, `${bloqueou} bloqueios`)
 
   // ── 1b. A verificação pública, que é para onde o QR aponta ────────────────
   const numeroRegistro = (await p.getAttribute('svg[role="img"]', 'aria-label')).match(

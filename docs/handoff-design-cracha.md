@@ -32,27 +32,31 @@ Carregar fonte do Google entrega o IP de cada visitante a um terceiro, sem base 
 sem o visitante saber. É a terceira vez que aparece: o canvas volta a gerar CDN porque não
 sabe da decisão. Não é erro do dono.
 
-## Correção 2 — tipo de deficiência na verificação pública
+## Correção 2 — o tipo de deficiência fica, mas condicionado ao consentimento
 
-`Verificar.dc.html` exibe um bloco "Tipo de deficiência" e o declara na frase do que a
-página mostra. **Sai.**
+> **Esta correção foi reescrita no mesmo dia.** A primeira versão mandava tirar o bloco
+> "Tipo de deficiência" da verificação em qualquer hipótese. O dono apontou o erro: ele
+> nunca disse que nunca deveria aparecer — disse que aparece **se houver consentimento**.
+> Ver [ADR-019](adr/adr-019-consentimento-governa-a-verificacao-publica.md).
 
-Não é discordância de desenho: é o campo 12, dado sensível do Art. 11 da LGPD, numa página
-pública sem autenticação. O dono decidiu manter a foto e o contato de cuidador, e deixar o
-tipo de deficiência de fora — [ADR-015](adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md).
+`Verificar.dc.html` exibe o bloco **sempre**. Na implementação ele é **condicional**: só
+aparece quando a pessoa marcou o opt-in em `/area/cracha`. Sem a marca, a rota nem consulta
+o campo.
 
-Junto sai o exemplo "Deficiência física — usuária de cadeira de rodas", e a frase de
-declaração passa a ser: "Esta página não mostra endereço, telefone, data de nascimento nem
-tipo de deficiência."
+O exemplo do canvas — "Deficiência física — usuária de cadeira de rodas" — vira o valor real
+da inscrição, sem descrição livre. E a frase de declaração passa a ser **variável**: ela cita
+tipo de deficiência quando ele não está sendo exibido, e para de citar quando está. Dizer
+"não mostramos" logo acima de um bloco que mostra faria quem confere parar de acreditar no
+resto da frase.
 
 ## Correção 3 — duas frases do crachá que o ADR-015 desatualizou
 
 `Cracha.dc.html` afirma, no rodapé do conteúdo:
 
-| O canvas escreveu                                                                              | O que vale                                                                                                     |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| "Sua foto fica guardada só para o crachá. Ela nunca aparece na página pública de verificação." | A foto **aparece** na verificação pública. É a razão de a página existir (ADR-015).                            |
-| "Se você não marcar, o crachá não diz nada sobre isso, e a página pública também não."         | A verificação **nunca** mostra o tipo de deficiência, marcado ou não. O opt-in vale só para o crachá impresso. |
+| O canvas escreveu                                                                              | O que vale                                                                                                                            |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| "Sua foto fica guardada só para o crachá. Ela nunca aparece na página pública de verificação." | A foto **aparece** na verificação pública. É a razão de a página existir (ADR-015).                                                   |
+| "Se você não marcar, o crachá não diz nada sobre isso, e a página pública também não."         | Meia verdade: **não marcar** de fato tira dos dois. Mas **marcar** passa a publicar nos dois, e o texto precisa dizer isso (ADR-019). |
 
 As duas frases estavam certas quando o prompt foi escrito, em 2026-08-05. O ADR-015 é de
 dois dias depois.
@@ -66,6 +70,7 @@ resposta HTML** (`data:` URI), sem URL de imagem endereçável, e com
 
 ## O que já foi implementado deste handoff
 
-O componente de recorte e compressão (`app/components/AppdFoto.vue`), com os estados de
-recorte, preparo e erro, mais o armazenamento (Fatia 2). A tela `/area/cracha`, o cartão
-frente e verso e a página `/verificar` seguem por implementar — fatias 4 e 5.
+**Tudo.** Fatia 2 (armazenamento), Fatia 3 (recorte e compressão), Fatia 4 (cartão frente e
+verso, exportação PNG e PDF, impressão A4, opt-in) e Fatia 5 (a verificação pública). A
+change foi validada item a item e arquivada em 2026-08-07 — ver
+[VALIDACAO.md](../openspec/archive/cracha-do-associado/VALIDACAO.md).
