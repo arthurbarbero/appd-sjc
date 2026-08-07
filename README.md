@@ -4,8 +4,13 @@ Site da **APPD-SJC** — Associação das Pessoas com Deficiência de São José
 (CNPJ 08.074.883/0001-96, fundada em 2006).
 
 Projeto voluntário, em desenvolvimento, feito com autorização da associação para uso
-de marca e conteúdo. **Ainda não é o site oficial** — o site no ar é
+de marca e conteúdo. **Ainda não é o site oficial** — o site oficial é
 [appd.org.br](https://www.appd.org.br).
+
+**Pré-visualização:** <https://appd-sjc.appd-sjc.workers.dev> — publicada a cada push na
+`main`, e só depois de lint, typecheck e testes passarem. É endereço de demonstração:
+fica em `*.workers.dev` enquanto a APPD não aprovar o domínio dela, e o banco por trás
+dele **não é de produção**. Não cadastre dado de pessoa real ali.
 
 ## Princípios
 

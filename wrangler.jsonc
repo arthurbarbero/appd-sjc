@@ -14,6 +14,15 @@
   // mensagem — "You need to register a workers.dev subdomain" — vinha depois de 40 linhas
   // de upload bem-sucedido, o que fazia a falha parecer de deploy e não de conta.
   "workers_dev": true,
+  // Endereço publicado: https://appd-sjc.appd-sjc.workers.dev (nome do Worker + subdomínio
+  // da conta).
+  //
+  // **Pré-visualização desligada.** Ligada — que é o padrão quando `workers_dev` é true —
+  // cada versão publicada ganha um endereço público próprio, e **todos apontam para o
+  // mesmo D1**. Num site que guarda nome, CPF e informação de deficiência, isso multiplica
+  // a superfície pública sem entregar nada: quem precisa conferir uma versão antiga tem o
+  // histórico do git.
+  "preview_urls": false,
   "assets": {
     "directory": "./.output/public/",
     "binding": "ASSETS",
