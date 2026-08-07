@@ -241,6 +241,11 @@ try {
     'o texto do opt-in não empurra a marcar',
     !/recomendad|ajuda a|facilita|melhor experiência/i.test(cracha),
   )
+  ok(
+    'a tela diz a situação de agora antes de pedir a escolha',
+    cracha.includes('Hoje o seu crachá não mostra'),
+  )
+  ok('a tela diz que a escolha fica guardada na conta', cracha.includes('guardada na sua conta'))
 
   // Envia uma foto de verdade pelo componente de recorte, para o crachá existir.
   await p.setInputFiles('input[type=file]', {
@@ -276,6 +281,37 @@ try {
       !cartoes.includes('99165-7059'),
   )
   ok('sem o opt-in, o crachá NÃO traz o tipo de deficiência', !cartoes.includes('Física'))
+
+  /*
+    O opt-in em funcionamento. Consentimento que não confirma não é consentimento: a
+    pessoa precisa saber que gravou, e o valor precisa sobreviver ao recarregar — senão a
+    escolha some sem aviso e ela descobre no crachá impresso.
+  */
+  await p.check('#optin-deficiencia')
+  await p.waitForSelector('.confirmacao', { timeout: 15000 })
+  ok(
+    'marcar confirma que a escolha foi guardada',
+    (await p.textContent('.confirmacao')).includes('Escolha guardada'),
+  )
+  ok(
+    'com o opt-in marcado, o tipo de deficiência entra no crachá',
+    (await p.textContent('.lados')).includes('Física'),
+  )
+  await p.reload({ waitUntil: 'networkidle' })
+  await p.waitForSelector('.lados', { timeout: 20000 })
+  ok('a escolha sobrevive ao recarregar', await p.isChecked('#optin-deficiencia'))
+  ok(
+    'a tela passa a dizer que hoje o crachá mostra',
+    (await p.textContent('.escolha-optin')).includes('Hoje o seu crachá mostra'),
+  )
+
+  // Desmarca de volta: as verificações seguintes contam com o crachá sem o campo 12.
+  await p.uncheck('#optin-deficiencia')
+  await p.waitForSelector('.confirmacao', { timeout: 15000 })
+  ok(
+    'desmarcar tira o tipo de deficiência do crachá',
+    !(await p.textContent('.lados')).includes('Física'),
+  )
 
   /*
     A exportação acontece inteira no aparelho (REQ-23). A prova é contar requisições de

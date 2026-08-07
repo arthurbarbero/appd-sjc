@@ -19,7 +19,7 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 | Comando          | O que cobre                                                                                                                                                                               |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm test`       | 122 testes — restrição de banco, emissão concorrente, revalidação da foto e regressão de interface                                                                                        |
-| `npm run aceite` | 105 verificações no workerd real: ciclo de conta, crachá com foto e exportação, verificação pública, sete larguras, axe A/AA em doze telas. Aceita `APPD_BASE` para rodar contra produção |
+| `npm run aceite` | 112 verificações no workerd real: ciclo de conta, crachá com foto e exportação, verificação pública, sete larguras, axe A/AA em doze telas. Aceita `APPD_BASE` para rodar contra produção |
 | CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                            |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de

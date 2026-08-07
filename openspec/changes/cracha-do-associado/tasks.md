@@ -84,8 +84,13 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 - [x] **T4.5** — Caixa única e separada, desmarcada por padrão, persistida em
       `usuarios.cracha_mostra_deficiencia`. **Efeito restrito por construção**: sem a marca, a
       rota do crachá **nem consulta** o campo 12 — a proteção está na consulta, não no template.
-      **Aceite**: o gate confere que nasce desmarcada e que o texto não usa "recomendado",
-      "ajuda" ou "facilita". _Feito em 2026-08-07._
+      **Tratada como consentimento** (decisão do dono, 2026-08-07): a tela diz a situação de
+      agora antes de pedir a escolha, avisa que ela fica guardada na conta, confirma a gravação
+      e, se a gravação falhar, devolve a caixa ao valor real — caixa marcada sem gravação é a
+      pior falha possível aqui, porque a pessoa acharia que escolheu.
+      **Aceite**: o gate confere que nasce desmarcada, que o texto não usa "recomendado",
+      "ajuda" ou "facilita", que marcar confirma e sobrevive ao recarregar, e que marcar e
+      desmarcar mudam o cartão. _Feito em 2026-08-07._
 - [x] **T4.6** — Sem foto, baixar fica desabilitado com o motivo em `aria-describedby`. O gate
       falha se aparecer "em análise", "aguardando aprovação" ou selo de validação. _Feito em
       2026-08-07._

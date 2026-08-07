@@ -80,10 +80,32 @@ watch(enviandoFoto, (blob) => {
   if (blob) enviarFoto()
 })
 
+const confirmacaoOptIn = ref('')
+const erroOptIn = ref('')
+
+/**
+ * Grava a escolha de imprimir o tipo de deficiência no crachá.
+ *
+ * É consentimento para expor dado sensível do Art. 11 num documento que qualquer pessoa
+ * vê, e por isso a tela **confirma que gravou** em vez de deixar a caixa marcada sem
+ * garantia. Se a gravação falhar, a caixa volta ao valor real: caixa que mostra um estado
+ * que o banco não tem é a pior falha possível aqui — a pessoa acharia que escolheu.
+ */
 async function alternarOptIn(evento: Event) {
-  const marcado = (evento.target as HTMLInputElement).checked
-  await $fetch('/api/area/cracha', { method: 'PUT', body: { mostraDeficiencia: marcado } })
-  await refresh()
+  const caixa = evento.target as HTMLInputElement
+  const marcado = caixa.checked
+  confirmacaoOptIn.value = ''
+  erroOptIn.value = ''
+  try {
+    await $fetch('/api/area/cracha', { method: 'PUT', body: { mostraDeficiencia: marcado } })
+    await refresh()
+    confirmacaoOptIn.value = marcado
+      ? 'Escolha guardada: o seu crachá passa a mostrar o tipo de deficiência.'
+      : 'Escolha guardada: o seu crachá não mostra o tipo de deficiência.'
+  } catch {
+    caixa.checked = !marcado
+    erroOptIn.value = 'Não conseguimos guardar a sua escolha agora. Nada mudou — tente de novo.'
+  }
 }
 
 async function exportar(formato: 'png' | 'pdf') {
@@ -253,24 +275,48 @@ async function exportar(formato: 'png' | 'pdf') {
         </p>
 
         <div class="escolha-optin">
+          <!--
+            A situação de agora, escrita antes da caixa. Sem ela, quem chega precisa inferir
+            a própria escolha do estado de um controle — e é justamente isso que fica ambíguo
+            para quem usa leitor de tela ou tem dificuldade de leitura, que é parte do
+            público deste site.
+          -->
+          <p class="estado-atual">
+            <strong
+              >Hoje o seu crachá {{ data.mostraDeficiencia ? 'mostra' : 'não mostra' }}</strong
+            >
+            o seu tipo de deficiência.
+          </p>
+
           <label class="escolha" for="optin-deficiencia">
             <input
               id="optin-deficiencia"
               type="checkbox"
               :checked="data.mostraDeficiencia"
+              aria-describedby="consequencias"
               @change="alternarOptIn"
             />
             <span>Mostrar o meu tipo de deficiência no crachá</span>
           </label>
-          <p>
-            Se você marcar, a palavra Física, Intelectual ou Neurodivergentes, Sensorial (visão,
-            audição, fala) ou Outro fica impressa na frente do crachá, visível para qualquer pessoa
-            que veja o documento.
-          </p>
-          <p>
-            Se você não marcar, o crachá não diz nada sobre isso. A página pública de verificação
-            nunca mostra essa informação, marcando ou não.
-          </p>
+
+          <div id="consequencias">
+            <p>
+              Se você marcar, a palavra Física, Intelectual ou Neurodivergentes, Sensorial (visão,
+              audição, fala) ou Outro fica impressa na frente do crachá, visível para qualquer
+              pessoa que veja o documento.
+            </p>
+            <p>
+              Se você não marcar, o crachá não diz nada sobre isso. A página pública de verificação
+              nunca mostra essa informação, marcando ou não.
+            </p>
+            <p>
+              A sua escolha fica <strong>guardada na sua conta</strong> e vale para os próximos
+              crachás que você baixar. Você pode mudá-la aqui quando quiser.
+            </p>
+          </div>
+
+          <p v-if="confirmacaoOptIn" class="confirmacao" role="status">{{ confirmacaoOptIn }}</p>
+          <p v-if="erroOptIn" class="erro" role="alert">{{ erroOptIn }}</p>
         </div>
       </section>
 
@@ -399,5 +445,20 @@ figcaption {
 
 .escolha-optin p {
   max-width: 60ch;
+}
+
+#consequencias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.estado-atual {
+  font-size: var(--texto-corpo-g);
+}
+
+.confirmacao {
+  color: var(--verde);
+  font-weight: var(--peso-forte);
 }
 </style>
