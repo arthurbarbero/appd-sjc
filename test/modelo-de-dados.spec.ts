@@ -59,6 +59,7 @@ function criaUsuario(db: DatabaseSync, sobrescreve: Record<string, string> = {})
     nascimento: '1978-03-12',
     telefone: '12900000001',
     telefone_whatsapp: 'Sim',
+    cep: '12239530',
     endereco: 'Rua de Teste',
     numero: 's/n',
     bairro: 'Bairro Fictício',
@@ -280,7 +281,8 @@ describe('Integridade do modelo de dados', () => {
     db.prepare(
       `UPDATE usuarios SET
          nome = NULL, email = NULL, cpf = NULL, senha_hash = NULL, senha_params = NULL,
-         nascimento = NULL, telefone = NULL, telefone_whatsapp = NULL, endereco = NULL,
+         nascimento = NULL, telefone = NULL, telefone_whatsapp = NULL, cep = NULL,
+         endereco = NULL,
          numero = NULL, complemento = NULL, bairro = NULL, municipio = NULL,
          cuidador_nome = NULL, cuidador_contato = NULL, chave_idempotencia = NULL,
          situacao = 'inativo', atualizado_em = ?

@@ -10,6 +10,15 @@ const menu = [
   { rotulo: 'Contato', para: '/contato' },
 ]
 
+/**
+ * Quem já entrou vê "Minha área"; quem não entrou vê "Entrar".
+ *
+ * O link fica **fora** da lista do menu principal, separado por uma divisória: os seis
+ * itens são o site institucional, e a conta é outra coisa. Misturar os dois faria o menu
+ * público mudar de tamanho conforme quem olha.
+ */
+const { loggedIn } = useUserSession()
+
 const menuAberto = ref(false)
 const rota = useRoute()
 watch(
@@ -53,6 +62,10 @@ const atual = (para: string) =>
             </NuxtLink>
           </li>
         </ul>
+        <div class="conta">
+          <NuxtLink v-if="loggedIn" to="/area" :aria-current="atual('/area')">Minha área</NuxtLink>
+          <NuxtLink v-else to="/entrar" :aria-current="atual('/entrar')">Entrar</NuxtLink>
+        </div>
       </nav>
     </header>
 
@@ -144,6 +157,20 @@ const atual = (para: string) =>
   display: none;
 }
 
+.cabecalho nav .conta {
+  display: flex;
+  align-items: center;
+  padding-left: var(--e3);
+  margin-left: var(--e2);
+  border-left: 1px solid var(--borda-suave);
+}
+.cabecalho nav .conta a {
+  font-weight: 700;
+  color: var(--primaria);
+}
+.cabecalho nav .conta a:visited {
+  color: var(--primaria);
+}
 .cabecalho nav ul {
   gap: var(--e1);
 }
@@ -199,6 +226,20 @@ const atual = (para: string) =>
     padding-top: var(--e2);
   }
 
+  .cabecalho nav .conta {
+    display: flex;
+    align-items: center;
+    padding-left: var(--e3);
+    margin-left: var(--e2);
+    border-left: 1px solid var(--borda-suave);
+  }
+  .cabecalho nav .conta a {
+    font-weight: 700;
+    color: var(--primaria);
+  }
+  .cabecalho nav .conta a:visited {
+    color: var(--primaria);
+  }
   .cabecalho nav ul {
     flex-direction: column;
   }

@@ -41,6 +41,7 @@ const f = reactive({
   nascimento: '',
   telefone: '',
   whatsapp: '',
+  cep: '',
   endereco: '',
   numero: '',
   complemento: '',
@@ -67,6 +68,55 @@ const enviando = ref(false)
 const numeroRegistro = ref('')
 const erroGeral = ref('')
 
+const buscandoCep = ref(false)
+const avisoCep = ref('')
+
+/**
+ * Preenche endereço, bairro e município a partir do CEP.
+ *
+ * Três decisões dentro de uma função pequena:
+ *
+ * - a consulta passa pelo **nosso** servidor (`/api/cep/...`), não direto pelo ViaCEP,
+ *   para não entregar o IP do visitante a um terceiro;
+ * - o preenchimento **nunca sobrescreve** o que a pessoa já digitou — corrigir texto que
+ *   sumiu sozinho é pior do que digitar do zero;
+ * - CEP não encontrado ou serviço fora do ar **não bloqueia nada**: avisa e segue. O
+ *   endereço continua sendo digitável à mão, que é o caminho que sempre funciona.
+ */
+async function buscarCep() {
+  const cep = soDigitos(f.cep)
+  avisoCep.value = ''
+  if (cep.length !== 8) return
+
+  buscandoCep.value = true
+  try {
+    const r = await $fetch<{
+      encontrado: boolean
+      indisponivel?: boolean
+      endereco?: string
+      bairro?: string
+      municipio?: string
+    }>(`/api/cep/${cep}`)
+
+    if (!r.encontrado) {
+      avisoCep.value = r.indisponivel
+        ? 'A busca por CEP está fora do ar. Preencha o endereço à mão.'
+        : 'Não encontramos este CEP. Confira, ou preencha o endereço à mão.'
+      return
+    }
+    if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
+    if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
+    if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
+    Reflect.deleteProperty(erros, 'endereco')
+    Reflect.deleteProperty(erros, 'bairro')
+    Reflect.deleteProperty(erros, 'municipio')
+  } catch {
+    avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
+  } finally {
+    buscandoCep.value = false
+  }
+}
+
 const erros = reactive<Record<string, string>>({})
 const enviado = ref(false)
 const resumoErro = ref<HTMLElement | null>(null)
@@ -75,12 +125,32 @@ function soDigitos(v: string) {
   return v.replace(/\D/g, '')
 }
 
+/**
+ * Aplica a máscara e **devolve o valor ao input**.
+ *
+ * Sem a segunda parte existe um bug sutil: quando a máscara descarta o caractere
+ * digitado (por já ter 11 dígitos), o valor calculado é idêntico ao anterior, o Vue não
+ * vê mudança, não repinta — e o caractere a mais **fica visível no campo**. O modelo
+ * fica certo e a tela mente, o que é pior do que os dois errados.
+ */
+function aplicarMascara(evento: Event, mascara: (v: string) => string): string {
+  const alvo = evento.target as HTMLInputElement
+  const formatado = mascara(alvo.value)
+  if (alvo.value !== formatado) alvo.value = formatado
+  return formatado
+}
+
 function mascaraTelefone(v: string) {
   const d = soDigitos(v).slice(0, 11)
   if (d.length <= 2) return d
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+function mascaraCep(v: string) {
+  const d = soDigitos(v).slice(0, 8)
+  return d.length <= 5 ? d : `${d.slice(0, 5)}-${d.slice(5)}`
 }
 
 function mascaraCpf(v: string) {
@@ -149,6 +219,10 @@ function validar() {
   else if (tel.length < 10) erros.telefone = 'O telefone precisa ter DDD. Exemplo: (12) 99165-7059.'
 
   if (!f.whatsapp) erros.whatsapp = 'Diga se este número tem WhatsApp.'
+  const cep = soDigitos(f.cep)
+  if (!cep) erros.cep = 'Informe o CEP.'
+  else if (cep.length !== 8) erros.cep = 'O CEP tem 8 números. Exemplo: 12239-530.'
+
   if (!f.endereco.trim()) erros.endereco = 'Informe a rua, avenida ou travessa.'
   if (!f.numero.trim()) erros.numero = 'Informe o número. Se não houver, escreva s/n.'
   if (!f.bairro.trim()) erros.bairro = 'Informe o bairro.'
@@ -202,6 +276,7 @@ async function enviar() {
         nascimento: f.nascimento,
         telefone: f.telefone,
         telefoneWhatsapp: f.whatsapp,
+        cep: soDigitos(f.cep),
         endereco: f.endereco.trim(),
         numero: f.numero.trim(),
         ...(f.complemento.trim() ? { complemento: f.complemento.trim() } : {}),
@@ -254,13 +329,6 @@ async function enviar() {
       <ul class="lista">
         <li v-for="regra in REGRAS_ATENDIMENTO" :key="regra">{{ regra }}</li>
       </ul>
-    </AppdAviso>
-
-    <AppdAviso tipo="atencao" titulo="Esta é uma demonstração local">
-      <span>
-        O formulário ainda não envia nada: não existe banco de dados nem servidor ligado. Ele está
-        aqui para você conferir o preenchimento, os erros e a tela de confirmação.
-      </span>
     </AppdAviso>
 
     <div v-if="enviado" class="sucesso">
@@ -348,7 +416,7 @@ async function enviar() {
             maxlength="10"
             :aria-invalid="erros.nascimento ? 'true' : undefined"
             :aria-describedby="erros.nascimento ? 'erro-nascimento' : 'ajuda-nascimento'"
-            @input="f.nascimento = mascaraData(($event.target as HTMLInputElement).value)"
+            @input="f.nascimento = aplicarMascara($event, mascaraData)"
           />
           <span v-if="erros.nascimento" id="erro-nascimento" class="erro">
             <span class="icone" aria-hidden="true">✕</span>{{ erros.nascimento }}
@@ -371,7 +439,7 @@ async function enviar() {
             placeholder="(00) 00000-0000"
             :aria-invalid="erros.telefone ? 'true' : undefined"
             :aria-describedby="erros.telefone ? 'erro-telefone' : 'ajuda-telefone'"
-            @input="f.telefone = mascaraTelefone(($event.target as HTMLInputElement).value)"
+            @input="f.telefone = aplicarMascara($event, mascaraTelefone)"
           />
           <span v-if="erros.telefone" id="erro-telefone" class="erro">
             <span class="icone" aria-hidden="true">✕</span>{{ erros.telefone }}
@@ -392,6 +460,30 @@ async function enviar() {
 
       <fieldset class="secao">
         <legend>2. Onde você mora</legend>
+
+        <div :class="['campo', { 'campo-erro': erros.cep }]">
+          <label for="cep">CEP <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-cep" class="ajuda">
+            Obrigatório. Ao preencher, buscamos a rua, o bairro e a cidade para você.
+          </span>
+          <input
+            id="cep"
+            :value="f.cep"
+            type="text"
+            inputmode="numeric"
+            autocomplete="postal-code"
+            placeholder="00000-000"
+            :aria-invalid="erros.cep ? 'true' : undefined"
+            :aria-describedby="erros.cep ? 'erro-cep' : 'ajuda-cep'"
+            @input="f.cep = aplicarMascara($event, mascaraCep)"
+            @blur="buscarCep"
+          />
+          <span v-if="erros.cep" id="erro-cep" class="erro">
+            <span class="icone" aria-hidden="true">✕</span>{{ erros.cep }}
+          </span>
+          <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
+          <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
+        </div>
 
         <div :class="['campo', 'largo', { 'campo-erro': erros.endereco }]">
           <label for="endereco">
@@ -497,7 +589,7 @@ async function enviar() {
             inputmode="tel"
             placeholder="(00) 00000-0000"
             aria-describedby="ajuda-cuidador-contato"
-            @input="f.cuidadorContato = mascaraTelefone(($event.target as HTMLInputElement).value)"
+            @input="f.cuidadorContato = aplicarMascara($event, mascaraTelefone)"
           />
         </div>
       </fieldset>
@@ -603,7 +695,7 @@ async function enviar() {
             autocomplete="off"
             :aria-invalid="erros.cpf ? 'true' : undefined"
             aria-describedby="ajuda-cpf"
-            @input="f.cpf = mascaraCpf(($event.target as HTMLInputElement).value)"
+            @input="f.cpf = aplicarMascara($event, mascaraCpf)"
           />
           <span v-if="erros.cpf" class="erro">
             <span class="icone" aria-hidden="true">✕</span>{{ erros.cpf }}

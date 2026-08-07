@@ -95,6 +95,7 @@ export const usuarios = sqliteTable(
     nascimento: text('nascimento'),
     telefone: text('telefone'),
     telefoneWhatsapp: text('telefone_whatsapp'),
+    cep: text('cep'),
     endereco: text('endereco'),
     numero: text('numero'),
     complemento: text('complemento'),
@@ -133,6 +134,8 @@ export const usuarios = sqliteTable(
       'usuarios_whatsapp',
       sql`${t.telefoneWhatsapp} IS NULL OR ${t.telefoneWhatsapp} IN ('Sim', 'Não')`,
     ),
+    // 8 dígitos, sem hífen. Guardar com máscara é guardar formatação, não dado.
+    check('usuarios_cep_digitos', sql`${t.cep} IS NULL OR (${soDigitos(t.cep, 8)})`),
     check(
       'usuarios_endereco_tamanho',
       sql`${t.endereco} IS NULL OR length(${t.endereco}) BETWEEN 3 AND 300`,
@@ -172,6 +175,7 @@ export const usuarios = sqliteTable(
         AND ${t.nascimento} IS NOT NULL AND ${t.telefone} IS NOT NULL
         AND ${t.telefoneWhatsapp} IS NOT NULL AND ${t.endereco} IS NOT NULL
         AND ${t.numero} IS NOT NULL AND ${t.bairro} IS NOT NULL AND ${t.municipio} IS NOT NULL
+        AND ${t.cep} IS NOT NULL
       )`,
     ),
   ],

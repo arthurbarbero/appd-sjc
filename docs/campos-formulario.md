@@ -134,6 +134,29 @@ conforme a situação de cada atendido.
 > ou modal: ninguém pode declarar ciência de algo que não leu. E precisa ficar claro
 > que é **sugerida e ajustável** — não é condição de atendimento.
 
+## Campos acrescentados por decisão do dono
+
+Não alteram nenhum dos 15 acima: são acréscimo. Ordem na tela: os 15 originais, depois
+o endereço ganha o CEP, e a conta vem no fim, antes do consentimento.
+
+| #   | Rótulo | Tipo              | Obrigatório | Decisão                                                   |
+| --- | ------ | ----------------- | ----------- | --------------------------------------------------------- |
+| 16  | CEP    | texto com máscara | Sim         | dono, 2026-08-06                                          |
+| 17  | E-MAIL | e-mail            | Sim         | [ADR-012](adr/adr-012-cadastro-embutido-no-formulario.md) |
+| 18  | CPF    | texto com máscara | Sim         | ADR-012                                                   |
+| 19  | SENHA  | senha             | Sim         | ADR-012                                                   |
+
+**O CEP preenche rua, bairro e município** a partir do ViaCEP, que é gratuito e não exige
+cadastro. Três regras nessa busca:
+
+1. A consulta passa pelo **nosso** servidor (`/api/cep/<cep>`), não direto do navegador.
+   Chamar direto entregaria o IP de cada visitante a um terceiro, junto com o CEP — e num
+   site de associação de pessoas com deficiência esse par diz que alguém daquela região
+   visitou **este** site. Mesma razão que tirou as fontes do Google do projeto.
+2. O preenchimento **nunca sobrescreve** o que a pessoa já digitou.
+3. CEP não encontrado ou serviço fora do ar **não bloqueia**: avisa e o endereço continua
+   digitável à mão, que é o caminho que sempre funciona.
+
 ## Regras que valem para o formulário inteiro
 
 - **Validação espelhada** cliente e servidor com o mesmo schema Zod. O servidor nunca

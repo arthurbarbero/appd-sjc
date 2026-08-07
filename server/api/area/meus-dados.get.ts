@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
       nascimento: true,
       email: true,
       telefone: true,
+      cep: true,
       endereco: true,
       numero: true,
       complemento: true,

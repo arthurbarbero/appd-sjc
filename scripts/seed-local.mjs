@@ -28,6 +28,7 @@ const PESSOAS = [
     telefone: '12900000001',
     whatsapp: 'Sim',
     bairro: 'Campos dos Alemães',
+    cep: '12239530',
     deficiencias: ['Física'],
     atendimentos: ['Fisioterapia', 'Serviço Social'],
     dias: ['Segundas', 'Quartas'],
@@ -42,6 +43,7 @@ const PESSOAS = [
     telefone: '12900000002',
     whatsapp: 'Não',
     bairro: 'Bairro de Teste',
+    cep: '12220000',
     deficiencias: ['Sensorial (visão, audição, fala)'],
     atendimentos: ['Orientações Gerais'],
     dias: ['Qualquer Dia da Semana'],
@@ -75,12 +77,12 @@ for (const p of PESSOAS) {
 
   linhas.push(
     `INSERT INTO usuarios (id, numero_registro, email, cpf, senha_hash, senha_params, nome,
-       nascimento, telefone, telefone_whatsapp, endereco, numero, bairro, municipio,
+       nascimento, telefone, telefone_whatsapp, cep, endereco, numero, bairro, municipio,
        situacao, criado_em, atualizado_em)
      VALUES (${aspas(p.id)}, ${aspas(p.numero)}, ${aspas(p.email)}, ${aspas(p.cpf)},
        'hash-ficticio-nao-e-senha', '{"N":16384,"r":8,"p":1,"sal":"ficticio"}',
        ${aspas(p.nome)}, ${aspas(p.nascimento)}, ${aspas(p.telefone)}, ${aspas(p.whatsapp)},
-       'Rua Fictícia de Teste', 's/n', ${aspas(p.bairro)}, 'São José dos Campos',
+       ${aspas(p.cep)}, 'Rua Fictícia de Teste', 's/n', ${aspas(p.bairro)}, 'São José dos Campos',
        'ativo', ${aspas(AGORA)}, ${aspas(AGORA)});`,
   )
 

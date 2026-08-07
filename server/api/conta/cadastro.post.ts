@@ -80,6 +80,7 @@ export default defineEventHandler(async (event) => {
           nascimento: paraDataIso(d.nascimento),
           telefone: d.telefone,
           telefoneWhatsapp: d.telefoneWhatsapp,
+          cep: d.cep,
           endereco: d.endereco,
           numero: d.numero,
           complemento: d.complemento ?? null,

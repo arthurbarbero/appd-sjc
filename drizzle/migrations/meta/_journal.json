@@ -15,6 +15,13 @@
       "when": 1786060370622,
       "tag": "0001_broad_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786063505002,
+      "tag": "0002_rainy_firestar",
+      "breakpoints": true
     }
   ]
 }

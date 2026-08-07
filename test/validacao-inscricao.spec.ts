@@ -15,6 +15,7 @@ const VALIDO = {
   nascimento: '12/03/1978',
   telefone: '(12) 90000-0001',
   telefoneWhatsapp: 'Sim',
+  cep: '12239-530',
   endereco: 'Rua de Teste',
   numero: 's/n',
   bairro: 'Bairro Fictício',
@@ -36,6 +37,12 @@ describe('Schema da inscrição', () => {
     expect(r.telefone).toBe('12900000001')
     expect(r.cpf).toBe('39053344705')
     expect(r.email).toBe('maria.ficticia@exemplo.test')
+    // O CEP é guardado só com dígitos: máscara é formatação, não dado.
+    expect(r.cep).toBe('12239530')
+  })
+
+  it('recusa CEP incompleto', () => {
+    expect(esquemaInscricao.safeParse({ ...VALIDO, cep: '1223' }).success).toBe(false)
   })
 
   it('a máscara não bloqueia: três formatos de telefone colados são aceitos', () => {

@@ -105,6 +105,10 @@ export const esquemaInscricao = z
       .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Use o formato dia/mês/ano, como 12/03/1978.'),
     telefone,
     telefoneWhatsapp: z.enum(['Sim', 'Não']),
+    cep: z
+      .string()
+      .transform(soDigitos)
+      .refine((v) => v.length === 8, 'O CEP tem 8 números. Exemplo: 12239-530.'),
     endereco: z.string().trim().min(3, 'Informe a rua, avenida ou travessa.').max(300),
     numero: z.string().trim().min(1, 'Informe o número, ou "s/n".').max(20),
     complemento: z.string().trim().max(60).optional(),
