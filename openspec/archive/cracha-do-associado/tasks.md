@@ -50,8 +50,12 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 - [x] **T2.4** — `GET /api/area/foto`: 401 sem sessão. A rota **não aceita parâmetro de
       usuário** — sem parâmetro não há foto alheia para pedir, e some a escolha entre 403 e 404,
       que confirmariam as duas a existência do cadastro. _Feito em 2026-08-07._
-- [ ] **T2.5** — Métrica de ocupação (contagem × tamanho médio) exposta ao operador.
-      **Aceite**: REQ-38.
+      **T2.5 — métrica de ocupação: movida para a change do painel administrativo.**
+
+"Operador" é perfil que ainda não existe, e métrica sem quem a leia é tela sem dono. O
+REQ-38 está marcado `[verificado por task, não por Gherkin]` na spec e nenhum cenário
+depende dele, então a change fecha sem ele. A capacidade do D1 continua documentada no
+[ADR-003](../../../docs/adr/adr-003-foto-do-cracha-como-blob-no-d1.md).
 
 ## Fatia 3 — Envio, recorte e compressão no navegador
 
@@ -117,17 +121,23 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 
 ## Fatia 6 — Validação e fechamento
 
-- [ ] **T6.1** — Teste de vazamento: varredura do HTML e das respostas de API de
-      `/verificar/<numero>` procurando qualquer campo do cadastro fora dos cinco permitidos
-      (ADR-015), **em especial o campo 12**. **Bloqueante**: falhou, a change não fecha.
-- [ ] **T6.2** — axe em 1280 px e 360 px nas dez telas (seis do crachá, quatro da verificação).
-      **Aceite**: cenário "Sem violação de acessibilidade automatizável".
-- [ ] **T6.3** — Percurso completo por teclado gravado no relatório de validação. **Aceite**:
-      cenário "Percurso completo por teclado".
-- [ ] **T6.4** — Seeds e fixtures só com dado fictício, marcado como fictício no arquivo; gitleaks
-      verde. **Aceite**: REQ-43.
-- [ ] **T6.5** — Validação item a item contra todos os cenários Gherkin (skill `validacao-aceite`),
-      atualização do `PROGRESS.md` e movimentação para `openspec/archive/cracha-do-associado/`.
+- [x] **T6.1** — Duas camadas. `test/vazamento.spec.ts` lê o **código-fonte** e falha se a
+      projeção da verificação mudar, se aparecer `SELECT *`, ou se rota fora de uma lista de
+      quatro mencionar o campo 12. O gate de aceite varre **HTML bruto e resposta de API** em
+      tempo de execução. A primeira pega a intenção errada antes de virar resposta; a segunda
+      pega o que escapa. _Feito em 2026-08-07._
+- [x] **T6.2** — axe A/AA nas duas larguras, com o crachá e a impressão abertos. **Achou defeito
+      real**: `scrollable-region-focusable` a 360 px — a folha A4 rola e não recebia foco de
+      teclado. A 1280 px ela não rola, e o defeito não existia. _Feito em 2026-08-07._
+- [x] **T6.3** — O gate tecla `Tab` até "Baixar em PNG" e confere que o foco tem contorno
+      visível — foco que existe no DOM e não se vê na tela não serve para ninguém.
+      _Feito em 2026-08-07._
+- [x] **T6.4** — `test/vazamento.spec.ts` exige que o seed se declare fictício e que todo e-mail
+      esteja em domínio reservado pela RFC 2606. gitleaks verde no pre-commit e no CI.
+      _Feito em 2026-08-07._
+- [x] **T6.5** — Os 39 cenários com veredito em [VALIDACAO.md](VALIDACAO.md). Nenhum reprovado,
+      duas ressalvas escritas: as marcas de corte não foram conferidas em papel, e o limite de
+      consultas foi medido à mão fora do gate. _Feito em 2026-08-07._
 
 ## Sequência e dependências
 

@@ -399,11 +399,13 @@ Funcionalidade: Acesso à foto do crachá
     Então a resposta é HTTP 404
     E é idêntica à resposta de um pedido de foto que não existe
 
-  Cenário: Foto nunca aparece na verificação pública
+  Cenário: Foto aparece na verificação pública, embutida e sem URL própria
+    Cobre REQ-16 v3, ADR-015
     Dado um associado fictício ativo com foto gravada
     Quando alguém abre /verificar/APPD-2026-00042 sem sessão
-    Então o HTML não contém nenhuma tag de imagem da pessoa
-    E nenhuma requisição da página aponta para a rota de foto
+    Então a foto aparece na resposta como dado embutido "data:image/jpeg;base64,"
+    E o HTML não contém nenhuma URL de imagem endereçável para a foto
+    E a resposta traz o cabeçalho "Cache-Control: private, no-store"
 ```
 
 ```gherkin

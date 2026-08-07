@@ -1,9 +1,9 @@
 # Estado real das changes — 2026-08-07
 
-> **Atualização do fim do dia.** Duas changes foram **arquivadas**, as primeiras do
-> projeto: `modelo-de-dados` e `revisao-de-interface`. O gate que faltava existe e roda —
+> **Atualização do fim do dia.** Três changes foram **arquivadas**: `modelo-de-dados`,
+> `revisao-de-interface` e `cracha-do-associado`. O gate que faltava existe e roda —
 > ver `openspec/PARECER-GATE-AUTOMATICO.md`. O que segue abaixo é o registro de como o
-> rito foi perdido e recuperado, e continua valendo para as seis changes que sobraram.
+> rito foi perdido e recuperado, e continua valendo para as cinco changes que sobraram.
 
 Documento de reconciliação. Existe porque em **2026-08-06 o rito foi abandonado**: escrevi
 schema, migration, três rotas de API, quatro telas, dois ADRs e a infraestrutura de
@@ -55,8 +55,9 @@ crescer, vira change própria.
    rodando e critérios de aceite **não percorridos**. O caminho honesto é rodar os
    cenários Gherkin de cada uma contra o que existe, marcar o que passa, e abrir tarefa
    para o que não passa — não presumir que passa porque o ciclo funcionou uma vez.
-3. **`consentimento-e-privacidade`, `cracha-do-associado` e `site-institucional`** seguem
-   sem implementação, e as tasks delas estão corretas.
+3. ~~**`consentimento-e-privacidade`, `cracha-do-associado` e `site-institucional`** seguem
+   sem implementação.~~ **`cracha-do-associado` foi implementada e arquivada em
+   2026-08-07**, com validação item a item. As outras duas seguem sem implementação.
 
 ## Entregas de 2026-08-07 (com a task marcada no mesmo commit)
 
@@ -71,10 +72,10 @@ crescer, vira change própria.
 
 ### Uma ressalva que fica escrita em vez de escondida
 
-**O QR Code aponta para uma página que ainda não existe.** `/verificar/<numero>` é a
-Fatia 5 de `cracha-do-associado`, travada pela T0.4 **daquela** change. Até subir, ler o
-código leva a um 404. A alternativa seria não pôr o QR; o dono pediu o QR. Registrado para
-que ninguém descubra isso na frente da associação.
+~~**O QR Code aponta para uma página que ainda não existe.**~~ **Resolvido em 2026-08-07**:
+`/verificar/<numero>` subiu com a Fatia 5. Ficou registrado por um dia, e é o tipo de
+ressalva que vale escrever — foi ela que fez a página virar prioridade no dia seguinte, em
+vez de alguém descobrir o 404 na frente da associação.
 
 > A ressalva sobre `/area/dados` não ter passado pelo Claude Design **caiu** em
 > 2026-08-07: o dono confirmou que operou o canvas e entregou as telas da área naquele
@@ -123,8 +124,10 @@ exatamente onde o registro se descola do código, e um dia inteiro basta para o
 ## Fecho de 2026-08-07
 
 **Arquivadas**: `modelo-de-dados` (19 tasks, contrato de dados com rastreabilidade
-requisito a requisito) e `revisao-de-interface` (15 tasks, os 21 pontos da sessão de uso
-do dono).
+requisito a requisito), `revisao-de-interface` (15 tasks, os 21 pontos da sessão de uso do
+dono) e `cracha-do-associado` (2026-08-07 — a primeira arquivada **com validação item a
+item dos cenários**, e não só com as tasks marcadas: os 39 têm veredito em
+`VALIDACAO.md`, com duas ressalvas escritas em vez de escondidas).
 
 **O que destravou o arquivamento** foi resolver a pendência que o próprio parecer anterior
 tinha declarado: o gate era autorrevisão. A saída não foi ler de novo — foi uma auditoria

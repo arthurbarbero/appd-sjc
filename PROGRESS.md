@@ -12,31 +12,36 @@ domínio da APPD antes de a associação revisar.
 O ciclo de conta funciona ponta a ponta — cadastrar, entrar, ver a área, corrigir os
 próprios dados, sair e excluir a conta —, percorrido **contra produção**, não só local.
 
-**Duas changes arquivadas**, as primeiras: `modelo-de-dados` e `revisao-de-interface`.
+**Três changes arquivadas**: `modelo-de-dados`, `revisao-de-interface` e
+`cracha-do-associado` — esta última é a primeira fechada **com validação item a item dos
+cenários**, e não só com as tasks marcadas.
 
 **O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
-| Comando          | O que cobre                                                                                                                                                                               |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 122 testes — restrição de banco, emissão concorrente, revalidação da foto e regressão de interface                                                                                        |
-| `npm run aceite` | 112 verificações no workerd real: ciclo de conta, crachá com foto e exportação, verificação pública, sete larguras, axe A/AA em doze telas. Aceita `APPD_BASE` para rodar contra produção |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                            |
+| Comando          | O que cobre                                                                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`       | 130 testes — restrição de banco, emissão concorrente, revalidação da foto, vazamento de dado sensível e regressão de interface                                             |
+| `npm run aceite` | 117 verificações no workerd real: ciclo de conta, crachá com foto, exportação, verificação pública, teclado, sete larguras e axe A/AA em duas larguras. Aceita `APPD_BASE` |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                             |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
 `openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**Próximas duas changes**: `cracha-do-associado` (**fatias 2 a 5 entregues em 2026-08-07** —
-falta só a Fatia 6, a validação item a item, para arquivar) e o **painel
-administrativo**, decidido pelo dono em 2026-08-07 — gerenciar usuários e refazer senha.
-O painel é o que faz a recuperação de senha existir sem depender de e-mail.
+**Próxima change**: o **painel administrativo**, decidido pelo dono em 2026-08-07 —
+gerenciar usuários e refazer senha. É o que faz a recuperação de senha existir sem depender
+de e-mail, e o que faz o caminho humano deixar de ser promessa vazia: a secretaria atende
+porque tem a ferramenta. Ele herda a T2.5 do crachá, a métrica de ocupação do D1, que
+esperava o perfil de operador existir.
 
-A recuperação de senha por e-mail entra com **SendGrid gratuito** (decisão do dono,
-2026-08-07): remetente avulso, sem DNS, aceitando que parte cai em spam até haver domínio.
-Falta a chave de API, que é do dono para criar. A 5 é prioridade porque o QR que
-está **no ar hoje** aponta para `/verificar/<numero>`, que ainda não existe e devolve 404 —
-é o único defeito publicado. As duas telas foram aprovadas no Claude Design em 2026-08-07
-e a Fatia 2 e quase toda a Fatia 3 já estão entregues.
+A recuperação por e-mail entra com **SendGrid gratuito** (decisão do dono, 2026-08-07):
+remetente avulso, sem DNS, aceitando que parte cai em spam até haver domínio. Falta a chave
+de API, que é do dono para criar, e o endereço a verificar como remetente.
+
+Depois: fechar `site-institucional` (17 tasks de medição e SEO) e percorrer os cenários de
+`cadastro-e-login`, `formulario-atendimento` e `area-do-associado`, que têm código rodando
+sem veredito registrado. O modelo agora existe: a validação do crachá está em
+`openspec/archive/cracha-do-associado/VALIDACAO.md`.
 
 **Seis decisões saíram do caminho em 2026-08-07**, todas delegadas pelo dono e registradas
 como ADR: conteúdo no código (006), foto e cuidador na verificação (015), redefinição de

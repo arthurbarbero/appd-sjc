@@ -75,16 +75,16 @@ sensação de cobertura.
 
 ## Veredito por change
 
-| Change                        | Forma | Pode arquivar?                                                           |
-| ----------------------------- | ----- | ------------------------------------------------------------------------ |
-| `modelo-de-dados`             | READY | **arquivada** em 2026-08-07                                              |
-| `revisao-de-interface`        | READY | **arquivada** em 2026-08-07                                              |
-| `site-institucional`          | READY | não — 17 tasks abertas (peso por rota, redirecionamentos, sitemap, 404)  |
-| `cadastro-e-login`            | READY | não — critérios de aceite não percorridos                                |
-| `formulario-atendimento`      | READY | não — critérios não percorridos; a foto opcional do REQ-7d não existe    |
-| `area-do-associado`           | READY | não — 28 tasks abertas, incluindo o bloco do crachá                      |
-| `cracha-do-associado`         | READY | não — sem implementação; a Fatia 2 está livre, as 3 a 5 esperam o design |
-| `consentimento-e-privacidade` | READY | não — sem implementação; T4 destravada pelo ADR-006 em 2026-08-07        |
+| Change                        | Forma | Pode arquivar?                                                          |
+| ----------------------------- | ----- | ----------------------------------------------------------------------- |
+| `modelo-de-dados`             | READY | **arquivada** em 2026-08-07                                             |
+| `revisao-de-interface`        | READY | **arquivada** em 2026-08-07                                             |
+| `site-institucional`          | READY | não — 17 tasks abertas (peso por rota, redirecionamentos, sitemap, 404) |
+| `cadastro-e-login`            | READY | não — critérios de aceite não percorridos                               |
+| `formulario-atendimento`      | READY | não — critérios não percorridos; a foto opcional do REQ-7d não existe   |
+| `area-do-associado`           | READY | não — 28 tasks abertas, incluindo o bloco do crachá                     |
+| `cracha-do-associado`         | READY | **arquivada** em 2026-08-07, com os 39 cenários validados item a item   |
+| `consentimento-e-privacidade` | READY | não — sem implementação; T4 destravada pelo ADR-006 em 2026-08-07       |
 
 **READY na forma não é pronto para arquivar.** As duas coisas se confundiram na primeira
 passada e é bom deixar dito: READY significa que a spec pode virar task. Arquivar exige a
@@ -110,11 +110,16 @@ renderizado) e de SEO (301 das 7 URLs antigas, sitemap, robots). Nenhuma depende
 terceiro. As duas que saíram da lista eram os ADR-010 e ADR-011, escritos em 2026-08-07 e
 marcados na auditoria do mesmo dia.
 
-**`cracha-do-associado`** — sem implementação, mas **a Fatia 2 não está travada**: o
-armazenamento da foto não tem tela nenhuma e pode começar hoje (a T2.2 já está feita
-dentro de `modelo-de-dados`). A T0.4 trava as fatias 3, 4 e 5, e está pela metade: o
-desenho de `/area/cracha` foi entregue pelo dono em 2026-08-07; o de `/verificar` precisa
-ser refeito, porque o ADR-015 mudou o que a página mostra.
+**`cracha-do-associado`** — **arquivada em 2026-08-07**, e é a primeira change a fechar com
+validação item a item dos cenários, não só com as tasks marcadas. Os 39 têm veredito em
+[`archive/cracha-do-associado/VALIDACAO.md`](archive/cracha-do-associado/VALIDACAO.md),
+com duas ressalvas escritas em vez de escondidas: as marcas de corte não foram conferidas
+em papel, e o limite de consultas foi medido à mão fora do gate.
+
+Vale registrar o que a exigência da T6.2 — axe nas **duas** larguras — encontrou: a folha
+A4 da pré-visualização rola na horizontal a 360 px e não recebia foco de teclado. A 1280 px
+ela não rola, e o defeito não existia. Requisito que parece redundante às vezes é o único
+que enxerga.
 
 **`consentimento-e-privacidade`** — sem implementação. O ADR-006 **destravou a T4** em
 2026-08-07. Continuam parados: as telas (esperam o canvas) e o archive (espera PB-1 a PB-5

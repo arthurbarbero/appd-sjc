@@ -236,7 +236,17 @@ async function exportar(formato: 'png' | 'pdf') {
           Imprima em 100%. Não use a opção de ajustar à página, senão o crachá sai menor que o
           tamanho certo.
         </p>
-        <div class="rolagem-folha">
+        <!--
+          `tabindex="0"` porque a folha A4 rola na horizontal em tela estreita, e região
+          que rola sem receber foco é intransponível para quem não usa mouse — a régua é a
+          `scrollable-region-focusable` do axe, que reprovou aqui a 360 px.
+        -->
+        <div
+          class="rolagem-folha"
+          tabindex="0"
+          role="group"
+          aria-label="Folha A4 com o crachá em tamanho real"
+        >
           <div class="folha">
             <div class="corte">
               <AppdCracha

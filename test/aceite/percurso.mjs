@@ -314,6 +314,27 @@ try {
   )
 
   /*
+    T6.1 — a mesma varredura na **resposta de API**, e não só no HTML.
+
+    O HTML é o que a pessoa vê; o JSON é o que o navegador recebe. A proteção pode existir
+    no template e o dado viajar mesmo assim, visível em duas teclas de ferramenta de
+    desenvolvimento. Roda aqui, e não na seção anterior, porque agora existe foto — assim
+    a varredura cobre a resposta completa, com o retrato dentro.
+  */
+  const json = await (await p.request.get(`${BASE}/api/verificar/${numeroRegistro}`)).text()
+  const PROIBIDOS = ['deficiencia', 'cpf', 'nascimento', 'endereco', 'Rua Fictícia', '1978']
+  const vazados = PROIBIDOS.filter((campo) => new RegExp(campo, 'i').test(json))
+  ok(
+    'a resposta de API da verificação não traz campo proibido',
+    vazados.length === 0,
+    vazados.join(', '),
+  )
+  ok(
+    'a foto viaja embutida na resposta, sem URL de imagem endereçável',
+    json.includes('data:image/jpeg;base64,'),
+  )
+
+  /*
     A exportação acontece inteira no aparelho (REQ-23). A prova é contar requisições de
     rede enquanto ela roda: tem de ser zero. Sem a contagem, "é no navegador" é afirmação
     de comentário — e comentário não falha quando alguém acrescenta um `fetch`.
@@ -353,14 +374,55 @@ try {
     (await p.textContent('.impressao')).includes('Não use a opção de ajustar à página'),
   )
 
-  const axeCracha = await new AxeBuilder({ page: p })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .analyze()
-  ok(
-    'axe A/AA em /area/cracha, com o crachá e a impressão abertos',
-    axeCracha.violations.length === 0,
-    axeCracha.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
-  )
+  /*
+    T6.2 — axe nas **duas** larguras. 1280 px é a escrivaninha; 360 px é o celular, que é
+    por onde a maior parte deste público acessa. Componente que passa numa e reprova na
+    outra é comum: alvo que encolhe abaixo de 44 px, contraste que muda com o empilhamento,
+    rótulo que some para caber.
+  */
+  for (const largura of [1280, 360]) {
+    await p.setViewportSize({ width: largura, height: 900 })
+    await p.waitForTimeout(300)
+    const r = await new AxeBuilder({ page: p })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+    ok(
+      `axe A/AA em /area/cracha a ${largura}px, com o crachá e a impressão abertos`,
+      r.violations.length === 0,
+      r.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
+    )
+  }
+
+  /*
+    T6.3 — o percurso do crachá só pelo teclado.
+
+    Não é conferência de acessibilidade genérica: é a garantia de que quem não usa mouse
+    chega às ações que importam. `Tab` até o botão de baixar, e o foco precisa estar
+    **visível** — foco que existe no DOM e não se vê na tela não serve para ninguém.
+  */
+  await p.setViewportSize({ width: 1280, height: 900 })
+  await p.keyboard.press('Escape')
+  await p.evaluate(() => document.body.focus())
+  let alcancou = false
+  let comFocoVisivel = false
+  for (let i = 0; i < 60 && !alcancou; i++) {
+    await p.keyboard.press('Tab')
+    const foco = await p.evaluate(() => {
+      const el = document.activeElement
+      if (!el) return null
+      const estilo = getComputedStyle(el)
+      return {
+        texto: (el.textContent ?? '').trim().slice(0, 40),
+        contorno: estilo.outlineStyle !== 'none' && parseFloat(estilo.outlineWidth) > 0,
+      }
+    })
+    if (foco?.texto.includes('Baixar em PNG')) {
+      alcancou = true
+      comFocoVisivel = foco.contorno
+    }
+  }
+  ok('só pelo teclado, o foco alcança "Baixar em PNG"', alcancou)
+  ok('o foco do teclado é visível, com contorno', comFocoVisivel)
 
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
 
