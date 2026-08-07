@@ -60,7 +60,7 @@ validação, que ainda vai rodar cenário a cenário.
 Concluída como **código**; a prova automatizada é a Fatia 6 e ainda não existe.
 
 - [x] **3.1 Um `h1` por página** em todas as 18 páginas. _Dono_: Arthur.
-- [x] **3.2 Foco de 3px com folga de 2px** em `design-system/base.css`, nenhum
+- [x] **3.2 Foco de 3px com folga de 2px** em `app/assets/css/base.css`, nenhum
       `outline: none` órfão. _Dono_: Arthur.
 - [x] **3.3 Alvo mínimo de 44px** (`--alvo-min`) aplicado a botões, links de navegação,
       links de rodapé e controles. _Dono_: Arthur.

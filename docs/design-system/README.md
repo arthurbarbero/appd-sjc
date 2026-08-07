@@ -15,7 +15,7 @@ olhar.
 | `build/`       | Gerado, fora do git. É o que sobe para o Claude Design.      |
 
 ```bash
-node design-system/montar.mjs
+node docs/design-system/montar.mjs
 ```
 
 Os previews precisam ser autossuficientes porque o painel do Claude Design não resolve

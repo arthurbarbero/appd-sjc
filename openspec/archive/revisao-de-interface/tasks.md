@@ -50,7 +50,7 @@ Ordem sugerida: o que quebra primeiro, o que engana depois, o que é estética p
 
 ## T3 — Interação
 
-- [x] **T3.1** — Padrão de cartão clicável em `design-system/base.css`: área inteira,
+- [x] **T3.1** — Padrão de cartão clicável em `app/assets/css/base.css`: área inteira,
       estado de ponteiro e de foco, **um link só** envolvendo o título (REQ-4 a REQ-7).
       _Feito em 2026-08-07._ A área cresce por pseudo-elemento sobre o cartão, e não por um
       segundo link; o foco destaca o **cartão** via `:focus-within`, porque é o cartão que

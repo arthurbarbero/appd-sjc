@@ -18,13 +18,14 @@ export default defineNuxtConfig({
     servidor de terceiro, nenhum IP de visitante entregue ao Google. Num site que trata
     dado de saúde, buscar fonte externa é vazamento sem consentimento.
 
-    tokens.css e base.css vêm de design-system/, que é a fonte da verdade. Não são
-    copiados para cá: duplicata vira divergência.
+    A ordem importa: `tokens.css` declara as variáveis e `base.css` as consome. Inverter
+    faz o navegador resolver `var(--cor)` para nada, e o efeito é sutil o bastante para
+    passar despercebido — texto sem cor herda a do pai e continua legível.
   */
   css: [
     '@fontsource-variable/atkinson-hyperlegible-next',
-    '~~/design-system/tokens.css',
-    '~~/design-system/base.css',
+    '~/assets/css/tokens.css',
+    '~/assets/css/base.css',
   ],
 
   typescript: {

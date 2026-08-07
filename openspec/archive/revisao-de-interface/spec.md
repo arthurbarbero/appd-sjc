@@ -38,7 +38,7 @@ minha paráfrase. Onde eu discordo ou vejo consequência, está marcado como not
 - **REQ-6** — O link continua sendo **um só** por cartão, envolvendo o título, para que o
   leitor de tela anuncie um destino e não dois. Cartão inteiro clicável **não** significa
   dois links para o mesmo lugar.
-- **REQ-7** — O padrão DEVE viver em `design-system/base.css` e ser o mesmo nas três
+- **REQ-7** — O padrão DEVE viver em `app/assets/css/base.css` e ser o mesmo nas três
   telas. Três variações parecidas é o começo de três divergências.
 
 ## Grupo C — Conteúdo que sai

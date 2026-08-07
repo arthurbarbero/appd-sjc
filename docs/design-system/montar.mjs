@@ -6,7 +6,7 @@
   documento HTML completo. O resultado vai para build/ — autossuficiente, sem link
   externo, porque o painel do Claude Design não resolve caminho relativo do repositório.
 
-  Uso: node design-system/montar.mjs
+  Uso: node docs/design-system/montar.mjs
 */
 
 import { readFile, readdir, writeFile, mkdir, rm } from 'node:fs/promises'

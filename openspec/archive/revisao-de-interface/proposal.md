@@ -37,7 +37,7 @@ sobre, contato — mais o cabeçalho e o rodapé. Todo o cartão de serviço e d
 
 - `shared/conteudo.ts` perde blocos e ganha as opções que hoje só existem como texto
   livre em "Outro" (ponto 3 do dono).
-- `design-system/base.css` ganha o padrão de cartão clicável, para as três telas usarem o
+- `app/assets/css/base.css` ganha o padrão de cartão clicável, para as três telas usarem o
   mesmo — e não três variações parecidas.
 - Nenhuma migration, nenhuma alteração de API.
 

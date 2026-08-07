@@ -53,13 +53,16 @@ Estado do projeto em `PROGRESS.md` — atualizar antes de encerrar sessão.
 ## Estrutura
 
 ```
-app/          # Vue (telas só depois do handoff de design)
-server/       # rotas Nitro, api/, database/schema.ts
+app/          # Vue — assets/css/ (tokens e base), components/, layouts/,
+              #   middleware/, pages/, utils/. Telas só depois do handoff de design.
+server/       # api/, database/schema.ts, middleware/, utils/
 shared/       # domínio puro compartilhado (auto-import Nuxt 4)
 drizzle/      # migrations SQL versionadas
-docs/         # inventário de conteúdo, ADRs, pendências da APPD, manual
-openspec/     # changes/ e archive/
-test/         # Vitest
+public/       # servido como está
+test/         # Vitest, mais o gate de aceite em test/aceite/
+docs/         # inventário, ADRs, pendências da APPD, prompts e galeria do design system
+openspec/     # o rito: changes/ e archive/
+scripts/      # utilitários de desenvolvimento chamados pelos comandos npm
 ```
 
 ## O que NÃO fazer

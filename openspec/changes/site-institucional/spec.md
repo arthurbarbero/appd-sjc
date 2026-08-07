@@ -258,7 +258,7 @@ Repetido aqui de propósito, porque é onde o escopo vaza:
 
 ## Premissas e dependências
 
-- `design-system/tokens.css` e `design-system/base.css` são a **fonte da verdade** de
+- `app/assets/css/tokens.css` e `app/assets/css/base.css` são a **fonte da verdade** de
   contraste, foco e alvo; `DESIGN.md` documenta os valores medidos. Divergência entre eles
   é defeito.
 - `shared/conteudo.ts` é a fonte única de conteúdo; texto não vive na página.
