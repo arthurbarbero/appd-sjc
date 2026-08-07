@@ -4,12 +4,10 @@
 
 **Site e área do associado da Associação das Pessoas com Deficiência de São José dos Campos**
 
-Acessibilidade WCAG 2.2 AA como requisito bloqueante · Custo de operação R$ 0 · LGPD desde o schema
-
 [![CI](https://github.com/arthurbarbero/appd-sjc/actions/workflows/ci.yml/badge.svg)](https://github.com/arthurbarbero/appd-sjc/actions/workflows/ci.yml)
 [![Publicar](https://github.com/arthurbarbero/appd-sjc/actions/workflows/deploy.yml/badge.svg)](https://github.com/arthurbarbero/appd-sjc/actions/workflows/deploy.yml)
 
-[Ver funcionando](https://appd-sjc.appd-sjc.workers.dev) · [Decisões de arquitetura](docs/adr/) · [Estado do projeto](PROGRESS.md)
+[Ver funcionando](https://appd-sjc.appd-sjc.workers.dev) · [Estado do projeto](PROGRESS.md)
 
 </div>
 
@@ -22,143 +20,78 @@ Campos. Ela atende pessoas com deficiência e suas famílias com fisioterapia, p
 serviço social, orientação e empréstimo de equipamento, e mantém quatro projetos
 contínuos de esporte, artesanato, manutenção e inclusão digital.
 
-Hoje o cadastro de quem procura atendimento é um formulário que vira planilha. Quem se
-cadastra não tem como conferir nem corrigir o próprio dado: precisa ligar. Este projeto
-substitui isso por um site com **área do associado** — a pessoa entra, vê o que a
-associação tem sobre ela, corrige o que estiver errado e pode apagar tudo quando quiser.
+Este repositório traz o site da associação e uma **área do associado**: quem se cadastra
+entra, vê o que a associação tem sobre ele, corrige o que estiver errado e pode apagar
+tudo quando quiser.
 
 É trabalho voluntário, com autorização da associação para usar marca e conteúdo.
 **Ainda não é o site oficial** — o oficial é [appd.org.br](https://www.appd.org.br). O
 endereço acima é demonstração, o banco por trás dele não é de produção, e **não deve
 receber dado de pessoa real**.
 
-### As três restrições que explicam quase toda escolha técnica daqui
+### O que já funciona
 
-Se algo neste repositório parecer uma decisão estranha, é quase certo que uma destas
-três a explica.
-
-**1. Acessibilidade é o produto, não um item de checklist.** O público do site é
-exatamente a população que a web costuma deixar de fora. Contraste AA, navegação
-completa por teclado, foco visível, alvo de 44 px, nada sinalizado só por cor, texto
-base de 17 px, `prefers-reduced-motion` respeitado. É critério de aceite bloqueante por
-tela — se reprovar, a tela não sobe.
-
-**2. Custo de operação R$ 0, sem cartão de crédito.** Uma associação voluntária não
-assume mensalidade de hospedagem. Isso elimina de saída quase toda a infraestrutura
-usual e é o motivo de o projeto rodar inteiro no plano gratuito da Cloudflare — com um
-teto de **10 ms de CPU por requisição** que muda como se guarda uma senha (ver
-[ADR-005](docs/adr/adr-005-parametros-do-scrypt.md)).
-
-**3. O repositório é público e o sistema trata dado sensível.** Tipo de deficiência é
-dado de saúde, categoria especial pelo Art. 11 da LGPD. Nenhuma credencial, foto ou dado
-de pessoa real entra aqui; os dados de teste são fictícios e declarados; o `gitleaks`
-varre o histórico completo a cada commit e a cada push.
+- **Site institucional** — 17 páginas públicas: serviços, projetos, sobre, contato e doações.
+- **Cadastro de atendimento** — o formulário de 15 campos da associação, que também cria a conta.
+- **Conta e sessão** — entrar, sair, sessão em cookie por 7 dias.
+- **Área do associado** — painel, alteração dos próprios dados, correção do cadastro e exclusão de conta.
+- **Crachá** — número de registro e QR Code de verificação.
 
 ---
 
-## Tecnologias, e o que cada uma resolve
+## Tecnologias
 
-Esta seção existe para quem chegou aqui querendo aprender. Cada item diz **o que a
-ferramenta faz**, **por que ela está neste projeto** e, quando houver, **o que foi
-descartado no lugar dela**.
+Esta seção descreve o que cada ferramenta faz e qual papel ela cumpre aqui — o
+repositório também serve para quem quer estudar uma aplicação Nuxt completa, com banco,
+autenticação e publicação automatizada.
 
 ### Interface
 
-| Ferramenta                                                        | O que faz                                                                                                                                                                  |
-| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[Nuxt 4](https://nuxt.com)**                                    | Framework sobre o Vue. Cuida de roteamento (cada arquivo em `app/pages/` vira uma URL), renderização no servidor, importação automática de componentes e do servidor HTTP. |
-| **[Vue 3](https://vuejs.org)**                                    | Biblioteca de interface. Descreve a tela como função do estado: muda o dado, a tela se redesenha sozinha.                                                                  |
-| **[TypeScript](https://www.typescriptlang.org)** em modo `strict` | JavaScript com tipos conferidos antes de rodar. Pega no editor o erro que apareceria só em produção.                                                                       |
+| Ferramenta                                                        | O que faz                                                                                                                                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Nuxt 4](https://nuxt.com)**                                    | Framework construído sobre o Vue. Cuida do roteamento (cada arquivo em `app/pages/` vira uma URL), da renderização no servidor, da importação automática de componentes e do servidor HTTP. |
+| **[Vue 3](https://vuejs.org)**                                    | Biblioteca de interface. A tela é descrita como função do estado: muda o dado, a tela se redesenha sozinha.                                                                                 |
+| **[TypeScript](https://www.typescriptlang.org)** em modo `strict` | JavaScript com tipos conferidos antes de rodar. O erro aparece no editor, não em produção.                                                                                                  |
+| **CSS com tokens próprios**                                       | As variáveis de cor, espaço e tipografia ficam em [`app/assets/css/tokens.css`](app/assets/css/) e a folha base as consome. Sem framework de estilo.                                        |
+| **[@fontsource](https://fontsource.org)**                         | Empacota a fonte [Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/) — desenhada para leitura com baixa visão — dentro do próprio site, sem CDN.                            |
 
-**Por que renderizar no servidor (SSR).** A primeira tela chega pronta em HTML, então
-quem está com internet ruim ou aparelho antigo vê conteúdo antes de o JavaScript
-carregar — e leitor de tela e buscador leem a página mesmo sem JavaScript. Numa
-aplicação só-cliente, a primeira coisa que chega é uma página em branco.
-
-**Estilo em CSS puro, sem framework.** Não há Tailwind nem biblioteca de componentes
-aqui, e é decisão consciente: as regras de acessibilidade deste projeto (alvo mínimo,
-foco visível, contraste) precisam ser garantidas em **um** lugar, e um sistema de
-tokens próprio em [`app/assets/css/`](app/assets/css/) faz isso melhor do que classes
-utilitárias espalhadas por 30 templates. O custo é escrever mais CSS; o ganho é que
-nenhuma tela consegue "esquecer" a regra.
-
-**Fonte auto-hospedada** ([Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/),
-desenhada para baixa visão) via `@fontsource`. Buscar fonte num CDN entregaria o IP de
-cada visitante a um terceiro — inaceitável num site que trata dado de saúde.
+**Renderização no servidor (SSR).** O Nuxt monta o HTML da primeira tela no servidor e
+envia pronto; o JavaScript assume depois, sem recarregar a página. Na prática: o conteúdo
+aparece antes de o JavaScript carregar, e leitor de tela e buscador leem a página mesmo
+sem ele.
 
 ### Servidor e dados
 
-| Ferramenta                                                           | O que faz                                                                                                                           |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **[Cloudflare Workers](https://developers.cloudflare.com/workers/)** | Executa o código do servidor na borda da rede, perto de quem acessa. Não há servidor para manter nem para pagar quando ninguém usa. |
-| **[Nitro](https://nitro.build)** (preset `cloudflare_module`)        | Motor de servidor do Nuxt. Compila o mesmo código para alvos diferentes; aqui, para o runtime da Cloudflare.                        |
-| **[Cloudflare D1](https://developers.cloudflare.com/d1/)**           | Banco SQLite gerenciado, também no plano gratuito.                                                                                  |
-| **[Drizzle ORM](https://orm.drizzle.team)**                          | Descreve as tabelas em TypeScript e **gera as migrations em SQL**, que são versionadas e revisadas.                                 |
-| **[Zod](https://zod.dev)**                                           | Valida dado de entrada e infere o tipo a partir da validação.                                                                       |
-| **[nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)**     | Sessão em cookie assinado e criptografado, sem tabela de sessão no banco.                                                           |
+| Ferramenta                                                           | O que faz                                                                                                                                                                                                                |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **[Cloudflare Workers](https://developers.cloudflare.com/workers/)** | Executa o código do servidor na borda da rede, perto de quem acessa. Não há máquina para manter.                                                                                                                         |
+| **[Nitro](https://nitro.build)** (preset `cloudflare_module`)        | Motor de servidor do Nuxt. Compila o mesmo código para alvos diferentes; aqui, para o runtime da Cloudflare.                                                                                                             |
+| **[Cloudflare D1](https://developers.cloudflare.com/d1/)**           | Banco SQLite gerenciado, acessado pelo Worker por um _binding_ declarado em [`wrangler.jsonc`](wrangler.jsonc).                                                                                                          |
+| **[Drizzle ORM](https://orm.drizzle.team)**                          | As tabelas são declaradas em TypeScript ([`server/database/schema.ts`](server/database/schema.ts)) e o Drizzle gera a migration SQL correspondente, que fica versionada em [`drizzle/migrations/`](drizzle/migrations/). |
+| **[Zod](https://zod.dev)**                                           | Valida o dado que entra e infere o tipo TypeScript a partir da própria validação. Os schemas vivem em [`shared/`](shared/) e são importados pelo navegador e pelo servidor.                                              |
+| **[nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)**     | Sessão num cookie assinado e criptografado. O conteúdo da sessão viaja no próprio cookie, sem tabela de sessão no banco.                                                                                                 |
+| **[@noble/hashes](https://github.com/paulmillr/noble-hashes)**       | Implementação de `scrypt` que roda no navegador, usada para derivar a senha antes do envio.                                                                                                                              |
+| **[uqr](https://github.com/unjs/uqr)**                               | Gera a matriz do QR Code do crachá, sem dependências.                                                                                                                                                                    |
 
-**Migrations versionadas, nunca `push`.** O Drizzle oferece um modo que sincroniza o
-banco direto com o schema. Ele é proibido aqui: toda mudança de estrutura vira um arquivo
-SQL em [`drizzle/migrations/`](drizzle/migrations/) que alguém lê antes de aplicar. Foi
-o que salvou o projeto de um bug real — o gerador emitiu `SELECT "cep" FROM usuarios`
-para uma coluna que ainda não existia, e o SQLite trata identificador desconhecido entre
-aspas duplas como **literal de texto**: cada linha teria recebido a string `'cep'` no
-lugar do CEP, em silêncio.
+**Como o dado é validado.** O mesmo schema Zod roda nos dois lados, e as regras
+equivalentes existem também como `CHECK` no SQLite. O Zod produz a mensagem em português
+que a pessoa lê; o banco recusa dado fora do formato venha de onde vier.
 
-**Validação no cliente e no servidor, com o mesmo objeto.** O schema Zod vive em
-[`shared/`](shared/) e é importado pelos dois lados. Enquanto a régua for uma só, "o
-formulário aceitou e a API recusou" deixa de ser uma classe de bug possível.
+**Como a senha é guardada.** O navegador deriva a senha com `scrypt` e envia o resultado;
+o servidor aplica um segundo hash com sal próprio e guarda apenas esse valor. A senha em
+texto não existe em coluna nenhuma.
 
-**As regras também estão no banco.** Cada restrição do Zod tem um `CHECK` correspondente
-no SQLite. É redundância proposital: o Zod dá a mensagem em português que a pessoa lê; o
-banco garante que nenhuma rota escreva lixo, nem uma rota nova que esqueça o Zod.
+### Qualidade e publicação
 
-### Segurança
-
-**A senha é derivada no navegador, não no servidor.** É a decisão menos óbvia do projeto
-([ADR-005](docs/adr/adr-005-parametros-do-scrypt.md)). Guardar senha exige um algoritmo
-**lento de propósito** — é o que torna caro testar bilhões de palpites depois de um
-vazamento. O mínimo recomendado pelo OWASP para o `scrypt` custou 48 ms de CPU medidos no
-runtime da Cloudflare, e o plano gratuito dá 10 ms por requisição inteira. As duas
-restrições do projeto não cabiam juntas.
-
-A saída: o aparelho da pessoa faz a conta cara e envia o resultado; o servidor re-embaralha
-com sal próprio e guarda só isso. **A lentidão que protege não sumiu — mudou de máquina.**
-
-E a pergunta que sempre volta: rate-limit não substitui isso. O rate-limit defende o
-formulário de login; o hash lento defende o banco **depois que ele vaza**, quando o
-atacante roda as tentativas na máquina dele.
-
-**Sem CAPTCHA, em lugar nenhum** ([ADR-009](docs/adr/adr-009-anti-abuso-sem-captcha.md)).
-CAPTCHA é barreira de acessibilidade documentada: o visual exclui quem tem baixa visão, o
-de áudio exclui quem tem deficiência auditiva. O público deste site é exatamente quem ele
-rejeita. O anti-abuso é limite por janela de tempo, com o identificador guardado como
-HMAC — o IP entra na função e não sai dela.
-
-**O número de registro é sorteado, não sequencial**
-([ADR-007](docs/adr/adr-007-numero-de-registro-sorteado.md)). A página de verificação do
-crachá é pública; com numeração sequencial, qualquer pessoa pediria 00001, 00002 e
-montaria a lista de associados de uma associação de pessoas com deficiência. O alfabeto
-exclui `0`, `O`, `1`, `I` e `L`, porque o número é ditado por telefone.
-
-### Qualidade
-
-| Ferramenta                                                         | O que faz                                                                                               |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| **[Vitest](https://vitest.dev)**                                   | Testes rápidos: restrições do banco, emissão concorrente, regressão de interface e auditoria das specs. |
-| **[Playwright](https://playwright.dev)**                           | Dirige um navegador de verdade contra o runtime real.                                                   |
-| **[axe-core](https://github.com/dequelabs/axe-core)**              | Auditoria automatizada de acessibilidade, níveis A e AA.                                                |
-| **[ESLint](https://eslint.org) + [Prettier](https://prettier.io)** | Erro provável e formatação — duas coisas diferentes, duas ferramentas.                                  |
-| **[gitleaks](https://github.com/gitleaks/gitleaks)**               | Procura credencial no que está sendo commitado e no histórico completo.                                 |
-
-**O aceite não depende de ninguém ler.** Este projeto tem 276 critérios de aceite
-escritos em Gherkin, e critério que exige leitura humana é um portão que nunca fecha.
-Duas camadas resolvem isso: uma lê o **código-fonte** das telas e falha se um texto
-removido voltar (rápida, roda sempre); outra sobe o **workerd real** e percorre cadastrar
-→ área → corrigir → sair → entrar → excluir, mede rolagem horizontal em sete larguras e
-roda o axe em dez telas.
-
-Ela roda contra produção também: `APPD_BASE=https://... npm run aceite`.
+| Ferramenta                                                             | O que faz                                                                                                                                                                                          |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Vitest](https://vitest.dev)**                                       | Testes rápidos, sem navegador: restrições do banco, geração do número de registro, regressão de conteúdo das telas e auditoria das specs.                                                          |
+| **[Playwright](https://playwright.dev)**                               | Dirige um navegador real contra o runtime do Cloudflare para percorrer o ciclo completo de conta.                                                                                                  |
+| **[axe-core](https://github.com/dequelabs/axe-core)**                  | Auditoria automatizada de acessibilidade, níveis A e AA.                                                                                                                                           |
+| **[ESLint](https://eslint.org)** e **[Prettier](https://prettier.io)** | Erro provável e formatação.                                                                                                                                                                        |
+| **[gitleaks](https://github.com/gitleaks/gitleaks)**                   | Procura credencial no que está sendo commitado e no histórico completo.                                                                                                                            |
+| **[wrangler](https://developers.cloudflare.com/workers/wrangler/)**    | CLI da Cloudflare: roda o Worker localmente, aplica migrations no D1 e publica.                                                                                                                    |
+| **GitHub Actions**                                                     | [`ci.yml`](.github/workflows/ci.yml) roda formatação, lint, typecheck, testes e gitleaks. [`deploy.yml`](.github/workflows/deploy.yml) aplica as migrations e publica, e só depois que a CI passa. |
 
 ---
 
@@ -172,7 +105,7 @@ npm install
 npm run dev              # http://localhost:3000
 ```
 
-Isso já dá o site institucional inteiro. Para exercitar a **área do associado**, que
+Isso já entrega o site institucional inteiro. Para exercitar a **área do associado**, que
 precisa de banco:
 
 ```bash
@@ -181,25 +114,34 @@ npm run db:seed:local      # popula com dado fictício (opcional)
 npm run cf:dev             # build + runtime real do Cloudflare em :8787
 ```
 
-> **Por que dois modos.** `npm run dev` é rápido e recarrega ao salvar, mas roda em
-> Node — e Node é mais permissivo que o runtime da Cloudflare. As duas armadilhas que
-> mais custaram tempo neste projeto (o limite de dez classes de caractere por padrão
-> `GLOB` no D1 e o teto de 10 ms de CPU) **passaram no `dev` e falharam no `cf:dev`**.
-> Antes de dar algo por pronto, rode no runtime real.
+`npm run dev` roda em Node e recarrega ao salvar; `npm run cf:dev` roda no mesmo runtime
+que a produção usa, que é mais restrito. Use o segundo antes de dar algo por pronto.
 
 ### Comandos
 
-| Comando                              | O que faz                                                             |
-| ------------------------------------ | --------------------------------------------------------------------- |
-| `npm run dev`                        | Servidor de desenvolvimento com recarga ao salvar                     |
-| `npm run cf:dev`                     | Build + `wrangler dev`: o runtime que a produção usa                  |
-| `npm test`                           | Testes rápidos, sem navegador                                         |
-| `npm run aceite`                     | Gate de aceite: navegador real, ciclo completo, sete larguras, axe    |
-| `npm run lint` / `npm run typecheck` | ESLint e `vue-tsc`                                                    |
-| `npm run format`                     | Prettier                                                              |
-| `npm run db:generate`                | Gera a migration SQL a partir do schema — **revise o arquivo gerado** |
-| `npm run db:aplicar:local`           | Aplica as migrations no D1 local                                      |
-| `npm run cf:parar`                   | Encerra `wrangler` órfão (Windows: destrava o `EBUSY` no build)       |
+| Comando                              | O que faz                                                            |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `npm run dev`                        | Servidor de desenvolvimento com recarga ao salvar                    |
+| `npm run cf:dev`                     | Build + `wrangler dev`: runtime real do Cloudflare                   |
+| `npm test`                           | Testes rápidos, sem navegador                                        |
+| `npm run aceite`                     | Navegador real: ciclo completo de conta, sete larguras de tela e axe |
+| `npm run lint` · `npm run typecheck` | ESLint e `vue-tsc`                                                   |
+| `npm run format`                     | Prettier                                                             |
+| `npm run db:generate`                | Gera a migration SQL a partir do schema                              |
+| `npm run db:aplicar:local`           | Aplica as migrations no D1 local                                     |
+| `npm run db:seed:local`              | Popula o banco local com dado fictício                               |
+| `npm run cf:parar`                   | Encerra `wrangler` órfão (no Windows, destrava o build)              |
+
+O gate de aceite também roda contra um endereço publicado:
+
+```bash
+APPD_BASE=https://appd-sjc.appd-sjc.workers.dev npm run aceite
+```
+
+### Variáveis de ambiente
+
+Copie [`.dev.vars.example`](.dev.vars.example) para `.dev.vars` — ele não é versionado.
+Em produção, os valores são secrets do Worker.
 
 ---
 
@@ -209,7 +151,7 @@ Layout padrão do Nuxt 4, com quatro pastas próprias.
 
 ```
 app/                 interface — o que roda no navegador
-├─ assets/css/       tokens e folha base do design system
+├─ assets/css/       tokens e folha base
 ├─ components/       componentes reutilizáveis (auto-importados)
 ├─ layouts/          casca comum: cabeçalho, rodapé
 ├─ middleware/       guardas de rota no cliente
@@ -218,52 +160,25 @@ app/                 interface — o que roda no navegador
 
 server/              o que roda no Worker
 ├─ api/              endpoints HTTP
-├─ database/         schema Drizzle — a fonte da verdade das tabelas
+├─ database/         schema Drizzle
 ├─ middleware/       guardas de rota no servidor
-└─ utils/            sessão, banco, senha, emissão de número
+└─ utils/            sessão, banco, senha, número de registro
 
-shared/              código usado pelos dois lados — schemas Zod, conteúdo, domínio
-drizzle/migrations/  SQL versionado, revisado, nunca gerado direto no banco
+shared/              usado pelos dois lados — schemas Zod, conteúdo, domínio
+drizzle/migrations/  SQL versionado
 public/              arquivos servidos como estão
 
 test/                Vitest, mais o gate de aceite em test/aceite/
-docs/                inventário de conteúdo, ADRs, pendências, prompts de design
-openspec/            o rito: changes em andamento e arquivadas
-scripts/             utilitários de desenvolvimento chamados pelos comandos npm
+docs/                conteúdo, decisões de arquitetura, design system
+openspec/            requisitos e tarefas por mudança
+scripts/             utilitários chamados pelos comandos npm
 ```
-
-**Guardas de rota nos dois lados, de propósito.** A do servidor vale para link direto,
-recarregamento e navegador sem JavaScript; a do cliente vale para navegação interna, que
-não passa pelo servidor. Quem manda é a do servidor — se as duas discordarem, a resposta
-HTTP é a verdade.
-
----
-
-## Como o projeto é conduzido
-
-Toda mudança relevante vira uma pasta em [`openspec/changes/`](openspec/changes/) com
-proposta, requisitos e tarefas, e só é arquivada depois que os critérios de aceite
-passam. Decisões que não devem ser rediscutidas viram **ADR** em
-[`docs/adr/`](docs/adr/) — contexto, decisão, alternativas recusadas e consequências.
-
-Duas regras vieram de erro cometido aqui, e estão escritas para não se repetirem:
-
-**Tarefa marcada no mesmo commit da entrega.** Não existe "marco depois" — o depois é
-exatamente onde o registro se descola do código. Um único dia produtivo bastou para o
-`openspec/` passar a descrever um projeto diferente do que estava no disco.
-
-**`[FEITO]` não é `[VALIDADO]`.** Código rodando não é critério de aceite percorrido.
-Confundir os dois é o que transforma arquivar em carimbo.
-
-O histórico completo, incluindo o dia em que o rito foi abandonado e como foi
-reconciliado, está em [`openspec/ESTADO.md`](openspec/ESTADO.md).
 
 ---
 
 ## Contribuindo
 
-Antes de abrir PR, leia [CLAUDE.md](CLAUDE.md) — ele resume as regras do repositório em
-uma página — e rode:
+Antes de abrir PR:
 
 ```bash
 npm run lint && npm run typecheck && npm test
@@ -271,11 +186,8 @@ npm run lint && npm run typecheck && npm test
 
 Se a mudança toca alguma tela, rode também `npm run aceite`.
 
-Três coisas que não passam em revisão: credencial ou dado de pessoa real versionado;
-tela que reprova no axe em nível A ou AA; e regra de validação duplicada em vez de
-importada de `shared/`.
-
-Bug de acessibilidade tem prioridade sobre qualquer outra coisa.
+As regras do repositório estão em [CLAUDE.md](CLAUDE.md), e o histórico de decisões em
+[`docs/adr/`](docs/adr/).
 
 ---
 
