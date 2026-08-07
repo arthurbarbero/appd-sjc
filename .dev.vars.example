@@ -4,3 +4,8 @@
 # Senha de selagem do cookie de sessão (nuxt-auth-utils), mínimo 32 caracteres.
 # Gere a sua: node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 NUXT_SESSION_PASSWORD=
+
+# Segredo do HMAC que protege os contadores de limite (tabela `tentativas`).
+# Sem ele nenhuma rota conta em claro: ela recusa contar e devolve 503.
+# Gere o seu: node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+LIMITE_SEGREDO=

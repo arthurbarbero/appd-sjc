@@ -89,23 +89,23 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 
 ## Fatia 5 — Verificação pública
 
-- [ ] **T5.1** — Rota `/verificar/<numero>` renderizada no servidor, com projeção que **seleciona
-      apenas** nome, número, situação, foto e contato de cuidador (nunca `SELECT *`, e **nunca** o
-      campo 12 — ADR-015). **Aceite**: cenários "Número válido de associado ativo" e "Verificação
-      funciona sem JavaScript".
-- [ ] **T5.2** — Resposta única para inexistente e mal formatado, com a mesma consulta ao banco nos
-      dois casos. **Aceite**: cenários "Número inexistente e número mal formatado respondem igual"
-      e "Consulta ao banco também ocorre para entrada mal formatada".
-- [ ] **T5.3** — Situação inativa como informação, não como erro. **Aceite**: cenário "Número
-      válido de cadastro inativo".
-- [ ] **T5.4** — Declaração explícita do que a página não mostra, em corpo normal. **Aceite**:
-      cenário "Página declara o que não mostra".
-- [ ] **T5.5** — Campo único de consulta manual, sem busca por nome nem sugestão. **Aceite**:
-      cenário "Não existe busca por nome nem sugestão".
-- [ ] **T5.6** — Limite de 20 consultas por minuto por IP, com 429 neutro. **Aceite**: cenário
-      "Rajada de consultas é limitada".
-- [ ] **T5.7** — Bloco "Recebeu uma ligação da APPD?" marcado `[A CONFIRMAR]` até a associação
-      responder.
+- [x] **T5.1** — `/verificar/<numero>` renderizada no servidor (`useFetch` no SSR), com projeção
+      coluna a coluna. **Aceite**: o aceite confere que o nome e o número aparecem, que a situação
+      é exibida, e que **nenhum valor do campo 12 aparece no HTML bruto** — atributo e comentário
+      inclusive. _Feito em 2026-08-07._
+- [x] **T5.2** — Resposta única. O número mal formatado vira consulta que não casa, em vez de
+      `return` antecipado: dois caminhos de código produziriam dois tempos de resposta, e o tempo
+      diria o que a mensagem cala. **Aceite**: o aceite compara os dois blocos e exige igualdade.
+      _Feito em 2026-08-07._
+- [x] **T5.3** — Situação inativa em âmbar (`.selo-atencao`), sem vermelho e sem a palavra
+      "inválido". _Feito em 2026-08-07._
+- [x] **T5.4** — Declaração em corpo normal logo abaixo da resposta. _Feito em 2026-08-07._
+- [x] **T5.5** — Campo único, sem busca por nome nem sugestão. _Feito em 2026-08-07._
+- [x] **T5.6** — 20 por minuto por **hash** de IP (`server/utils/limite.ts`), com 429 neutro.
+      Medido no workerd: 20 passam, a 21ª devolve 429, e outro IP não é afetado. Sem
+      `LIMITE_SEGREDO` a rota **recusa contar** em vez de gravar IP em claro.
+      _Feito em 2026-08-07._
+- [x] **T5.7** — Bloco presente, com o selo "A confirmar" visível. _Feito em 2026-08-07._
 
 ## Fatia 6 — Validação e fechamento
 

@@ -37,6 +37,9 @@ const PUBLICAS = [
   '/doar',
   '/entrar',
   '/atendimento/inscricao',
+  // Número que não existe, de propósito: é o estado que qualquer pessoa alcança sem
+  // conta, e o que a câmera do celular mais vai encontrar se o crachá estiver borrado.
+  '/verificar/APPD-2026-ZZZZZZ',
 ]
 
 const LARGURAS = [360, 414, 768, 880, 1024, 1280, 1440]
@@ -155,6 +158,45 @@ try {
     /\/verificar\/APPD-/.test(await p.getAttribute('svg[role="img"]', 'aria-label')),
   )
 
+  // ── 1b. A verificação pública, que é para onde o QR aponta ────────────────
+  const numeroRegistro = (await p.getAttribute('svg[role="img"]', 'aria-label')).match(
+    /APPD-\d{4}-[A-Z0-9]{6}/,
+  )?.[0]
+
+  await p.goto(`${BASE}/verificar/${numeroRegistro}`, { waitUntil: 'networkidle' })
+  const publica = await p.textContent('body')
+  ok('o QR não leva mais a 404', !p.url().includes('404') && publica.includes(numeroRegistro))
+  ok('a verificação mostra o nome', publica.includes('Maria Fictícia de Teste'))
+  ok('a verificação diz que o cadastro está ativo', publica.includes('Associado ativo'))
+
+  /*
+    O item que sozinho reprova a tela. `Física` é o campo 12 — dado sensível do Art. 11
+    numa página pública. A varredura é no HTML inteiro, não no texto visível: atributo,
+    comentário e JSON embutido contam.
+  */
+  const bruto = await p.content()
+  ok(
+    'tipo de deficiência NÃO aparece na verificação pública',
+    !/Física|Intelectual|Sensorial|Neurodivergente/.test(bruto),
+  )
+  ok(
+    'a verificação declara o que não mostra',
+    publica.includes('não mostra endereço') && publica.includes('tipo de deficiência'),
+  )
+  ok('endereço e nascimento não vazam', !bruto.includes('Rua Fictícia') && !bruto.includes('1978'))
+
+  // Número inexistente e número mal digitado respondem igual, caractere a caractere.
+  const bloco = async (n) => {
+    await p.goto(`${BASE}/verificar/${n}`, { waitUntil: 'networkidle' })
+    return (await p.textContent('.resposta'))?.replace(/\s+/g, ' ').trim()
+  }
+  const inexistente = await bloco('APPD-2026-ZZZZZZ')
+  const malFormatado = await bloco('nada-disso')
+  ok('inexistente e mal formatado respondem igual', inexistente === malFormatado, inexistente)
+  ok('nenhum dos dois dá dica de formato', !/formato|dígito|caracter/i.test(inexistente ?? ''))
+
+  await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
+
   // ── 2. O cabeçalho sabe que a pessoa entrou ───────────────────────────────
   const conta = async () => (await p.textContent('.cabecalho nav .conta'))?.trim()
   ok('cabeçalho mostra "Minha área" depois do cadastro', (await conta()) === 'Minha área')
@@ -259,6 +301,15 @@ try {
   await p.waitForURL(/conta=excluida/, { timeout: 20000 }).catch(() => {})
   ok('exclusão conclui e volta para a home', p.url().includes('conta=excluida'), p.url())
   ok('cabeçalho volta a oferecer "Entrar"', (await conta()) === 'Entrar')
+
+  /*
+    REQ-28a: o número sobrevive à exclusão — de propósito, para que um crachá antigo não
+    passe a identificar outra pessoa —, mas nome, foto e cuidador vão embora com ele.
+  */
+  await p.goto(`${BASE}/verificar/${numeroRegistro}`, { waitUntil: 'networkidle' })
+  const depois = await p.content()
+  ok('depois de excluir, a verificação não mostra mais o nome', !depois.includes('Maria Fictícia'))
+  ok('depois de excluir, a verificação não serve foto', !depois.includes('data:image/jpeg'))
 
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
   ok('a área não abre depois de excluída', p.url().includes('/entrar'), p.url())

@@ -536,6 +536,24 @@ a:hover {
   font-weight: var(--peso-forte);
 }
 
+/*
+  Situação que não é boa nem é erro. Âmbar, e nunca vermelho: na verificação pública, um
+  cadastro inativo não é fraude nem acusação — é informação (REQ-31). Vermelho ali faria
+  quem confere tratar a pessoa como suspeita.
+
+  `.selo-sucesso` existe como nome explícito porque `.selo` sozinho já é verde, e depender
+  do padrão faz o próximo variante virar o inesperado.
+*/
+.selo-sucesso {
+  background: var(--verde-tenue);
+  color: var(--verde);
+}
+
+.selo-atencao {
+  background: var(--aviso-fundo);
+  color: var(--aviso);
+}
+
 /* ---------- tabela ---------- */
 
 .rolagem {
