@@ -4,18 +4,17 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar em <https://appd-sjc.appd-sjc.workers.dev>** — publicado a cada push na `main`,
-depois de lint, typecheck e testes passarem. É endereço de demonstração; o banco por trás
-dele não é de produção, e nada vai para o domínio da APPD antes de a associação revisar.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>** (v0.2.0, 2026-08-07) — publicado a
+cada push na `main`, depois de prettier, eslint, vue-tsc, vitest e gitleaks passarem.
+Endereço de demonstração: o banco por trás dele não é de produção, e nada vai para o
+domínio da APPD antes de a associação revisar.
 
-O ciclo de conta funciona ponta a ponta: cadastrar, entrar, ver a área, corrigir os
-próprios dados, sair e excluir a conta. Percorrido contra **produção**, não só local.
+O ciclo de conta funciona ponta a ponta — cadastrar, entrar, ver a área, corrigir os
+próprios dados, sair e excluir a conta —, percorrido **contra produção**, não só local.
 
-**Duas changes arquivadas** em 2026-08-07, as primeiras do projeto:
-`modelo-de-dados` e `revisao-de-interface`. Ver `openspec/archive/`.
+**Duas changes arquivadas**, as primeiras: `modelo-de-dados` e `revisao-de-interface`.
 
-**O gate deixou de ser leitura.** Decisão do dono: "não vou analisar a mão mesmo não, voce
-mesmo valida". Três comandos:
+**O gate deixou de depender de leitura.** Três comandos dizem o estado em dois minutos:
 
 | Comando          | O que cobre                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -26,11 +25,12 @@ mesmo valida". Três comandos:
 **Próximo passo**: fechar `site-institucional` (19 tasks, quase todas de medição e SEO,
 nenhuma dependendo de terceiro) e mapear os cenários de `cadastro-e-login`,
 `formulario-atendimento` e `area-do-associado` para onde eles já rodam — o caminho está
-descrito em `openspec/PARECER-GATE-AUTOMATICO.md`.
+em `openspec/PARECER-GATE-AUTOMATICO.md`.
 
 **O que trava o resto**: `cracha-do-associado` espera o design das dez telas (T0.4);
 `consentimento-e-privacidade` espera o ADR-006; a redefinição de senha espera um caminho
-de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
+de e-mail ou SMS gratuito, ainda em pesquisa — e é a lacuna mais séria do que está no ar,
+porque hoje quem esquece a senha perde a conta.
 
 ## Decisões tomadas
 
@@ -237,3 +237,32 @@ de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 - `shared/registro.ts` existe como teste de fumaça da fundação. A spec do número
   de registro está em `cadastro-e-login` (é lá que ele é gerado), não em
   `cracha-do-associado`, que só o exibe.
+
+## Sessão de 2026-08-07 — o que mudou
+
+Dia longo. O resumo do que ficou diferente do começo ao fim:
+
+**Entregue**: `/area/dados` (alterar nome, telefone e endereço), QR Code da verificação
+no crachá, CEP e telefone formatados no painel, os 21 pontos da revisão de interface
+(fila de vagas, blocos inventados, cartões clicáveis, contato com botão de copiar,
+`/sobre` completo, projetos como opção do formulário, logo no rodapé), botão "Sair" — que
+não existia para uma rota de API pronta havia um dia.
+
+**Consertado**: o cabeçalho na faixa de 861 a 900 px; entrar e sair sem atualizar o
+estado de sessão no cliente; cadastro e login abertos para quem já tinha sessão; a tela
+que redeclarava as três listas de escolha em vez de importá-las.
+
+**Publicado**: o deploy falhava por a conta Cloudflare nunca ter registrado subdomínio
+`workers.dev` — o Worker subia inteiro e morria no último passo. Registrado, com
+`preview_urls` desligado.
+
+**Rito**: o gate de spec virou `test/gate-spec.spec.ts` e deixou de ser autorrevisão. Na
+primeira execução reprovou dez checagens, nove defeito real — quatro ADRs citados e nunca
+escritos, nove requisitos sem critério de aceite.
+
+**Limpeza**: `design-system/` saiu da raiz (CSS para `app/assets/css/`, galeria para
+`docs/design-system/`); `shared/` achatado em quatro arquivos sem pasta; scripts do
+`package.json` de 18 para 12; `parar-workerd.mjs` apagado depois de corrigir a causa —
+o runner do aceite não derrubava a árvore de processos que abria.
+
+**Registrado como aberto, não como decidido**: CSS puro nunca foi escolha do dono.

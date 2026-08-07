@@ -164,7 +164,12 @@ server/              o que roda no Worker
 ├─ middleware/       guardas de rota no servidor
 └─ utils/            sessão, banco, senha, número de registro
 
-shared/              usado pelos dois lados — schemas Zod, conteúdo, domínio
+shared/              usado pelo navegador e pelo Worker
+├─ conteudo.ts       conteúdo institucional
+├─ inscricao.ts      os campos do formulário e o schema Zod que os valida
+├─ registro.ts       geração e formato do número de registro
+└─ senha.ts          parâmetros da derivação da senha
+
 drizzle/migrations/  SQL versionado
 public/              arquivos servidos como estão
 
