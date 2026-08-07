@@ -205,13 +205,20 @@ async function exportar(formato: 'png' | 'pdf') {
             {{ exportando === 'pdf' ? 'Gerando…' : 'Baixar em PDF' }}
           </button>
           <!--
-            Abre em tela própria (decisão do dono, 2026-08-07): a folha A4 não é um bloco
-            desta página, é o documento. Em tela separada o Ctrl+P pega a página inteira sem
-            cabeçalho em volta, e rolar a folha deixa de ser problema desta tela.
+            Abre em **outra aba** (decisão do dono, 2026-08-07). A folha A4 não é um bloco
+            desta página, é o documento — e quem manda imprimir não quer perder de vista o
+            crachá que estava olhando. `rel="noopener"` porque `target="_blank"` sem isso
+            entrega à aba nova uma referência à que a abriu.
           -->
-          <NuxtLink class="botao botao-secundario" to="/area/cracha-impressao">
+          <a
+            class="botao botao-secundario"
+            href="/area/cracha-impressao"
+            target="_blank"
+            rel="noopener"
+          >
             Ver como fica impresso
-          </NuxtLink>
+            <span class="so-leitor-de-tela">(abre em outra aba)</span>
+          </a>
         </template>
 
         <!-- Estado desabilitado sempre com o motivo escrito ao lado (REQ-8, T4.6) -->

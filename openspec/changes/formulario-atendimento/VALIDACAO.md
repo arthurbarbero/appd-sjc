@@ -53,8 +53,8 @@ texto está certo, e proibir palavra para sempre engessa sem proteger nada.
 
 ## O que trava o arquivamento
 
-**T9 — gate de publicação.** Depende de `consentimento-e-privacidade`, que não tem uma
-linha implementada. E há um defeito concreto que ela precisa resolver:
+**T9 — gate de publicação.** Depende de `consentimento-e-privacidade`, que ainda não tem o
+catálogo completo de termos:
 
 > **O consentimento é gravado com hash zerado.** `server/api/conta/cadastro.post.ts` escreve
 > `hash: '0'.repeat(64)` — um marcador de lugar até o catálogo de termos existir. O formato

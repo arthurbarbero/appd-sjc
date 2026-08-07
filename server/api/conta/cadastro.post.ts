@@ -12,6 +12,7 @@
 
 import { eq } from 'drizzle-orm'
 import { esquemaInscricao } from '~~/shared/inscricao'
+import { TERMO_ART11, hashDoTermo } from '~~/shared/termos'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 
 /** Converte `dd/mm/aaaa` para o `aaaa-mm-dd` que o banco exige. */
@@ -21,17 +22,24 @@ function paraDataIso(brasileira: string): string {
 }
 
 /**
- * Limite de cadastros por hora, por hash de IP (REQ-4, REQ-22).
+ * Limite de cadastros por hash de IP (REQ-4, REQ-22). **Contador próprio desta rota**: o
+ * escopo `inscricao` não é compartilhado com a verificação nem com o login.
  *
- * Doze é folgado para o uso real — uma família cadastrando várias pessoas do mesmo
- * aparelho cabe — e apertado para o que se quer impedir: um laço criando conta em série,
- * cada uma consumindo linha no D1 e um número de registro.
+ * Doze é folgado para o uso real e apertado para o que se quer impedir: um laço criando
+ * conta em série, cada uma consumindo linha no D1 e um número de registro.
+ *
+ * **A janela caiu de uma hora para quinze minutos em 2026-08-07**, e o motivo não é
+ * técnico: a APPD faz mutirão de cadastro na sede, e vários associados usam a mesma rede.
+ * Com janela de uma hora, o décimo terceiro da fila ficaria uma hora sem conseguir se
+ * cadastrar, na frente de quem estava ajudando. Quinze minutos continua cortando um laço
+ * automatizado — no máximo 48 contas por hora, e o corte chega em segundos — e devolve o
+ * acesso a quem só estava esperando a vez.
  *
  * O IP nunca é gravado em claro: a chave é `HMAC-SHA-256` (`server/utils/limite.ts`).
  * Guardar o IP de quem procura uma associação de pessoas com deficiência seria produzir
  * exatamente o registro que este mecanismo existe para não criar.
  */
-const LIMITE = { escopo: 'inscricao', maximo: 12, janelaSegundos: 3600 } as const
+const LIMITE = { escopo: 'inscricao', maximo: 12, janelaSegundos: 900 } as const
 
 /**
  * Teto do corpo, **derivado dos campos**, não chutado.
@@ -112,6 +120,9 @@ export default defineEventHandler(async (event) => {
   const senha = prepararSenha(chave)
   const id = crypto.randomUUID()
 
+  // Calculado do texto, e não escrito à mão: hash digitado é hash que ninguém confere.
+  const hashTermo = await hashDoTermo(TERMO_ART11.texto)
+
   const numeroRegistro = await emitirNumeroRegistro(anoCorrente(), async (numero) => {
     try {
       // Transação lógica: o D1 executa `batch` como unidade atômica.
@@ -156,11 +167,12 @@ export default defineEventHandler(async (event) => {
         bd.insert(schema.consentimentos).values({
           id: crypto.randomUUID(),
           usuarioId: id,
-          termoId: 'deficiencia-art11',
-          versao: 'v1',
-          // Placeholder até o catálogo de termos existir (ADR-006). O formato é o
-          // definitivo — 64 hexadecimais — para não mascarar erro de schema.
-          hash: '0'.repeat(64),
+          termoId: TERMO_ART11.termoId,
+          versao: TERMO_ART11.versao,
+          // SHA-256 do texto que a pessoa leu, calculado do próprio texto. Até 2026-08-07
+          // isto era '0' repetido 64 vezes — um valor que **parecia** prova e não era, o
+          // que é pior que campo vazio: o vazio se vê, o falso se acredita.
+          hash: hashTermo,
           evento: 'aceite',
           registradoEm: agora,
           origem: '/atendimento/inscricao',

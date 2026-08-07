@@ -403,17 +403,37 @@ try {
   ok('o PNG baixa com o número no nome', arquivo.suggestedFilename().includes(numeroRegistro))
 
   /*
-    A folha A4 mora em tela própria desde 2026-08-07 (decisão do dono): ela não é um bloco
-    do crachá, é o documento. Aqui o axe a vê sozinha, sem o resto da área em volta.
+    A folha A4 mora em **outra aba** desde 2026-08-07 (decisão do dono): não é um bloco do
+    crachá, é o documento, e quem manda imprimir não quer perder de vista o que estava
+    olhando. Por isso o teste espera a aba nova em vez de navegar nesta.
   */
+  const abaImpressao = ctx.waitForEvent('page')
   await p.click('a:has-text("Ver como fica impresso")')
-  await p.waitForSelector('.folha', { timeout: 15000 })
-  ok('a impressão abre em tela própria', p.url().includes('/area/cracha-impressao'), p.url())
+  const impressao = await abaImpressao
+  await impressao.waitForSelector('.folha', { timeout: 20000 })
+  ok(
+    'a impressão abre em outra aba',
+    impressao.url().includes('/area/cracha-impressao'),
+    impressao.url(),
+  )
   ok(
     'a impressão avisa para não ajustar à página',
-    (await p.textContent('.impressao')).includes('Não use a opção de ajustar à página'),
+    (await impressao.textContent('.impressao')).includes('Não use a opção de ajustar à página'),
   )
-  ok('a tela de impressão não traz a navegação da área', !(await p.$('.area-navegacao')))
+
+  /*
+    O PDF que o dono mandou provou que a tela levava para o papel cabeçalho, menu, rodapé de
+    quatro colunas e uma segunda página com o COMTRAD. A causa era o layout padrão, que
+    envolve a página inteira — `@media print` daqui não alcançava. A tela passou a declarar
+    `layout: false`, e é isso que estas três verificações guardam.
+  */
+  const htmlImpressao = await impressao.content()
+  ok(
+    'a tela de impressão não traz o cabeçalho do site',
+    !htmlImpressao.includes('class="cabecalho'),
+  )
+  ok('a tela de impressão não traz o rodapé do site', !htmlImpressao.includes('class="rodape'))
+  ok('a tela de impressão não traz a navegação da área', !(await impressao.$('nav')))
 
   /*
     T6.2 — axe nas **duas** larguras. 1280 px é a escrivaninha; 360 px é o celular, que é
@@ -422,9 +442,9 @@ try {
     rótulo que some para caber.
   */
   for (const largura of [1280, 360]) {
-    await p.setViewportSize({ width: largura, height: 900 })
-    await p.waitForTimeout(300)
-    const r = await new AxeBuilder({ page: p })
+    await impressao.setViewportSize({ width: largura, height: 900 })
+    await impressao.waitForTimeout(300)
+    const r = await new AxeBuilder({ page: impressao })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze()
     ok(
@@ -441,8 +461,9 @@ try {
     chega às ações que importam. `Tab` até o botão de baixar, e o foco precisa estar
     **visível** — foco que existe no DOM e não se vê na tela não serve para ninguém.
   */
+  await impressao.close()
   await p.setViewportSize({ width: 1280, height: 900 })
-  // A impressão abre em tela própria desde 2026-08-07: volta para o crachá antes de teclar.
+  // A aba da impressão fechou: o percurso por teclado continua na aba do crachá.
   await p.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
   let alcancou = false
   let comFocoVisivel = false
@@ -676,42 +697,57 @@ try {
   }
 
   /*
-    ── 8. O corte por IP, sem forjar nada ──────────────────────────────────────
+    ── 8. Os limites por IP, cada tela no seu contador ─────────────────────────
 
-    Fica **por último** e usa a rota de verificação, e as duas escolhas têm motivo:
+    Fica **por último** porque a rajada esgota a cota da própria máquina, e nada depois
+    disto precisa das duas rotas.
 
-    **Sem forjar.** A Cloudflare sobrescreve `CF-Connecting-IP` com o IP real de quem
-    conecta — é ela quem serve o valor, e o Worker só lê. Mandar o cabeçalho da máquina de
-    teste era inventar um campo que não é meu, e ainda fazia o percurso passar local e
-    reprovar em produção. Teste que muda de comportamento por ambiente não prova nada.
+    **Sem forjar cabeçalho.** A Cloudflare sobrescreve `CF-Connecting-IP` com o IP real de
+    quem conecta — é ela quem serve o valor, e o Worker só lê. Mandar o cabeçalho da máquina
+    de teste era inventar um campo que não é meu, e ainda fazia o percurso passar local e
+    reprovar em produção.
 
-    **Na verificação, e não no cadastro.** O contador é o mesmo (`registrarTentativa`), mas
-    as janelas são diferentes: verificação corta em 20 por **minuto**, cadastro em 12 por
-    **hora**. Esgotar a cota horária do cadastro bloquearia a próxima execução do gate — a
-    de minuto se recupera sozinha antes de alguém rodar de novo.
+    **Cada rota no próprio escopo**, e é por isso que as duas são medidas separadamente:
+    `verificacao` corta em 20 por minuto, `inscricao` em 12 por quinze minutos. Provar uma
+    pela outra seria supor que o contador está ligado onde não foi conferido.
 
-    **Por último** porque a rajada esgota a cota da própria máquina; nada depois disto
-    precisa consultar.
-
-    Que o cadastro está ligado ao mesmo contador é provado por `test/seguranca.spec.ts`,
-    que falha se a rota deixar de chamar `registrarTentativa` no escopo certo.
+    **O preço, escrito:** rodar o gate contra produção duas vezes seguidas esbarra na cota
+    do cadastro. Quinze minutos depois ela volta.
   */
-  const respostas = []
-  for (let i = 0; i < 22; i++) {
-    const r = await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)
-    respostas.push(r.status())
+  const rajada = async (fazer, quantas) => {
+    const status = []
+    for (let i = 0; i < quantas; i++) status.push(await fazer())
+    return status
   }
-  const primeiroCorte = respostas.indexOf(429)
-  ok('rajada de consultas é cortada com 429', primeiroCorte !== -1, respostas.join(' '))
-  /*
-    O corte tem de vir **depois** de algumas passarem: isso é o que distingue limite de
-    bloqueio geral. A posição exata não é asserção — o percurso já consultou a verificação
-    várias vezes antes de chegar aqui, e cada consulta conta na mesma janela de um minuto.
-  */
+
+  const naVerificacao = await rajada(
+    async () => (await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)).status(),
+    22,
+  )
+  const corteVerificacao = naVerificacao.indexOf(429)
+  ok('a verificação corta a rajada com 429', corteVerificacao !== -1, naVerificacao.join(' '))
   ok(
-    'algumas consultas passam antes do corte — é limite, não bloqueio',
-    primeiroCorte > 0,
-    `cortou na ${primeiroCorte + 1}ª de 22`,
+    'na verificação, algumas passam antes do corte — é limite, não bloqueio',
+    corteVerificacao > 0,
+    `cortou na ${corteVerificacao + 1}ª de 22`,
+  )
+
+  const noCadastro = await rajada(
+    async () =>
+      (
+        await p.request.post(`${BASE}/api/conta/cadastro`, {
+          headers: { 'content-type': 'application/json' },
+          data: { nada: true },
+        })
+      ).status(),
+    14,
+  )
+  const corteCadastro = noCadastro.indexOf(429)
+  ok('o cadastro corta a rajada com 429', corteCadastro !== -1, noCadastro.join(' '))
+  ok(
+    'no cadastro, algumas passam antes do corte',
+    corteCadastro > 0,
+    `cortou na ${corteCadastro + 1}ª de 14`,
   )
 } finally {
   await navegador.close()

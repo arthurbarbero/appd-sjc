@@ -14,6 +14,16 @@ import { ASSOCIACAO } from '~~/shared/conteudo'
   Sem `AreaNavegacao` e sem os blocos da área, de propósito. Quem chega aqui veio imprimir.
 */
 
+/*
+  **Sem layout nenhum** (`layout: false`). Não é preferência: com o layout padrão, o
+  `Ctrl+P` levava junto cabeçalho, menu, rodapé de quatro colunas e uma segunda página com
+  o COMTRAD. O dono mandou o PDF e o defeito estava lá inteiro.
+
+  `@media print` sozinho não resolvia, porque cabeçalho e rodapé vêm do layout, fora desta
+  página — não havia como marcá-los para sumir daqui.
+*/
+definePageMeta({ layout: false })
+
 useHead({
   title: 'Crachá para impressão — APPD São José dos Campos',
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
@@ -29,6 +39,15 @@ const temFoto = computed(() => Boolean(data.value?.foto))
 
 function imprimir() {
   window.print()
+}
+
+/*
+  A tela abre em aba nova. Fechar é o gesto certo — voltar levaria a lugar nenhum, porque
+  esta aba não tem histórico. Se alguém chegou por link direto, `window.close()` é ignorado
+  pelo navegador e o caminho de volta fica no link abaixo.
+*/
+function fechar() {
+  window.close()
 }
 </script>
 
@@ -47,8 +66,12 @@ function imprimir() {
         <button v-if="temFoto" type="button" class="botao botao-primario" @click="imprimir">
           Imprimir
         </button>
-        <NuxtLink class="botao botao-secundario" to="/area/cracha">Voltar ao meu crachá</NuxtLink>
+        <button type="button" class="botao botao-secundario" @click="fechar">Fechar</button>
       </div>
+      <p class="volta">
+        Esta tela abriu em outra aba. Se ela não fechar, use
+        <NuxtLink to="/area/cracha">Meu crachá</NuxtLink>.
+      </p>
     </div>
 
     <p v-if="pending" role="status" class="nao-imprime carregando">Carregando o seu crachá…</p>
@@ -107,10 +130,17 @@ function imprimir() {
 </template>
 
 <style scoped>
+/*
+  Sem layout, a página não herda margem nenhuma — o respiro tem de vir daqui. E ele some
+  na impressão, onde a margem quem define é o navegador.
+*/
 .impressao {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--e5) var(--e4);
 }
 
 .cabecalho-impressao {
@@ -130,6 +160,13 @@ function imprimir() {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e2);
+}
+
+.volta {
+  flex-basis: 100%;
+  font-size: var(--texto-rotulo);
+  color: var(--texto-suave);
+  margin: 0;
 }
 
 .folha-rolagem {
@@ -184,6 +221,9 @@ function imprimir() {
 
   .impressao {
     gap: 0;
+    padding: 0;
+    margin: 0;
+    max-width: none;
   }
 
   .folha-rolagem {
