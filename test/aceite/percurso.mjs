@@ -177,42 +177,16 @@ try {
   )
 
   /*
-    Guarda anti-abuso do cadastro (T4 de `formulario-atendimento`).
+    Teto de corpo do cadastro (T4 de `formulario-atendimento`).
 
-    Os dois lados: corpo maior que o esperado é recusado com 413, e rajada de cadastros do
-    mesmo endereço é cortada com 429. O IP nunca é gravado em claro — a chave do contador
-    é HMAC.
-
-    O teste usa um IP fictício próprio para não gastar a cota do percurso real.
+    Sem cabeçalho forjado: o teto vale para qualquer requisição. O corte por IP é medido no
+    fim do percurso, na rota de verificação — a explicação está lá.
   */
   const grande = await p.request.post(`${BASE}/api/conta/cadastro`, {
     headers: { 'content-type': 'application/json' },
     data: { lixo: 'x'.repeat(20000) },
   })
   ok('corpo maior que o esperado é recusado com 413', grande.status() === 413, `${grande.status()}`)
-
-  /*
-    O limite por IP só é exercitável **localmente**, e a razão é uma boa notícia.
-
-    Para provar o corte sem gastar a cota do percurso real, o teste precisa fingir um IP —
-    e em produção a Cloudflare **recusa com 403** qualquer requisição que traga
-    `cf-connecting-ip` posto pelo cliente. Ou seja: o cabeçalho em que o contador se apoia
-    não é falsificável de fora, que é exatamente a propriedade que se quer.
-
-    Medido em 2026-08-07 contra produção: com o cabeçalho forjado, 403; sem ele, o fluxo
-    normal responde 413 e 422 como deve.
-  */
-  if (SOBE_SERVIDOR) {
-    let bloqueou = 0
-    for (let i = 0; i < 14; i++) {
-      const r = await p.request.post(`${BASE}/api/conta/cadastro`, {
-        headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.88' },
-        data: { nada: true },
-      })
-      if (r.status() === 429) bloqueou += 1
-    }
-    ok('rajada de cadastros do mesmo IP é cortada com 429', bloqueou > 0, `${bloqueou} bloqueios`)
-  }
 
   // ── 1b. A verificação pública, que é para onde o QR aponta ────────────────
   const numeroRegistro = (await p.getAttribute('svg[role="img"]', 'aria-label')).match(
@@ -428,13 +402,18 @@ try {
   ok('exportar PNG não faz nenhuma requisição de rede', pedidos === 0, urls.join(' | '))
   ok('o PNG baixa com o número no nome', arquivo.suggestedFilename().includes(numeroRegistro))
 
-  // A pré-visualização de impressão é estado próprio, e o axe precisa vê-la aberta.
-  await p.click('button:has-text("Ver como fica impresso")')
-  await p.waitForSelector('.folha')
+  /*
+    A folha A4 mora em tela própria desde 2026-08-07 (decisão do dono): ela não é um bloco
+    do crachá, é o documento. Aqui o axe a vê sozinha, sem o resto da área em volta.
+  */
+  await p.click('a:has-text("Ver como fica impresso")')
+  await p.waitForSelector('.folha', { timeout: 15000 })
+  ok('a impressão abre em tela própria', p.url().includes('/area/cracha-impressao'), p.url())
   ok(
     'a impressão avisa para não ajustar à página',
     (await p.textContent('.impressao')).includes('Não use a opção de ajustar à página'),
   )
+  ok('a tela de impressão não traz a navegação da área', !(await p.$('.area-navegacao')))
 
   /*
     T6.2 — axe nas **duas** larguras. 1280 px é a escrivaninha; 360 px é o celular, que é
@@ -449,7 +428,7 @@ try {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze()
     ok(
-      `axe A/AA em /area/cracha a ${largura}px, com o crachá e a impressão abertos`,
+      `axe A/AA em /area/cracha-impressao a ${largura}px`,
       r.violations.length === 0,
       r.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
     )
@@ -463,8 +442,8 @@ try {
     **visível** — foco que existe no DOM e não se vê na tela não serve para ninguém.
   */
   await p.setViewportSize({ width: 1280, height: 900 })
-  await p.keyboard.press('Escape')
-  await p.evaluate(() => document.body.focus())
+  // A impressão abre em tela própria desde 2026-08-07: volta para o crachá antes de teclar.
+  await p.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
   let alcancou = false
   let comFocoVisivel = false
   for (let i = 0; i < 60 && !alcancou; i++) {
@@ -695,6 +674,45 @@ try {
     const graves = violations.map((v) => `${v.id} (${v.nodes.length})`)
     ok(`axe A/AA em ${rota}`, graves.length === 0, graves.join(', '))
   }
+
+  /*
+    ── 8. O corte por IP, sem forjar nada ──────────────────────────────────────
+
+    Fica **por último** e usa a rota de verificação, e as duas escolhas têm motivo:
+
+    **Sem forjar.** A Cloudflare sobrescreve `CF-Connecting-IP` com o IP real de quem
+    conecta — é ela quem serve o valor, e o Worker só lê. Mandar o cabeçalho da máquina de
+    teste era inventar um campo que não é meu, e ainda fazia o percurso passar local e
+    reprovar em produção. Teste que muda de comportamento por ambiente não prova nada.
+
+    **Na verificação, e não no cadastro.** O contador é o mesmo (`registrarTentativa`), mas
+    as janelas são diferentes: verificação corta em 20 por **minuto**, cadastro em 12 por
+    **hora**. Esgotar a cota horária do cadastro bloquearia a próxima execução do gate — a
+    de minuto se recupera sozinha antes de alguém rodar de novo.
+
+    **Por último** porque a rajada esgota a cota da própria máquina; nada depois disto
+    precisa consultar.
+
+    Que o cadastro está ligado ao mesmo contador é provado por `test/seguranca.spec.ts`,
+    que falha se a rota deixar de chamar `registrarTentativa` no escopo certo.
+  */
+  const respostas = []
+  for (let i = 0; i < 22; i++) {
+    const r = await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)
+    respostas.push(r.status())
+  }
+  const primeiroCorte = respostas.indexOf(429)
+  ok('rajada de consultas é cortada com 429', primeiroCorte !== -1, respostas.join(' '))
+  /*
+    O corte tem de vir **depois** de algumas passarem: isso é o que distingue limite de
+    bloqueio geral. A posição exata não é asserção — o percurso já consultou a verificação
+    várias vezes antes de chegar aqui, e cada consulta conta na mesma janela de um minuto.
+  */
+  ok(
+    'algumas consultas passam antes do corte — é limite, não bloqueio',
+    primeiroCorte > 0,
+    `cortou na ${primeiroCorte + 1}ª de 22`,
+  )
 } finally {
   await navegador.close()
   encerrar(servidor)

@@ -28,7 +28,6 @@ const salvandoFoto = ref(false)
 const erroEnvio = ref('')
 const exportando = ref('')
 const erroExportar = ref('')
-const impressao = ref(false)
 
 const temFoto = computed(() => Boolean(data.value?.foto))
 const urlVerificacao = computed(() => `${origem}/verificar/${data.value?.numeroRegistro ?? ''}`)
@@ -205,9 +204,14 @@ async function exportar(formato: 'png' | 'pdf') {
           >
             {{ exportando === 'pdf' ? 'Gerando…' : 'Baixar em PDF' }}
           </button>
-          <button type="button" class="botao botao-secundario" @click="impressao = !impressao">
-            {{ impressao ? 'Esconder' : 'Ver como fica impresso' }}
-          </button>
+          <!--
+            Abre em tela própria (decisão do dono, 2026-08-07): a folha A4 não é um bloco
+            desta página, é o documento. Em tela separada o Ctrl+P pega a página inteira sem
+            cabeçalho em volta, e rolar a folha deixa de ser problema desta tela.
+          -->
+          <NuxtLink class="botao botao-secundario" to="/area/cracha-impressao">
+            Ver como fica impresso
+          </NuxtLink>
         </template>
 
         <!-- Estado desabilitado sempre com o motivo escrito ao lado (REQ-8, T4.6) -->
@@ -228,49 +232,6 @@ async function exportar(formato: 'png' | 'pdf') {
 
       <!-- REQ-24: em corpo normal, não em nota de rodapé -->
       <p class="local">O arquivo é gerado aqui no seu navegador. Nada é enviado para fora.</p>
-
-      <!-- Estado 6 — pré-visualização de impressão -->
-      <section v-if="impressao && temFoto" class="impressao" aria-labelledby="t-impressao">
-        <h2 id="t-impressao">Como fica impresso</h2>
-        <p class="atencao-impressao">
-          Imprima em 100%. Não use a opção de ajustar à página, senão o crachá sai menor que o
-          tamanho certo.
-        </p>
-        <!--
-          `tabindex="0"` porque a folha A4 rola na horizontal em tela estreita, e região
-          que rola sem receber foco é intransponível para quem não usa mouse — a régua é a
-          `scrollable-region-focusable` do axe, que reprovou aqui a 360 px.
-        -->
-        <div
-          class="rolagem-folha"
-          tabindex="0"
-          role="group"
-          aria-label="Folha A4 com o crachá em tamanho real"
-        >
-          <div class="folha">
-            <div class="corte">
-              <AppdCracha
-                lado="frente"
-                :nome="data.nome ?? ''"
-                :numero-registro="data.numeroRegistro"
-                :situacao="data.situacao"
-                :foto="data.foto"
-                :deficiencias="data.deficiencias"
-                :url-verificacao="urlVerificacao"
-              />
-            </div>
-            <div class="corte">
-              <AppdCracha
-                lado="verso"
-                :nome="data.nome ?? ''"
-                :numero-registro="data.numeroRegistro"
-                :situacao="data.situacao"
-                :url-verificacao="urlVerificacao"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!--
         REQ-25: caixa única, separada das demais, desmarcada por padrão. O texto descreve
@@ -403,55 +364,6 @@ figcaption {
   margin: 0;
   color: var(--texto-suave);
   max-width: 40ch;
-}
-
-.atencao-impressao {
-  font-weight: var(--peso-forte);
-  max-width: 52ch;
-}
-
-.rolagem-folha {
-  overflow-x: auto;
-  padding-bottom: var(--e2);
-}
-
-.folha {
-  width: 210mm;
-  height: 297mm;
-  background: #fff;
-  border: 1px solid var(--borda-suave);
-  box-shadow: var(--sombra-2);
-  padding: 20mm;
-  box-sizing: border-box;
-  display: flex;
-  gap: 10mm;
-  align-items: flex-start;
-}
-
-/* Marcas de corte finas, para saber onde cortar sem invadir o cartão. */
-.corte {
-  position: relative;
-}
-
-.corte::before,
-.corte::after {
-  content: '';
-  position: absolute;
-  background: var(--texto);
-}
-
-.corte::before {
-  left: -6mm;
-  top: 0;
-  width: 4mm;
-  height: 1px;
-}
-
-.corte::after {
-  left: -6mm;
-  bottom: 0;
-  width: 4mm;
-  height: 1px;
 }
 
 .escolha-optin {

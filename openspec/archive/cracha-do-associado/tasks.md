@@ -83,8 +83,11 @@ depende dele, então a change fecha sem ele. A capacidade do D1 continua documen
       as bibliotecas de HTML-para-imagem baixam fonte em tempo de execução, o que quebraria o
       REQ-23 de forma invisível. **Aceite**: o gate conta requisições durante a exportação e exige
       zero — descontando o polling de manifesto do Nuxt, nomeado no teste. _Feito em 2026-08-07._
-- [x] **T4.4** — Folha A4 com marcas de corte e a instrução de imprimir em 100%. _Feito em
-      2026-08-07._
+- [x] **T4.4** — Folha A4 com marcas de corte e a instrução de imprimir em 100%, **em tela
+      própria** (`/area/cracha-impressao`) desde 2026-08-07, por decisão do dono: a folha não é
+      um bloco do crachá, é o documento. Em tela separada o `Ctrl+P` pega a página inteira sem
+      cabeçalho em volta, e a folha ganha `@media print` que tira borda, sombra e botões.
+      _Feito em 2026-08-07._
 - [x] **T4.5** — Caixa única e separada, desmarcada por padrão, persistida em
       `usuarios.cracha_mostra_deficiencia`. **Efeito restrito por construção**: sem a marca, a
       rota do crachá **nem consulta** o campo 12 — a proteção está na consulta, não no template.
