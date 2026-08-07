@@ -16,6 +16,7 @@ Reversão de decisão é por ADR novo que substitui o anterior, nunca por apagam
 | 003 | [Foto do crachá como BLOB no D1](adr-003-foto-do-cracha-como-blob-no-d1.md)                         | Aceito |
 | 004 | [Liberação imediata do crachá](adr-004-liberacao-imediata-do-cracha.md)                             | Aceito |
 | 005 | [Parâmetros do scrypt e o teto de CPU](adr-005-parametros-do-scrypt.md)                             | Aceito |
+| 006 | [Conteúdo de página vive no código](adr-006-conteudo-de-pagina-vive-no-codigo.md)                   | Aceito |
 | 012 | [Cadastro embutido no formulário](adr-012-cadastro-embutido-no-formulario.md)                       | Aceito |
 | 013 | [Fronteira de rotas entre as changes](adr-013-fronteira-de-rotas-entre-changes.md)                  | Aceito |
 | 014 | [Inscrição como registro de interesse](adr-014-inscricao-como-registro-de-interesse.md)             | Aceito |
@@ -29,12 +30,12 @@ cálculo caro para o navegador — a proteção continua existindo, só mudou de
 
 ## Reservados pelas specs, ainda não escritos
 
-Um só, e ele bloqueia a implementação da change que o pediu.
+**Nenhum.** A lista zerou em 2026-08-07 com o ADR-006.
 
-| Nº  | Decisão a registrar                                     | Pedido por                    |
-| --- | ------------------------------------------------------- | ----------------------------- |
-| 006 | Onde vive o texto das versões do termo de consentimento | `consentimento-e-privacidade` |
-
+> **006 saiu desta lista** no mesmo dia: o dono decidiu que conteúdo de página não mora em
+> banco de dados, e a decisão vale além do termo de consentimento — virou a regra geral do
+> projeto.
+>
 > **008, 009, 010 e 011 saíram desta lista em 2026-08-07**, porque foram escritos. Eles
 > estavam citados em quatro specs havia dois dias, apontando para documento nenhum — duas
 > das decisões já estavam **implementadas**. Quem achou foi `test/gate-spec.spec.ts`, que

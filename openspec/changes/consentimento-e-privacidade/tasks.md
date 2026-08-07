@@ -7,14 +7,17 @@ aprovação — quando for diferente, está escrito.
 
 Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 
-## T1 — ADR-006: onde vive o texto das versões do termo
+## T1 [FEITO 2026-08-07] — ADR-006: onde vive o texto das versões do termo
 
 - Dono da decisão: Arquiteto (Arthur Barbero assina)
 - Depende de: nada
-- Entrega: `docs/adr/adr-006-<slug>.md` decidindo entre catálogo versionado no repo (com hash
-  conferido em teste) e linhas em tabela no D1, com alternativas e consequências.
-- Aceite: o ADR responde como a imutabilidade da versão publicada (REQ-2) é garantida e como o
-  catálogo é lido em runtime no workerd. Sem esse ADR, T4 não começa.
+- Entrega: [`docs/adr/adr-006-conteudo-de-pagina-vive-no-codigo.md`](../../../docs/adr/adr-006-conteudo-de-pagina-vive-no-codigo.md).
+- **Decisão do dono, 2026-08-07**: conteúdo de página vive no código, versionado no git;
+  não existe conteúdo de página em banco de dados. Vale além do termo. A imutabilidade do
+  REQ-2 passa a ser propriedade do git e da CI — o hash é conferido no `npm test`, sem
+  código de runtime. O banco continua guardando o **aceite** (quem, qual hash, quando),
+  que é registro de fato, não conteúdo.
+- Aceite: atendido. **T4 destravada.**
 
 ## T2 — Levar PB-1 a PB-5 à APPD
 
@@ -47,7 +50,11 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 
 ## T5 — Tabela `consentimentos` no D1 e migration
 
-- Depende de: `cadastro-e-login` ter criado `usuarios` (bloqueio externo)
+- Depende de: ~~`cadastro-e-login` ter criado `usuarios` (bloqueio externo)~~ — **o bloqueio
+  caiu em 2026-08-07**: `usuarios` e `consentimentos` existem em `server/database/schema.ts`
+  e nas migrations desde que `modelo-de-dados` foi arquivada (ADR-013 pôs tabela e coluna
+  lá). O que resta aqui é **conferir** o schema contra o contrato de dados desta spec e
+  percorrer o aceite abaixo, não criar tabela.
 - Entrega: schema em `server/database/schema.ts` conforme o contrato de dados da spec, com a
   migration gerada por `npm run db:generate`, índice em `(usuario_id, termo_id, registrado_em)`.
 - Aceite: a migration aplica limpo em banco local (`npm run db:migrate`); teste prova
