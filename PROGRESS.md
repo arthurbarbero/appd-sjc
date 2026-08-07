@@ -4,20 +4,33 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**Site institucional rodando localmente** (`npm run dev`, http://localhost:3000), com
-12 rotas públicas em Nuxt sobre o design system v2.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>** — publicado a cada push na `main`,
+depois de lint, typecheck e testes passarem. É endereço de demonstração; o banco por trás
+dele não é de produção, e nada vai para o domínio da APPD antes de a associação revisar.
 
-A Fase 3 reprovou no gate (25 bloqueios) e foi destravada: o dono decidiu as três
-questões de fundo em 2026-08-06 (ADR-012, 013 e 014), a change `modelo-de-dados` virou o
-contrato único de dado, e **as seis changes foram reescritas contra ele** (T4 concluída).
+O ciclo de conta funciona ponta a ponta: cadastrar, entrar, ver a área, corrigir os
+próprios dados, sair e excluir a conta. Percorrido contra **produção**, não só local.
 
-O **T5 rodou** (`openspec/PARECER-GATE-T5.md`): 4 bloqueios contra os 25 do anterior, os
-quatro corrigidos no mesmo dia. Veredito READY, **com ressalva declarada** — quem revisou
-foi quem escreveu, então vale para varredura mecânica, não para leitura de mérito.
+**Duas changes arquivadas** em 2026-08-07, as primeiras do projeto:
+`modelo-de-dados` e `revisao-de-interface`. Ver `openspec/archive/`.
 
-**Próximo passo: T1 a T3 da `modelo-de-dados`** — schema Drizzle, migration versionada e
-os 13 testes de restrição contra o D1 local. É a primeira linha de código com banco.
-Antes dela, rodar um revisor independente sobre `modelo-de-dados`.
+**O gate deixou de ser leitura.** Decisão do dono: "não vou analisar a mão mesmo não, voce
+mesmo valida". Três comandos:
+
+| Comando          | O que cobre                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm test`       | 155 testes — restrição de banco, emissão concorrente, regressão de interface e a auditoria mecânica das specs                        |
+| `npm run aceite` | 78 verificações no workerd real: ciclo de conta, sete larguras, axe A/AA em dez telas. Aceita `APPD_BASE` para rodar contra produção |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                       |
+
+**Próximo passo**: fechar `site-institucional` (19 tasks, quase todas de medição e SEO,
+nenhuma dependendo de terceiro) e mapear os cenários de `cadastro-e-login`,
+`formulario-atendimento` e `area-do-associado` para onde eles já rodam — o caminho está
+descrito em `openspec/PARECER-GATE-AUTOMATICO.md`.
+
+**O que trava o resto**: `cracha-do-associado` espera o design das dez telas (T0.4);
+`consentimento-e-privacidade` espera o ADR-006; a redefinição de senha espera um caminho
+de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 
 ## Decisões tomadas
 

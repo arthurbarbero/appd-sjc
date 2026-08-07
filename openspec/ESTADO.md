@@ -1,5 +1,10 @@
 # Estado real das changes — 2026-08-07
 
+> **Atualização do fim do dia.** Duas changes foram **arquivadas**, as primeiras do
+> projeto: `modelo-de-dados` e `revisao-de-interface`. O gate que faltava existe e roda —
+> ver `openspec/PARECER-GATE-AUTOMATICO.md`. O que segue abaixo é o registro de como o
+> rito foi perdido e recuperado, e continua valendo para as seis changes que sobraram.
+
 Documento de reconciliação. Existe porque em **2026-08-06 o rito foi abandonado**: escrevi
 schema, migration, três rotas de API, quatro telas, dois ADRs e a infraestrutura de
 publicação **sem abrir change nenhuma**, sem marcar task e sem arquivar nada. O
@@ -113,3 +118,20 @@ para percorrê-los, que é o que faltava.
 Task marcada **no mesmo commit** que a entrega. Não existe "marco depois": o depois é
 exatamente onde o registro se descola do código, e um dia inteiro basta para o
 `openspec/` virar ficção.
+
+## Fecho de 2026-08-07
+
+**Arquivadas**: `modelo-de-dados` (19 tasks, contrato de dados com rastreabilidade
+requisito a requisito) e `revisao-de-interface` (15 tasks, os 21 pontos da sessão de uso
+do dono).
+
+**O que destravou o arquivamento** foi resolver a pendência que o próprio parecer anterior
+tinha declarado: o gate era autorrevisão. A saída não foi ler de novo — foi
+`test/gate-spec.spec.ts`, que audita a parte mecânica da Definition of Ready e roda no
+`npm test` de quem quer que escreva a spec. Na primeira execução reprovou dez checagens,
+nove delas defeito real: quatro ADRs citados e nunca escritos, nove requisitos sem
+critério de aceite. Uma era falha do próprio gate, e vale registrar — gate com falso
+negativo é pior que gate nenhum, porque dá sensação de cobertura.
+
+**Continua valendo**: `[FEITO]` não é `[VALIDADO]`, e task marcada no mesmo commit da
+entrega. As duas regras sobreviveram ao dia e são o que permitiu fechar sem maquiar.

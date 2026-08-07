@@ -29,15 +29,18 @@ cálculo caro para o navegador — a proteção continua existindo, só mudou de
 
 ## Reservados pelas specs, ainda não escritos
 
-Cada um bloqueia a implementação da change que o pediu.
+Um só, e ele bloqueia a implementação da change que o pediu.
 
-| Nº  | Decisão a registrar                                                 | Pedido por                    |
-| --- | ------------------------------------------------------------------- | ----------------------------- |
-| 006 | Onde vive o texto das versões do termo de consentimento             | `consentimento-e-privacidade` |
-| 008 | Múltipla escolha guardada como JSON no D1                           | `formulario-atendimento`      |
-| 009 | Anti-abuso sem CAPTCHA, com IP hasheado                             | `formulario-atendimento`      |
-| 010 | Implementar antes de especificar: por que o site veio antes da spec | `site-institucional`          |
-| 011 | Publicar com marcação "A confirmar" em vez de esperar a APPD        | `site-institucional`          |
+| Nº  | Decisão a registrar                                     | Pedido por                    |
+| --- | ------------------------------------------------------- | ----------------------------- |
+| 006 | Onde vive o texto das versões do termo de consentimento | `consentimento-e-privacidade` |
+
+> **008, 009, 010 e 011 saíram desta lista em 2026-08-07**, porque foram escritos. Eles
+> estavam citados em quatro specs havia dois dias, apontando para documento nenhum — duas
+> das decisões já estavam **implementadas**. Quem achou foi `test/gate-spec.spec.ts`, que
+> falha quando uma spec cita ADR que não existe nem está reservado aqui. É a razão de esta
+> tabela existir de forma legível por máquina: enquanto ela era só prosa, a lista crescia
+> sem ninguém notar.
 
 **ADR-005 está escrito mas NÃO decidido**: a medição no workerd mostrou que nenhum
 parâmetro defensável de scrypt cabe nos 10 ms de CPU do plano gratuito. As cinco opções

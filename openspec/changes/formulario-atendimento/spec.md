@@ -353,6 +353,23 @@ O que esta change escreve, e onde:
 As três primeiras, numa transação só (REQ-1). O `numero_registro` é emitido pela change
 `cadastro-e-login` (ADR-013) e esta change o consome, não o calcula.
 
+```gherkin
+Funcionalidade: Procedência do consentimento e dado fictício
+  Cobre REQ-40 e REQ-54 da SPEC-formulario-atendimento
+
+  Cenário: O aceite gravado aponta para a versão do termo, não para texto solto
+    Dado o catálogo de termos com a versão vigente
+    Quando uma inscrição é concluída
+    Então a linha de consentimentos traz termo_id, versao e hash vindos do catálogo
+    E nenhum dos três é escrito à mão pela rota
+
+  Cenário: Nenhum dado de pessoa real entra em teste, seed ou fixture
+    Quando percorro os testes, os seeds e as fixtures do repositório
+    Então todo CPF é gerado na hora ou está marcado como fictício
+    E todo e-mail termina em exemplo.invalido
+    E o gitleaks passa sobre o histórico completo
+```
+
 ## Fora de escopo
 
 Igual ao da proposal, repetido aqui porque é contrato: consentimento do Art. 11 em si;

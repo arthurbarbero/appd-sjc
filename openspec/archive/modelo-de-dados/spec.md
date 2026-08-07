@@ -340,3 +340,42 @@ Funcionalidade: Integridade do modelo de dados
 Nenhuma rota, nenhuma tela, nenhum componente. Nenhum parâmetro de scrypt (ADR-005).
 Nenhum texto de termo (ADR-006). Nenhum painel administrativo (V1.1). Nenhum envio de
 e-mail. Nenhuma anonimização automatizada além do REQ-28.
+
+## Rastreabilidade: onde cada requisito é verificado
+
+Contrato de dados não se valida por cenário de comportamento — "a coluna `cpf` é TEXT NOT
+NULL UNIQUE de 11 dígitos" é forma, não Dado/Quando/Então. O que vale aqui é a linha
+apontar para algo **executável**: um teste, uma migration, uma restrição do banco.
+
+Todos os testes citados rodam em `npm test`, contra o SQL das migrations versionadas — o
+mesmo arquivo que vai para o D1.
+
+| Requisito       | Onde é verificado                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| REQ-1           | `server/database/schema.ts` existe e gera as migrations; `npm run db:generate`                          |
+| REQ-2           | `test/modelo-de-dados.spec.ts` — nomes das colunas conferidos na migration                              |
+| REQ-3           | `test/modelo-de-dados.spec.ts` — CHECK de formato ISO-8601 UTC                                          |
+| REQ-4           | `test/modelo-de-dados.spec.ts` — cada CHECK, UNIQUE e FK exercido por SQL cru                           |
+| REQ-5           | `test/modelo-de-dados.spec.ts` — varredura: nenhuma coluna de IP em texto claro                         |
+| REQ-6           | `scripts/seed-local.mjs` só com dado fictício; gitleaks no pre-commit e no CI                           |
+| REQ-7           | `drizzle/migrations/0002` — as 22 colunas de `usuarios`                                                 |
+| REQ-8, REQ-9    | `test/emissao-concorrente.spec.ts` — 10 rodadas de 50 emissões paralelas                                |
+| REQ-10          | **Revogado pelo ADR-007**: o número é sorteado, não sequencial. Não há o que reiniciar.                 |
+| REQ-11          | `test/modelo-de-dados.spec.ts` — varredura de senha em texto claro                                      |
+| REQ-12          | `server/api/area/excluir.post.ts` é o único escritor de `situacao`                                      |
+| REQ-13          | `test/modelo-de-dados.spec.ts` — UNIQUE separado em `email` e em `cpf`                                  |
+| REQ-14, REQ-15  | `drizzle/migrations/0001`; UNIQUE em `usuario_id` exercido no teste                                     |
+| REQ-16          | `shared/validacao/inscricao.ts` (`STATUS_INSCRICAO`) + CHECK na migration                               |
+| REQ-17          | `server/api/area/inscricao.put.ts` faz UPDATE, nunca INSERT                                             |
+| REQ-18          | CHECK `json_valid` + `json_type = 'array'` na migration                                                 |
+| REQ-19, REQ-20  | Ausência conferida: a migration não tem essas colunas                                                   |
+| REQ-21 a REQ-25 | `drizzle/migrations/0001` — tabela `consentimentos`, append-only na aplicação                           |
+| REQ-26, REQ-27  | `drizzle/migrations/0001` — tabela `fotos`; rota pública inexistente                                    |
+| REQ-28, REQ-29  | `server/api/area/excluir.post.ts` numa transação; `npm run aceite` percorre a exclusão de ponta a ponta |
+| REQ-30          | `test/modelo-de-dados.spec.ts` — a varredura de IP cobre o projeto inteiro                              |
+| REQ-31, REQ-32  | `drizzle/migrations/0001` — tabela `tentativas` com os limites por escopo                               |
+| REQ-33, REQ-34  | Ausência conferida: nenhuma tabela de sessão, de log ou de auditoria                                    |
+
+**Uma linha honesta sobre o REQ-12 e o REQ-17**: são verificados por leitura do código, não
+por teste. Provar "esta é a única rota que escreve nesta coluna" exige análise estática que
+não existe aqui. Estão registrados assim de propósito, em vez de contarem como testados.

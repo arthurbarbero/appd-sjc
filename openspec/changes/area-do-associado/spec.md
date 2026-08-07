@@ -301,7 +301,8 @@ Todos os dados abaixo são fictícios.
 
 ```gherkin
 Funcionalidade: Painel da área do associado
-  Cobre REQ-1 a REQ-4, REQ-8, REQ-9, REQ-12, REQ-15 e REQ-18 da SPEC-area-do-associado
+  Cobre REQ-1 a REQ-4, REQ-8, REQ-9, REQ-11, REQ-11a, REQ-11b, REQ-11c, REQ-12, REQ-15 e
+  REQ-18 da SPEC-area-do-associado
 
   Cenário: Painel completo
     Dado o associado fictício "Maria Aparecida da Silva", "APPD-2026-00042", com foto no

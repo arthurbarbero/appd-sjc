@@ -123,16 +123,19 @@ descreve processo que a APPD não executa.
 ## Critérios de aceite
 
 ```gherkin
+# Cobre REQ-1 e REQ-3
 Cenário: Cabeçalho não quebra em nenhuma largura
   Quando abro qualquer página em 360px e em 1280px
   Então o cabeçalho ocupa uma linha coerente, sem elemento fora do fluxo
   E não há rolagem horizontal
 
+# Cobre REQ-2
 Cenário: Quem não tem sessão vê "Entrar"
   Dado que não tenho cookie de sessão
   Quando abro a home
   Então o cabeçalho mostra "Entrar", e não "Minha área"
 
+# Cobre REQ-4 a REQ-7 e REQ-14
 Cenário: Cartão de serviço é clicável inteiro
   Dado que estou na home
   Quando clico em qualquer ponto do cartão "Fisioterapia" que não seja texto
@@ -140,10 +143,12 @@ Cenário: Cartão de serviço é clicável inteiro
   E o cartão tem estado visível de ponteiro e de foco
   E o leitor de tela anuncia um único link no cartão
 
+# Cobre REQ-8
 Cenário: Nenhuma tela afirma que existe fila de vagas
   Quando percorro as 17 páginas públicas
   Então nenhuma contém "fila", "vaga chamada" ou "conforme abrem"
 
+# Cobre REQ-16 e REQ-17
 Cenário: Telefone em contato é texto com botão de copiar
   Dado que estou em "/contato" num viewport de 360px
   Então o telefone é texto legível, não botão de bloco
@@ -151,11 +156,13 @@ Cenário: Telefone em contato é texto com botão de copiar
   Quando aciono "Copiar"
   Então uma região aria-live confirma "Número copiado"
 
+# Cobre REQ-18
 Cenário: A tela de contato não finge que envia
   Quando abro "/contato"
   Então existe aviso de que a mensagem ainda não é enviada
   E o telefone e o WhatsApp aparecem como caminho que funciona
 
+# Cobre REQ-20
 Cenário: Concluir o cadastro leva à área logado
   Dado que preencho o cadastro com dados válidos
   Quando envio
@@ -163,6 +170,65 @@ Cenário: Concluir o cadastro leva à área logado
   E vejo a confirmação com o meu número de registro
   E a sessão está aberta
 ```
+
+```gherkin
+# Cobre REQ-9 a REQ-13
+Cenário: Os blocos que não existem no site original saíram
+  Quando percorro o código-fonte de todas as telas
+  Então não existe bloco "Três passos" nem aviso com título "Como funciona"
+  E não existe a frase "Todos os atendimentos começam pelo mesmo cadastro"
+  E não existe nenhuma das duas frases sobre "um cadastro só"
+  E não existe o título "O que já é público" no Sobre
+
+# Cobre REQ-15
+Cenário: A página Sobre nós contém tudo o que está no site original
+  Quando comparo /sobre com a transcrição de docs/inventario-conteudo.md
+  Então estão presentes a apresentação, a fundação e o objetivo
+  E está presente a seção "Nosso compromisso"
+  E está presente o texto sobre o presidente, incluindo o histórico dele
+  E o nome dos dois filhos não aparece
+
+# Cobre REQ-19
+Cenário: Os quatro projetos são opções do formulário
+  Quando abro o Cadastro de Atendimento
+  Então "Bocha Paralímpica", "Oficina Mão na Roda", "Artesão da Inclusão" e
+    "Informática Nota 10" são opções de "Tipo de Atendimento"
+  E "Outro" continua existindo
+  E nenhuma tela instrui a marcar "Outro" e escrever o nome do projeto
+  E o formulário não redeclara a lista: ele a importa do módulo de validação
+
+# Cobre REQ-21
+Cenário: O rodapé traz a logo da APPD
+  Quando abro qualquer página
+  Então o rodapé contém a imagem da marca, com largura e altura declaradas
+  E o alt é vazio, porque o nome da associação está escrito ao lado
+```
+
+## Onde cada cenário é executado
+
+Nenhum destes cenários é percorrido a olho. A decisão do dono em 2026-08-07 foi explícita
+— "não vou analisar a mão mesmo não, voce mesmo valida" —, e ela está certa: critério de
+aceite lido por uma pessoa é gate que não acontece.
+
+| Cenário                                      | Onde roda                                     |
+| -------------------------------------------- | --------------------------------------------- |
+| Cabeçalho não quebra                         | `test/aceite/percurso.mjs` — sete larguras    |
+| Quem não tem sessão vê "Entrar"              | `test/aceite/percurso.mjs`                    |
+| Cartão de serviço é clicável inteiro         | `test/revisao-de-interface.spec.ts` + axe     |
+| Nenhuma tela afirma que existe fila          | `test/revisao-de-interface.spec.ts`           |
+| Telefone é texto com botão de copiar         | `test/revisao-de-interface.spec.ts`           |
+| A tela de contato não finge que envia        | `test/revisao-de-interface.spec.ts`           |
+| Concluir o cadastro leva à área logado       | `test/aceite/percurso.mjs`                    |
+| Os blocos inventados saíram                  | `test/revisao-de-interface.spec.ts`           |
+| Sobre nós contém tudo o que está no original | `test/revisao-de-interface.spec.ts` (parcial) |
+| Os quatro projetos são opções                | `test/revisao-de-interface.spec.ts`           |
+| O rodapé traz a logo                         | `test/revisao-de-interface.spec.ts`           |
+
+**Uma ressalva honesta**: o cenário do Sobre nós é conferido **em parte**. O teste verifica
+que os trechos que faltavam estão lá e que o nome dos filhos não está. Ele não prova que
+_nada mais_ do original ficou de fora — isso exigiria a transcrição inteira como fixture, e
+a comparação foi feita a olho contra `docs/inventario-conteudo.md`. É a única linha desta
+change validada por leitura, e fica escrito.
 
 ## Fora de escopo
 
