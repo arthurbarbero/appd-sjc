@@ -23,6 +23,14 @@ const { data, pending, error } = await useFetch('/api/area/meus-dados')
 const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
 
 /*
+  A foto é a única parte do cadastro que pode falhar sozinha (REQ-7f de
+  `formulario-atendimento`): ela sobe depois da transação, já com a sessão aberta. Quando
+  falha, o cadastro está gravado e só a imagem ficou para trás — e a tela precisa dizer
+  isso, senão a pessoa fica achando que perdeu tudo por causa de uma foto.
+*/
+const fotoFalhou = computed(() => rota.query.foto === 'falhou')
+
+/*
   Endereço público de conferência do crachá.
 
   A origem vem do pedido, não de uma constante: em `workers.dev`, em pré-visualização e no
@@ -62,6 +70,13 @@ function cepBr(cep?: string | null) {
         Seus interesses ficaram registrados e a sua conta foi criada. Seu número de registro é
         <strong>{{ recemCadastrada }}</strong> — ele é seu e não muda. A associação entra em contato
         pelo telefone que você informou.
+      </span>
+    </AppdAviso>
+
+    <AppdAviso v-if="fotoFalhou" tipo="atencao" titulo="A foto não subiu">
+      <span>
+        Seu cadastro foi gravado normalmente — só a foto do crachá não chegou. Nada se perdeu: envie
+        a foto quando quiser, e o crachá fica pronto na hora.
       </span>
     </AppdAviso>
 
@@ -158,7 +173,9 @@ function cepBr(cep?: string | null) {
             <div>
               <p class="explicacao">Quem receber seu crachá confere aqui que ele é seu:</p>
               <p class="endereco-verificacao">{{ urlVerificacao(data.conta.numeroRegistro) }}</p>
-              <p class="explicacao">A página mostra apenas nome, número e situação.</p>
+              <p class="explicacao">
+                A página mostra sua foto, nome, número e situação. Nunca o tipo de deficiência.
+              </p>
             </div>
           </div>
         </section>

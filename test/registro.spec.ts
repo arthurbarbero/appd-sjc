@@ -16,11 +16,23 @@ describe('gerarNumeroRegistro', () => {
     expect(sufixos.join('')).not.toMatch(/[0O1IL]/)
   })
 
-  it('não repete em 5 mil sorteios', () => {
-    // Não prova unicidade — quem garante isso é o UNIQUE do banco. Prova que o sorteio
-    // não está preso num punhado de valores, que é a falha silenciosa deste tipo de código.
+  it('quase não repete em 5 mil sorteios', () => {
+    /*
+      Não prova unicidade — quem garante isso é o UNIQUE do banco. Prova que o sorteio não
+      está preso num punhado de valores, que é a falha silenciosa deste tipo de código.
+
+      **Por que não `toBe(5000)`**, que era a asserção original: o espaço tem 31⁶ ≈ 8,9×10⁸
+      valores, e o paradoxo do aniversário dá ~0,014 colisão esperada em 5 mil sorteios —
+      ou seja, esta asserção reprovava sozinha em cerca de 1,4% das execuções, sem nenhum
+      defeito no código. Aconteceu em 2026-08-07. Teste que falha por acaso ensina a
+      ignorar vermelho, que é pior do que não ter o teste.
+
+      A folga de 10 é enorme para o acaso (~700 vezes a colisão esperada) e apertadíssima
+      para o defeito que interessa: um gerador preso em poucos valores produz centenas ou
+      milhares de repetições, não dez.
+    */
     const gerados = new Set(Array.from({ length: 5000 }, () => gerarNumeroRegistro(2026)))
-    expect(gerados.size).toBe(5000)
+    expect(gerados.size).toBeGreaterThanOrEqual(4990)
   })
 
   it('espalha pelo alfabeto inteiro, sem viés de módulo', () => {

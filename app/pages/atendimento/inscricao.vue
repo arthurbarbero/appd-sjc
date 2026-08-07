@@ -57,6 +57,18 @@ const f = reactive({
 /** Gerada uma vez ao abrir a página: clique duplo e retentativa não viram dois cadastros. */
 const chaveIdempotencia = crypto.randomUUID()
 
+/**
+ * Foto do crachá: opcional, e **fora** da transação do cadastro (REQ-7f).
+ *
+ * Ela só sobe depois que a conta existe e a sessão está aberta, porque a rota que a
+ * recebe é autenticada. Se o envio da foto falhar, a conta, a inscrição e o aceite já
+ * estão gravados — a foto é a única parte do formulário que pode falhar sozinha, de
+ * propósito: perder o cadastro inteiro por causa de uma imagem seria o pior negócio
+ * possível para quem acabou de preencher 15 campos.
+ */
+const fotoCracha = ref<Blob | null>(null)
+const fotoFalhou = ref(false)
+
 const enviando = ref(false)
 const numeroRegistro = ref('')
 const erroGeral = ref('')
@@ -253,7 +265,28 @@ async function enviar() {
     // Relê a sessão que o servidor acabou de abrir, senão o cabeçalho continua oferecendo
     // "Entrar" para quem já entrou. Mesmo motivo detalhado em `app/pages/entrar.vue`.
     await sessao.fetch()
-    await navigateTo({ path: '/area', query: { cadastro: resposta.numeroRegistro } })
+
+    // A foto vai aqui, com a sessão já aberta e o cadastro já gravado. Falhar aqui não
+    // desfaz nada: a pessoa entra na área e envia de novo em `/area/cracha` (REQ-7f).
+    if (fotoCracha.value) {
+      try {
+        await $fetch('/api/area/foto', {
+          method: 'PUT',
+          body: fotoCracha.value,
+          headers: { 'Content-Type': 'image/jpeg' },
+        })
+      } catch {
+        fotoFalhou.value = true
+      }
+    }
+
+    await navigateTo({
+      path: '/area',
+      query: {
+        cadastro: resposta.numeroRegistro,
+        ...(fotoFalhou.value ? { foto: 'falhou' } : {}),
+      },
+    })
   } catch (erro: unknown) {
     // Erro do servidor volta por campo, com a mesma mensagem que o cliente daria.
     const dados = (erro as { data?: { data?: { erros?: Record<string, string> } } })?.data?.data
@@ -678,8 +711,20 @@ async function enviar() {
         </div>
       </fieldset>
 
+      <fieldset class="secao">
+        <legend>6. Foto do crachá (opcional)</legend>
+
+        <p>
+          Se quiser, já deixe a foto pronta agora. Ela vale só para o crachá do associado.
+          <strong>Não é obrigatória</strong>: você pode concluir o cadastro sem ela e enviar depois,
+          quando quiser, pela sua área.
+        </p>
+
+        <AppdFoto v-model="fotoCracha" rotulo="Foto para o crachá (opcional)" />
+      </fieldset>
+
       <fieldset class="secao consentimento">
-        <legend>6. Consentimento</legend>
+        <legend>7. Consentimento</legend>
 
         <p>
           A informação sobre deficiência é <strong>dado de saúde</strong>. A Lei Geral de Proteção

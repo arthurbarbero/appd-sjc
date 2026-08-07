@@ -96,6 +96,19 @@ change de fora.
   de 422 do servidor e o de falha de rede; nenhum recarregamento de página no envio; o
   botão fica desabilitado com "Enviando…" e o clique duplo gera 1 linha só.
 
+## T5b [FEITO 2026-08-07] — Campo de foto, opcional, fora da transação
+
+- **Dono:** Claude Code · **Decisão:** Arthur Barbero ("a foto é opcional no formulário,
+  pode colocar")
+- **O que:** seção 6 do formulário com `<AppdFoto>` — o componente de
+  `cracha-do-associado`, não uma segunda implementação (REQ-7e). A foto sobe **depois** da
+  transação, com a sessão já aberta, por `PUT /api/area/foto`.
+- **Cobre:** REQ-7d, REQ-7e, REQ-7f.
+- **Aceite:** a tela diz, ao lado do campo, que dá para concluir sem foto e enviar depois;
+  falha no envio da foto **não** desfaz cadastro nenhum — a pessoa cai em `/area` com o
+  número de registro e um aviso de que só a imagem ficou para trás; nenhum limite de
+  tamanho vive nesta change, todos vêm de `shared/foto.ts`.
+
 ## T6 — Confirmação honesta
 
 - **Dono:** Claude Code

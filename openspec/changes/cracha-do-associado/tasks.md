@@ -18,14 +18,11 @@ sozinho e tem aceite ligado a cenário Gherkin da spec. Dono padrão: Arthur Bar
       **Aceite**: ADR aceito; REQ-27 aponta para ele.
 - [x] **T0.3 — Gate do revisor-spec.** Rodado em 2026-08-07: veredito **READY** na forma,
       registrado em `openspec/PARECER-GATE-AUTOMATICO.md`. Mérito continua sendo do dono.
-- [ ] **T0.4 — Design aprovado no Claude Design. Metade feita.**
-      **(a)** `/area/cracha`, seis estados: **gerado pelo dono em 2026-08-07**. Falta puxar
-      o bundle e conferir contra o "Aceite visual" de `docs/prompts-design/cracha.md`.
-      **(b)** `/verificar/<numero>`, quatro estados: **regerar**, porque o prompt mudou em
-      2026-08-07 com o
-      [ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md) — a
-      página passa a exibir foto e contato de cuidador.
-      **Bloqueia as fatias 3, 4 e 5. Não bloqueia a Fatia 2**, que não tem tela.
+- [x] **T0.4 — Design aprovado no Claude Design.** As **duas** telas foram geradas pelo
+      dono em 2026-08-07 (`templates/cracha/` e `templates/verificar/` no projeto do
+      canvas) e lidas por DesignSync. Handoff, com as quatro correções que a implementação
+      aplica, em [handoff-design-cracha.md](../../../docs/handoff-design-cracha.md).
+      **Destrava as fatias 3, 4 e 5.**
 
 ## Fatia 1 — Número de registro: movida para `cadastro-e-login`
 
@@ -40,37 +37,37 @@ o REQ-4 da change dona (bloqueio B10 do gate).
 
 ## Fatia 2 — Armazenamento da foto (sem tela)
 
-- [ ] **T2.1** — Interface `ArmazenamentoFoto` em `shared/` com `gravar`, `ler` e `apagar`, mais a
-      implementação D1/BLOB em `server/`. **Aceite**: cenário "Gravação passa pela interface
-      ArmazenamentoFoto"; nenhuma rota referencia a tabela direto.
+- [x] **T2.1** — Interface `ArmazenamentoFoto` em `shared/foto.ts`, implementação D1/BLOB em
+      `server/utils/foto.ts`. **Aceite**: nenhuma rota referencia `schema.fotos` direto — só o
+      utilitário. _Feito em 2026-08-07._
 - [x] **T2.2** — Migration da tabela de foto (BLOB, dono, tipo, bytes, criado_em).
       _Feita dentro de `modelo-de-dados` e aplicada no D1: `fotos` em
       `server/database/schema.ts`, com os `CHECK` de 102.400 bytes, `image/jpeg` e
       400 × 500. Marcada em 2026-08-07, ao ser conferida na auditoria._
-- [ ] **T2.3** — Rota de gravação com revalidação server-side: MIME pelos bytes iniciais,
-      dimensões 400 × 500, tamanho ≤ 102.400. **Aceite**: cenário "Servidor não confia no cliente".
-- [ ] **T2.4** — Rota autenticada de leitura da foto, com 401 sem sessão e 404 para foto alheia.
-      **Aceite**: cenários "Foto exige sessão" e "Foto de outra pessoa responde igual a foto
-      inexistente".
+- [x] **T2.3** — `PUT /api/area/foto`, com revalidação nos bytes recebidos: SOI e marcador de
+      quadro do JPEG, dimensão 400 × 500 lida do cabeçalho, teto de 102.400. **Aceite**: os 9
+      testes de `test/foto.spec.ts` — inclusive PNG legítimo recusado e cabeçalho truncado.
+      _Feito em 2026-08-07._
+- [x] **T2.4** — `GET /api/area/foto`: 401 sem sessão. A rota **não aceita parâmetro de
+      usuário** — sem parâmetro não há foto alheia para pedir, e some a escolha entre 403 e 404,
+      que confirmariam as duas a existência do cadastro. _Feito em 2026-08-07._
 - [ ] **T2.5** — Métrica de ocupação (contagem × tamanho médio) exposta ao operador.
       **Aceite**: REQ-38.
 
 ## Fatia 3 — Envio, recorte e compressão no navegador
 
-- [ ] **T3.1** — Componente recortador 4:5 com moldura fixa, arrasto, aproximação e **controle por
-      teclado** (setas, `+`, `−`) e botões de 44 px. **Aceite**: cenário "Recorte operável só pelo
-      teclado".
-- [ ] **T3.2** — Pipeline de compressão em canvas: 400 × 500, JPEG 0,75, medição do resultado.
-      **Aceite**: cenário "Recorte acontece no cliente e a imagem original não sobe".
-- [ ] **T3.3** — Teto rígido: rejeitar acima de 102.400 bytes com o tamanho obtido e instrução; sem
-      degradação silenciosa. **Aceite**: cenário "Foto acima do teto rígido é rejeitada com
-      instrução".
-- [ ] **T3.4** — Recusas antes de processar: arquivo > 10 MB e tipo não suportado. **Aceite**:
-      cenários "Arquivo de origem grande demais" e "Arquivo que não é imagem".
-- [ ] **T3.5** — Estado de processamento com `progressbar` determinado e `aria-live`. **Aceite**:
-      cenários "Progresso do processamento é determinado" e "Resultado anunciado por região viva".
+- [x] **T3.1** — `app/components/AppdFoto.vue`: moldura 4:5, arrasto por ponteiro, setas movem,
+      `+` e `−` aproximam, e os mesmos controles como botão de 44 px. _Feito em 2026-08-07._
+- [x] **T3.2** — Compressão em `canvas`: 400 × 500, JPEG 0,75, tamanho medido e exibido.
+      _Feito em 2026-08-07._
+- [x] **T3.3** — Teto rígido no cliente e no servidor, com o tamanho obtido na mensagem. Nada de
+      baixar qualidade nem recortar mais para caber. _Feito em 2026-08-07._
+- [x] **T3.4** — As duas recusas acontecem antes de qualquer processamento. _Feito em 2026-08-07._
+- [x] **T3.5** — `role="progressbar"` com `aria-valuenow`, dentro da região `aria-live` que
+      envolve os cinco estados. _Feito em 2026-08-07._
 - [ ] **T3.6** — Falha de rede no envio preserva o recorte e oferece "Tentar de novo".
-- [ ] **T3.7** — Ausência de `canvas.toBlob`: mensagem de orientação, nunca envio da original.
+- [x] **T3.7** — Sem `canvas.toBlob`, a tela orienta e **não** envia a original. _Feito em
+      2026-08-07._
 
 ## Fatia 4 — Crachá e exportação
 
