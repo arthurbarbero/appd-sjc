@@ -12,49 +12,47 @@ domínio da APPD antes de a associação revisar.
 O ciclo de conta funciona ponta a ponta — cadastrar, entrar, ver a área, corrigir os
 próprios dados, sair e excluir a conta —, percorrido **contra produção**, não só local.
 
-**Três changes arquivadas**: `modelo-de-dados`, `revisao-de-interface` e
-`cracha-do-associado` — esta última é a primeira fechada **com validação item a item dos
-cenários**, e não só com as tasks marcadas.
+**Cinco changes arquivadas**: `modelo-de-dados`, `revisao-de-interface`,
+`cracha-do-associado`, `area-do-associado` e `cadastro-e-login`. As três últimas fecharam
+**com validação item a item dos cenários** — cada uma tem `VALIDACAO.md` dizendo onde cada
+cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
 
 **O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
-| Comando          | O que cobre                                                                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 130 testes — restrição de banco, emissão concorrente, revalidação da foto, vazamento de dado sensível e regressão de interface                                             |
-| `npm run aceite` | 117 verificações no workerd real: ciclo de conta, crachá com foto, exportação, verificação pública, teclado, sete larguras e axe A/AA em duas larguras. Aceita `APPD_BASE` |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                             |
+| Comando          | O que cobre                                                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`       | 148 testes — restrição de banco, emissão concorrente, revalidação da foto, vazamento de dado sensível, varredura de segurança e regressão de interface                        |
+| `npm run aceite` | 137 verificações no workerd real: ciclo de conta, crachá, exportação, verificação pública, anti-abuso, teclado, sete larguras e axe A/AA em duas larguras. Aceita `APPD_BASE` |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
 `openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**Próxima change**: o **painel administrativo**, decidido pelo dono em 2026-08-07 —
-gerenciar usuários e refazer senha. É o que faz a recuperação de senha existir sem depender
-de e-mail, e o que faz o caminho humano deixar de ser promessa vazia: a secretaria atende
-porque tem a ferramenta. Ele herda a T2.5 do crachá, a métrica de ocupação do D1, que
-esperava o perfil de operador existir.
+**Próxima change**: o **painel administrativo** — proposal escrito, spec por fazer. Gerência
+de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e um usuário
+`root` que cria o primeiro administrador.
 
-A recuperação por e-mail entra com **SendGrid gratuito** (decisão do dono, 2026-08-07):
-remetente avulso, sem DNS, aceitando que parte cai em spam até haver domínio. Falta a chave
-de API, que é do dono para criar, e o endereço a verificar como remetente.
+**O que resta nas outras três**:
 
-Depois: fechar `site-institucional` (17 tasks de medição e SEO) e percorrer os cenários de
-`cadastro-e-login`, `formulario-atendimento` e `area-do-associado`, que têm código rodando
-sem veredito registrado. O modelo agora existe: a validação do crachá está em
-`openspec/archive/cracha-do-associado/VALIDACAO.md`.
+- `site-institucional` — 15 tasks de medição e SEO (301, sitemap, robots, peso por rota,
+  CLS, contraste renderizado). Nada começado, e 3 pendências esperam a APPD.
+- `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
+  `consentimento-e-privacidade`.
+- `consentimento-e-privacidade` — nada implementado. Trava a anterior, e tem um defeito
+  concreto para resolver: **o consentimento é gravado com hash zerado**.
 
-**Seis decisões saíram do caminho em 2026-08-07**, todas delegadas pelo dono e registradas
-como ADR: conteúdo no código (006), foto e cuidador na verificação (015), redefinição de
-senha (016), retenção após exclusão (017) e mensagem de erro e enumeração (018). Mais a
-T0.3 de `area-do-associado`: a tela de confirmação da exclusão **fica**; o que é imediato é
-o apagamento depois do Excluir, sem período de carência.
+**Sete decisões saíram do caminho em 2026-08-07**, todas do dono e registradas como ADR:
+conteúdo no código (006), foto e cuidador na verificação (015), recuperação de senha (016),
+retenção após exclusão (017), mensagem de erro e enumeração (018) e **o consentimento
+governando a verificação pública** (019). Mais a T0.3 de `area-do-associado`: a tela de
+confirmação da exclusão **fica**; o que é imediato é o apagamento depois do Excluir.
 
 **O que trava o resto**:
 
-- **Redefinição de senha** — resolvida em dois estágios pelo ADR-016: **painel
-  administrativo primeiro** (change própria, a próxima da fila), e-mail depois. Enviar
-  e-mail não exige DNS; o que exige é não cair em spam, e remetente `@gmail.com` por
-  provedor de terceiro cai desde que o Gmail passou a `p=quarantine`, em 02/2024.
+- **Redefinição de senha** — ADR-016: **SendGrid gratuito** com remetente avulso, sem DNS,
+  aceitando que parte cai em spam até haver domínio; **mais** o painel administrativo. Falta
+  a chave de API e o endereço a verificar como remetente, que são do dono.
 - **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
   associação. As duas telas esperam o canvas.
 - **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
