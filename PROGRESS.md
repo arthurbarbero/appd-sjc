@@ -55,6 +55,11 @@ confirmação da exclusão **fica**; o que é imediato é o apagamento depois do
   a chave de API e o endereço a verificar como remetente, que são do dono.
 - **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
   associação. As duas telas esperam o canvas.
+- **O hash do consentimento é marcador de lugar** — `'0'` repetido 64 vezes, até o catálogo
+  de termos existir. O hash existe para ser **prova do texto que a pessoa leu**; com valor
+  falso ele _parece_ prova e não é, o que é pior que não ter campo. Enquanto o catálogo não
+  existir, nenhum cadastro com dado de pessoa real vai ao ar — hoje protegido de fato,
+  porque o endereço publicado é de demonstração.
 - **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
 
 ## Decisões tomadas
