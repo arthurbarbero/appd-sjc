@@ -11,14 +11,19 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
 ## Fatia 0 — Gates que destravam o resto
 
-- [ ] **T0.1 — Gate do revisor-spec.** Rodar a auditoria de Definition of Ready sobre esta
-      spec. **Aceite**: veredito READY registrado, ou lista de bloqueios com dono.
-- [ ] **T0.2 — Resposta da APPD e do jurídico** sobre o que a associação é obrigada a manter
-      após a exclusão e por quanto tempo. Registrar em
-      [pendencias-appd.md](../../../docs/pendencias-appd.md). **Aceite**: resposta registrada,
-      ou decisão do dono de publicar com `[A CONFIRMAR]` visível. **Bloqueia T4.6 e T4.7.**
-- [ ] **T0.3 — Decisão do dono**: exclusão imediata ou com janela de arrependimento. A spec v1
-      assume imediata. **Aceite**: decisão registrada; se mudar, vira ADR e a spec sobe para v2.
+- [x] **T0.1 — Gate do revisor-spec.** Rodado em 2026-08-07: veredito **READY** na forma,
+      registrado em `openspec/PARECER-GATE-AUTOMATICO.md`.
+- [x] **T0.2 — O que a associação mantém após a exclusão.** **Decidido em 2026-08-07**, com
+      a decisão delegada pelo dono: [ADR-017](../../../docs/adr/adr-017-retencao-apos-exclusao.md).
+      O site **não retém nada** — ele nunca guardou prontuário, só registro de interesse. O
+      prazo mínimo de cinco anos do COFFITO 414/2012 e das Resoluções CFP vale para o
+      documento em papel da sede, e a tela diz isso. **Some o `[A CONFIRMAR]` da T4.3.**
+      A APPD revisa depois; o gatilho de revisão está dentro do ADR. **T4.6 e T4.7
+      destravadas.**
+- [x] **T0.3 — Exclusão imediata**, sem janela de arrependimento. Decidido em 2026-08-07, com a
+      decisão delegada pelo dono. Fica a redação da spec v1. Motivo: janela de arrependimento
+      exige guardar dado de quem pediu para apagar, e o ADR-017 acabou de decidir que o site
+      não retém nada. Uma coisa contradiria a outra no mesmo dia.
 - [x] **T0.4 — Design aprovado no Claude Design** para os cinco estados (painel completo, sem
       inscrição, sem foto, carregando, exclusão), com handoff bundle. **Aceite**: bundle
       entregue e checklist de aceite visual do prompt de design todo marcado.
@@ -104,8 +109,10 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       devolvido ao fechar, `role="dialog"` com rótulo, `prefers-reduced-motion`).
       **Aceite**: cenários "A exclusão mora numa página só", "O foco do modal nunca começa no
       botão destrutivo" e "O modal prende o foco e devolve ao fechar".
-- [ ] **T4.3** — Os três blocos explicativos, com `[A CONFIRMAR]` visível no que a associação
-      mantém. **Aceite**: cenário "A página explica o que sai, o que fica e que é irreversível".
+- [ ] **T4.3** — Os três blocos explicativos. **O `[A CONFIRMAR]` saiu** com o ADR-017: o
+      texto definitivo dos três blocos está escrito lá, inclusive a frase sobre o documento em
+      papel da sede. **Aceite**: cenário "A página explica o que sai, o que fica e que é
+      irreversível".
 - [ ] **T4.4** — Confirmação só pelo modal; **teste que falha se aparecer qualquer campo de
       texto pedindo palavra de confirmação**. **Aceite**: cenário "O modal confirma, e nunca
       pede para digitar palavra".

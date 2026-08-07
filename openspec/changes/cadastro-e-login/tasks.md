@@ -16,27 +16,34 @@
 - Papéis: **Dono** = Arthur Barbero · **Arquiteto** e **Dev** = Claude Code sob revisão
   do dono · **QA** = validação contra os cenários da spec · **APPD** = a associação.
 
-## T-0 — Destravar as decisões abertas (antes de qualquer código)
+## T-0 [FEITO 2026-08-07] — Destravar as decisões abertas
 
-| #     | O que decidir                                                          | Dono |
-| ----- | ---------------------------------------------------------------------- | ---- |
-| T-0.1 | Q-1: as mensagens de e-mail já cadastrado revelam a conta? (risco R-6) | Dono |
-| T-0.3 | Q-2: **prazo de retenção** do que a APPD mantém após a exclusão        | APPD |
-| T-0.4 | R-1: caminho de custo zero para e-mail ou SMS de redefinição de senha  | Dono |
+**As três foram delegadas a mim pelo dono em 2026-08-07** e viraram ADR no mesmo dia.
 
-Resolvidas e fora da tabela: **T-0.2** (contador em D1, chave em HMAC — REQ-26b) e
-**T-0.5** (ADR-013 deu a área para `area-do-associado`).
+| #     | O que decidir                                  | Onde ficou                                                                    |
+| ----- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| T-0.1 | Q-1: a mensagem revela que o e-mail tem conta? | [ADR-018](../../../docs/adr/adr-018-mensagem-de-erro-e-enumeracao.md)         |
+| T-0.3 | Q-2: prazo de retenção após a exclusão         | [ADR-017](../../../docs/adr/adr-017-retencao-apos-exclusao.md)                |
+| T-0.4 | R-1: caminho gratuito de e-mail ou SMS         | [ADR-016](../../../docs/adr/adr-016-redefinicao-de-senha-espera-o-dominio.md) |
 
-**Aceite**: T-0.1 vira ADR numerado com dono, data e alternativas — e vale para as
-**três** portas de vazamento de uma vez, não só a do cadastro. T-0.3 vira texto no bloco
-"O que a associação precisa manter" ou continua `[A CONFIRMAR]` em
-`docs/pendencias-appd.md`. T-0.4 vira decisão escrita, ainda que seja "segue bloqueado";
-com o ADR-012, toda pessoa passa a ter senha, então o volume de esquecimento agora é
-proporcional ao cadastro inteiro.
+Resolvidas antes: **T-0.2** (contador em D1, chave em HMAC — REQ-26b) e **T-0.5**
+(ADR-013 deu a área para `area-do-associado`).
 
-**Trava**: T-0.1 bloqueia o texto final de T-5 e os cenários marcados
-`[condicional a Q-1]`. T-0.3 bloqueia a exibição do prazo na tela de exclusão, que é de
-`area-do-associado`. **T-0.4 bloqueia o login ir ao ar**, não só o T-9.2.
+**O que cada uma decidiu, em uma linha:**
+
+- **T-0.1** — entrada e recuperação respondem igual; o cadastro diz que já existe conta,
+  porque mentir ali prende a pessoa sem saída e protege pouco. Os cenários marcados
+  `[condicional a Q-1]` valem na redação que **revela** no cadastro.
+- **T-0.3** — o site não retém nada: ele nunca guardou prontuário, só registro de
+  interesse. O prazo de 5 anos do COFFITO e do CFP vale para o papel da sede, e a tela diz
+  isso em vez de fingir que o botão alcança o arquivo de lá.
+- **T-0.4** — o bloqueio nunca foi o provedor, é o **domínio**: todo plano gratuito exige
+  verificação por DNS para escrever a destinatário arbitrário. Destrava com a publicação
+  em `appd.org.br`.
+
+**Trava que sobra**: a T-9.1 (caminho humano) **não vai ao ar sozinha** — ver a ressalva
+dentro do ADR-016. Oferecer o telefone da secretaria sem a associação ter ferramenta para
+refazer a senha é prometer o que ninguém cumpre.
 
 ## T-1 [FEITO 2026-08-06, ver ADR-005] — Fixar e medir os parâmetros do scrypt (REQ-6, REQ-7, REQ-27)
 

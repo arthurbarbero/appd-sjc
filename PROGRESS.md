@@ -18,7 +18,7 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 
 | Comando          | O que cobre                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm test`       | 109 testes — restrição de banco, emissão concorrente e regressão de interface                                                        |
+| `npm test`       | 119 testes — restrição de banco, emissão concorrente, revalidação da foto e regressão de interface                                   |
 | `npm run aceite` | 78 verificações no workerd real: ciclo de conta, sete larguras, axe A/AA em dez telas. Aceita `APPD_BASE` para rodar contra produção |
 | CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                       |
 
@@ -26,16 +26,25 @@ próprios dados, sair e excluir a conta —, percorrido **contra produção**, n
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
 `openspec/PARECER-GATE-AUTOMATICO.md`.
 
-**Próximo passo**: fechar `site-institucional` (17 tasks, quase todas de medição e SEO,
-nenhuma dependendo de terceiro), começar a Fatia 2 de `cracha-do-associado` (armazenamento
-da foto, sem tela, destravada) e mapear os cenários de `cadastro-e-login`,
-`formulario-atendimento` e `area-do-associado` para onde eles já rodam.
+**Próximo passo**: `cracha-do-associado`, fatias 4 e 5. A 5 é prioridade porque o QR que
+está **no ar hoje** aponta para `/verificar/<numero>`, que ainda não existe e devolve 404 —
+é o único defeito publicado. As duas telas foram aprovadas no Claude Design em 2026-08-07
+e a Fatia 2 e quase toda a Fatia 3 já estão entregues.
 
-**O que trava o resto**: o desenho de `/verificar` precisa ser refeito no Claude Design
-(o ADR-015 mudou o que a página mostra); `consentimento-e-privacidade` espera PB-1 a PB-5
-com a APPD e o jurídico; e a redefinição de senha espera um caminho de e-mail ou SMS
-gratuito, ainda em pesquisa — a lacuna mais séria do que está no ar, porque hoje quem
-esquece a senha perde a conta.
+**Seis decisões saíram do caminho em 2026-08-07**, todas delegadas pelo dono e registradas
+como ADR: conteúdo no código (006), foto e cuidador na verificação (015), redefinição de
+senha (016), retenção após exclusão (017), mensagem de erro e enumeração (018) e exclusão
+imediata sem janela de arrependimento (T0.3 de `area-do-associado`).
+
+**O que trava o resto**:
+
+- **Redefinição de senha** — não é falta de provedor, é falta de **domínio** (ADR-016).
+  Destrava com a publicação em `appd.org.br`. Até lá, quem esquece a senha depende de
+  contato com a associação, e o caminho humano não vai ao ar sem a APPD ter ferramenta
+  para refazer a senha.
+- **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
+  associação. As duas telas esperam o canvas.
+- **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
 
 ## Decisões tomadas
 
@@ -191,12 +200,12 @@ esquece a senha perde a conta.
 - [x] ~~Escrever os ADRs 005, 006, 008 a 011.~~ **Todos escritos.** 005 em 2026-08-06;
       008 a 011 em 2026-08-07; 006 em 2026-08-07, com a decisão do dono de que conteúdo de
       página vive no código. A lista de reservados em `docs/adr/README.md` está zerada.
-- [ ] **Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha"
-      (pedido do dono, 2026-08-06). Com o cadastro embutido, toda pessoa tem senha, e
-      sem esse caminho **o login não pode ir ao ar**. Restrição: custo zero, sem cartão.
-      Comparar pelo menos serviço de e-mail transacional com plano gratuito, envio pelo
-      próprio Worker e alternativas de SMS — com data, limite mensal e se exige cartão.
-      Nenhuma conta externa criada sem o dono mandar.
+- [x] ~~**Pesquisar caminho gratuito de e-mail ou SMS** para "esqueci minha senha".~~
+      **Pesquisado em 2026-08-07** (dez buscas) e virou [ADR-016]. O bloqueio nunca foi o
+      provedor: **é o domínio**. MailChannels encerrou para Workers em 31/08/2024; o
+      `send_email` da Cloudflare só alcança endereço verificado da própria conta; Resend e
+      Brevo exigem verificação por DNS para escrever a destinatário arbitrário. Destrava
+      com a publicação em `appd.org.br`.
 - [ ] Telas ainda não implementadas: **Crachá** (`/area/cracha`), **Verificação pública**
       (`/verificar/<numero>`), **Política de Privacidade** e **Seus direitos**. Cadastro,
       Login e Área do Associado foram implementados em 2026-08-06 e estão no ar — este
@@ -214,14 +223,12 @@ esquece a senha perde a conta.
 - [x] ~~AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita.~~ **Feita.**
       A conta existe, o D1 remoto está criado com id real em `wrangler.jsonc`, o
       subdomínio `appd-sjc.workers.dev` está registrado e o R2 continua desligado.
-- [ ] **A foto opcional do formulário não foi implementada.** A spec de
+- [x] ~~**A foto opcional do formulário não foi implementada.**~~ **Entregue em 2026-08-07**,
+      com o componente e o limite únicos de `cracha-do-associado`. Era: A spec de
       `formulario-atendimento` v2.1 registra, como decisão do dono de 2026-08-06, que a
       foto volta ao formulário como campo opcional (REQ-7d a REQ-7f). Não existe no código
       nem em `docs/campos-formulario.md`. Depende do componente de recorte, que é da Fatia
       3 de `cracha-do-associado`.
-- [ ] **Levar à APPD o contato de cuidador na verificação pública** (ADR-015). O cuidador
-      é terceiro: não usou o site, não aceitou termo e não tem caminho de titular para
-      pedir remoção. Precisa ser avisado, e o cadastro precisa deixar o campo em branco.
 
 ## Bugs / riscos conhecidos
 
