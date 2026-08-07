@@ -14,18 +14,19 @@ useHead({ title: 'Projetos — APPD São José dos Campos' })
       </p>
     </header>
 
-    <AppdAviso tipo="atencao" titulo="Como entrar em um projeto, hoje">
-      <span>
-        Os projetos ainda não são opções do campo "Tipo de Atendimento" do formulário. Faça o
-        cadastro, marque <strong>Outro</strong> e escreva o nome do projeto que você quer.
-      </span>
-    </AppdAviso>
+    <!--
+      O aviso "marque Outro e escreva o nome do projeto" saiu porque deixou de ser
+      verdade: os quatro projetos agora são opções do campo "Tipo de Atendimento"
+      (REQ-19). Manter o aviso seria instruir a pessoa a digitar o que ela pode marcar.
+    -->
 
     <ul class="blocos">
       <li v-for="p in PROJETOS" :key="p.slug">
-        <article class="cartao bloco">
+        <article class="cartao bloco cartao-clicavel">
           <div class="cabeca">
-            <h2>{{ p.nome }}</h2>
+            <h2>
+              <NuxtLink :to="`/projetos/${p.slug}`" class="gatilho">{{ p.nome }}</NuxtLink>
+            </h2>
             <AppdSelo v-if="!p.horarios" />
           </div>
           <p>{{ p.resumo }}</p>
@@ -35,16 +36,14 @@ useHead({ title: 'Projetos — APPD São José dos Campos' })
           <p v-else class="detalhe">
             Dias, horários e como participar ainda estão sendo confirmados com a associação.
           </p>
-          <p class="rodape-cartao">
-            <NuxtLink :to="`/projetos/${p.slug}`">Ver {{ p.nome }}</NuxtLink>
-          </p>
+          <p class="rodape-cartao" aria-hidden="true">Ver {{ p.nome }}</p>
         </article>
       </li>
     </ul>
 
     <section aria-labelledby="acao" class="acao">
       <h2 id="acao">Quer participar de um projeto?</h2>
-      <p>O caminho é o cadastro de atendimento, marcando a opção "Outro".</p>
+      <p>O caminho é o cadastro de atendimento, marcando o projeto que você quer.</p>
       <p>
         <NuxtLink to="/atendimento/inscricao" class="botao botao-primario">
           Fazer meu cadastro

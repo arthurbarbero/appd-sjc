@@ -19,10 +19,13 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
       ou decisão do dono de publicar com `[A CONFIRMAR]` visível. **Bloqueia T4.6 e T4.7.**
 - [ ] **T0.3 — Decisão do dono**: exclusão imediata ou com janela de arrependimento. A spec v1
       assume imediata. **Aceite**: decisão registrada; se mudar, vira ADR e a spec sobe para v2.
-- [ ] **T0.4 — Design aprovado no Claude Design** para os cinco estados (painel completo, sem
+- [x] **T0.4 — Design aprovado no Claude Design** para os cinco estados (painel completo, sem
       inscrição, sem foto, carregando, exclusão), com handoff bundle. **Aceite**: bundle
-      entregue e checklist de aceite visual do prompt de design todo marcado. **Bloqueia toda
-      tela.**
+      entregue e checklist de aceite visual do prompt de design todo marcado.
+      **Feito em 2026-08-06 e confirmado pelo dono em 2026-08-07**: ele operou o Claude
+      Design, entregou as telas e eu as consumi (`docs/handoff-design-ciclo-conta.md`).
+      A ressalva de `/area/dados` que eu havia registrado no `ESTADO.md` **cai** — a
+      aprovação existe e é desta change.
 - [x] **T0.5 — Vocabulário de status alinhado** com `formulario-atendimento`. **Resolvido
       em 2026-08-06 (ADR-014)**: há um único valor, `Interesse registrado`. Os três valores
       anteriores descreviam uma fila que a APPD não opera, e dois deles eram inalcançáveis
@@ -67,11 +70,7 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 ## Fatia 3 — Meus dados
 
 > Entregue em 2026-08-07, a pedido do dono ("o nome, telefone e endereço podem ser
-> editados também"). **Ressalva de rito registrada**: `/area/dados` não passou pela T0.4
-> (design aprovado no Claude Design), que o CLAUDE.md exige antes de qualquer tela. A tela
-> reusa os componentes de campo já aprovados no formulário de atendimento e a casca da
-> área — o que reduz o risco, mas não substitui o gate. A exceção está em
-> `openspec/ESTADO.md` em vez de ficar escondida aqui.
+> editados também"), sobre a casca e os componentes de campo aprovados na T0.4.
 
 - [x] **T3.1** — Página `/area/dados` em leitura: rótulo visível acima do valor, sem campo 12.
       **Aceite**: cenário "Meus dados explica onde a informação está, sem exibi-la".

@@ -89,7 +89,7 @@ export const SERVICOS: Oferta[] = [
     ],
     sobre: [
       'A fisioterapia trabalha o movimento do corpo. Para a pessoa com deficiência, ela não busca uma cura: busca autonomia — conseguir se transferir da cama para a cadeira, manter a força que já existe, evitar dor e deformidade.',
-      'A continuidade é o que faz diferença. Sessão isolada alivia; acompanhamento regular preserva função. É por isso que a fila existe e é levada a sério.',
+      'A continuidade é o que faz diferença. Sessão isolada alivia; acompanhamento regular preserva função. É por isso que o acompanhamento é levado a sério, e não tratado como visita avulsa.',
       'A Lei Brasileira de Inclusão garante à pessoa com deficiência atenção integral à saúde, incluindo reabilitação, pelo SUS. O atendimento da associação não substitui esse direito — soma a ele.',
     ],
     oQueEsperar: [
@@ -255,7 +255,7 @@ export const PROJETOS: Oferta[] = [
     nome: 'Bocha Paralímpica',
     resumo:
       'Esporte paralímpico praticado em cadeira de rodas, com treinos em dois locais da cidade.',
-    noFormulario: false,
+    noFormulario: true,
     paraQuem: [
       'Pessoas com deficiência severa, inclusive quem tem pouca mobilidade de braços',
       'Quem quer praticar esporte e conviver',
@@ -331,7 +331,7 @@ export const PROJETOS: Oferta[] = [
     slug: 'mao-na-roda',
     nome: 'Oficina Mão na Roda',
     resumo: 'Manutenção de cadeira de rodas, muletas, andadores e bengalas.',
-    noFormulario: false,
+    noFormulario: true,
     paraQuem: [
       'Quem usa equipamento de locomoção e precisa de conserto ou ajuste',
       'Famílias sem condição de manter o equipamento em bom estado',
@@ -373,7 +373,7 @@ export const PROJETOS: Oferta[] = [
     slug: 'artesao-da-inclusao',
     nome: 'Artesão da Inclusão',
     resumo: 'Capacitação em artesanato e comercialização, como fonte de renda alternativa.',
-    noFormulario: false,
+    noFormulario: true,
     paraQuem: [
       'Pessoas com deficiência que querem gerar renda',
       'Familiares que deixaram o trabalho para cuidar e precisam de alternativa',
@@ -411,7 +411,7 @@ export const PROJETOS: Oferta[] = [
       arquivo: '/imagens/cbae5e83df0948c78b196574aeb04f3c.webp',
       alt: 'Selo do Informática Nota 10: um monitor de computador dentro de um círculo azul, com os dizeres "cursos profissionalizantes".',
     },
-    noFormulario: false,
+    noFormulario: true,
     paraQuem: [
       'Pessoas com deficiência que querem aprender a usar o computador',
       'Quem precisa de informática para estudar ou procurar trabalho',
@@ -454,9 +454,15 @@ export interface Pessoa {
 /**
  * Quem é quem na associação. Texto e nomes vêm da página institucional do site atual.
  *
- * O site publica também o histórico clínico do presidente — lesão medular, tetraplegia,
- * datas e tratamento. Isso é dado de saúde, sensível pelo Art. 11 da LGPD, e não foi
- * republicado: a associação decide por escrito o que quer contar dessa parte.
+ * O histórico do presidente — o acidente de 2007, a lesão medular, a reabilitação no Sarah
+ * Kubitschek — **está republicado** por decisão do dono do projeto, que tem autorização da
+ * associação para usar todo o conteúdo do site atual. O texto já está público no
+ * `appd.org.br` há anos, escrito na primeira pessoa da associação sobre o próprio
+ * representante legal, e é ele que explica por que a APPD existe do jeito que existe.
+ *
+ * **O que continua fora são os nomes dos dois filhos.** A autorização é da associação
+ * sobre o conteúdo dela; não alcança terceiros que não decidiram nada. E o nome deles não
+ * acrescenta uma linha ao que o texto conta.
  */
 export const PESSOAS: Pessoa[] = [
   {
@@ -474,7 +480,10 @@ export const PESSOAS: Pessoa[] = [
     foto: '/imagens/adc13541b5744f6292df8093aa43f702.webp',
     alt: 'Retrato de Luiz Carlos Lucas Barbosa, presidente da APPD, de camisa clara.',
     bio: [
-      'Trabalhou como motorista profissional por 15 anos. Voltou a estudar já na presidência da associação e trocou a área de transporte e logística pelo curso de Serviço Social, para atuar melhor no atendimento.',
+      'Casado, pai de dois filhos, trabalhou como motorista profissional durante 15 anos.',
+      'Em 7 de setembro de 2007 estava com a família num momento de descontração quando, ao mergulhar, atingiu um banco de areia e sofreu uma lesão medular que o deixou tetraplégico.',
+      'Em 2009 fez três meses de reabilitação no Centro de Reabilitação Sarah Kubitschek. Foi ali que se deparou com a realidade que o trouxe até aqui: a dificuldade das pessoas com deficiência e de suas famílias em conseguir tratamento de ponta.',
+      'Já na presidência da associação voltou a estudar, deixou a área de transporte e logística e ingressou no curso de Serviço Social, para atuar melhor no atendimento.',
       'Além do trabalho voluntário como presidente, atua como palestrante e busca parceiros e colaboradores para ampliar o alcance dos atendimentos.',
     ],
   },

@@ -91,6 +91,29 @@ p {
   top: var(--e2);
 }
 
+/*
+  Texto que só o leitor de tela lê.
+
+  Serve para completar rótulo repetido — três botões "Copiar" numa lista de telefones não
+  dizem nada a quem não vê qual número está ao lado.
+
+  Não use `display: none` nem `visibility: hidden` para isto: os dois tiram o texto da
+  árvore de acessibilidade, que é exatamente o oposto do que se quer. A receita abaixo
+  mantém o nó lido e o tira do desenho, sem `left: -9999px` — que quebra em página com
+  direção da direita para a esquerda e pode gerar rolagem horizontal.
+*/
+.so-leitor-de-tela {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- links ---------- */
 
 a {
@@ -419,6 +442,84 @@ a:hover {
 .cartao .rodape-cartao {
   margin-top: auto;
   padding-top: var(--e2);
+}
+
+/* ---------- cartão clicável ---------- */
+
+/*
+  Cartão inteiro clicável, com **um link só**.
+
+  A técnica: o link envolve o título e espalha um pseudo-elemento invisível por cima do
+  cartão inteiro. O alvo cresce para a área toda sem que exista um segundo link — dois
+  links para o mesmo lugar fazem o leitor de tela anunciar o destino duas vezes, e a
+  navegação por Tab parar duas vezes no mesmo cartão.
+
+  `position: relative` no cartão dá a referência ao pseudo-elemento; `z-index` mantém
+  qualquer link legítimo dentro do texto acima da camada de clique — senão a área
+  invisível engoliria um link de "saiba mais" no meio do parágrafo.
+
+  Texto continua selecionável: a camada só captura o clique, e o `user-select` não é
+  desligado em lugar nenhum.
+*/
+.cartao-clicavel {
+  position: relative;
+}
+
+.cartao-clicavel .gatilho::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.cartao-clicavel .gatilho {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cartao-clicavel .gatilho:visited {
+  color: inherit;
+}
+
+/*
+  Sinal de que dá para clicar, por **três** vias ao mesmo tempo: elevação, cor da borda e
+  sublinhado no título. Nunca só cor — quem não distingue as duas continua vendo a
+  mudança de sombra e o sublinhado.
+*/
+.cartao-clicavel:hover {
+  border-color: var(--primaria);
+  box-shadow: var(--sombra-2);
+}
+
+.cartao-clicavel:hover .gatilho {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+  `:focus-within` no cartão inteiro, e não `:focus` no link: quem chega por teclado
+  precisa ver o **cartão** destacado, porque é o cartão que é o alvo. O contorno usa
+  `outline`, que respeita o modo de alto contraste do sistema, e não uma borda desenhada.
+*/
+.cartao-clicavel:focus-within {
+  outline: var(--foco-largura) solid var(--foco);
+  outline-offset: var(--foco-folga);
+  border-color: var(--primaria);
+}
+
+.cartao-clicavel .gatilho:focus-visible {
+  outline: none;
+}
+
+/* O cursor de mão vale para o cartão todo, não só para o texto do título. */
+.cartao-clicavel {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao-clicavel {
+    transition: none;
+  }
 }
 
 /* ---------- selo ---------- */

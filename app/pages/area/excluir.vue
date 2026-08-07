@@ -21,6 +21,7 @@ import { ASSOCIACAO } from '~~/shared/conteudo'
 useHead({ title: 'Excluir minha conta — APPD São José dos Campos' })
 
 const sede = ASSOCIACAO.telefones[0]!
+const sessao = useUserSession()
 const modalAberto = ref(false)
 const excluindo = ref(false)
 const erro = ref('')
@@ -67,6 +68,10 @@ async function excluir() {
   erro.value = ''
   try {
     await $fetch('/api/area/excluir', { method: 'POST' })
+    // O servidor encerrou a sessão; o cliente ainda acha que ela existe, e sem esta
+    // linha o cabeçalho continuaria oferecendo "Minha área" para uma conta apagada.
+    // É o mesmo defeito do login, do outro lado — ver `app/pages/entrar.vue`.
+    await sessao.fetch()
     await navigateTo('/?conta=excluida')
   } catch {
     erro.value = 'Não conseguimos apagar agora. Tente de novo ou ligue para a secretaria.'

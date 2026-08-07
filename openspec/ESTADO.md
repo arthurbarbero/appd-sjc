@@ -64,19 +64,49 @@ crescer, vira change própria.
 | QR Code da verificação no bloco do crachá      | `area-do-associado`    | T3.1b    | sim      |
 | `/area/dados` — alterar nome, telefone, ender. | `area-do-associado`    | T3.1–3.5 | sim      |
 
-### Duas ressalvas que ficam escritas em vez de escondidas
+### Uma ressalva que fica escrita em vez de escondida
 
-**1. `/area/dados` não passou pelo Claude Design.** O `CLAUDE.md` é explícito: nenhuma tela
-é implementada antes do design aprovado, e a T0.4 de `area-do-associado` lista cinco
-estados — nenhum deles é este. A tela foi feita reusando os componentes de campo já
-aprovados no formulário de atendimento e a casca da área, o que reduz o risco de ela
-destoar, mas **não substitui o gate**. Se o dono reprovar o desenho, o retrabalho é dele
-ter pedido e meu ter feito — e é por isso que está aqui, e não numa nota de rodapé.
-
-**2. O QR Code aponta para uma página que ainda não existe.** `/verificar/<numero>` é a
-Fatia 5 de `cracha-do-associado`, travada pela T0.4 daquela change. Até subir, ler o
+**O QR Code aponta para uma página que ainda não existe.** `/verificar/<numero>` é a
+Fatia 5 de `cracha-do-associado`, travada pela T0.4 **daquela** change. Até subir, ler o
 código leva a um 404. A alternativa seria não pôr o QR; o dono pediu o QR. Registrado para
 que ninguém descubra isso na frente da associação.
+
+> A ressalva sobre `/area/dados` não ter passado pelo Claude Design **caiu** em
+> 2026-08-07: o dono confirmou que operou o canvas e entregou as telas da área naquele
+> mesmo ciclo. A T0.4 de `area-do-associado` está marcada.
+
+## Entregas de 2026-08-07, segunda leva
+
+A change `revisao-de-interface` está com **as 15 tasks feitas** — os 21 requisitos que
+saíram da sessão de uso do dono. Junto foram três defeitos que só apareceram percorrendo
+o ciclo:
+
+| Defeito                                                                  | Onde estava                                  |
+| ------------------------------------------------------------------------ | -------------------------------------------- |
+| Entrar não atualizava o cabeçalho: continuava oferecendo "Entrar"        | `entrar.vue`, `inscricao.vue`, `excluir.vue` |
+| Quem tinha sessão abria o cadastro e criava conta duplicada              | faltava guarda nos dois lados                |
+| **Não existia botão "Sair"** — a rota da API não era chamada por ninguém | `AreaNavegacao.vue`                          |
+| O formulário redeclarava as três listas de escolha                       | `inscricao.vue`                              |
+
+## O gate deixou de ser leitura
+
+Decisão do dono em 2026-08-07: **"não vou analisar a mão mesmo não, voce mesmo valida"**.
+Está certo. 276 cenários Gherkin percorridos por uma pessoa é um gate que nunca acontece,
+e gate que não acontece é carimbo.
+
+O aceite passou a viver em dois lugares que rodam sozinhos:
+
+- **`npm test`** — `test/revisao-de-interface.spec.ts` lê o código-fonte das telas e falha
+  se qualquer frase que o dono mandou tirar voltar. Lê o fonte, e não o HTML renderizado,
+  porque o jeito de essas frases voltarem não é bug de renderização: é alguém digitar de
+  novo.
+- **`npm run aceite`** — `test/aceite/percurso.mjs` sobe o workerd de verdade e percorre
+  cadastrar → área → corrigir → sair → entrar → excluir, mede rolagem horizontal em sete
+  larguras e roda `axe` A/AA em dez telas. **78 de 78 em 2026-08-07.**
+
+Isso **não fecha** as changes antigas: `cadastro-e-login`, `formulario-atendimento` e
+`area-do-associado` continuam com critérios não percorridos. Mas agora existe a ferramenta
+para percorrê-los, que é o que faltava.
 
 ## A regra que não vai ser quebrada de novo
 

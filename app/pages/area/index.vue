@@ -120,7 +120,12 @@ function cepBr(cep?: string | null) {
             O cadastro é gratuito. Seus interesses ficam registrados e a associação entra em contato
             pelo telefone.
           </p>
-          <NuxtLink class="botao botao-primario" to="/atendimento/inscricao">
+          <!--
+            Aponta para `/area/inscricoes`, e não para o formulário público: quem está
+            aqui já tem conta, e o formulário cria conta nova. Desde a guarda de
+            `server/middleware/area.ts`, aquele caminho devolveria a pessoa para cá.
+          -->
+          <NuxtLink class="botao botao-primario" to="/area/inscricoes">
             Fazer meu Cadastro de Atendimento
           </NuxtLink>
           <p>

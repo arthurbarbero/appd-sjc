@@ -27,9 +27,7 @@ useHead({
           <NuxtLink to="/atendimento/inscricao" class="botao botao-primario">
             Preciso de atendimento
           </NuxtLink>
-          <p class="apoio">
-            Cadastro gratuito. Você entra na fila e a associação entra em contato.
-          </p>
+          <p class="apoio">Cadastro gratuito. A associação entra em contato pelo telefone.</p>
         </div>
         <div class="acao">
           <NuxtLink to="/doar" class="botao botao-secundario">Quero doar</NuxtLink>
@@ -38,26 +36,31 @@ useHead({
       </div>
     </section>
 
-    <AppdAviso tipo="destaque" titulo="Antes de pedir atendimento">
-      <span>
-        As sessões acontecem <strong>somente no período da manhã</strong>, e as vagas são chamadas
-        conforme abrem.
-      </span>
-    </AppdAviso>
+    <!--
+      O bloco "Antes de pedir atendimento" saiu (REQ-8). Ele afirmava que "as vagas são
+      chamadas conforme abrem" — uma fila que a APPD não opera (ADR-014). O horário da
+      manhã, que era a parte verdadeira, vive na página de cada serviço, onde quem está
+      decidindo procura.
+    -->
 
     <section aria-labelledby="atendimento">
       <div class="cabeca-secao">
         <h2 id="atendimento">Atendimento</h2>
         <p>Os cinco serviços que você pode pedir pelo cadastro de atendimento.</p>
       </div>
+      <!--
+        Cartão inteiro clicável, com um único link envolvendo o título (REQ-4 a REQ-6).
+        O "Ver como funciona" do rodapé deixou de ser link: era o segundo caminho para o
+        mesmo lugar, e virava a segunda parada do Tab no mesmo cartão.
+      -->
       <ul class="grade">
         <li v-for="s in SERVICOS" :key="s.slug">
-          <article class="cartao">
-            <h3>{{ s.nome }}</h3>
+          <article class="cartao cartao-clicavel">
+            <h3>
+              <NuxtLink :to="`/atendimento/${s.slug}`" class="gatilho">{{ s.nome }}</NuxtLink>
+            </h3>
             <p>{{ s.resumo }}</p>
-            <p class="rodape-cartao">
-              <NuxtLink :to="`/atendimento/${s.slug}`">Ver como funciona</NuxtLink>
-            </p>
+            <p class="rodape-cartao" aria-hidden="true">Ver como funciona</p>
           </article>
         </li>
       </ul>
@@ -70,12 +73,12 @@ useHead({
       </div>
       <ul class="grade">
         <li v-for="p in PROJETOS" :key="p.slug">
-          <article class="cartao">
-            <h3>{{ p.nome }}</h3>
+          <article class="cartao cartao-clicavel">
+            <h3>
+              <NuxtLink :to="`/projetos/${p.slug}`" class="gatilho">{{ p.nome }}</NuxtLink>
+            </h3>
             <p>{{ p.resumo }}</p>
-            <p class="rodape-cartao">
-              <NuxtLink :to="`/projetos/${p.slug}`">Ver como funciona</NuxtLink>
-            </p>
+            <p class="rodape-cartao" aria-hidden="true">Ver como funciona</p>
           </article>
         </li>
       </ul>

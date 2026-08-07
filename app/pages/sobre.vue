@@ -7,10 +7,14 @@ import { ASSOCIACAO, PESSOAS, PROJETOS, SERVICOS } from '~~/shared/conteudo'
   As duas pessoas que fundaram e presidem a associação aparecem aqui com nome, cargo e
   retrato — decisão do dono do projeto, que tem autorização da associação.
 
-  O que não foi republicado é o histórico clínico do presidente que está no site atual
-  (lesão medular, tetraplegia, datas de tratamento) e o nome dos filhos dele. Isso é
-  dado de saúde, sensível pelo Art. 11 da LGPD, e a decisão de contar essa parte é da
-  própria pessoa, por escrito.
+  Esta página reproduz **tudo** o que está no "Sobre nós" do site atual (REQ-15):
+  apresentação, fundação, objetivo, compromisso e o texto sobre o presidente, incluindo o
+  histórico dele. A autorização de usar o conteúdo é da associação, e o dono do projeto
+  já a confirmou duas vezes.
+
+  A única coisa que fica fora é o **nome dos dois filhos** do presidente. A autorização é
+  da associação sobre o conteúdo dela e não alcança terceiros que não decidiram nada — e
+  o nome deles não acrescenta uma linha ao que o texto conta.
 */
 
 useHead({
@@ -40,8 +44,10 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       <h2 id="quem">Quem somos</h2>
       <p>
         A APPD é uma associação sem fins lucrativos, formada por pessoas com deficiência, suas
-        famílias e voluntários. Foi fundada em {{ ASSOCIACAO.fundacaoPorExtenso }} — são
-        {{ anos }} anos de atividade na cidade.
+        famílias e voluntários. Foi fundada em {{ ASSOCIACAO.fundacaoPorExtenso }}, a partir da
+        iniciativa da Sra. Maria Claudete da Silveira Rabelo de Moura junto de pessoas com os mesmos
+        ideais — são {{ anos }} anos trabalhando com a sociedade para melhorar a qualidade de vida
+        das pessoas com deficiência da região.
       </p>
       <p>
         O objetivo declarado desde o começo é <strong>localizar, orientar e inserir</strong> na
@@ -55,6 +61,16 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       <p>
         A associação se mantém com doação e com a contribuição solidária de quem é atendido — um
         valor sugerido, ajustável, que nunca condiciona o atendimento.
+      </p>
+    </section>
+
+    <section aria-labelledby="compromisso">
+      <h2 id="compromisso">Nosso compromisso</h2>
+      <p>
+        O compromisso da APPD é levar o máximo de informação possível. O número de pessoas que
+        adquirem algum tipo de deficiência — temporária ou definitiva, muitas vezes por acidente e
+        principalmente entre jovens — cresce de forma contínua, e com ele a luta de muitas delas
+        pela inclusão social.
       </p>
     </section>
 
@@ -122,7 +138,11 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
         <li><AppdSelo /> Relatório de atividades</li>
       </ul>
 
-      <h3>O que já é público</h3>
+      <!--
+        O título "O que já é público" saiu (REQ-13). Ele opunha esta tabela à lista de
+        documentos pendentes acima, num contraste que eu inventei; a legenda da tabela já
+        diz o que ela é, e é ela que o leitor de tela anuncia.
+      -->
       <div class="rolagem">
         <table>
           <caption>

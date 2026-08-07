@@ -23,12 +23,31 @@ export const DEFICIENCIAS = [
   'Outro',
 ] as const
 
+/*
+  Os cinco atendimentos do formulário oficial **mais os quatro projetos** (REQ-19).
+
+  Antes, quem queria Bocha Paralímpica marcava "Outro" e digitava o nome — o que
+  transformava uma escolha fechada em texto livre, com toda variação de grafia que isso
+  traz para quem depois lê as inscrições. "Outro" volta a significar outro.
+
+  **Isto altera as perguntas do formulário oficial**, contra o que `docs/campos-formulario.md`
+  trava como réplica fiel. É decisão do dono, registrada em `docs/pendencias-appd.md`
+  item 4a: quem recebe as inscrições construiu o atendimento em cima da lista antiga e
+  precisa saber que ela mudou.
+
+  Nada some da lista: os valores antigos continuam aqui, e inscrição já gravada com
+  "Outro" segue válida.
+*/
 export const ATENDIMENTOS = [
   'Empréstimo Equipamentos',
   'Fisioterapia',
   'Orientações Gerais',
   'Psicologia',
   'Serviço Social',
+  'Bocha Paralímpica',
+  'Oficina Mão na Roda',
+  'Artesão da Inclusão',
+  'Informática Nota 10',
   'Outro',
 ] as const
 

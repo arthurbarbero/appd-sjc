@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/auth/derivacao'
-import { cpfValido } from '~~/shared/validacao/inscricao'
+import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/validacao/inscricao'
 import { derivarChave } from '~/utils/derivar-senha'
 
 /*
@@ -19,22 +19,15 @@ import { derivarChave } from '~/utils/derivar-senha'
 
 useHead({ title: 'Cadastro de Atendimento 2026 — APPD São José dos Campos' })
 const sede = ASSOCIACAO.telefones[0]!
+const sessao = useUserSession()
 
-const DEFICIENCIAS = [
-  'Física',
-  'Intelectual ou Neurodivergentes',
-  'Sensorial (visão, audição, fala)',
-  'Outro',
-]
-const ATENDIMENTOS = [
-  'Empréstimo Equipamentos',
-  'Fisioterapia',
-  'Orientações Gerais',
-  'Psicologia',
-  'Serviço Social',
-  'Outro',
-]
-const DIAS = ['Segundas', 'Terças', 'Quartas', 'Quintas', 'Sextas', 'Qualquer Dia da Semana']
+/*
+  As três listas vinham copiadas aqui, palavra por palavra, ao lado do módulo que já as
+  declarava. Copiar vocabulário fechado é o jeito mais silencioso de duas telas
+  divergirem: acrescentei os quatro projetos em `ATENDIMENTOS` (REQ-19) e **o formulário
+  não teria mudado** — o cadastro ofereceria seis opções e a tela de correção, dez.
+  Agora vêm de `shared/validacao/inscricao`, o mesmo módulo que valida no servidor.
+*/
 
 const f = reactive({
   nome: '',
@@ -257,6 +250,9 @@ async function enviar() {
     // pedido. Mandar para a área é o que a pessoa espera, e evita uma tela intermediária
     // que só existia porque o cadastro não gravava nada.
     numeroRegistro.value = resposta.numeroRegistro
+    // Relê a sessão que o servidor acabou de abrir, senão o cabeçalho continua oferecendo
+    // "Entrar" para quem já entrou. Mesmo motivo detalhado em `app/pages/entrar.vue`.
+    await sessao.fetch()
     await navigateTo({ path: '/area', query: { cadastro: resposta.numeroRegistro } })
   } catch (erro: unknown) {
     // Erro do servidor volta por campo, com a mesma mensagem que o cliente daria.
@@ -280,7 +276,8 @@ async function enviar() {
     <header class="topo">
       <h1>Cadastro de Atendimento 2026</h1>
       <p class="lide">
-        Um cadastro só, para qualquer um dos atendimentos da associação. Leva poucos minutos.
+        Leva poucos minutos. Marque tudo de que você precisa; a associação entra em contato pelo
+        telefone que você informar.
       </p>
     </header>
 

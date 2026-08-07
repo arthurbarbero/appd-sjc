@@ -76,6 +76,19 @@ const atual = (para: string) =>
     <footer class="rodape sobre-escuro">
       <div class="colunas">
         <div class="coluna">
+          <!--
+            Logo no rodapé (REQ-21). `alt` vazio porque o nome da associação está escrito
+            logo abaixo: leitor de tela anunciando duas vezes é ruído, não acessibilidade.
+            Largura e altura declaradas para a imagem não empurrar o rodapé ao carregar.
+          -->
+          <img
+            src="/marca/logo-appd.png"
+            alt=""
+            width="600"
+            height="345"
+            loading="lazy"
+            class="logo-rodape"
+          />
           <p class="titulo-rodape">{{ ASSOCIACAO.nome }}</p>
           <p class="discreto">
             {{ ASSOCIACAO.endereco.logradouro }} — {{ ASSOCIACAO.endereco.bairro }}<br />
@@ -211,6 +224,17 @@ const atual = (para: string) =>
   min-height: var(--alvo-min);
   display: inline-flex;
   align-items: center;
+}
+
+.logo-rodape {
+  height: 64px;
+  width: auto;
+  border-radius: var(--raio-p);
+  /* Fundo claro fixo: a marca tem verde e azul sobre branco e some no rodapé escuro. */
+  background: #fff;
+  padding: 4px;
+  margin-bottom: var(--e1);
+  align-self: flex-start;
 }
 
 .titulo-rodape {

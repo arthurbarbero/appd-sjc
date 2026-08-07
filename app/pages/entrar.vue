@@ -46,6 +46,8 @@ onMounted(() => {
   temJs.value = true
 })
 
+const sessao = useUserSession()
+
 async function entrar() {
   erro.value = ''
   if (!email.value.trim() || !senha.value) {
@@ -62,6 +64,16 @@ async function entrar() {
       method: 'POST',
       body: { email: normalizaEmail(email.value), chaveDerivada },
     })
+    /*
+      Sem esta linha o cabeçalho continua escrito "Entrar" depois de a pessoa entrar.
+
+      O servidor grava o cookie na resposta acima, mas quem desenha o cabeçalho é o
+      `loggedIn` do `useUserSession`, que vive no cliente e foi carregado **antes** do
+      login. Navegar por dentro do Nuxt não recarrega a página, então esse estado ficava
+      congelado em "deslogado" até um F5 — e o link levava para o login de quem já estava
+      logado. `fetch()` relê a sessão e acerta o cabeçalho no mesmo instante.
+    */
+    await sessao.fetch()
     await navigateTo('/area')
   } catch {
     // Mesma frase para senha errada, e-mail inexistente e conta excluída (REQ-25).

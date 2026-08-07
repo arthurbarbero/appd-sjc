@@ -53,20 +53,24 @@ function enviar() {
       </p>
     </header>
 
+    <!--
+      Telefone é **texto com botão de copiar**, não botão de bloco (REQ-16). O bloco
+      inteiro clicável ocupava a tela no celular e discava sem querer — e ligação errada
+      não se desfaz. Quem quer ligar continua podendo: o número vira link `tel:` só no
+      celular, onde discar é a ação natural (a regra está no CSS abaixo).
+    -->
     <section aria-labelledby="canais">
       <h2 id="canais">Falar com uma pessoa</h2>
       <ul class="canais">
         <li v-for="t in ASSOCIACAO.telefones" :key="t.e164">
-          <a :href="`tel:${t.e164}`" class="canal">
-            <span class="numero">{{ t.numero }}</span>
-            <span class="rotulo">{{ t.rotulo }}</span>
-          </a>
+          <p class="rotulo">{{ t.rotulo }}</p>
+          <AppdCopiar :valor="t.numero" o-que="Telefone" />
+          <a :href="`tel:${t.e164}`" class="ligar">Ligar agora</a>
         </li>
         <li>
-          <a :href="`mailto:${ASSOCIACAO.email}`" class="canal">
-            <span class="numero">{{ ASSOCIACAO.email }}</span>
-            <span class="rotulo">E-mail</span>
-          </a>
+          <p class="rotulo">E-mail</p>
+          <AppdCopiar :valor="ASSOCIACAO.email" o-que="E-mail" />
+          <a :href="`mailto:${ASSOCIACAO.email}`" class="ligar">Abrir no meu e-mail</a>
         </li>
       </ul>
       <p class="endereco">
@@ -83,10 +87,24 @@ function enviar() {
     <section aria-labelledby="escrever">
       <h2 id="escrever">Escrever uma mensagem</h2>
 
-      <AppdAviso v-if="enviado" tipo="sucesso" titulo="Mensagem registrada">
+      <!--
+        REQ-18: a tela diz que o formulário não envia, **antes** de a pessoa escrever, e
+        não depois de ela apertar o botão. Escrever uma mensagem para descobrir no fim que
+        ela não foi a lugar nenhum é o pior desenho possível para quem procura ajuda.
+        Sai quando a APPD informar o e-mail que recebe (`docs/pendencias-appd.md`, item 4).
+      -->
+      <AppdAviso tipo="atencao" titulo="Este formulário ainda não envia">
         <span>
-          Esta é uma demonstração local: nada foi enviado ainda, porque a associação ainda não
-          informou qual e-mail recebe as mensagens do site.
+          A associação ainda não definiu qual e-mail recebe as mensagens do site, então nada escrito
+          aqui chega a alguém. Para falar hoje, use o telefone ou o WhatsApp acima — esses
+          funcionam.
+        </span>
+      </AppdAviso>
+
+      <AppdAviso v-if="enviado" tipo="sucesso" titulo="Mensagem conferida, mas não enviada">
+        <span>
+          O que você escreveu está completo e sem erro. Ele <strong>não foi enviado</strong>:
+          continua faltando o destinatário. Leve o assunto pelo telefone acima.
         </span>
       </AppdAviso>
 
@@ -182,7 +200,11 @@ function enviar() {
         </div>
 
         <div class="envio">
-          <button type="submit" class="botao botao-primario">Enviar mensagem</button>
+          <!--
+            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito.
+            "Enviar mensagem" seria uma promessa que o sistema não cumpre.
+          -->
+          <button type="submit" class="botao botao-primario">Conferir minha mensagem</button>
           <p class="discreto">
             <AppdSelo /> O prazo de resposta será publicado quando a associação definir quem
             responde.
@@ -222,34 +244,42 @@ section {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--e3);
 }
 
-.canal,
-.canal:visited {
-  color: var(--texto);
+.canais > li {
   display: flex;
   flex-direction: column;
   gap: var(--e1);
-  min-height: 72px;
-  justify-content: center;
   padding: var(--e3);
   border: var(--borda-largura) solid var(--borda-suave);
   border-radius: var(--raio);
   background: var(--fundo);
-  box-shadow: var(--sombra-1);
-  text-decoration: none;
 }
 
-.canal .numero {
-  font-weight: var(--peso-forte);
-  font-size: var(--texto-corpo-g);
-}
-
-.canal .rotulo {
+.canais .rotulo {
   color: var(--texto-suave);
   font-size: var(--texto-rotulo);
+}
+
+/*
+  "Ligar agora" é link de texto, e só aparece em tela de toque — num computador, `tel:`
+  costuma abrir um programa que a pessoa não pediu, e o número copiado resolve. Em
+  celular, discar é a ação natural, e escondê-la seria pior do que o botão de bloco que
+  esta tela acabou de tirar.
+*/
+.ligar {
+  display: none;
+  align-items: center;
+  min-height: var(--alvo-min);
+  font-size: var(--texto-rotulo);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .ligar {
+    display: inline-flex;
+  }
 }
 
 .horario {

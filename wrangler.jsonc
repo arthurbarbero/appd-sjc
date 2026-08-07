@@ -5,6 +5,15 @@
   "compatibility_date": "2026-08-01",
   // scrypt do node:crypto (hash de senha) depende de nodejs_compat.
   "compatibility_flags": ["nodejs_compat"],
+  // Publica em https://appd-sjc.workers.dev. **Só ali** enquanto a APPD não aprovar o
+  // domínio deles (regra do CLAUDE.md); trocar por `routes` é decisão do dono.
+  //
+  // O subdomínio `appd-sjc.workers.dev` foi registrado na conta em 2026-08-07. Até então
+  // ele não existia, e era essa a causa da falha do workflow "Publicar": o Worker subia
+  // inteiro e morria no último passo, porque não havia endereço para onde apontá-lo. A
+  // mensagem — "You need to register a workers.dev subdomain" — vinha depois de 40 linhas
+  // de upload bem-sucedido, o que fazia a falha parecer de deploy e não de conta.
+  "workers_dev": true,
   "assets": {
     "directory": "./.output/public/",
     "binding": "ASSETS",

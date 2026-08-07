@@ -92,8 +92,10 @@ formulário, então a pessoa clica no que foi oferecido e não encontra a opçã
 Pergunta: os quatro projetos devem virar opção do campo "Tipo de Atendimento", ou eles
 entram por outro caminho (contato direto com o responsável)?
 
-**Enquanto isso**: os 15 campos e as opções não mudam ([campos-formulario.md](campos-formulario.md)),
-e cada página de projeto avisa na tela que o pedido vai por `Outro`.
+**Resolvido pelo dono em 2026-08-07** (ver item 4a): os quatro projetos **viraram opções**
+do campo "Tipo de Atendimento". O aviso "marque `Outro` e escreva o nome" saiu das páginas
+de projeto, porque deixou de ser verdade. A pergunta à APPD continua de pé — não sobre o
+que fazer, mas sobre confirmar a lista nova e o efeito em quem lê as inscrições.
 
 ### 2. Chave PIX e dados de doação (bloqueia a Central de Doações)
 

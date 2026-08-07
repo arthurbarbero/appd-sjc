@@ -33,10 +33,15 @@ const sede = ASSOCIACAO.telefones[0]!
       <img :src="oferta.imagem.arquivo" :alt="oferta.imagem.alt" loading="lazy" />
     </figure>
 
+    <!--
+      A linha da fila de vagas saiu daqui também (REQ-8). Ela sobreviveu à correção do
+      `conteudo.ts` porque estava escrita direto no template — que é exatamente onde o
+      visitante lê, e onde eu não olhei da primeira vez.
+    -->
     <AppdAviso tipo="destaque" titulo="Antes de você se cadastrar">
       <ul class="lista-aviso">
-        <li>As vagas são chamadas conforme abrem — o cadastro entra em fila.</li>
         <li>As sessões acontecem somente no período da manhã.</li>
+        <li>Marcar este atendimento registra seu interesse; a associação entra em contato.</li>
       </ul>
     </AppdAviso>
 
@@ -104,15 +109,15 @@ const sede = ASSOCIACAO.telefones[0]!
     <section aria-labelledby="acao" class="acao">
       <h2 id="acao">Quer participar?</h2>
 
-      <AppdAviso v-if="!oferta.noFormulario" tipo="atencao" titulo="Como pedir, hoje">
-        <span>
-          {{ oferta.nome }} ainda não é uma das opções do campo "Tipo de Atendimento" do formulário.
-          Marque <strong>Outro</strong> e escreva o nome do projeto. A associação já está avaliando
-          incluir os projetos na lista.
-        </span>
-      </AppdAviso>
-
-      <p>O primeiro passo é o cadastro de atendimento. É gratuito e leva poucos minutos.</p>
+      <!--
+        O aviso "marque Outro e escreva o nome" saiu: os quatro projetos viraram opções
+        próprias do campo "Tipo de Atendimento" (REQ-19), então instruir a digitar o que
+        se pode marcar deixou de fazer sentido.
+      -->
+      <p>
+        O primeiro passo é o cadastro de atendimento. É gratuito, leva poucos minutos, e
+        <strong>{{ oferta.nome }}</strong> é uma das opções que você pode marcar.
+      </p>
 
       <div class="botoes">
         <NuxtLink to="/atendimento/inscricao" class="botao botao-primario">
