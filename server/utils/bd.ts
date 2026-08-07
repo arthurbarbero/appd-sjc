@@ -18,7 +18,7 @@ export function usarBanco(event: H3Event): Banco {
     throw createError({
       statusCode: 503,
       statusMessage:
-        'Banco indisponível: rode com `npm run cf:dev` (workerd) em vez de `npm run dev`.',
+        'Banco indisponível: rode com `npm run preview` (workerd) em vez de `npm run dev`.',
     })
   }
   return drizzle(d1, { schema })

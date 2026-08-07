@@ -11,8 +11,8 @@
  */
 
 import { eq } from 'drizzle-orm'
-import { esquemaInscricao } from '~~/shared/validacao/inscricao'
-import { SENHA_MINIMO, normalizaEmail } from '~~/shared/auth/derivacao'
+import { esquemaInscricao } from '~~/shared/inscricao'
+import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 
 /** Converte `dd/mm/aaaa` para o `aaaa-mm-dd` que o banco exige. */
 function paraDataIso(brasileira: string): string {

@@ -10,7 +10,7 @@
  * `SELECT` antes (que reintroduziria a corrida entre dois cadastros simultâneos).
  */
 
-import { gerarNumeroRegistro } from '~~/shared/utils/registro'
+import { gerarNumeroRegistro } from '~~/shared/registro'
 
 /** Com 887 milhões de combinações, chegar a 5 colisões seguidas é sinal de outro defeito. */
 const MAXIMO_TENTATIVAS = 5

@@ -22,7 +22,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { emitirNumeroRegistro, ColisaoPersistente } from '../server/utils/registro'
-import { PADRAO_NUMERO_REGISTRO } from '../shared/utils/registro'
+import { PADRAO_NUMERO_REGISTRO } from '../shared/registro'
 
 const PASTA_MIGRATIONS = join(import.meta.dirname, '..', 'drizzle', 'migrations')
 

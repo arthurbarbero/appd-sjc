@@ -64,7 +64,7 @@ o `CHECK` de `situacao`.
 
 Dono: Dev. Depende de: T-2.
 
-Estender `shared/utils/registro.ts` com a regra de geração (hoje ele só formata) e a
+Estender `shared/registro.ts` com a regra de geração (hoje ele só formata) e a
 nova tentativa sob colisão. Corrigir o comentário do arquivo, que aponta a change errada.
 
 **Aceite**: passam os cenários "Cadastro concluído gera número de registro no formato
@@ -185,7 +185,7 @@ Dono: Dev. Depende de: nada. Pode ser feita já.
 
 - `openspec/README.md`: a change 6 (`area-do-associado`) foi absorvida por esta —
   registrar, para a lista não ficar com uma change fantasma.
-- `shared/utils/registro.ts`: o comentário diz que a spec do número nasce em
+- `shared/registro.ts`: o comentário diz que a spec do número nasce em
   `cracha-do-associado`. Nasce aqui; lá fica a exibição.
 - `PROGRESS.md`, seção "Dívidas conscientes": mesma correção.
 - `PROGRESS.md`, "Em aberto": ligar os itens de scrypt e de e-mail a esta change,

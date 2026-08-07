@@ -12,7 +12,7 @@
 
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { ATENDIMENTOS, DEFICIENCIAS, DIAS } from '~~/shared/validacao/inscricao'
+import { ATENDIMENTOS, DEFICIENCIAS, DIAS } from '~~/shared/inscricao'
 
 /**
  * Só os campos que a tela de correção edita.

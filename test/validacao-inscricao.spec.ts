@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { cpfValido, esquemaInscricao } from '../shared/validacao/inscricao'
+import { cpfValido, esquemaInscricao } from '../shared/inscricao'
 
 /** Preenchimento válido mínimo. Todo dado é fictício. */
 const VALIDO = {

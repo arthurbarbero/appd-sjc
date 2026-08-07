@@ -21,7 +21,7 @@ T5 é o gate. **Nenhuma task de outra change começa antes de T5 aprovar.**
 - [x] **T2.1** — `npm run db:generate` e conferência do SQL gerado, linha a linha,
       contra a spec. Nada de `push`.
       Aceite: arquivo versionado em `drizzle/migrations`, revisado no PR.
-- [x] **T2.2** — `npm run db:aplicar:local` num banco vazio, sem erro.
+- [x] **T2.2** — `npm run db:migrate` num banco vazio, sem erro.
       Aceite: as cinco tabelas existem; nenhuma outra (cenário 1 dos critérios).
 - [x] **T2.3** — Seed de desenvolvimento com dado fictício explícito (REQ-6), com CPFs
       válidos por dígito verificador mas reconhecidamente falsos.

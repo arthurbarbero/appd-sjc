@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { esquemaMeusDados } from '~~/shared/validacao/inscricao'
+import { esquemaMeusDados } from '~~/shared/inscricao'
 
 /*
   Meus dados — `/area/dados`. Fatia 3 de `area-do-associado` (REQ-15 a REQ-17).
@@ -11,7 +11,7 @@ import { esquemaMeusDados } from '~~/shared/validacao/inscricao'
   **O que esta tela não altera, e por quê** — e-mail, CPF e data de nascimento não têm
   campo aqui. O e-mail entra no sal da derivação da senha no navegador: trocá-lo sem
   refazer a derivação transformaria a senha atual em senha errada, sem aviso. O motivo
-  completo de cada exclusão está junto do schema, em `shared/validacao/inscricao.ts`.
+  completo de cada exclusão está junto do schema, em `shared/inscricao.ts`.
 
   **Ressalva de rito**: esta tela não passou pelo Claude Design como o CLAUDE.md exige.
   Ela reusa os componentes de campo já aprovados no formulário de atendimento e a casca da

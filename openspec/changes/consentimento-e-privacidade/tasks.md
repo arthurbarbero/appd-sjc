@@ -50,7 +50,7 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Depende de: `cadastro-e-login` ter criado `usuarios` (bloqueio externo)
 - Entrega: schema em `server/database/schema.ts` conforme o contrato de dados da spec, com a
   migration gerada por `npm run db:generate`, índice em `(usuario_id, termo_id, registrado_em)`.
-- Aceite: a migration aplica limpo em banco local (`npm run db:aplicar:local`); teste prova
+- Aceite: a migration aplica limpo em banco local (`npm run db:migrate`); teste prova
   que a linha gravada não contém IP nem user-agent (REQ-10) e que o registro é append-only (REQ-9).
   Seed só com dado fictício explícito.
 

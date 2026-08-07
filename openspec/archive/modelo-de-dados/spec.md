@@ -365,7 +365,7 @@ mesmo arquivo que vai para o D1.
 | REQ-12          | `server/api/area/excluir.post.ts` é o único escritor de `situacao`                                      |
 | REQ-13          | `test/modelo-de-dados.spec.ts` — UNIQUE separado em `email` e em `cpf`                                  |
 | REQ-14, REQ-15  | `drizzle/migrations/0001`; UNIQUE em `usuario_id` exercido no teste                                     |
-| REQ-16          | `shared/validacao/inscricao.ts` (`STATUS_INSCRICAO`) + CHECK na migration                               |
+| REQ-16          | `shared/inscricao.ts` (`STATUS_INSCRICAO`) + CHECK na migration                                         |
 | REQ-17          | `server/api/area/inscricao.put.ts` faz UPDATE, nunca INSERT                                             |
 | REQ-18          | CHECK `json_valid` + `json_type = 'array'` na migration                                                 |
 | REQ-19, REQ-20  | Ausência conferida: a migration não tem essas colunas                                                   |

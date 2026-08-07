@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ASSOCIACAO } from '~~/shared/conteudo'
-import { normalizaEmail } from '~~/shared/auth/derivacao'
+import { normalizaEmail } from '~~/shared/senha'
 import { derivarChave } from '~/utils/derivar-senha'
 
 /*

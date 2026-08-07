@@ -19,7 +19,7 @@ O banco é D1, que é SQLite. Não há tipo array nativo.
 Cada campo de múltipla escolha é **uma coluna TEXT contendo um array JSON**, com `CHECK`
 garantindo `json_valid`, `json_type = 'array'` e `json_array_length >= 1`.
 
-O vocabulário fechado de cada campo vive em `shared/validacao/inscricao.ts` e é validado
+O vocabulário fechado de cada campo vive em `shared/inscricao.ts` e é validado
 pelo Zod nos dois lados. O banco garante a **forma**; o Zod garante o **conteúdo**.
 
 ## Alternativas consideradas

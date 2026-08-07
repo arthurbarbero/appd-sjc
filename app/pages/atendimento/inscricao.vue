@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
-import { SENHA_MINIMO, normalizaEmail } from '~~/shared/auth/derivacao'
-import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/validacao/inscricao'
+import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
+import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
 import { derivarChave } from '~/utils/derivar-senha'
 
 /*
@@ -26,7 +26,7 @@ const sessao = useUserSession()
   declarava. Copiar vocabulário fechado é o jeito mais silencioso de duas telas
   divergirem: acrescentei os quatro projetos em `ATENDIMENTOS` (REQ-19) e **o formulário
   não teria mudado** — o cadastro ofereceria seis opções e a tela de correção, dez.
-  Agora vêm de `shared/validacao/inscricao`, o mesmo módulo que valida no servidor.
+  Agora vêm de `shared/inscricao`, o mesmo módulo que valida no servidor.
 */
 
 const f = reactive({

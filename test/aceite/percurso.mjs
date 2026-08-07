@@ -19,7 +19,7 @@
  * 10 ms de CPU — só aparecem no runtime real.
  */
 
-import { spawn } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import { chromium } from 'playwright'
 import { AxeBuilder } from '@axe-core/playwright'
 
@@ -72,11 +72,43 @@ async function esperarServidor(tentativas = 60) {
   return false
 }
 
+/**
+ * Encerra o `wrangler` **e tudo que ele abriu**.
+ *
+ * `servidor.kill()` sozinho não basta: o `wrangler` é supervisor e o runtime `workerd`
+ * roda como filho dele. Matar só o pai deixa o filho vivo segurando `.output/public`, e o
+ * build seguinte falha com `EBUSY: resource busy or locked`. A mensagem não diz o que
+ * fazer, e o processo é invisível — dá a impressão de que o build quebrou sozinho.
+ *
+ * `taskkill /T` no Windows e o process group no resto derrubam a árvore inteira.
+ */
+function encerrar(processo) {
+  if (!processo?.pid) return
+  try {
+    if (process.platform === 'win32') {
+      execFileSync('taskkill', ['/pid', String(processo.pid), '/T', '/F'], { stdio: 'ignore' })
+    } else {
+      process.kill(-processo.pid, 'SIGTERM')
+    }
+  } catch {
+    // Já morreu, ou nunca chegou a subir. Não é erro.
+  }
+}
+
 let servidor
 if (SOBE_SERVIDOR) {
-  servidor = spawn('npx', ['wrangler', 'dev'], { shell: true, stdio: 'ignore' })
+  servidor = spawn('npx', ['wrangler', 'dev'], {
+    stdio: 'ignore',
+    shell: process.platform === 'win32',
+    detached: process.platform !== 'win32',
+  })
+  // Ctrl+C ou queda no meio do percurso não pode deixar processo órfão para trás.
+  for (const sinal of ['SIGINT', 'SIGTERM', 'exit']) {
+    process.once(sinal, () => encerrar(servidor))
+  }
   if (!(await esperarServidor())) {
     console.error('wrangler dev não subiu. Rode `npm run build` antes.')
+    encerrar(servidor)
     process.exit(1)
   }
 }
@@ -242,7 +274,7 @@ try {
   }
 } finally {
   await navegador.close()
-  if (servidor) servidor.kill()
+  encerrar(servidor)
 }
 
 const falhas = resultados.filter((r) => !r.passou)

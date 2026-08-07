@@ -40,13 +40,13 @@ change de fora.
 - **O que resta:** conferir, antes de começar a T3, que as tabelas `usuarios`,
   `inscricoes_atendimento`, `consentimentos` e `tentativas` já existem no banco
   local com as restrições da spec.
-- **Aceite:** `npm run db:aplicar:local` num banco limpo cria as cinco tabelas, e os
+- **Aceite:** `npm run db:migrate` num banco limpo cria as cinco tabelas, e os
   testes de restrição de `modelo-de-dados` T3.1 passam.
 
 ## T2 — Schema Zod compartilhado
 
 - **Dono:** Claude Code
-- **O que:** `shared/validacao/inscricao.ts` com o esquema estrito, as listas oficiais de
+- **O que:** `shared/inscricao.ts` com o esquema estrito, as listas oficiais de
   opções, as mensagens em pt-BR e o tipo inferido. Normalização de telefone (só dígitos)
   e de data (`aaaa-mm-dd`) dentro do próprio esquema.
 - **Cobre:** REQ-8 a REQ-18, REQ-41.

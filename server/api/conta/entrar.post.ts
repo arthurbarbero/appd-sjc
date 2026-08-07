@@ -8,7 +8,7 @@
  */
 
 import { eq } from 'drizzle-orm'
-import { normalizaEmail } from '~~/shared/auth/derivacao'
+import { normalizaEmail } from '~~/shared/senha'
 
 const MENSAGEM_UNICA = 'E-mail ou senha não confere. Confira e tente de novo.'
 

@@ -109,28 +109,28 @@ Isso já entrega o site institucional inteiro. Para exercitar a **área do assoc
 precisa de banco:
 
 ```bash
-npm run db:aplicar:local   # aplica as migrations no SQLite local
-npm run db:seed:local      # popula com dado fictício (opcional)
-npm run cf:dev             # build + runtime real do Cloudflare em :8787
+npm run db:migrate       # aplica as migrations no SQLite local
+npm run db:seed          # popula com dado fictício (opcional)
+npm run preview          # build + runtime real do Cloudflare em :8787
 ```
 
-`npm run dev` roda em Node e recarrega ao salvar; `npm run cf:dev` roda no mesmo runtime
+`npm run dev` roda em Node e recarrega ao salvar; `npm run preview` roda no mesmo runtime
 que a produção usa, que é mais restrito. Use o segundo antes de dar algo por pronto.
 
 ### Comandos
 
 | Comando                              | O que faz                                                            |
 | ------------------------------------ | -------------------------------------------------------------------- |
-| `npm run dev`                        | Servidor de desenvolvimento com recarga ao salvar                    |
-| `npm run cf:dev`                     | Build + `wrangler dev`: runtime real do Cloudflare                   |
+| `npm run dev`                        | Servidor de desenvolvimento, com recarga ao salvar                   |
+| `npm run build`                      | Compila para o runtime da Cloudflare                                 |
+| `npm run preview`                    | Build + `wrangler dev`: o runtime que a produção usa                 |
 | `npm test`                           | Testes rápidos, sem navegador                                        |
 | `npm run aceite`                     | Navegador real: ciclo completo de conta, sete larguras de tela e axe |
 | `npm run lint` · `npm run typecheck` | ESLint e `vue-tsc`                                                   |
 | `npm run format`                     | Prettier                                                             |
 | `npm run db:generate`                | Gera a migration SQL a partir do schema                              |
-| `npm run db:aplicar:local`           | Aplica as migrations no D1 local                                     |
-| `npm run db:seed:local`              | Popula o banco local com dado fictício                               |
-| `npm run cf:parar`                   | Encerra `wrangler` órfão (no Windows, destrava o build)              |
+| `npm run db:migrate`                 | Aplica as migrations no D1 local                                     |
+| `npm run db:seed`                    | Popula o banco local com dado fictício                               |
 
 O gate de aceite também roda contra um endereço publicado:
 

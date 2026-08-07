@@ -17,7 +17,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { ATENDIMENTOS } from '../shared/validacao/inscricao'
+import { ATENDIMENTOS } from '../shared/inscricao'
 
 const RAIZ = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
 
@@ -130,7 +130,7 @@ describe('Os projetos são opções do formulário, não texto livre (REQ-19)', 
 
   it('o formulário não redeclara as listas — importa do módulo de validação', () => {
     const formulario = readFileSync(join(RAIZ, 'app/pages/atendimento/inscricao.vue'), 'utf8')
-    expect(formulario).toMatch(/import \{[^}]*ATENDIMENTOS[^}]*\} from '~~\/shared\/validacao/)
+    expect(formulario).toMatch(/import \{[^}]*ATENDIMENTOS[^}]*\} from '~~\/shared\/inscricao'/)
     expect(formulario).not.toMatch(/const ATENDIMENTOS = \[/)
     expect(formulario).not.toMatch(/const DEFICIENCIAS = \[/)
   })

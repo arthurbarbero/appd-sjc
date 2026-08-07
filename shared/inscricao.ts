@@ -147,7 +147,7 @@ const camposPessoais = {
  * O que `/area/dados` altera: contato e endereço, e mais nada.
  *
  * **E-mail e CPF ficam de fora, e não por esquecimento.** O e-mail é a chave do login e
- * também entra no sal da derivação da senha no navegador (`shared/auth/derivacao.ts`):
+ * também entra no sal da derivação da senha no navegador (`shared/senha.ts`):
  * trocá-lo sem refazer a derivação transformaria a senha atual em senha errada, sem aviso
  * e sem volta. Trocar e-mail é, na prática, um fluxo de reautenticação — tarefa própria,
  * não um campo neste formulário. O CPF identifica a pessoa perante a associação e não é

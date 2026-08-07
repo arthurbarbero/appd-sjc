@@ -10,7 +10,7 @@
   de verdade, e o hash do termo depende do catálogo que ainda não existe (ADR-006).
 
   Uso: node scripts/seed-local.mjs | npx wrangler d1 execute appd-sjc --local --file=-
-  Ou:  npm run db:seed:local
+  Ou:  npm run db:seed
 
   É idempotente: apaga o que ele mesmo criou (ids com prefixo `seed-`) antes de inserir.
 */

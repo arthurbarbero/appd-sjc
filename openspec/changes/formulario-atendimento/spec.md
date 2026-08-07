@@ -130,7 +130,7 @@ não vira alteração unilateral.
 
 ### Validação espelhada
 
-- **REQ-8** — DEVE existir **um único** schema Zod, em `shared/validacao/inscricao.ts`,
+- **REQ-8** — DEVE existir **um único** schema Zod, em `shared/inscricao.ts`,
   exportando o esquema e o tipo inferido. Cliente e servidor importam esse mesmo módulo.
   Duplicar regra de validação em qualquer outro arquivo é defeito.
 - **REQ-9** — O servidor DEVE revalidar o payload inteiro com esse schema antes de

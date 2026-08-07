@@ -32,7 +32,7 @@ próximo" — está **revogada**: quebra com cadastros simultâneos, e contradiz
 o REQ-4 da change dona (bloqueio B10 do gate).
 
 - [ ] **T1.0** — Conferir que a emissão de `cadastro-e-login` está entregue e que
-      `formatarNumeroRegistro` de `shared/utils/registro.ts` é usada por ela.
+      `formatarNumeroRegistro` de `shared/registro.ts` é usada por ela.
       **Aceite**: os cenários de número daquela change passam; esta change só exibe.
 
 ## Fatia 2 — Armazenamento da foto (sem tela)

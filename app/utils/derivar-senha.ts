@@ -17,7 +17,7 @@
 
 import { scryptAsync } from '@noble/hashes/scrypt.js'
 import { sha256 } from '@noble/hashes/sha2.js'
-import { PARAMETROS_CLIENTE, textoDoSalCliente } from '~~/shared/auth/derivacao'
+import { PARAMETROS_CLIENTE, textoDoSalCliente } from '~~/shared/senha'
 
 /** Converte bytes em hexadecimal minúsculo — o formato que trafega e que o banco espera. */
 function hex(bytes: Uint8Array): string {

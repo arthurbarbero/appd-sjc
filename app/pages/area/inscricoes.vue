@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ATENDIMENTOS, DEFICIENCIAS, DIAS } from '~~/shared/validacao/inscricao'
+import { ATENDIMENTOS, DEFICIENCIAS, DIAS } from '~~/shared/inscricao'
 
 /*
   Corrigir meu cadastro — `/area/inscricoes`.
@@ -10,7 +10,7 @@ import { ATENDIMENTOS, DEFICIENCIAS, DIAS } from '~~/shared/validacao/inscricao'
   **Esta é a única tela da área que exibe tipo de deficiência**, e exibe justamente porque
   é onde ele se corrige. O painel não recebe o campo (a rota dele nem devolve).
 
-  As opções vêm de `shared/validacao/inscricao` — as mesmas do formulário oficial. O canvas
+  As opções vêm de `shared/inscricao` — as mesmas do formulário oficial. O canvas
   havia gerado uma lista inventada, com "Orientação jurídica", que a APPD não oferece; a
   correção está em `docs/handoff-design-ciclo-conta.md`.
 */

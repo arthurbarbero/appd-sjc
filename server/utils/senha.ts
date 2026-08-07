@@ -10,7 +10,7 @@
  */
 
 import { randomBytes, timingSafeEqual, createHash } from 'node:crypto'
-import { PARAMETROS_CLIENTE } from '~~/shared/auth/derivacao'
+import { PARAMETROS_CLIENTE } from '~~/shared/senha'
 
 /** O que fica gravado na linha do usuário. */
 export interface SenhaGravada {

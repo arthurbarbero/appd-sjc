@@ -15,12 +15,13 @@ Drizzle (migrations versionadas) · auth com `nuxt-auth-utils` + scrypt (`node:c
 
 ```bash
 npm run dev              # Nuxt dev
+npm run preview          # build + wrangler dev (runtime workerd real)
 npm test                 # Vitest
+npm run aceite           # gate de aceite no navegador
 npm run lint             # ESLint
 npm run typecheck        # vue-tsc
 npm run db:generate      # Drizzle → drizzle/migrations
-npm run db:aplicar:local # wrangler d1 migrations apply --local
-npm run cf:dev           # build + wrangler dev (runtime workerd real)
+npm run db:migrate       # aplica as migrations no D1 local
 ```
 
 ## Regra central
@@ -56,7 +57,7 @@ Estado do projeto em `PROGRESS.md` — atualizar antes de encerrar sessão.
 app/          # Vue — assets/css/ (tokens e base), components/, layouts/,
               #   middleware/, pages/, utils/. Telas só depois do handoff de design.
 server/       # api/, database/schema.ts, middleware/, utils/
-shared/       # domínio puro compartilhado (auto-import Nuxt 4)
+shared/       # domínio compartilhado: conteudo, inscricao, registro, senha
 drizzle/      # migrations SQL versionadas
 public/       # servido como está
 test/         # Vitest, mais o gate de aceite em test/aceite/

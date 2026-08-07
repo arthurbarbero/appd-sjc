@@ -135,6 +135,13 @@ de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 
 ## Em aberto / próximos passos
 
+- **CSS puro nunca foi decidido pelo dono** (apontado por ele em 2026-08-07). A folha de
+  tokens e a base vieram do import do Claude Design em 2026-08-05 e ficaram como estão
+  por inércia, não por escolha registrada. **Não é decisão tomada** — é estado de fato.
+  Se virar decisão, vira ADR; se virar troca (Tailwind, UnoCSS, biblioteca de
+  componentes), o custo é reescrever o estilo de 20 telas e refazer o gate de
+  acessibilidade, porque as regras de foco, alvo e contraste hoje moram na folha base.
+
 - [x] QR do PIX **conferido pelo dono em 2026-08-05**: escaneia e resolve.
 - [x] Fotos do Sobre nós **confirmadas pelo dono**: a mulher é a fundadora Maria
       Claudete, o homem é o presidente Luiz Carlos.
@@ -166,8 +173,8 @@ de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 - [ ] **Revisor independente sobre `modelo-de-dados`** antes da primeira migration. O
       T5 foi autorrevisão e está declarado como tal no parecer.
 - [x] **T1 a T3 da `modelo-de-dados`** — schema com as 5 tabelas, migration versionada
-      aplicada no D1 local, seed fictício e 39 testes. `npm run db:aplicar:local` e
-      `npm run db:seed:local` funcionam.
+      aplicada no D1 local, seed fictício e 39 testes. `npm run db:migrate` e
+      `npm run db:seed` funcionam.
 - [ ] **DECISÃO DO DONO, bloqueante: como guardar senha.** A medição do scrypt no workerd
       real (ADR-005) mostrou que **nenhum parâmetro defensável cabe nos 10 ms de CPU do
       plano gratuito** do Workers — o mínimo do OWASP gasta 48 ms. Cinco opções na mesa,
@@ -199,13 +206,6 @@ de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 
 ## Atrito de ambiente resolvido (2026-08-06)
 
-- **`npm run cf:dev` falhava com `EBUSY: rmdir '.output\public'`.** Um `wrangler dev`
-  vivo segura a pasta que o build precisa reescrever, e a mensagem não diz isso.
-  A pegadinha: **matar só o `workerd` não resolve** — o `wrangler` é supervisor e relança
-  o runtime em segundos, com PID novo, dando a impressão de que o comando não funciona.
-  `npm run cf:dev` agora encerra os dois antes de compilar (`scripts/parar-workerd.mjs`),
-  e existe `npm run cf:parar` para o caso avulso.
-
 ## Bugs / riscos conhecidos
 
 - `npm audit` aponta 7 vulnerabilidades **só em dependência de desenvolvimento**
@@ -234,6 +234,6 @@ de e-mail ou SMS gratuito, que ainda é pesquisa em aberto.
 
 ## Dívidas conscientes
 
-- `shared/utils/registro.ts` existe como teste de fumaça da fundação. A spec do número
+- `shared/registro.ts` existe como teste de fumaça da fundação. A spec do número
   de registro está em `cadastro-e-login` (é lá que ele é gerado), não em
   `cracha-do-associado`, que só o exibe.

@@ -3,7 +3,7 @@ import {
   gerarNumeroRegistro,
   numeroRegistroValido,
   PADRAO_NUMERO_REGISTRO,
-} from '../shared/utils/registro'
+} from '../shared/registro'
 
 describe('gerarNumeroRegistro', () => {
   it('produz o formato APPD-<ano>-<6 caracteres>', () => {

@@ -7,11 +7,11 @@
  * interface encontra exatamente a régua que o formulário encontrou.
  *
  * Não toca em e-mail, CPF, data de nascimento nem em nada da inscrição — o motivo de cada
- * ausência está escrito junto do schema, em `shared/validacao/inscricao.ts`.
+ * ausência está escrito junto do schema, em `shared/inscricao.ts`.
  */
 
 import { eq } from 'drizzle-orm'
-import { esquemaMeusDados } from '~~/shared/validacao/inscricao'
+import { esquemaMeusDados } from '~~/shared/inscricao'
 
 export default defineEventHandler(async (event) => {
   const sessao = await sessaoAtual(event)

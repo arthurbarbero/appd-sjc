@@ -404,7 +404,7 @@ faz painel administrativo; **não** tem login social; **não** confirma e-mail n
 - ADR-005 (parâmetros do scrypt) **ainda não existe** e é pré-requisito do REQ-7.
 - `nuxt-auth-utils` ainda não está no `package.json`: precisa rodar no workerd sob
   `nodejs_compat` antes de a tarefa de sessão ser considerada viável.
-- `shared/utils/registro.ts` já formata o número; falta a regra de geração e unicidade.
+- `shared/registro.ts` já formata o número; falta a regra de geração e unicidade.
 - `server/database/schema.ts` está vazio: esta change cria a primeira tabela do projeto.
 - Design das telas `/cadastro`, `/entrar` e `/area/*` aprovado no Claude Design — pela
   regra central do `CLAUDE.md`, é pré-requisito de qualquer implementação de tela.

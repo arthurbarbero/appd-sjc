@@ -88,14 +88,14 @@ formulário de atendimento; a foto — é de `cracha-do-associado`; e as quatro 
   destino dos dados na exclusão está no `modelo-de-dados` REQ-28.
 - ~~**Absorção de escopo declarada**~~ — **desfeita** pelo ADR-013: vale a fronteira do
   `openspec/README.md`, e `area-do-associado` continua sendo change própria.
-- **Conflito de origem declarado:** `shared/utils/registro.ts` e a seção "Dívidas
+- **Conflito de origem declarado:** `shared/registro.ts` e a seção "Dívidas
   conscientes" do `PROGRESS.md` afirmam que a spec do número de registro nasceria em
   `cracha-do-associado`. Isso muda: o número é **gerado no cadastro**, então a spec de
   geração é desta change e a de exibição é da outra. Os dois comentários precisam ser
   corrigidos — tarefa T-14.
 - **Dependências e quem é tocado:**
   - `server/database/schema.ts` (hoje vazio) e `drizzle/migrations` (hoje inexistente).
-  - `shared/utils/registro.ts` — ganha a regra de verdade, além da formatação.
+  - `shared/registro.ts` — ganha a regra de verdade, além da formatação.
   - Dependência de biblioteca nova: `nuxt-auth-utils` (ainda não está no
     `package.json`). Precisa de verificação no workerd antes de virar tarefa fechada.
   - `modelo-de-dados` — **dependência dura**: as tabelas precisam existir antes.
