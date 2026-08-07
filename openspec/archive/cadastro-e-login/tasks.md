@@ -137,22 +137,18 @@ as rotas das duas changes donas". Remover o link do menu no cliente não dá ace
 `/area`. A área diz, sem prometer o contrário, que sair não derruba a sessão de outro
 aparelho.
 
-## T-9 — Recuperação de senha (REQ-28, REQ-29)
+## T-9 — Recuperação de senha: **movida para `painel-administrativo`**
 
-Dono: Dev (caminho humano) · Dono do projeto (destravar R-1).
+Movida em 2026-08-07, por decisão do dono. As duas partes pertencem à change nova:
 
-Duas partes, e só a primeira é executável agora:
+- **T-9.1, o caminho humano**, só vai ao ar quando a associação tiver ferramenta para
+  refazer senha — oferecer o telefone antes disso é prometer o que ninguém cumpre, o mesmo
+  defeito que o ADR-014 corrigiu na promessa de fila de vagas.
+- **T-9.2, o fluxo por e-mail**, entra com SendGrid gratuito
+  ([ADR-016](../../../docs/adr/adr-016-recuperacao-de-senha.md)), e falta a chave de API,
+  que é do dono para criar.
 
-- **T-9.1 — caminho humano**: o telefone da secretaria no corpo de toda tela de falha de
-  entrada e na tela de recuperação, com o texto que diz que a secretaria refaz a senha.
-- **T-9.2 — fluxo por e-mail**: **não começa** enquanto R-1 estiver aberto. Quando
-  liberar: token aleatório de uso único, validade de 1 hora, guardado como hash,
-  confirmação com a redação genérica.
-
-**Aceite de T-9.1**: passam "O caminho humano aparece em toda falha de entrada" e "O
-fluxo por e-mail não é publicado enquanto o risco R-1 estiver aberto". Nenhuma tela
-promete e-mail enviado. **Aceite de T-9.2**: os dois cenários marcados `[condicional a
-R-1]`.
+O REQ-28 e o REQ-29 continuam sendo desta spec; quem os implementa é a outra change.
 
 ## T-10 e T-11 — Área do associado e exclusão (movidas)
 
@@ -163,7 +159,7 @@ O que sobrou desta change no assunto está na T-8 (guarda de rota) e no REQ-32 (
 exclusão sobre sessão, login e `numero_registro`), verificado pelos cenários de "Guarda
 de rota e efeitos da exclusão".
 
-## T-12 — Acessibilidade verificada (REQ-36, REQ-37)
+## T-12 [FEITO 2026-08-07] — Acessibilidade verificada (REQ-36, REQ-37)
 
 Dono: Dev + QA. Depende de: T-6, T-8, T-10, T-11.
 
@@ -174,7 +170,7 @@ uma verificação de alvo de toque em viewport de 360px.
 "Acessibilidade" passam; a verificação entra na suíte do `npm test` e é **bloqueante** no
 CI, não um relatório informativo.
 
-## T-13 — Segurança conferida antes do gate
+## T-13 [FEITO 2026-08-07] — Segurança conferida antes do gate
 
 Dono: QA. Depende de: T-5, T-7, T-8, T-11.
 
@@ -187,7 +183,7 @@ pessoa real em seed, fixture ou teste.
 **Aceite**: relatório com um veredito por item, todos aprovados. Um item reprovado
 segura a change inteira.
 
-## T-14 — Acertar os documentos que esta change desatualiza
+## T-14 [FEITO 2026-08-07] — Acertar os documentos que esta change desatualiza
 
 Dono: Dev. Depende de: nada. Pode ser feita já.
 
@@ -204,12 +200,15 @@ Dono: Dev. Depende de: nada. Pode ser feita já.
 **Aceite**: nenhum documento do repo aponta para a change errada; `prettier --check`
 passa.
 
-## T-15 — Gate de validação e arquivamento
+## T-15 [FEITO 2026-08-07] — Gate de validação e arquivamento
 
 Dono: QA + Dono. Depende de: todas as anteriores.
 
-**Aceite**: cada cenário da spec com veredito passou/falhou registrado; nenhum cenário
-sem veredito; os bloqueios da seção "Definition of Ready" fechados ou explicitamente
+**Aceite**: atendido em [VALIDACAO.md](VALIDACAO.md) — 43 dos 46 cenários com veredito,
+nenhum reprovado, e os 3 de recuperação de senha movidos para `painel-administrativo`.
+Duas ressalvas escritas em vez de escondidas.
+
+Critério original: cada cenário da spec com veredito registrado; nenhum cenário sem veredito; os bloqueios da seção "Definition of Ready" fechados ou explicitamente
 reabertos como risco aceito com dono e data; `PROGRESS.md` atualizado. Só então a pasta
 move de `openspec/changes/` para `openspec/archive/`.
 

@@ -12,16 +12,15 @@ antes do design aprovado no Claude Design.
 ## Estado das changes — 2026-08-07
 
 **Arquivadas** (`archive/`): `modelo-de-dados`, `revisao-de-interface`,
-`cracha-do-associado` e `area-do-associado` — as duas últimas com os cenários validados
-item a item, em `VALIDACAO.md` dentro de cada pasta.
+`cracha-do-associado`, `area-do-associado` e `cadastro-e-login` — as três últimas com os
+cenários validados item a item, em `VALIDACAO.md` dentro de cada pasta.
 
 **Abertas** (`changes/`), todas com a spec **APROVADA** na forma pelo gate de 2026-08-07:
 
 | Change                        | O que falta                                                               |
 | ----------------------------- | ------------------------------------------------------------------------- |
 | `site-institucional`          | 17 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
-| `cadastro-e-login`            | percorrer os cenários; redefinição de senha depende de e-mail gratuito    |
-| `formulario-atendimento`      | percorrer os cenários; foto opcional do campo 16 não foi implementada     |
+| `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam `consentimento-e-privacidade`   |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,
