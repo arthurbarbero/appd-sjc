@@ -20,9 +20,56 @@ function paraDataIso(brasileira: string): string {
   return `${ano}-${mes}-${dia}`
 }
 
+/**
+ * Limite de cadastros por hora, por hash de IP (REQ-4, REQ-22).
+ *
+ * Doze é folgado para o uso real — uma família cadastrando várias pessoas do mesmo
+ * aparelho cabe — e apertado para o que se quer impedir: um laço criando conta em série,
+ * cada uma consumindo linha no D1 e um número de registro.
+ *
+ * O IP nunca é gravado em claro: a chave é `HMAC-SHA-256` (`server/utils/limite.ts`).
+ * Guardar o IP de quem procura uma associação de pessoas com deficiência seria produzir
+ * exatamente o registro que este mecanismo existe para não criar.
+ */
+const LIMITE = { escopo: 'inscricao', maximo: 12, janelaSegundos: 3600 } as const
+
+/**
+ * Teto do corpo, **derivado dos campos**, não chutado.
+ *
+ * Todo campo de texto do schema tem `.max()`, e a soma deles com o overhead de JSON fica
+ * abaixo de 4 KB. Os 16 KB daqui são o dobro do dobro disso: nunca recusam um cadastro
+ * legítimo e cortam qualquer tentativa de mandar volume.
+ *
+ * Sem os `.max()` do schema este número seria consolo — o corpo passaria, seria
+ * transformado e só então recusado. A ordem certa é: teto barato aqui, limite por campo lá.
+ */
+const MAXIMO_CORPO = 16 * 1024
+
 export default defineEventHandler(async (event) => {
   const bd = usarBanco(event)
-  const corpo = await readBody(event)
+
+  const bruto = await readRawBody(event, false)
+  if (bruto && bruto.length > MAXIMO_CORPO) {
+    throw createError({
+      statusCode: 413,
+      statusMessage: 'O envio é maior que o esperado para este formulário.',
+    })
+  }
+
+  const { excedeu } = await registrarTentativa(event, bd, ipDoPedido(event), LIMITE)
+  if (excedeu) {
+    throw createError({
+      statusCode: 429,
+      data: {
+        erros: {
+          formulario:
+            'Muitos cadastros seguidos deste aparelho. Espere um pouco e tente de novo, ou ligue para a associação.',
+        },
+      },
+    })
+  }
+
+  const corpo = JSON.parse(new TextDecoder().decode(bruto ?? new Uint8Array()) || '{}')
 
   // O servidor revalida tudo com o mesmo schema do cliente (REQ-9). O que a tela
   // conferiu não conta: quem chama a API direto não passou por tela nenhuma.

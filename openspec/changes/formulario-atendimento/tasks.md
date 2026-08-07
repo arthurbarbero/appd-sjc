@@ -45,7 +45,7 @@ change de fora.
 - **Aceite:** `npm run db:migrate` num banco limpo cria as cinco tabelas, e os
   testes de restrição de `modelo-de-dados` T3.1 passam.
 
-## T2 — Schema Zod compartilhado
+## T2 [FEITO 2026-08-07] — Schema Zod compartilhado
 
 - **Dono:** Claude Code
 - **O que:** `shared/inscricao.ts` com o esquema estrito, as listas oficiais de
@@ -58,7 +58,7 @@ change de fora.
   validação duplicada fora deste arquivo (verificado por busca); listas de opções batem
   caractere a caractere com `docs/campos-formulario.md`.
 
-## T3 — Rota de servidor: a transação de três linhas
+## T3 [FEITO 2026-08-07] — Rota de servidor: a transação de três linhas
 
 - **Dono:** Claude Code
 - **O que:** `server/api/atendimento/inscricao.post.ts` — revalida com o esquema de T2 e
@@ -73,7 +73,7 @@ change de fora.
   conteúdo de campo aparece em log; resposta de erro sem stack trace; senha em texto
   claro não aparece em log, URL nem resposta.
 
-## T4 — Guarda anti-abuso
+## T4 [FEITO 2026-08-07] — Guarda anti-abuso
 
 - **Dono:** Claude Code
 - **O que:** HMAC-SHA-256 do IP com segredo de ambiente, contagem por hora, limpeza das
@@ -84,7 +84,7 @@ change de fora.
   já aprendida no projeto); nenhum segredo versionado; a mensagem de 429 oferece o
   telefone da sede.
 
-## T5 — Ligar a tela ao servidor sem perder resposta
+## T5 [FEITO 2026-08-07] — Ligar a tela ao servidor sem perder resposta
 
 - **Dono:** Claude Code
 - **O que:** em `app/pages/atendimento/inscricao.vue`: chave de idempotência no
@@ -109,19 +109,23 @@ change de fora.
   número de registro e um aviso de que só a imagem ficou para trás; nenhum limite de
   tamanho vive nesta change, todos vêm de `shared/foto.ts`.
 
-## T6 — Confirmação honesta
+## T6 [FEITO 2026-08-07] — Confirmação honesta
 
 - **Dono:** Claude Code
 - **O que:** tela de sucesso com o `numero_registro` em destaque, o que de fato acontece
   agora, o canal do contato, o link para a pessoa entrar e editar o cadastro, e o que
   fazer se o telefone mudar.
 - **Cobre:** REQ-32, REQ-33.
-- **Aceite:** cenários "A confirmação diz o que acontece..." e "A confirmação não promete
-  o que a APPD não faz" verdes; **teste que falha se as palavras "fila", "vaga",
-  "posição" ou "matrícula" aparecerem na tela**; nenhum prazo numérico; o telefone
-  exibido é o que a pessoa digitou.
+- **Aceite:** a confirmação diz o que acontece agora, não promete o que a APPD não faz,
+  não traz prazo numérico e mostra o telefone que a pessoa digitou.
 
-## T7 — Acessibilidade verificada
+  > **O critério do teste de vocabulário caiu, por correção do dono em 2026-08-07.** Ele
+  > pediu, em 06/08, uma varredura removendo a promessa de fila — e eu transformei isso em
+  > regra permanente com teste. "Remove tal coisa" não é "nunca mais use tal coisa": a
+  > varredura foi feita, o texto está certo, e proibir palavra para sempre engessa sem
+  > proteger nada.
+
+## T7 [FEITO 2026-08-07] — Acessibilidade verificada
 
 - **Dono:** Claude Code · **veto:** validador (QA)
 - **O que:** conferir e corrigir `fieldset`/`legend`, `aria-describedby`, `aria-invalid`,
@@ -132,7 +136,7 @@ change de fora.
   sem violação A/AA nos quatro estados em 360 px e 1280 px; percurso completo só por
   teclado, gravado no relatório de validação.
 
-## T8 — Conteúdo obrigatório e conferência da réplica fiel
+## T8 [FEITO 2026-08-07] — Conteúdo obrigatório e conferência da réplica fiel
 
 - **Dono:** Claude Code · **veredito de conteúdo:** Arthur Barbero
 - **O que:** conferir rótulo a rótulo contra `docs/campos-formulario.md`; garantir a

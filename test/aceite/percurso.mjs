@@ -176,6 +176,31 @@ try {
     /\/verificar\/APPD-/.test(await p.getAttribute('svg[role="img"]', 'aria-label')),
   )
 
+  /*
+    Guarda anti-abuso do cadastro (T4 de `formulario-atendimento`).
+
+    Os dois lados: corpo maior que o esperado é recusado com 413, e rajada de cadastros do
+    mesmo endereço é cortada com 429. O IP nunca é gravado em claro — a chave do contador
+    é HMAC.
+
+    O teste usa um IP fictício próprio para não gastar a cota do percurso real.
+  */
+  const grande = await p.request.post(`${BASE}/api/conta/cadastro`, {
+    headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.77' },
+    data: { lixo: 'x'.repeat(20000) },
+  })
+  ok('corpo maior que o esperado é recusado com 413', grande.status() === 413, `${grande.status()}`)
+
+  let bloqueou = 0
+  for (let i = 0; i < 14; i++) {
+    const r = await p.request.post(`${BASE}/api/conta/cadastro`, {
+      headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.88' },
+      data: { nada: true },
+    })
+    if (r.status() === 429) bloqueou += 1
+  }
+  ok('rajada de cadastros do mesmo IP é cortada com 429', bloqueou > 0, `${bloqueou} bloqueios`)
+
   // ── 1b. A verificação pública, que é para onde o QR aponta ────────────────
   const numeroRegistro = (await p.getAttribute('svg[role="img"]', 'aria-label')).match(
     /APPD-\d{4}-[A-Z0-9]{6}/,

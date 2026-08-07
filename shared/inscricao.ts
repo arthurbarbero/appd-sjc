@@ -185,8 +185,15 @@ export const esquemaInscricao = z
     cienciaContribuicao: z.literal('Ciente'),
 
     // 16 a 18 — cadastro embutido (ADR-012).
-    email: z.string().trim().toLowerCase().pipe(z.email('Informe um e-mail válido.')),
-    cpf: z.string().transform(soDigitos).refine(cpfValido, 'Confira o CPF: os dígitos não batem.'),
+    // 254 é o teto de um endereço de e-mail pela RFC 5321; 20 cobre o CPF com pontuação
+    // e sobra. Os dois faltavam, e eram os únicos campos de texto sem teto — sem eles, um
+    // corpo de megabytes chegava a ser transformado e validado antes de ser recusado.
+    email: z.string().trim().toLowerCase().max(254).pipe(z.email('Informe um e-mail válido.')),
+    cpf: z
+      .string()
+      .max(20)
+      .transform(soDigitos)
+      .refine(cpfValido, 'Confira o CPF: os dígitos não batem.'),
     senha: z
       .string()
       .min(10, 'A senha precisa ter pelo menos 10 caracteres.')
