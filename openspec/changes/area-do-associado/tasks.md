@@ -66,14 +66,35 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 
 ## Fatia 3 — Meus dados
 
-- [ ] **T3.1** — Página `/area/dados` em leitura: rótulo visível acima do valor, sem campo 12.
+> Entregue em 2026-08-07, a pedido do dono ("o nome, telefone e endereço podem ser
+> editados também"). **Ressalva de rito registrada**: `/area/dados` não passou pela T0.4
+> (design aprovado no Claude Design), que o CLAUDE.md exige antes de qualquer tela. A tela
+> reusa os componentes de campo já aprovados no formulário de atendimento e a casca da
+> área — o que reduz o risco, mas não substitui o gate. A exceção está em
+> `openspec/ESTADO.md` em vez de ficar escondida aqui.
+
+- [x] **T3.1** — Página `/area/dados` em leitura: rótulo visível acima do valor, sem campo 12.
       **Aceite**: cenário "Meus dados explica onde a informação está, sem exibi-la".
+      _Feito em 2026-08-07._
+- [x] **T3.1b** — Bloco "Meus dados" do painel exibindo o **CEP** e a ação "Alterar meus
+      dados" (REQ-15). **Aceite**: cenário "O endereço exibido inclui o CEP".
+      _Feito em 2026-08-07._
 - [ ] **T3.2** — Linha explicativa apontando "Seus direitos" e o telefone da associação.
-- [ ] **T3.3** — Formulário de alteração com schema Zod compartilhado cliente/servidor, erro por
+      **Pendente**: a página "Seus direitos" é de `consentimento-e-privacidade` e ainda não
+      existe; apontar para ela agora seria repetir o erro do QR que leva a 404.
+- [x] **T3.3** — Formulário de alteração com schema Zod compartilhado cliente/servidor, erro por
       campo, `aria-describedby` e `aria-live`. **Aceite**: cenário "Servidor valida com o mesmo
-      schema do cliente".
-- [ ] **T3.4** — Preservação das respostas em caso de erro. **Aceite**: cenário "Erro de
-      validação não apaga o que já foi digitado".
+      schema do cliente". _Feito em 2026-08-07 — `esquemaMeusDados` é importado pelos dois
+      lados; os campos pessoais saíram de dentro de `esquemaInscricao` para um objeto
+      reutilizado, em vez de serem copiados._
+- [x] **T3.4** — Preservação das respostas em caso de erro. **Aceite**: cenário "Erro de
+      validação não apaga o que já foi digitado". _Feito em 2026-08-07._
+- [x] **T3.5** — E-mail, CPF e data de nascimento fora da alteração, com o motivo escrito na
+      tela (REQ-15a). **Aceite**: cenários "A alteração não oferece e-mail, CPF nem data de
+      nascimento" e "Requisição que tenta alterar e-mail é recusada". _Feito em 2026-08-07._
+
+> **Marcado `[x]` = entregue e rodando. Não é `[VALIDADO]`** — os cenários de aceite acima
+> ainda não foram percorridos um a um. A distinção é a regra do `ESTADO.md`.
 
 ## Fatia 4 — Excluir minha conta
 
@@ -89,6 +110,8 @@ Claude Code (execução). Nada começa antes do gate do revisor-spec.
 - [ ] **T4.4** — Confirmação só pelo modal; **teste que falha se aparecer qualquer campo de
       texto pedindo palavra de confirmação**. **Aceite**: cenário "O modal confirma, e nunca
       pede para digitar palavra".
+- [x] **T4.5a** — Os dois botões do modal na mesma linha, rótulo do destrutivo encurtado para
+      "Excluir" (REQ-24 v3, REQ-24a). _Feito em 2026-08-07, a pedido do dono._
 - [ ] **T4.5** — "Cancelar" como único botão preenchido do modal; o que confirma diz o que faz
       e é contornado. **Aceite**: cenário "A ação preenchida é a saída segura".
 - [ ] **T4.6** — Rotina de exclusão que executa **o contrato do `modelo-de-dados` REQ-28**, sem

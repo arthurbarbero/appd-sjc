@@ -53,6 +53,31 @@ crescer, vira change própria.
 3. **`consentimento-e-privacidade`, `cracha-do-associado` e `site-institucional`** seguem
    sem implementação, e as tasks delas estão corretas.
 
+## Entregas de 2026-08-07 (com a task marcada no mesmo commit)
+
+| Entregue                                       | Change dona            | Task     | Marcada? |
+| ---------------------------------------------- | ---------------------- | -------- | -------- |
+| Cabeçalho em uma linha, faixa 861–900px        | `revisao-de-interface` | T1.1b    | sim      |
+| Cadastro concluído leva a `/area` logado       | `revisao-de-interface` | T1.2     | sim      |
+| Modal de exclusão em uma linha, "Excluir"      | `area-do-associado`    | T4.5a    | sim      |
+| CEP e telefone formatados no painel            | `area-do-associado`    | T3.1b    | sim      |
+| QR Code da verificação no bloco do crachá      | `area-do-associado`    | T3.1b    | sim      |
+| `/area/dados` — alterar nome, telefone, ender. | `area-do-associado`    | T3.1–3.5 | sim      |
+
+### Duas ressalvas que ficam escritas em vez de escondidas
+
+**1. `/area/dados` não passou pelo Claude Design.** O `CLAUDE.md` é explícito: nenhuma tela
+é implementada antes do design aprovado, e a T0.4 de `area-do-associado` lista cinco
+estados — nenhum deles é este. A tela foi feita reusando os componentes de campo já
+aprovados no formulário de atendimento e a casca da área, o que reduz o risco de ela
+destoar, mas **não substitui o gate**. Se o dono reprovar o desenho, o retrabalho é dele
+ter pedido e meu ter feito — e é por isso que está aqui, e não numa nota de rodapé.
+
+**2. O QR Code aponta para uma página que ainda não existe.** `/verificar/<numero>` é a
+Fatia 5 de `cracha-do-associado`, travada pela T0.4 daquela change. Até subir, ler o
+código leva a um 404. A alternativa seria não pôr o QR; o dono pediu o QR. Registrado para
+que ninguém descubra isso na frente da associação.
+
 ## A regra que não vai ser quebrada de novo
 
 Task marcada **no mesmo commit** que a entrega. Não existe "marco depois": o depois é

@@ -163,8 +163,15 @@ const atual = (para: string) =>
   padding-left: var(--e2);
   border-left: 1px solid var(--borda-suave);
 }
-/* No celular a divisória vertical não faz sentido: a navegação vira coluna. */
-@media (width <= 900px) {
+/*
+  A divisória vertical só vira horizontal quando a navegação **já** virou coluna, e isso
+  acontece em 860px (a regra do menu sanfonado, mais abaixo). Enquanto os dois números
+  discordavam — a divisória em 900, o menu em 860 —, a faixa de 861 a 900px recebia
+  `width: 100%` numa navegação ainda horizontal, e o bloco da conta caía para a segunda
+  linha. Era o mesmo defeito do REQ-1, sobrevivendo numa faixa estreita de largura.
+  Se um dos dois mudar, o outro muda junto.
+*/
+@media (width <= 860px) {
   .cabecalho nav .conta {
     padding-left: 0;
     border-left: 0;
@@ -235,20 +242,12 @@ const atual = (para: string) =>
     padding-top: var(--e2);
   }
 
-  .cabecalho nav .conta {
-    display: flex;
-    align-items: center;
-    padding-left: var(--e3);
-    margin-left: var(--e2);
-    border-left: 1px solid var(--borda-suave);
-  }
-  .cabecalho nav .conta a {
-    font-weight: 700;
-    color: var(--primaria);
-  }
-  .cabecalho nav .conta a:visited {
-    color: var(--primaria);
-  }
+  /*
+    Aqui só o que muda com o menu sanfonado. A divisória e a cor do link da conta já vêm
+    da regra de ≤860px acima — repeti-las nesta media query trazia de volta o
+    `border-left` vertical que aquela regra tinha acabado de tirar, porque esta vem
+    depois na cascata.
+  */
   .cabecalho nav ul {
     flex-direction: column;
   }

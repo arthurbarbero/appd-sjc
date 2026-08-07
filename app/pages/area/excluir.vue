@@ -145,17 +145,24 @@ async function excluir() {
         <p id="d-certeza">
           Sua conta e seus dados serão apagados agora. Isso não pode ser desfeito.
         </p>
-        <div class="acoes">
+        <div class="acoes acoes-modal">
           <button ref="botaoCancelar" type="button" class="botao botao-primario" @click="fechar">
             Cancelar
           </button>
+          <!--
+            Rótulo curto de propósito. "Excluir minha conta" não cabia ao lado de
+            "Cancelar" nos 400px úteis do modal e empurrava os dois botões para linhas
+            separadas — o que faz o par de escolhas parecer uma lista de passos.
+            O contexto já está dito no título e no parágrafo acima; "Excluir" continua
+            dizendo o que o botão faz, que é o que a T4.5 exige.
+          -->
           <button
             type="button"
             class="botao botao-destrutivo"
             :disabled="excluindo"
             @click="excluir"
           >
-            {{ excluindo ? 'Apagando…' : 'Excluir minha conta' }}
+            {{ excluindo ? 'Apagando…' : 'Excluir' }}
           </button>
         </div>
       </div>
@@ -197,11 +204,20 @@ h2 {
   background: var(--fundo);
   border-radius: var(--raio);
   box-shadow: var(--sombra-2);
-  padding: var(--e5);
+  padding: var(--e4);
   max-width: 480px;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--e3);
+}
+/*
+  Os dois botões ficam lado a lado, alinhados à direita — a leitura é "saio daqui" à
+  esquerda e "sigo" à direita. Em tela estreita (menos de 380px úteis) eles ainda
+  empilham, e aí o `flex-wrap` do `.acoes` é o que salva; o alvo de 44px nunca é
+  sacrificado para caber numa linha.
+*/
+.acoes-modal {
+  justify-content: flex-end;
 }
 </style>

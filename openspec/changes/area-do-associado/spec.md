@@ -3,8 +3,15 @@
 - ID: SPEC-area-do-associado Deriva de: PROP-20260805-area-do-associado
 - Status: rascunho (aguarda gate do revisor-spec e aprovação do dono)
 - Dono do conteúdo: Arthur Barbero · Aprovador da spec: Arthur Barbero
-- Versão: v2 · Data: 2026-08-06
+- Versão: v3 · Data: 2026-08-07
 - **Fonte da verdade das tabelas**: [`modelo-de-dados`](../modelo-de-dados/spec.md)
+
+> **v3 (2026-08-07)** — três correções vindas da sessão de uso do dono, não de refino de
+> escrivaninha. O bloco do crachá troca a linha de texto sobre a verificação por um **QR
+> Code** (REQ-12). "Meus dados" passa a exibir o **CEP**, campo que entrou no formulário
+> depois desta spec ser escrita e que ninguém veio acrescentar aqui (REQ-15). E ficou
+> explícito o que a pessoa **não** altera sozinha, com o motivo de cada exclusão
+> (REQ-15a) — o e-mail em especial, que parece um campo comum e não é.
 
 > **v2 (2026-08-06)** — reescrita contra o contrato de dados, depois do gate. Esta change
 > passa a ser **dona única** de `/area`, `/area/dados`, `/area/inscricoes` e
@@ -97,9 +104,23 @@ nomeada e nunca exibe dado de saúde.
 > envio da foto, é de `cracha-do-associado`. O que fica aqui é o **bloco do painel** que
 > leva até lá. Os REQ-12 a REQ-14 abaixo descrevem só esse bloco, não a tela de destino.
 
-- **REQ-12**: O bloco do painel DEVE exibir prévia com foto, nome, `numero_registro` e situação, mais a
-  linha que informa o endereço público de verificação e que ele mostra apenas nome, número e
-  situação.
+- **REQ-12**: O bloco do painel DEVE exibir prévia com foto, nome, `numero_registro` e situação,
+  mais o **QR Code** do endereço público de verificação, a **URL escrita por extenso** ao lado
+  dele, e a informação de que a página mostra apenas nome, número e situação.
+
+  > **v3.** Antes era uma linha de texto com o caminho entre `<code>`, seguida da confissão
+  > "esta tela ainda não foi construída" — que o dono mandou tirar, com razão: uma pendência
+  > minha não é informação para quem usa. O QR é o mesmo que vai no verso do crachá
+  > (`cracha-do-associado` REQ-21), e vê-lo aqui é como a pessoa confere que o crachá dela
+  > funciona antes de precisar dele.
+  >
+  > **A URL por extenso é obrigatória junto do código**, não alternativa: quem confere pode
+  > não ter câmera, e um QR sozinho exclui exatamente quem está do outro lado do balcão.
+  >
+  > **Ressalva honesta**: `/verificar/<numero>` ainda não existe — é a Fatia 5 de
+  > `cracha-do-associado`, travada pela T0.4. Até ela subir, o código leva a um 404. Isso
+  > está em `openspec/ESTADO.md` e **não** foi escondido da spec.
+
 - **REQ-13**: A prévia NÃO DEVE exibir tipo de deficiência, independentemente do opt-in da
   change `cracha-do-associado` — o opt-in vale para o crachá impresso, não para esta tela.
 - **REQ-14**: Sem foto, o bloco DEVE mostrar um espaço reservado com a palavra "Sem foto",
@@ -109,8 +130,28 @@ nomeada e nunca exibe dado de saúde.
 
 ### Bloco "Meus dados"
 
-- **REQ-15**: O bloco DEVE exibir nome, data de nascimento, e-mail, telefone e endereço, cada
-  um com rótulo visível acima do valor, e a ação "Alterar meus dados".
+- **REQ-15**: O bloco DEVE exibir nome, data de nascimento, e-mail, telefone e endereço
+  **completo, com CEP**, cada um com rótulo visível acima do valor, e a ação "Alterar meus
+  dados".
+
+  > **v3.** O CEP entrou no formulário de atendimento em 2026-08-06 e **ninguém veio
+  > acrescentá-lo aqui** — o dado era gravado, era devolvido pela API e não aparecia na
+  > tela. É o defeito típico de campo que nasce fora de change: some no caminho entre o
+  > banco e o olho de quem lê.
+
+- **REQ-15a**: A alteração DEVE cobrir nome, telefone, marcação de WhatsApp e endereço
+  completo, e **NÃO DEVE** oferecer e-mail, CPF nem data de nascimento. Cada ausência DEVE
+  estar escrita na tela, com o caminho para resolver.
+
+  > O e-mail não é um campo comum: ele é a chave do login **e** entra no sal da derivação
+  > da senha no navegador ([ADR-005](../../../docs/adr/adr-005-parametros-do-scrypt.md)).
+  > Trocá-lo sem refazer a derivação transforma a senha certa em senha errada, sem aviso e
+  > sem volta — a pessoa perde a conta por ter corrigido um typo. Trocar e-mail é um fluxo
+  > de reautenticação, e vira tarefa própria quando alguém precisar.
+  >
+  > CPF e data de nascimento identificam a pessoa perante a associação; corrigi-los pela
+  > internet, sem conferência, é o caminho por onde uma conta passa a ser de outra pessoa.
+
 - **REQ-16**: A alteração DEVE usar o mesmo schema Zod no cliente e no servidor, com erro por
   campo, texto que diz o que fazer, associação por `aria-describedby` e anúncio em `aria-live`.
 - **REQ-17**: Erro de validação NÃO DEVE apagar nenhuma resposta já digitada.
@@ -143,8 +184,22 @@ nomeada e nunca exibe dado de saúde.
 - **REQ-23**: É **proibido** exigir digitação de palavra de confirmação (por exemplo, teclar
   "EXCLUIR"). Digitar palavra em caixa alta é barreira real para quem tem dificuldade motora ou
   intelectual, e este site atende exatamente essas pessoas.
-- **REQ-24**: O botão que confirma dentro do modal DEVE dizer o que faz — "Excluir minha
-  conta" —, nunca "OK" nem "Confirmar", e DEVE ser contornado, nunca preenchido.
+- **REQ-24**: O botão que confirma dentro do modal DEVE dizer o **verbo da ação** —
+  "Excluir" —, nunca "OK", "Sim" nem "Confirmar", e DEVE ser contornado, nunca preenchido.
+
+  > **v3.** A v2 exigia o rótulo longo "Excluir minha conta". Na prática ele não cabia ao
+  > lado de "Cancelar" nos 400 px úteis do modal, e os dois botões empilhavam — o que faz
+  > um par de escolhas parecer uma lista de passos, exatamente o oposto do que um modal de
+  > confirmação precisa comunicar. O dono viu e mandou encurtar.
+  >
+  > O que o requisito protege continua de pé: o botão diz **o que acontece**, não uma
+  > partícula vazia. "OK" e "Confirmar" seguem proibidos porque não dizem nada — quem
+  > chegou ali distraído lê "OK" e clica. "Excluir" não deixa dúvida, e o objeto da ação
+  > está no título ("Tem certeza?") e no parágrafo logo acima.
+
+- **REQ-24a**: Os dois botões do modal DEVEM ficar **na mesma linha** sempre que couberem,
+  com a saída segura à esquerda. Abaixo da largura em que couberem, empilham — e aí o alvo
+  de 44 px vence o alinhamento, nunca o contrário.
 - **REQ-25**: A ação preenchida do modal DEVE ser **"Cancelar"**. A saída segura é a mais
   fácil de acertar.
 - **REQ-26**: O que a exclusão apaga está em [`modelo-de-dados`](../modelo-de-dados/spec.md)
@@ -442,6 +497,52 @@ Funcionalidade: Alteração de dados de contato
     Quando ela é enviada
     Então o servidor recusa com o mesmo erro por campo
     E nenhum dado é gravado
+
+  Cenário: O endereço exibido inclui o CEP
+    Dado o associado fictício com CEP 12239-530 gravado
+    Quando ele abre /area
+    Então o bloco "Meus dados" mostra "CEP 12239-530"
+    E a alteração em /area/dados chega com o campo de CEP preenchido com o mesmo valor
+
+  Cenário: A alteração não oferece e-mail, CPF nem data de nascimento
+    Quando o associado fictício abre /area/dados
+    Então não existe campo editável de e-mail, de CPF nem de data de nascimento
+    E a tela explica que os três não são alterados por ali e para onde ir
+
+  Cenário: Requisição que tenta alterar e-mail é recusada
+    Dado uma requisição de alteração montada fora da interface, contendo o campo email
+    Quando ela é enviada
+    Então o servidor recusa com 422 por campo desconhecido
+    E o e-mail gravado continua o mesmo
+
+  Cenário: Salvar não sobrescreve a marcação de WhatsApp
+    Dado o associado fictício com telefoneWhatsapp igual a "Não"
+    Quando ele abre /area/dados, altera só o bairro e salva
+    Então o valor gravado de telefoneWhatsapp continua "Não"
+```
+
+```gherkin
+Funcionalidade: QR Code da verificação pública
+  Cobre REQ-12 da SPEC-area-do-associado
+
+  Cenário: O bloco do crachá traz o QR e a URL por extenso
+    Quando o associado fictício APPD-2026-00042 abre /area
+    Então o bloco "Meu crachá" contém um elemento com role="img" rotulado com a URL
+    E a mesma URL aparece escrita por extenso, em texto selecionável
+    E a URL termina em "/verificar/APPD-2026-00042"
+
+  Cenário: O QR é desenhado sem JavaScript no aparelho
+    Dado um navegador com JavaScript desligado
+    Quando ele abre /area
+    Então o HTML entregue pelo servidor já contém o SVG do código
+
+  Cenário: O QR não é montado por injeção de marcação
+    Quando o código-fonte do componente de QR é inspecionado
+    Então não existe v-html, innerHTML nem concatenação de string de marcação
+
+  Cenário: A tela não confessa pendência de construção
+    Quando o associado fictício abre /area
+    Então não existe nenhum texto dizendo que uma tela ainda não foi construída
 ```
 
 ```gherkin

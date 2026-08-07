@@ -96,26 +96,66 @@ const escolhaMultipla = <T extends readonly [string, ...string[]]>(opcoes: T, ca
 
 // ── Os 15 campos + os 3 do cadastro embutido ─────────────────────────────────────────
 
+/**
+ * Campos 1 a 11 — identidade e contato, gravados em `usuarios`.
+ *
+ * Vivem separados porque **duas telas os usam**: o formulário de atendimento, que os
+ * cria, e `/area/dados`, onde a pessoa os corrige (`area-do-associado` REQ-15 a REQ-17).
+ * Redeclarar a régua na tela de correção seria a duplicação que o REQ-8 proíbe — e a
+ * forma mais previsível de as duas divergirem sem ninguém notar.
+ */
+const camposPessoais = {
+  nome: z.string().trim().min(2, 'Informe o nome completo.').max(120),
+  nascimento: z
+    .string()
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Use o formato dia/mês/ano, como 12/03/1978.'),
+  telefone,
+  telefoneWhatsapp: z.enum(['Sim', 'Não']),
+  cep: z
+    .string()
+    .transform(soDigitos)
+    .refine((v) => v.length === 8, 'O CEP tem 8 números. Exemplo: 12239-530.'),
+  endereco: z.string().trim().min(3, 'Informe a rua, avenida ou travessa.').max(300),
+  numero: z.string().trim().min(1, 'Informe o número, ou "s/n".').max(20),
+  complemento: z.string().trim().max(60).optional(),
+  bairro: z.string().trim().min(2, 'Informe o bairro.').max(80),
+  municipio: z.string().trim().min(2, 'Informe o município.').max(80),
+  cuidadorNome: z.string().trim().max(120).optional(),
+  cuidadorContato: telefone.optional(),
+}
+
+/**
+ * O que `/area/dados` altera: contato e endereço, e mais nada.
+ *
+ * **E-mail e CPF ficam de fora, e não por esquecimento.** O e-mail é a chave do login e
+ * também entra no sal da derivação da senha no navegador (`shared/auth/derivacao.ts`):
+ * trocá-lo sem refazer a derivação transformaria a senha atual em senha errada, sem aviso
+ * e sem volta. Trocar e-mail é, na prática, um fluxo de reautenticação — tarefa própria,
+ * não um campo neste formulário. O CPF identifica a pessoa perante a associação e não é
+ * dado que se corrige sozinho pela internet.
+ *
+ * A data de nascimento também fica de fora: é dado de identificação, não de contato.
+ */
+export const esquemaMeusDados = z
+  .object({
+    nome: camposPessoais.nome,
+    telefone: camposPessoais.telefone,
+    telefoneWhatsapp: camposPessoais.telefoneWhatsapp,
+    cep: camposPessoais.cep,
+    endereco: camposPessoais.endereco,
+    numero: camposPessoais.numero,
+    complemento: camposPessoais.complemento,
+    bairro: camposPessoais.bairro,
+    municipio: camposPessoais.municipio,
+  })
+  .strict()
+
+export type MeusDados = z.infer<typeof esquemaMeusDados>
+
 export const esquemaInscricao = z
   .object({
     // 1 a 11 — identidade e contato, gravados em `usuarios`.
-    nome: z.string().trim().min(2, 'Informe o nome completo.').max(120),
-    nascimento: z
-      .string()
-      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Use o formato dia/mês/ano, como 12/03/1978.'),
-    telefone,
-    telefoneWhatsapp: z.enum(['Sim', 'Não']),
-    cep: z
-      .string()
-      .transform(soDigitos)
-      .refine((v) => v.length === 8, 'O CEP tem 8 números. Exemplo: 12239-530.'),
-    endereco: z.string().trim().min(3, 'Informe a rua, avenida ou travessa.').max(300),
-    numero: z.string().trim().min(1, 'Informe o número, ou "s/n".').max(20),
-    complemento: z.string().trim().max(60).optional(),
-    bairro: z.string().trim().min(2, 'Informe o bairro.').max(80),
-    municipio: z.string().trim().min(2, 'Informe o município.').max(80),
-    cuidadorNome: z.string().trim().max(120).optional(),
-    cuidadorContato: telefone.optional(),
+    ...camposPessoais,
 
     // 12 a 15 — o que a pessoa precisa, gravado em `inscricoes_atendimento`.
     deficiencias: escolhaMultipla(DEFICIENCIAS, 'tipo de deficiência'),

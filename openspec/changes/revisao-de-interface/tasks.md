@@ -6,6 +6,19 @@ Ordem sugerida: o que quebra primeiro, o que engana depois, o que é estética p
 
 - [x] **T1.1** — Cabeçalho em uma linha; `nav` vira container flex e o bloco de conta
       empilha no celular em vez de cair para fora (REQ-1, REQ-3). _Feito em 2026-08-07._
+- [x] **T1.1b** — **A T1.1 tinha ficado pela metade.** A correção de 2026-08-07 pôs a
+      divisória do bloco de conta em `@media (width <= 900px)`, mas o menu sanfonado vira
+      coluna em `860px`. Entre 861 e 900 px o bloco recebia `width: 100%` numa navegação
+      ainda horizontal e caía para a segunda linha — o mesmo defeito do REQ-1, vivo numa
+      faixa estreita. Havia ainda uma segunda declaração do bloco dentro da media query de
+      860px que ressuscitava o `border-left` vertical, por vir depois na cascata.
+      _Corrigido em 2026-08-07; os dois números agora são o mesmo._
+      **Como apareceu, e por que não pela tela**: eu tinha declarado a T1.1 concluída
+      olhando o desenho em 1266 px e em 1440 px. Medir as caixas do `ul` e do bloco de
+      conta em seis larguras levou um minuto e achou o que a conferência visual não acha —
+      porque ninguém redimensiona a janela até 880 px por acaso. É o argumento para a T1.3
+      ser medição, e não olhada.
+
 - [x] **T1.2** — Concluir o cadastro leva para `/area` logado, com a confirmação e o
       número exibidos lá; a tela intermediária deixa de existir (REQ-20).
       _Feito em 2026-08-07._

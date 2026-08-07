@@ -22,10 +22,34 @@ const { data, pending, error } = await useFetch('/api/area/meus-dados')
 /** Chega preenchido quando a pessoa acabou de concluir o cadastro. */
 const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
 
+/*
+  Endereço público de conferência do crachá.
+
+  A origem vem do pedido, não de uma constante: em `workers.dev`, em pré-visualização e no
+  domínio da APPD o valor é diferente, e um QR apontando para o ambiente errado é um QR
+  que leva a lugar nenhum na mão de quem confere.
+
+  **A página `/verificar/<numero>` ainda não existe** — é a Fatia 5 de
+  `cracha-do-associado`, travada pela T0.4 (design aprovado). Até ela subir, este código
+  leva a um 404. Está registrado em `openspec/ESTADO.md`.
+*/
+const origem = useRequestURL().origin
+const urlVerificacao = (numero: string) => `${origem}/verificar/${numero}`
+
 function dataBr(iso?: string | null) {
   if (!iso) return ''
   const [ano, mes, dia] = iso.slice(0, 10).split('-')
   return `${dia}/${mes}/${ano}`
+}
+
+/*
+  O banco guarda só dígitos — é o formato certo para comparar e para discar. Quem lê
+  espera pontuação: `12239-530`, `(12) 99165-7059`. Formatar na exibição, e não na
+  gravação, mantém as duas coisas certas.
+*/
+function cepBr(cep?: string | null) {
+  if (!cep || cep.length !== 8) return cep ?? '—'
+  return `${cep.slice(0, 5)}-${cep.slice(5)}`
 }
 </script>
 
@@ -117,12 +141,21 @@ function dataBr(iso?: string | null) {
             </div>
           </div>
           <p v-if="!data.temFoto" class="aviso-foto">O crachá precisa de foto para ser impresso.</p>
-          <p class="explicacao">
-            Qualquer pessoa pode conferir este crachá em
-            <code>/verificar/{{ data.conta.numeroRegistro }}</code> — a página mostra apenas nome,
-            número e situação.
-          </p>
-          <p class="explicacao pendente">Esta tela ainda não foi construída.</p>
+
+          <!--
+            O mesmo código que vai no verso do crachá (`cracha-do-associado` REQ-21). A URL
+            aparece escrita por extenso ao lado, e isso é requisito e não redundância: quem
+            está do outro lado do balcão pode não ter câmera, ou não saber usar a do
+            aparelho, e precisa poder digitar.
+          -->
+          <div class="verificacao">
+            <AppdQrCode :valor="urlVerificacao(data.conta.numeroRegistro)" :tamanho="112" />
+            <div>
+              <p class="explicacao">Quem receber seu crachá confere aqui que ele é seu:</p>
+              <p class="endereco-verificacao">{{ urlVerificacao(data.conta.numeroRegistro) }}</p>
+              <p class="explicacao">A página mostra apenas nome, número e situação.</p>
+            </div>
+          </div>
         </section>
 
         <section class="cartao" aria-labelledby="t-dados">
@@ -142,16 +175,23 @@ function dataBr(iso?: string | null) {
             </div>
             <div>
               <dt>Telefone</dt>
-              <dd>{{ data.conta.telefone }}</dd>
+              <dd>{{ mascaraTelefone(data.conta.telefone ?? '') }}</dd>
             </div>
             <div>
               <dt>Endereço</dt>
               <dd>
-                {{ data.conta.endereco }}, {{ data.conta.numero }} — {{ data.conta.bairro }},
-                {{ data.conta.municipio }}
+                {{ data.conta.endereco }}, {{ data.conta.numero
+                }}<template v-if="data.conta.complemento">, {{ data.conta.complemento }}</template>
+                <br />
+                {{ data.conta.bairro }} — {{ data.conta.municipio }}
+                <br />
+                CEP {{ cepBr(data.conta.cep) }}
               </dd>
             </div>
           </dl>
+          <div class="acoes">
+            <NuxtLink class="botao botao-secundario" to="/area/dados">Alterar meus dados</NuxtLink>
+          </div>
           <p class="explicacao nota">
             A informação sobre deficiência que você deu no Cadastro de Atendimento não é exibida
             aqui. Para consultar ou corrigir, use
@@ -272,8 +312,20 @@ dd {
   border-top: 1px solid var(--borda-suave);
   padding-top: var(--e2);
 }
-.pendente {
-  font-style: italic;
+.verificacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e3);
+  align-items: flex-start;
+}
+.verificacao p {
+  margin: 0 0 4px;
+}
+.endereco-verificacao {
+  font-family: var(--fonte-mono, monospace);
+  font-size: 0.94rem;
+  /* Endereço longo em cartão estreito: quebra em qualquer ponto em vez de estourar. */
+  overflow-wrap: anywhere;
 }
 .excluir {
   border: 1px solid var(--primaria);

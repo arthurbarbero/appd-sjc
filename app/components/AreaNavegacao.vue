@@ -6,7 +6,7 @@
   cor. Quem não distingue as cores continua sabendo onde está, e o leitor de tela anuncia.
 */
 
-defineProps<{ atual: 'painel' | 'inscricoes' | 'excluir' }>()
+defineProps<{ atual: 'painel' | 'dados' | 'inscricoes' | 'excluir' }>()
 </script>
 
 <template>
@@ -15,6 +15,11 @@ defineProps<{ atual: 'painel' | 'inscricoes' | 'excluir' }>()
       <li>
         <NuxtLink to="/area" :aria-current="atual === 'painel' ? 'page' : undefined">
           Início
+        </NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/area/dados" :aria-current="atual === 'dados' ? 'page' : undefined">
+          Meus dados
         </NuxtLink>
       </li>
       <li>

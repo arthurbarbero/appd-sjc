@@ -23,6 +23,9 @@ export default defineEventHandler(async (event) => {
       nascimento: true,
       email: true,
       telefone: true,
+      // A tela de correção precisa dele preenchido: sem isto o formulário assumiria um
+      // valor padrão e gravaria por cima da resposta real da pessoa ao salvar.
+      telefoneWhatsapp: true,
       cep: true,
       endereco: true,
       numero: true,
