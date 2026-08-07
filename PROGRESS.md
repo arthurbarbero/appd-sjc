@@ -184,6 +184,15 @@ Antes dela, rodar um revisor independente sobre `modelo-de-dados`.
 - [ ] Achar caminho de custo zero para e-mail de recuperação de senha (Fase 3).
 - [ ] AÇÃO DO DONO (quando for deployar): criar conta Cloudflare gratuita. NÃO ativar R2.
 
+## Atrito de ambiente resolvido (2026-08-06)
+
+- **`npm run cf:dev` falhava com `EBUSY: rmdir '.output\public'`.** Um `wrangler dev`
+  vivo segura a pasta que o build precisa reescrever, e a mensagem não diz isso.
+  A pegadinha: **matar só o `workerd` não resolve** — o `wrangler` é supervisor e relança
+  o runtime em segundos, com PID novo, dando a impressão de que o comando não funciona.
+  `npm run cf:dev` agora encerra os dois antes de compilar (`scripts/parar-workerd.mjs`),
+  e existe `npm run cf:parar` para o caso avulso.
+
 ## Bugs / riscos conhecidos
 
 - `npm audit` aponta 7 vulnerabilidades **só em dependência de desenvolvimento**

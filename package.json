@@ -17,8 +17,9 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:aplicar:local": "wrangler d1 migrations apply appd-sjc --local",
-    "cf:dev": "npm run build && wrangler dev",
-    "db:seed:local": "node scripts/seed-local.mjs > .wrangler/seed.sql && wrangler d1 execute appd-sjc --local --file=.wrangler/seed.sql"
+    "cf:dev": "node scripts/parar-workerd.mjs && npm run build && wrangler dev",
+    "db:seed:local": "node scripts/seed-local.mjs > .wrangler/seed.sql && wrangler d1 execute appd-sjc --local --file=.wrangler/seed.sql",
+    "cf:parar": "node scripts/parar-workerd.mjs"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
