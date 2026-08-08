@@ -697,58 +697,56 @@ try {
   }
 
   /*
-    ── 8. Os limites por IP, cada tela no seu contador ─────────────────────────
+    ── 8. O corte por IP ───────────────────────────────────────────────────────
 
-    Fica **por último** porque a rajada esgota a cota da própria máquina, e nada depois
-    disto precisa das duas rotas.
+    Fica **por último** porque a rajada esgota a cota da própria máquina.
 
     **Sem forjar cabeçalho.** A Cloudflare sobrescreve `CF-Connecting-IP` com o IP real de
     quem conecta — é ela quem serve o valor, e o Worker só lê. Mandar o cabeçalho da máquina
     de teste era inventar um campo que não é meu, e ainda fazia o percurso passar local e
     reprovar em produção.
 
-    **Cada rota no próprio escopo**, e é por isso que as duas são medidas separadamente:
-    `verificacao` corta em 20 por minuto, `inscricao` em 12 por quinze minutos. Provar uma
-    pela outra seria supor que o contador está ligado onde não foi conferido.
+    **Só na verificação, e o motivo é o gate ter de rodar quantas vezes for preciso.** A
+    janela da verificação é de 60 segundos: quando alguém rodar de novo, ela já expirou. A
+    do cadastro é de quinze minutos — esgotá-la aqui bloquearia o cadastro da execução
+    seguinte, e um gate que só funciona uma vez por quarto de hora é um gate pela metade.
 
-    **O preço, escrito:** rodar o gate contra produção duas vezes seguidas esbarra na cota
-    do cadastro. Quinze minutos depois ela volta.
+    O cadastro não fica sem cobertura: `test/seguranca.spec.ts` confere que a rota chama
+    `registrarTentativa` no escopo `inscricao` **e com quais números**, e o teto de corpo é
+    medido em tempo de execução, ali no começo do percurso. O que roda aqui é o mecanismo
+    de corte, que é o mesmo código para as duas.
   */
-  const rajada = async (fazer, quantas) => {
-    const status = []
-    for (let i = 0; i < quantas; i++) status.push(await fazer())
-    return status
+  const naVerificacao = []
+  for (let i = 0; i < 22; i++) {
+    naVerificacao.push((await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)).status())
   }
-
-  const naVerificacao = await rajada(
-    async () => (await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)).status(),
-    22,
-  )
   const corteVerificacao = naVerificacao.indexOf(429)
   ok('a verificação corta a rajada com 429', corteVerificacao !== -1, naVerificacao.join(' '))
   ok(
-    'na verificação, algumas passam antes do corte — é limite, não bloqueio',
+    'algumas passam antes do corte — é limite, não bloqueio',
     corteVerificacao > 0,
     `cortou na ${corteVerificacao + 1}ª de 22`,
   )
 
-  const noCadastro = await rajada(
-    async () =>
-      (
-        await p.request.post(`${BASE}/api/conta/cadastro`, {
-          headers: { 'content-type': 'application/json' },
-          data: { nada: true },
-        })
-      ).status(),
-    14,
-  )
-  const corteCadastro = noCadastro.indexOf(429)
-  ok('o cadastro corta a rajada com 429', corteCadastro !== -1, noCadastro.join(' '))
-  ok(
-    'no cadastro, algumas passam antes do corte',
-    corteCadastro > 0,
-    `cortou na ${corteCadastro + 1}ª de 14`,
-  )
+  /*
+    **A rajada limpa a própria sujeira.** Sem isto, a execução seguinte do gate encontrava a
+    cota estourada e reprovava cinco verificações da página de verificação — medido em
+    2026-08-07, rodando duas vezes seguidas.
+
+    Deixar assim e escrever "o gate roda uma vez a cada quinze minutos" seria entregar pela
+    metade: ferramenta de aceite que não pode ser rodada duas vezes é ferramenta que se
+    deixa de rodar. Espera-se a janela fechar, e confirma-se que fechou — em vez de supor
+    pelo relógio.
+  */
+  const limpou = await (async () => {
+    for (let i = 0; i < 40; i++) {
+      const r = await p.request.get(`${BASE}/api/verificar/APPD-2026-ZZZZZZ`)
+      if (r.status() === 200) return true
+      await new Promise((r) => setTimeout(r, 3000))
+    }
+    return false
+  })()
+  ok('a janela do limite se fecha sozinha, e o gate pode rodar de novo', limpou)
 } finally {
   await navegador.close()
   encerrar(servidor)

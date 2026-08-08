@@ -25,15 +25,17 @@ function paraDataIso(brasileira: string): string {
  * Limite de cadastros por hash de IP (REQ-4, REQ-22). **Contador próprio desta rota**: o
  * escopo `inscricao` não é compartilhado com a verificação nem com o login.
  *
- * Doze é folgado para o uso real e apertado para o que se quer impedir: um laço criando
- * conta em série, cada uma consumindo linha no D1 e um número de registro.
+ * O que ele impede: um laço criando conta em série, cada uma consumindo linha no D1 e um
+ * número de registro.
  *
- * **A janela caiu de uma hora para quinze minutos em 2026-08-07**, e o motivo não é
- * técnico: a APPD faz mutirão de cadastro na sede, e vários associados usam a mesma rede.
- * Com janela de uma hora, o décimo terceiro da fila ficaria uma hora sem conseguir se
- * cadastrar, na frente de quem estava ajudando. Quinze minutos continua cortando um laço
- * automatizado — no máximo 48 contas por hora, e o corte chega em segundos — e devolve o
- * acesso a quem só estava esperando a vez.
+ * **Os números são um chute informado, sem medição.** O site não tem histórico de uso, e
+ * não há dado sobre quantas pessoas se cadastram de uma mesma rede. Doze em quinze minutos
+ * é apertado o bastante para o corte chegar em segundos num laço automatizado, e folgado
+ * para o uso que se imagina — mas "se imagina" é a palavra certa, e está escrita de
+ * propósito.
+ *
+ * **Gatilho de revisão**: aparecer relato de bloqueio indevido, o número sobe; aparecer
+ * abuso que passou, desce. Sem um dos dois, mexer aqui é trocar um chute por outro.
  *
  * O IP nunca é gravado em claro: a chave é `HMAC-SHA-256` (`server/utils/limite.ts`).
  * Guardar o IP de quem procura uma associação de pessoas com deficiência seria produzir

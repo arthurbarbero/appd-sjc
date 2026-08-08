@@ -31,10 +31,13 @@ export interface VersaoTermo {
 }
 
 /**
- * O termo do Art. 11, versão 1.
+ * O termo do Art. 11, versão 1 — **resumo**.
  *
- * Escrito para ser lido por quem tem dificuldade de leitura, que é parte do público deste
- * site: frases curtas, sem "outrossim", sem remissão a artigo que ninguém vai abrir.
+ * É o texto curto que fica ao lado da caixa de aceite. Os documentos completos entram
+ * depois, como links, junto com a change `consentimento-e-privacidade`; a caixa passa a
+ * dizer que a pessoa leu os links, e se leu ou não é escolha dela.
+ *
+ * O que o hash cobre é **este** texto. Quando os links entrarem, é versão nova.
  */
 export const TERMO_ART11: VersaoTermo = {
   termoId: 'deficiencia-art11',

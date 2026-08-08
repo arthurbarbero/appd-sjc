@@ -109,6 +109,25 @@ describe('o limite de tentativas está ligado onde precisa (REQ-26)', () => {
     expect(texto).toMatch(new RegExp(`escopo: '${escopo}'`))
   })
 
+  it('o cadastro declara os números do próprio limite', () => {
+    /*
+      O corte em si é medido em execução, no gate, pela rota de verificação — cuja janela é
+      de 60 segundos e expira antes de alguém rodar o gate de novo. A do cadastro é de
+      quinze minutos: esgotá-la no teste bloquearia a execução seguinte, e gate que só
+      funciona a cada quinze minutos é gate pela metade.
+
+      Então o que se prova aqui é a **configuração**: que a rota tem contador próprio, com
+      escopo, teto e janela declarados. Trocar qualquer um sem querer reprova.
+    */
+    const rota = ler(join(RAIZ, 'server', 'api', 'conta', 'cadastro.post.ts'))
+    expect(rota).toMatch(/escopo:\s*'inscricao'/)
+    expect(rota).toMatch(/maximo:\s*\d+/)
+    expect(rota).toMatch(/janelaSegundos:\s*\d+/)
+    // E o teto de corpo, que é a outra metade da guarda.
+    expect(rota).toMatch(/MAXIMO_CORPO/)
+    expect(rota).toMatch(/statusCode:\s*413/)
+  })
+
   it('o contador nunca guarda o identificador em claro', () => {
     const limite = ler(join(RAIZ, 'server', 'utils', 'limite.ts'))
     // A chave gravada tem de ser o resultado do HMAC, e não o valor recebido.

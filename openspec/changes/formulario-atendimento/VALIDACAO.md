@@ -33,12 +33,9 @@ antes de ser recusado. Fechados em 254 (RFC 5321) e 20.
 Com todos limitados, a soma dos campos fica **abaixo de 4 KB**. O teto de corpo virou
 16 KB — derivado disso, não chutado: nunca recusa cadastro legítimo, e corta volume.
 
-**Rate limit**: 12 cadastros por hora por hash de IP. Folgado para uma família cadastrando
-várias pessoas do mesmo aparelho; apertado para um laço criando conta em série. O IP nunca
-é gravado em claro — guardar o IP de quem procura uma associação de pessoas com deficiência
-seria produzir exatamente o registro que o mecanismo existe para não criar.
+**Rate limit**: 12 cadastros por 15 minutos, por hash de IP, em contador próprio da rota. Os números são **chute informado, sem medição** — o site não tem histórico de uso, e isso está escrito no código junto com o gatilho de revisão: relato de bloqueio indevido sobe o número, abuso que passou desce. O IP nunca é gravado em claro.
 
-Medido no aceite: corpo de 20 KB devolve 413, e rajada do mesmo IP devolve 429.
+Medido no aceite: corpo de 20 KB devolve 413. O **corte por rajada** é medido na rota de verificação, cuja janela de 60 segundos se fecha dentro da própria execução; a configuração do cadastro — escopo, teto e janela — é conferida em . Esgotar a janela de 15 minutos do cadastro no teste bloquearia a execução seguinte do gate.
 
 ## Um critério de aceite que foi retirado, e por quê
 

@@ -57,13 +57,13 @@ describe('o catálogo guarda o que foi publicado', () => {
     expect(versaoPorTexto('qualquer outra coisa')).toBeNull()
   })
 
-  it('o termo fala em português comum, sem remissão a artigo solto', () => {
-    // O público deste site inclui quem tem dificuldade de leitura. Termo que exige abrir
-    // a lei para entender é termo que ninguém leu de verdade — e consentimento que não
-    // foi entendido não é consentimento.
-    expect(TERMO_ART11.texto).toMatch(/dado de saúde/i)
-    expect(TERMO_ART11.texto).toMatch(/pode retirar esta autorização/i)
-    expect(TERMO_ART11.texto).not.toMatch(/outrossim|não obstante|far-se-á/i)
+  it('o resumo diz a finalidade e que dá para retirar', () => {
+    // O que o texto precisa ter é o que a pessoa está autorizando e como desfazer. Se ela
+    // lê ou não é escolha dela — o teste não policia vocabulário.
+    // O texto é quebrado em linhas para caber na largura do arquivo; a frase não é.
+    const corrido = TERMO_ART11.texto.replace(/\s+/g, ' ')
+    expect(corrido).toMatch(/organizar o atendimento/i)
+    expect(corrido).toMatch(/pode retirar esta autorização/i)
   })
 })
 
