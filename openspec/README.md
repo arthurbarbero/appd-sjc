@@ -19,8 +19,8 @@ cenários validados item a item, em `VALIDACAO.md` dentro de cada pasta.
 
 | Change                        | O que falta                                                               |
 | ----------------------------- | ------------------------------------------------------------------------- |
-| `site-institucional`          | 17 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
-| `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam `consentimento-e-privacidade`   |
+| `site-institucional`          | 15 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
+| `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam o catálogo completo de termos   |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,

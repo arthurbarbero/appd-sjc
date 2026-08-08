@@ -19,11 +19,11 @@ cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
 
 **O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
-| Comando          | O que cobre                                                                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 148 testes — restrição de banco, emissão concorrente, revalidação da foto, vazamento de dado sensível, varredura de segurança e regressão de interface                        |
-| `npm run aceite` | 137 verificações no workerd real: ciclo de conta, crachá, exportação, verificação pública, anti-abuso, teclado, sete larguras e axe A/AA em duas larguras. Aceita `APPD_BASE` |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                |
+| Comando          | O que cobre                                                                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`       | 159 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos, vazamento de dado sensível, varredura de segurança e regressão de interface |
+| `npm run aceite` | 143 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                        |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                             |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
@@ -36,7 +36,8 @@ de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e u
 **O que resta nas outras três**:
 
 - `site-institucional` — 15 tasks de medição e SEO (301, sitemap, robots, peso por rota,
-  CLS, contraste renderizado). Nada começado, e 3 pendências esperam a APPD.
+  CLS, contraste renderizado). Nada começado, e 3 pendências esperam a APPD: e-mail do
+  contato, WhatsApp oficial e catálogo de serviços.
 - `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
   `consentimento-e-privacidade`.
 - `consentimento-e-privacidade` — nada implementado. Trava a anterior, e tem um defeito
@@ -55,11 +56,11 @@ confirmação da exclusão **fica**; o que é imediato é o apagamento depois do
   a chave de API e o endereço a verificar como remetente, que são do dono.
 - **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
   associação. As duas telas esperam o canvas.
-- **O hash do consentimento é marcador de lugar** — `'0'` repetido 64 vezes, até o catálogo
-  de termos existir. O hash existe para ser **prova do texto que a pessoa leu**; com valor
-  falso ele _parece_ prova e não é, o que é pior que não ter campo. Enquanto o catálogo não
-  existir, nenhum cadastro com dado de pessoa real vai ao ar — hoje protegido de fato,
-  porque o endereço publicado é de demonstração.
+- ~~O hash do consentimento é marcador de lugar.~~ **Resolvido em 2026-08-07**:
+  `shared/termos.ts` traz o resumo da v1 e o cadastro grava o SHA-256 do próprio texto. O
+  que falta é da change de consentimento — manifesto com data de vigência, resolução de
+  versão vigente, teste de integridade bloqueante, e os **links completos** que a caixa vai
+  passar a citar.
 - **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
 
 ## Decisões tomadas

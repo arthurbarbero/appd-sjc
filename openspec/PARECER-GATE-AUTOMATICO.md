@@ -32,9 +32,12 @@ passada saiba o que conferir:
 | Change arquivada não tem task em aberto                       | coerência do rito        |
 | Nenhum link relativo aponta para arquivo que não existe       | coerência do registro    |
 | Nenhuma task depende de change já arquivada                   | coerência do registro    |
+| O gate de aceite roda **duas vezes seguidas** sem reprovar    | coerência do gate        |
 
-As duas últimas linhas entraram na auditoria manual de 2026-08-07, e as duas acharam
-defeito na primeira passada: 15 links quebrados e uma task esperando change arquivada.
+As três últimas entraram na auditoria manual de 2026-08-07, e as três acharam defeito na
+primeira passada: 15 links quebrados, uma task esperando change arquivada, e um gate que
+reprovava cinco verificações quando rodado duas vezes — porque a própria rajada de teste
+deixava a cota estourada.
 
 ## O que nenhuma checagem cobre
 
@@ -79,10 +82,10 @@ sensação de cobertura.
 | ----------------------------- | ----- | ----------------------------------------------------------------------- |
 | `modelo-de-dados`             | READY | **arquivada** em 2026-08-07                                             |
 | `revisao-de-interface`        | READY | **arquivada** em 2026-08-07                                             |
-| `site-institucional`          | READY | não — 17 tasks abertas (peso por rota, redirecionamentos, sitemap, 404) |
-| `cadastro-e-login`            | READY | não — critérios de aceite não percorridos                               |
-| `formulario-atendimento`      | READY | não — critérios não percorridos; a foto opcional do REQ-7d não existe   |
-| `area-do-associado`           | READY | não — 28 tasks abertas, incluindo o bloco do crachá                     |
+| `site-institucional`          | READY | não — 15 tasks abertas (peso por rota, redirecionamentos, sitemap, 404) |
+| `cadastro-e-login`            | READY | **arquivada** em 2026-08-07, com 43 dos 46 cenários validados           |
+| `formulario-atendimento`      | READY | não — T9 e T10 esperam o catálogo completo de termos                    |
+| `area-do-associado`           | READY | **arquivada** em 2026-08-07, com os 38 cenários validados item a item   |
 | `cracha-do-associado`         | READY | **arquivada** em 2026-08-07, com os 39 cenários validados item a item   |
 | `consentimento-e-privacidade` | READY | não — sem implementação; T4 destravada pelo ADR-006 em 2026-08-07       |
 
@@ -92,23 +95,23 @@ task feita **e** o critério percorrido.
 
 ## O que falta, por change, para arquivar
 
-**`cadastro-e-login`** — os cenários de sessão, login e emissão do número já rodam dentro
-de `npm run aceite`, mas as tasks do arquivo estão em formato `[FEITO]` sem checkbox e sem
-veredito por cenário. Falta mapear cada cenário para onde ele roda, como foi feito em
-`revisao-de-interface`, e fechar o que sobrar. Também falta a redefinição de senha, que
-depende de caminho de e-mail ou SMS gratuito — pesquisa em aberto.
+**`cadastro-e-login`** — **arquivada em 2026-08-07**. Os 3 cenários de recuperação de senha
+saíram para `painel-administrativo` junto com a T-9. A varredura de segurança da T-13 virou
+`test/seguranca.spec.ts`, com dez checagens estruturais.
 
-**`formulario-atendimento`** — mesma situação, mais o REQ-40 (procedência do termo de
-consentimento), que depende de `consentimento-e-privacidade`.
+**`formulario-atendimento`** — 8 das 10 tasks fechadas. A guarda anti-abuso entrou em
+2026-08-07, e o hash do consentimento deixou de ser marcador de lugar. O que resta (T9 e
+T10) espera o **catálogo completo de termos**, que é de `consentimento-e-privacidade`.
 
-**`area-do-associado`** — o bloco do crachá no painel depende de `cracha-do-associado`; a
-linha "Seus direitos" depende de `consentimento-e-privacidade`. As duas Fatias 3 e 4 estão
-entregues; as Fatias 1, 2, 5 e 6 têm código rodando sem veredito registrado.
+**`area-do-associado`** — **arquivada em 2026-08-07**, com os 38 cenários validados. A única
+lacuna de código era o painel fazer uma chamada só: virou uma por bloco, por decisão do
+dono. Um cenário foi **corrigido** em vez de carimbado — o de tipo de deficiência listava a
+tela de correção entre as proibidas, e estava defasado desde o ADR-014.
 
-**`site-institucional`** — 17 tasks, quase todas de medição (peso por rota, CLS, contraste
+**`site-institucional`** — 15 tasks, quase todas de medição (peso por rota, CLS, contraste
 renderizado) e de SEO (301 das 7 URLs antigas, sitemap, robots). Nenhuma depende de
-terceiro. As duas que saíram da lista eram os ADR-010 e ADR-011, escritos em 2026-08-07 e
-marcados na auditoria do mesmo dia.
+terceiro. Quatro saíram da lista em 2026-08-07: os ADR-010 e ADR-011, o QR do PIX conferido
+pelo dono no app do banco, e a logo em vetor — encerrada por decisão dele.
 
 **`cracha-do-associado`** — **arquivada em 2026-08-07**, e é a primeira change a fechar com
 validação item a item dos cenários, não só com as tasks marcadas. Os 39 têm veredito em
