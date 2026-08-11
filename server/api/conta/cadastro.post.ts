@@ -12,7 +12,7 @@
 
 import { eq } from 'drizzle-orm'
 import { esquemaInscricao } from '~~/shared/inscricao'
-import { TERMO_ART11, hashDoTermo } from '~~/shared/termos'
+import { versaoPorHash } from '~~/shared/termos'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 
 /** Converte `dd/mm/aaaa` para o `aaaa-mm-dd` que o banco exige. */
@@ -122,8 +122,27 @@ export default defineEventHandler(async (event) => {
   const senha = prepararSenha(chave)
   const id = crypto.randomUUID()
 
-  // Calculado do texto, e não escrito à mão: hash digitado é hash que ninguém confere.
-  const hashTermo = await hashDoTermo(TERMO_ART11.texto)
+  /*
+    Vale o termo que foi **exibido**, não o vigente agora (`consentimento-e-privacidade`
+    REQ-8). Se a versão virou entre a renderização da tela e o envio, o que a pessoa leu
+    continua sendo o que ela leu — gravar a versão nova seria registrar um aceite que nunca
+    aconteceu.
+
+    Hash que não existe no catálogo é recusado: prova que ninguém consegue conferir é pior
+    que campo vazio, porque o vazio se vê e o falso se acredita.
+  */
+  const termo = versaoPorHash(d.termoHash)
+  if (!termo) {
+    throw createError({
+      statusCode: 422,
+      data: {
+        erros: {
+          consentimentoSaude:
+            'O termo de autorização mudou enquanto você preenchia. Recarregue a página e leia o texto novo antes de enviar.',
+        },
+      },
+    })
+  }
 
   const numeroRegistro = await emitirNumeroRegistro(anoCorrente(), async (numero) => {
     try {
@@ -169,12 +188,12 @@ export default defineEventHandler(async (event) => {
         bd.insert(schema.consentimentos).values({
           id: crypto.randomUUID(),
           usuarioId: id,
-          termoId: TERMO_ART11.termoId,
-          versao: TERMO_ART11.versao,
-          // SHA-256 do texto que a pessoa leu, calculado do próprio texto. Até 2026-08-07
-          // isto era '0' repetido 64 vezes — um valor que **parecia** prova e não era, o
-          // que é pior que campo vazio: o vazio se vê, o falso se acredita.
-          hash: hashTermo,
+          termoId: termo.termoId,
+          versao: termo.versao,
+          // SHA-256 do texto que a pessoa leu, resolvido no catálogo pelo hash que a tela
+          // exibiu. Até 2026-08-07 isto era '0' repetido 64 vezes — um valor que **parecia**
+          // prova e não era, o que é pior que campo vazio: o vazio se vê, o falso se acredita.
+          hash: termo.hash,
           evento: 'aceite',
           registradoEm: agora,
           origem: '/atendimento/inscricao',

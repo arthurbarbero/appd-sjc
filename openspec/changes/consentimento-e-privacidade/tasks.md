@@ -38,7 +38,7 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: as listas de "Aceite visual" do prompt, referentes a estas duas telas, todas
   marcadas. Nenhuma tela entra em código antes disso — é a regra central do `CLAUDE.md`.
 
-## T4 — Catálogo de termos versionado, com verificação de integridade
+## T4 [FEITO 2026-08-11] — Catálogo de termos versionado, com verificação de integridade
 
 - Depende de: T1
 - Entrega: a versão `v1` do termo do Art. 11, o manifesto com `termo_id`, `versao`,
@@ -47,8 +47,20 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   de vigência futura. O teste de integridade fica vermelho se o texto de `v1` for alterado.
 - Nota: o texto de `v1` precisa de revisão do dono antes de virar hash — depois de publicado,
   só se corrige com `v2`.
+- **Entregue** em `shared/termos.ts`: manifesto com os cinco campos, `validarCatalogo` (recusa
+  no carregamento o que estiver fora de formato), `versaoVigente`, `versaoPorHash`,
+  `precisaNovoAceite` e `conferirIntegridade`. 30 testes em `test/termos.spec.ts`.
+- **O teste de integridade é bloqueante e detecta remoção**: além de conferir o hash declarado
+  contra o texto, há um caso que adultera um catálogo de mentira e exige que a conferência
+  acuse. Teste de integridade que não fica vermelho quando o texto muda é carimbo.
+- **Ressalva, escrita em vez de escondida**: dos 9 cenários, o de "mudança material exige novo
+  aceite" está fechado **na regra** (`precisaNovoAceite`, 7 testes) e **aberto na tela** — o
+  aviso em destaque no próximo acesso autenticado é interface, e interface espera a T3. O
+  cenário de "publicar versão nova não invalida aceite antigo" roda contra catálogo de teste:
+  só existe uma versão publicada, e inventar uma `v2` de mentira no catálogo real seria pior
+  que o gap.
 
-## T5 — Tabela `consentimentos` no D1 e migration
+## T5 [FEITO 2026-08-11] — Tabela `consentimentos` no D1 e migration
 
 - Depende de: ~~`cadastro-e-login` ter criado `usuarios` (bloqueio externo)~~ — **o bloqueio
   caiu em 2026-08-07**: `usuarios` e `consentimentos` existem em `server/database/schema.ts`
@@ -60,8 +72,14 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: a migration aplica limpo em banco local (`npm run db:migrate`); teste prova
   que a linha gravada não contém IP nem user-agent (REQ-10) e que o registro é append-only (REQ-9).
   Seed só com dado fictício explícito.
+- **Conferido, não criado**: o schema já casava com o contrato — as oito colunas, o índice
+  `(usuario_id, termo_id, registrado_em)` e os três `CHECK`. Nenhuma migration nova.
+- **Entregue** em `test/consentimento.spec.ts`: as colunas são lidas do banco migrado (o que
+  vale é o arquivo que vai para o D1), nenhuma delas guarda IP ou user-agent, nenhum `values`
+  de consentimento cita cabeçalho, e a varredura de `server/**` prova que não existe `UPDATE`
+  nem `DELETE` sobre a tabela — em Drizzle ou em SQL solto.
 
-## T6 — Gravação do aceite e recusa no servidor
+## T6 [FEITO 2026-08-11] — Gravação do aceite e recusa no servidor
 
 - Depende de: T4, T5
 - Entrega: a rota que grava o aceite e a validação de servidor que recusa envio sem
@@ -69,6 +87,19 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: passam os 8 cenários de "Consentimento específico e destacado", incluindo o 422 com
   cliente contornado, o "aceitar a política geral não vale", o hash exibido prevalecendo sobre
   o vigente, e a falha de banco que não deixa gravação parcial.
+- **Entregue**: `termoHash` entra no contrato do envio (`shared/inscricao.ts`), a tela manda o
+  hash da versão que resolveu ao abrir, e `cadastro.post.ts` grava a versão **resolvida pelo
+  hash exibido** — não a vigente no instante do POST. Hash fora do catálogo é 422 pedindo
+  releitura. Os dois 422 rodam no workerd real, no `npm run aceite`.
+- **Defeito consertado junto**: `excluir.post.ts` gravava a revogação com `versao: 'v1'` fixa e
+  `hash` de 64 zeros — o marcador de lugar que já tinha saído do cadastro em 2026-08-07,
+  sobrevivendo aqui. Agora a revogação aponta para o termo que a pessoa aceitou, lido do
+  histórico dela.
+- **Ressalva**: o bloco 7 do formulário exibe hoje uma **paráfrase** do termo, não o texto do
+  catálogo. O hash gravado é o do texto do catálogo, então "hash do que foi exibido" só fica
+  literalmente verdadeiro quando a T7 trocar aquele bloco pelo componente que renderiza o
+  texto versionado. Enquanto isso, a versão registrada está certa e o que está em tela diz a
+  mesma coisa em outras palavras — mas as palavras não são as mesmas, e isso fica escrito.
 
 ## T7 — Componente da caixa de consentimento
 
@@ -116,14 +147,27 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   (ADR-013). Três changes escreviam esse fluxo antes; agora, uma.
 - Aceite: passam os 3 cenários de "O conteúdo que a tela de exclusão exibe"; as linhas
   anteriores de `consentimentos` continuam intactas depois da exclusão.
+- **Metade entregue em 2026-08-11**: a gravação da revogação está correta (aponta para o termo
+  que a pessoa aceitou) e o cenário das linhas anteriores intactas está coberto pela varredura
+  de append-only da T5. O que falta é o **texto** do bloco "O que a associação precisa manter",
+  e ele depende da PB-1 — prazo de conservação não se inventa.
 
-## T12 — Proibição transversal do dado sensível
+## T12 [FEITO 2026-08-11] — Proibição transversal do dado sensível
 
 - Depende de: `cracha-do-associado` (bloqueio externo para a tela; o teste pode vir antes)
 - Entrega: teste de regressão que varre a resposta de `/verificar/<numero>` — HTML, atributos,
   comentários, metadados e payload JSON — procurando qualquer valor do campo 12.
 - Aceite: passam os 2 cenários de "O dado sensível nunca vaza para o público". O teste é
   bloqueante no CI: se alguém expuser o dado, o build quebra.
+- **Entregue em três camadas**, que pegam coisas diferentes: `test/vazamento.spec.ts` lê o
+  **fonte** das rotas e barra a intenção errada antes de virar resposta (projeção coluna a
+  coluna, consulta ao campo 12 só dentro da condicional do consentimento); o `npm run aceite`
+  varre o **DOM hidratado** e o **JSON da API**; e agora também o **HTML como o servidor
+  manda**, antes de qualquer JavaScript — dado que viaja no payload e some na hidratação já
+  viajou, e quem lê o fonte da página o encontra.
+- Os dois cenários rodam com o opt-in nos dois estados: sem consentimento o tipo não aparece
+  em lugar nenhum; com consentimento aparece, porque o ADR-019 decidiu que o consentimento
+  governa os dois destinos.
 
 ## T13 — Auditoria de acessibilidade das cinco telas
 

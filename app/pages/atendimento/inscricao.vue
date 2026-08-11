@@ -2,6 +2,7 @@
 import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
+import { versaoVigente } from '~~/shared/termos'
 import { derivarChave } from '~/utils/derivar-senha'
 
 /*
@@ -56,6 +57,20 @@ const f = reactive({
 
 /** Gerada uma vez ao abrir a página: clique duplo e retentativa não viram dois cadastros. */
 const chaveIdempotencia = crypto.randomUUID()
+
+/*
+  A versão do termo é resolvida **uma vez, ao abrir a página**, e o hash dela viaja no
+  envio (`consentimento-e-privacidade` REQ-8). Se uma versão nova entrar em vigor enquanto
+  a pessoa preenche, o que fica gravado continua sendo o que ela leu — não o que passou a
+  valer no meio do caminho.
+
+  **Ressalva escrita em vez de escondida**: hoje o bloco 7 desta tela mostra uma paráfrase
+  do termo, não o texto do catálogo. O hash é do texto do catálogo, então "hash do que foi
+  exibido" só fica literalmente verdadeiro quando a T7 trocar este bloco pelo componente
+  que renderiza o texto versionado. Até lá, o registro aponta para a versão certa e o texto
+  em tela diz a mesma coisa em outras palavras.
+*/
+const termoExibido = versaoVigente('deficiencia-art11')
 
 /**
  * Foto do crachá: opcional, e **fora** da transação do cadastro (REQ-7f).
@@ -254,6 +269,7 @@ async function enviar() {
         email: normalizaEmail(f.email),
         cpf: soDigitos(f.cpf),
         consentimentoSaude: true,
+        termoHash: termoExibido.hash,
         chaveIdempotencia,
         chaveDerivada,
       },

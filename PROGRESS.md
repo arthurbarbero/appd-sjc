@@ -19,11 +19,11 @@ cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
 
 **O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
 
-| Comando          | O que cobre                                                                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 159 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos, vazamento de dado sensível, varredura de segurança e regressão de interface |
-| `npm run aceite` | 143 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                        |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                             |
+| Comando          | O que cobre                                                                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`       | 201 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
+| `npm run aceite` | 148 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
+| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                                                      |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
 spec que morava ali foi removida; o que ela conferia virou checklist manual em
@@ -40,8 +40,10 @@ de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e u
   contato, WhatsApp oficial e catálogo de serviços.
 - `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
   `consentimento-e-privacidade`.
-- `consentimento-e-privacidade` — nada implementado. Trava a anterior, e tem um defeito
-  concreto para resolver: **o consentimento é gravado com hash zerado**.
+- `consentimento-e-privacidade` — **4 das 14 tasks fechadas em 2026-08-11** (T4, T5, T6 e
+  T12, mais metade da T11). O que sobra se divide em três: o que espera **a APPD** (T2, e o
+  texto que depende da PB-1), o que espera **o canvas** (T3, e com ela T7 a T10, T13) e o
+  gate final (T14).
 
 **Sete decisões saíram do caminho em 2026-08-07**, todas do dono e registradas como ADR:
 conteúdo no código (006), foto e cuidador na verificação (015), recuperação de senha (016),
@@ -56,11 +58,12 @@ confirmação da exclusão **fica**; o que é imediato é o apagamento depois do
   a chave de API e o endereço a verificar como remetente, que são do dono.
 - **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
   associação. As duas telas esperam o canvas.
-- ~~O hash do consentimento é marcador de lugar.~~ **Resolvido em 2026-08-07**:
-  `shared/termos.ts` traz o resumo da v1 e o cadastro grava o SHA-256 do próprio texto. O
-  que falta é da change de consentimento — manifesto com data de vigência, resolução de
-  versão vigente, teste de integridade bloqueante, e os **links completos** que a caixa vai
-  passar a citar.
+- ~~O hash do consentimento é marcador de lugar.~~ **Fechado em duas etapas.** Em 2026-08-07 o
+  cadastro passou a gravar o SHA-256 do próprio texto. Em **2026-08-11** veio o resto: o
+  manifesto com `data_vigencia` e `tipo_mudanca`, a resolução de versão vigente, o teste de
+  integridade bloqueante — e o mesmo marcador de lugar **sobrevivendo na rota de exclusão**,
+  que gravava a revogação com 64 zeros e `v1` fixa. Continuam de fora os **links completos**
+  que a caixa vai citar: são versão nova do termo, e vêm com as telas.
 - **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
 
 ## Decisões tomadas
@@ -320,3 +323,43 @@ ainda em "rascunho" depois do gate, e quatro tasks feitas e não marcadas.
 o runner do aceite não derrubava a árvore de processos que abria.
 
 **Registrado como aberto, não como decidido**: CSS puro nunca foi escolha do dono.
+
+## Sessão de 2026-08-11 — o consentimento vira prova verificável
+
+Sessão curta e de um assunto só: as tasks de `consentimento-e-privacidade` que **não**
+dependem da APPD nem do canvas. T4, T5, T6 e T12 fechadas, mais metade da T11.
+
+**O catálogo virou contrato** (`shared/termos.ts`): manifesto com `termo_id`, `versao`,
+`data_vigencia`, `tipo_mudanca` e `hash`; `validarCatalogo` recusa no carregamento o que
+estiver fora de formato; `versaoVigente` resolve por instante, e vigência futura não é
+exigida antes da data; `precisaNovoAceite` separa mudança material de editorial;
+`conferirIntegridade` recalcula o hash de cada versão a partir do texto.
+
+**O teste de integridade é o que dá sentido ao resto.** Ele não confere um valor escrito à
+mão: recalcula e compara com o declarado. Alterar uma letra de um termo já publicado deixa
+o CI vermelho, que é como imutabilidade deixa de ser promessa e vira mecanismo. E há um
+caso que adultera um catálogo de mentira para provar que a conferência **acusa** — gate que
+não detecta o defeito que existe para detectar é carimbo.
+
+**O que era gravado passou a sair do catálogo.** O envio leva o `termoHash` da versão que a
+tela resolveu ao abrir, e o servidor grava a versão correspondente a **esse** hash, não a
+vigente no instante do POST. Hash fora do catálogo é 422 pedindo releitura. Os dois 422
+rodam no workerd real.
+
+**O marcador de lugar tinha um sobrevivente.** `excluir.post.ts` gravava a revogação com
+`hash: '0'.repeat(64)` e `versao: 'v1'` fixa — o mesmo defeito que tinha saído do cadastro
+quatro dias antes, intacto na rota vizinha. Agora a revogação aponta para o termo que a
+pessoa aceitou, lido do histórico dela. Foi achado procurando outra coisa, o que é o
+argumento a favor de varrer o repositório inteiro atrás de um padrão em vez de corrigir
+onde ele foi visto.
+
+**Duas ressalvas escritas em vez de escondidas:**
+
+1. O bloco 7 do formulário exibe uma **paráfrase** do termo, não o texto do catálogo. O
+   hash é do catálogo. "Hash do que foi exibido" só fica literalmente verdadeiro quando a
+   T7 trocar o bloco pelo componente que renderiza o texto versionado — e T7 depende do
+   design.
+2. O cenário "mudança material exige novo aceite" está fechado na **regra** e aberto na
+   **tela**: o aviso no próximo acesso autenticado é interface, e interface espera o canvas.
+
+**Números**: `npm test` de 159 para 201; `npm run aceite` de 143 para 148.

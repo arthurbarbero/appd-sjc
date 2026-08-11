@@ -14,7 +14,10 @@
  *   linha nova de `revogacao`, que é o registro de que a pessoa pediu para sair.
  */
 
-import { eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
+import { versaoVigente } from '~~/shared/termos'
+
+const TERMO_ID = 'deficiencia-art11'
 
 export default defineEventHandler(async (event) => {
   const sessao = await sessaoAtual(event)
@@ -22,6 +25,25 @@ export default defineEventHandler(async (event) => {
 
   const bd = usarBanco(event)
   const agora = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
+
+  /*
+    A revogação aponta para o termo que a pessoa **aceitou**, não para um valor inventado.
+    Até 2026-08-11 esta linha gravava `versao: 'v1'` fixa e `hash` com 64 zeros — o mesmo
+    marcador de lugar que já tinha sido tirado do cadastro, sobrevivendo aqui. Hash falso
+    é pior que campo vazio: o vazio se vê, o falso se acredita.
+
+    Quem nunca aceitou (conta sem consentimento gravado) revoga contra a versão vigente:
+    é o único termo do qual faz sentido dizer que ela está saindo.
+  */
+  const ultimo = await bd.query.consentimentos.findFirst({
+    where: and(
+      eq(schema.consentimentos.usuarioId, sessao.id),
+      eq(schema.consentimentos.termoId, TERMO_ID),
+    ),
+    orderBy: desc(schema.consentimentos.registradoEm),
+    columns: { versao: true, hash: true },
+  })
+  const termo = ultimo ?? versaoVigente(TERMO_ID)
 
   await bd.batch([
     bd.delete(schema.fotos).where(eq(schema.fotos.usuarioId, sessao.id)),
@@ -54,9 +76,9 @@ export default defineEventHandler(async (event) => {
     bd.insert(schema.consentimentos).values({
       id: crypto.randomUUID(),
       usuarioId: sessao.id,
-      termoId: 'deficiencia-art11',
-      versao: 'v1',
-      hash: '0'.repeat(64),
+      termoId: TERMO_ID,
+      versao: termo.versao,
+      hash: termo.hash,
       evento: 'revogacao',
       registradoEm: agora,
       origem: '/area/excluir',

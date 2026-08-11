@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { cpfValido, esquemaInscricao } from '../shared/inscricao'
+import { TERMO_ART11 } from '../shared/termos'
 
 /** Preenchimento válido mínimo. Todo dado é fictício. */
 const VALIDO = {
@@ -28,6 +29,9 @@ const VALIDO = {
   cpf: '390.533.447-05',
   senha: 'senha de teste bem longa',
   consentimentoSaude: true,
+  // Hash do termo exibido: sem ele o servidor não sabe **qual texto** foi aceito
+  // (`consentimento-e-privacidade` REQ-8).
+  termoHash: TERMO_ART11.hash,
   chaveIdempotencia: '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
 }
 

@@ -206,6 +206,18 @@ export const esquemaInscricao = z
     // Art. 11 da LGPD — sem isto, nada é gravado (REQ-41).
     consentimentoSaude: z.literal(true, 'É preciso autorizar para concluir o cadastro.'),
 
+    /**
+     * Hash do termo que a tela **exibiu** (`consentimento-e-privacidade` REQ-8).
+     *
+     * Vai junto porque o que precisa ser gravado é o texto que a pessoa leu, não o que
+     * estava vigente quando o clique chegou ao servidor: entre abrir o formulário e enviar,
+     * uma versão nova pode ter entrado em vigor. O servidor procura este hash no catálogo e
+     * recusa o que não encontrar — hash desconhecido é prova de nada.
+     */
+    termoHash: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/, 'Recarregue a página e leia o termo de novo antes de enviar.'),
+
     chaveIdempotencia: z.uuid(),
   })
   // `.strict()`: campo desconhecido é recusado com 422, nunca ignorado em silêncio (REQ-10).

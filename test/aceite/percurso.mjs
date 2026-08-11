@@ -188,6 +188,66 @@ try {
   })
   ok('corpo maior que o esperado é recusado com 413', grande.status() === 413, `${grande.status()}`)
 
+  /*
+    ── 1a. O servidor recusa consentimento que não existe ────────────────────
+
+    T6 de `consentimento-e-privacidade` (REQ-7, REQ-8). O schema compartilhado já é testado
+    no `npm test`; o que só se prova aqui é que a **rota** responde 422 a quem chama a API
+    direto, sem passar por tela nenhuma — que é exatamente o cenário "cliente contornado".
+
+    São **dois** pedidos, e não os oito cenários da spec, porque cada um consome uma das
+    doze fichas da janela de quinze minutos do cadastro. Três por execução ainda deixam o
+    gate rodar quatro vezes seguidas; o resto dos cenários é coberto por unidade, onde
+    repetir não custa cota.
+  */
+  const corpoBase = {
+    nome: 'Maria Fictícia de Teste',
+    nascimento: '12/03/1978',
+    telefone: '12991657059',
+    telefoneWhatsapp: 'Sim',
+    cep: '12239530',
+    endereco: 'Rua Fictícia',
+    numero: 's/n',
+    bairro: 'Centro',
+    municipio: 'São José dos Campos',
+    deficiencias: ['Física'],
+    atendimentos: ['Fisioterapia'],
+    dias: ['Segundas'],
+    cienciaContribuicao: 'Ciente',
+    email: `contornado.${Date.now()}@exemplo.invalido`,
+    cpf: cpfAleatorio(),
+    chaveIdempotencia: crypto.randomUUID(),
+    chaveDerivada: 'a'.repeat(64),
+  }
+
+  const semConsentimento = await p.request.post(`${BASE}/api/conta/cadastro`, {
+    headers: { 'content-type': 'application/json' },
+    data: { ...corpoBase, termoHash: 'b'.repeat(64) },
+  })
+  ok(
+    'POST direto sem consentimento é recusado com 422',
+    semConsentimento.status() === 422,
+    `${semConsentimento.status()}`,
+  )
+  ok(
+    'o 422 diz qual campo falta, em vez de "erro no formulário"',
+    (await semConsentimento.text()).includes('consentimentoSaude'),
+  )
+
+  const hashDesconhecido = await p.request.post(`${BASE}/api/conta/cadastro`, {
+    headers: { 'content-type': 'application/json' },
+    data: { ...corpoBase, consentimentoSaude: true, termoHash: 'b'.repeat(64) },
+  })
+  ok(
+    'aceite de termo que não existe no catálogo é recusado com 422',
+    hashDesconhecido.status() === 422,
+    `${hashDesconhecido.status()}`,
+  )
+  ok(
+    'e o texto pede releitura do termo, em vez de culpar a pessoa',
+    /recarregue a página/i.test(await hashDesconhecido.text()),
+  )
+
   // ── 1b. A verificação pública, que é para onde o QR aponta ────────────────
   const numeroRegistro = (await p.getAttribute('svg[role="img"]', 'aria-label')).match(
     /APPD-\d{4}-[A-Z0-9]{6}/,
@@ -208,6 +268,19 @@ try {
   ok(
     'sem o consentimento, o tipo de deficiência NÃO aparece na verificação pública',
     !/Física|Intelectual|Sensorial|Neurodivergente/.test(bruto),
+  )
+
+  /*
+    A mesma varredura no HTML **como o servidor manda**, antes de qualquer JavaScript
+    (T12 de `consentimento-e-privacidade`, REQ-25). O `p.content()` acima é o DOM depois da
+    hidratação — se o dado vier no payload do servidor e a tela o descartar ao hidratar, ele
+    já viajou, e quem lê o fonte da página o encontra. São dois momentos diferentes do mesmo
+    dado, e o que interessa proteger é o primeiro.
+  */
+  const html = await (await p.request.get(`${BASE}/verificar/${numeroRegistro}`)).text()
+  ok(
+    'nem no HTML do servidor, antes de hidratar',
+    !/Física|Intelectual|Sensorial|Neurodivergente|deficiencias/i.test(html),
   )
   ok(
     'sem consentimento, a declaração cita o tipo de deficiência',
