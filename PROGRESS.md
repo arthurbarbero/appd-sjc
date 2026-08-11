@@ -21,8 +21,8 @@ cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
 
 | Comando          | O que cobre                                                                                                                                                                                                         |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 201 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
-| `npm run aceite` | 148 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
+| `npm test`       | 216 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
+| `npm run aceite` | 156 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
 | CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                                                      |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
@@ -40,10 +40,10 @@ de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e u
   contato, WhatsApp oficial e catálogo de serviços.
 - `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
   `consentimento-e-privacidade`.
-- `consentimento-e-privacidade` — **4 das 14 tasks fechadas em 2026-08-11** (T4, T5, T6 e
-  T12, mais metade da T11). O que sobra se divide em três: o que espera **a APPD** (T2, e o
-  texto que depende da PB-1), o que espera **o canvas** (T3, e com ela T7 a T10, T13) e o
-  gate final (T14).
+- `consentimento-e-privacidade` — **6 das 14 tasks fechadas em 2026-08-11** (T3, T4, T5, T6,
+  T8 e T12, mais metade da T11). O que sobra: T2 espera a APPD; T7, T9 e T13 estão
+  destravadas pelo handoff do design; **T10 espera uma decisão do dono** sobre a restrição
+  do banco; e T14 é o gate final.
 
 **Sete decisões saíram do caminho em 2026-08-07**, todas do dono e registradas como ADR:
 conteúdo no código (006), foto e cuidador na verificação (015), recuperação de senha (016),
@@ -363,3 +363,26 @@ onde ele foi visto.
    **tela**: o aviso no próximo acesso autenticado é interface, e interface espera o canvas.
 
 **Números**: `npm test` de 159 para 201; `npm run aceite` de 143 para 148.
+
+### Segunda leva do dia — o design chegou
+
+O dono gerou `/privacidade` e `/seus-direitos` no canvas, e as duas foram lidas por
+DesignSync e auditadas em `docs/handoff-design-privacidade.md`. **T3 fechada**, e com ela
+caiu o bloqueio de T7 a T13.
+
+**O prompt reescrito valeu o tempo.** A v2 saiu horas antes de o canvas rodar, e nenhum dos
+cinco defeitos que a v1 teria produzido apareceu nas telas — a seção de guarda diz o que o
+ADR-017 decidiu em vez de fingir pendência, a frase da foto é a estreita e correta, e o
+fluxo de exclusão em três telas não voltou.
+
+**`/privacidade` está no ar** (T8): 12 seções, sumário e títulos saindo da mesma lista, e a
+versão do termo no topo lida do catálogo em vez de digitada.
+
+**O gate pegou o que o teste de texto deixou passar.** "Cinco linhas renderizadas" tinha
+virado "320 caracteres" no vitest, que é chute. A 360px, seis parágrafos passavam de cinco
+linhas. A medida certa é a do navegador — altura do parágrafo dividida pela entrelinha —, e
+ela agora roda no aceite. O teto do teste de texto virou 200, calibrado contra ela.
+
+**Uma decisão ficou aberta, e trava a T10**: a tela de retirada de consentimento afirma que
+o tipo de deficiência sai do cadastro, e o `CHECK` de `inscricoes_atendimento` exige pelo
+menos uma escolha no campo. Opções e recomendação no handoff.

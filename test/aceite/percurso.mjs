@@ -37,6 +37,7 @@ const PUBLICAS = [
   '/doar',
   '/entrar',
   '/atendimento/inscricao',
+  '/privacidade',
   // Número que não existe, de propósito: é o estado que qualquer pessoa alcança sem
   // conta, e o que a câmera do celular mais vai encontrar se o crachá estiver borrado.
   '/verificar/APPD-2026-ZZZZZZ',
@@ -758,6 +759,74 @@ try {
 
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
   ok('a área não abre depois de excluída', p.url().includes('/entrar'), p.url())
+
+  /*
+    ── 6b. A política de privacidade ─────────────────────────────────────────
+
+    T8 de `consentimento-e-privacidade`. Quatro coisas que só se verificam com a página
+    renderizada de verdade: a ordem do sumário contra a ordem dos títulos, o foco que o
+    link do sumário move, a altura real de cada parágrafo, e o sumário aberto no celular.
+  */
+  await p.goto(`${BASE}/privacidade`, { waitUntil: 'networkidle' })
+
+  const noSumario = await p.$$eval('.sumario a', (as) => as.map((a) => a.textContent.trim()))
+  const nosTitulos = await p.$$eval('.secoes h2', (hs) => hs.map((h) => h.textContent.trim()))
+  ok(
+    'a ordem do sumário é a mesma dos títulos da página',
+    // A última seção ("Com quem falar") não entra no sumário: é o bloco de contato.
+    JSON.stringify(noSumario) === JSON.stringify(nosTitulos.slice(0, noSumario.length)),
+    `${noSumario.length} itens × ${nosTitulos.length} títulos`,
+  )
+
+  await p.click('.sumario a[href="#dado-sensivel"]')
+  ok(
+    'o link do sumário leva o foco para a seção, não só a rolagem',
+    (await p.evaluate(() => document.activeElement?.id)) === 'dado-sensivel',
+    await p.evaluate(() => document.activeElement?.id ?? '(nada focado)'),
+  )
+
+  const textoPolitica = await p.textContent('main')
+  ok(
+    'a política não publica prazo de retenção em dias, meses ou anos',
+    !/\b\d+\s*(dias?|meses|m[êe]s|anos?)\b/i.test(textoPolitica),
+  )
+  ok(
+    'a política declara as três garantias sobre dado sensível e foto',
+    textoPolitica.includes('não aparece no crachá impresso') &&
+      textoPolitica.includes('nunca em endereço aberto') &&
+      textoPolitica.includes('Art. 11'),
+  )
+  ok(
+    'a pendência do encarregado está no corpo do texto, com o selo visível',
+    textoPolitica.includes('Encarregado de dados') && textoPolitica.includes('A confirmar'),
+  )
+
+  /*
+    Cinco linhas renderizadas é o teto do REQ-22, e "renderizadas" é a palavra que importa:
+    o mesmo parágrafo cabe em três linhas no desktop e estoura em oito no celular. Por isso
+    a medida é feita a 360px, que é onde ele é mais alto.
+  */
+  await p.setViewportSize({ width: 360, height: 900 })
+  const compridos = await p.$$eval('.secoes p', (ps) =>
+    ps
+      .map((el) => {
+        const linhas = Math.round(
+          el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight),
+        )
+        return { linhas, inicio: el.textContent.trim().slice(0, 40) }
+      })
+      .filter((p) => p.linhas > 5),
+  )
+  ok(
+    'nenhum parágrafo passa de cinco linhas renderizadas a 360px',
+    compridos.length === 0,
+    compridos.map((c) => `${c.linhas} linhas: "${c.inicio}…"`).join(' | '),
+  )
+
+  const sumarioVisivel = await p.isVisible('.sumario ul')
+  const escondido = await p.$('.sumario details, .sumario button')
+  ok('a 360px o sumário está aberto, e não atrás de um botão', sumarioVisivel && !escondido)
+  await p.setViewportSize({ width: 1280, height: 900 })
 
   // ── 7. axe ────────────────────────────────────────────────────────────────
   for (const rota of PUBLICAS) {

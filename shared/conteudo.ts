@@ -528,6 +528,314 @@ export const DOACAO_EM_ESPECIE = [
  * resposta estão aqui — como o horário é definido, como funciona o voluntariado e o
  * que acontece com quem atrasa a contribuição.
  */
+/**
+ * Política de Privacidade — o conteúdo da rota `/privacidade`
+ * (`consentimento-e-privacidade` REQ-21 a REQ-24).
+ *
+ * Está aqui, e não no template, por um motivo de acessibilidade e não de organização: a
+ * **ordem do sumário tem de ser igual à ordem dos `h2`** (REQ-21), e sumário escrito à mão
+ * ao lado de seções escritas à mão diverge no primeiro dia em que alguém acrescenta uma
+ * seção. Sendo lista, os dois saem da mesma fonte e não têm como discordar.
+ *
+ * Cada seção começa pela explicação em linguagem simples; o dispositivo legal entra como
+ * bloco `lei`, sempre **depois** (REQ-21). Parágrafo com mais de cinco linhas renderizadas
+ * é defeito (REQ-22) — na prática, o teto que funciona ao escrever é mais ou menos 320
+ * caracteres por parágrafo.
+ *
+ * **Nada de prazo de retenção aqui.** Não é `[A CONFIRMAR]`: o ADR-017 decidiu que não há
+ * retenção. Número de dias, meses ou anos nesta página é defeito, e existe teste que
+ * reprova.
+ */
+export type BlocoPolitica =
+  | { tipo: 'p'; texto: string }
+  | { tipo: 'sub'; titulo: string; itens: readonly string[] }
+  | { tipo: 'lista'; itens: readonly string[] }
+  | { tipo: 'cartoes'; itens: readonly { titulo: string; texto: string }[] }
+  /** Pendência da associação, visível no corpo do texto e nunca em cinza claro (REQ-23). */
+  | { tipo: 'confirmar'; rotulo: string }
+  /** O dispositivo legal, sempre depois da explicação simples. */
+  | { tipo: 'lei'; texto: string }
+
+export interface SecaoPolitica {
+  id: string
+  titulo: string
+  /** Seção com barra vermelha à esquerda — só o dado sensível tem. */
+  destaque?: true
+  blocos: readonly BlocoPolitica[]
+}
+
+export const POLITICA_PRIVACIDADE: readonly SecaoPolitica[] = [
+  {
+    id: 'responsavel',
+    titulo: 'Quem é responsável pela sua informação?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'A Associação das Pessoas com Deficiência de São José dos Campos (APPD), CNPJ 08.074.883/0001-96, com sede na Rua Acássia Pereira 136, Campos dos Alemães, São José dos Campos/SP.',
+      },
+      { tipo: 'confirmar', rotulo: 'Encarregado de dados' },
+      {
+        tipo: 'lei',
+        texto:
+          'Lei 13.709/2018 (LGPD), Art. 41 — o controlador indica um encarregado e divulga o contato dele publicamente.',
+      },
+    ],
+  },
+  {
+    id: 'coleta',
+    titulo: 'Que informação a APPD guarda sobre você?',
+    blocos: [
+      { tipo: 'p', texto: 'São três grupos, e nada além deles.' },
+      {
+        tipo: 'sub',
+        titulo: 'Contato e endereço',
+        itens: [
+          'Nome completo e data de nascimento',
+          'Telefone, e se ele recebe WhatsApp',
+          'Endereço, bairro e município',
+          'Nome e telefone de um cuidador, quando você informa',
+        ],
+      },
+      {
+        tipo: 'sub',
+        titulo: 'Informação sobre deficiência',
+        itens: ['O tipo de deficiência que você indica no cadastro'],
+      },
+      {
+        tipo: 'sub',
+        titulo: 'Conta e crachá',
+        itens: [
+          'E-mail de acesso e CPF',
+          'Senha, guardada de forma cifrada — ninguém na associação consegue lê-la',
+          'Foto do crachá, quando você envia',
+          'Número de registro',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'finalidade',
+    titulo: 'Para que serve cada uma?',
+    blocos: [
+      {
+        tipo: 'lista',
+        itens: [
+          'Contato e endereço: registrar o seu interesse em ser atendido, em quais dias você pode vir, e falar com você.',
+          'Informação sobre deficiência: organizar o atendimento com a equipe certa.',
+          'Conta e crachá: deixar você entrar na sua área, editar o que registrou e emitir o crachá de associado.',
+        ],
+      },
+      {
+        tipo: 'p',
+        texto:
+          'O que você preenche no site é um registro de interesse, que você mesmo edita quando quiser. A associação não promete data, ordem de chamada nem posição nenhuma pelo site.',
+      },
+    ],
+  },
+  {
+    id: 'base-legal',
+    titulo: 'Com qual base legal a APPD faz isso?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Você escolhe entregar essa informação, e a associação só a usa para as finalidades desta página.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'A informação sobre deficiência tem um consentimento próprio, separado, que você dá numa caixa de seleção específica.',
+      },
+      {
+        tipo: 'lei',
+        texto:
+          'Lei 13.709/2018 (LGPD), Art. 7º, inciso I — consentimento do titular; e Art. 11, inciso I, para dado pessoal sensível.',
+      },
+    ],
+  },
+  {
+    id: 'dado-sensivel',
+    titulo: 'A informação sobre deficiência é dado sensível',
+    destaque: true,
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'A lei trata dado de saúde com cuidado maior, e a APPD também. Por isso ele tem um consentimento só dele, numa caixa separada no cadastro, que vem desmarcada.',
+      },
+      { tipo: 'p', texto: 'Você pode retirar esse consentimento quando quiser.' },
+      {
+        tipo: 'p',
+        texto:
+          'Existe uma segunda escolha, diferente dessa: a de exibição. Ela fica na área do associado e decide se o tipo de deficiência aparece no crachá e na página pública de verificação.',
+      },
+      {
+        tipo: 'cartoes',
+        itens: [
+          {
+            titulo: 'Sem marcar — é assim que vem',
+            texto:
+              'O tipo de deficiência não aparece no crachá impresso nem na página pública de verificação.',
+          },
+          {
+            titulo: 'Marcando',
+            texto:
+              'Aparece nos dois. Quem mostra o crachá numa portaria já está mostrando para desconhecido, e separar papel de internet seria uma pergunta a mais.',
+          },
+        ],
+      },
+      {
+        tipo: 'p',
+        texto:
+          'A escolha é reversível a qualquer momento, na área do associado. A sua foto do crachá só aparece na página de verificação, e nunca em endereço aberto.',
+      },
+      {
+        tipo: 'lei',
+        texto:
+          'Lei 13.709/2018 (LGPD), Art. 11 — tratamento de dado pessoal sensível mediante consentimento específico e destacado, para finalidades também específicas.',
+      },
+    ],
+  },
+  {
+    id: 'aceite',
+    titulo: 'Como fica registrado o seu aceite?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Quando você aceita este texto, a associação guarda a versão que estava na tela, a data e a hora.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'Guarda também uma impressão digital do texto exato: uma sequência de letras e números que muda se uma vírgula mudar.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'Assim dá para saber exatamente com o que você concordou, e quando, mesmo que o texto mude depois. Mudar o texto do termo não apaga nem invalida o aceite antigo.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'A associação não guarda o seu endereço de internet nem o aparelho que você usou para aceitar: o registro precisa da versão, do momento e da tela de onde veio, e nada além disso.',
+      },
+    ],
+  },
+  {
+    id: 'guarda',
+    titulo: 'Por quanto tempo a informação fica guardada?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Enquanto você quiser. Quando você pede exclusão, os seus dados saem na hora, e não ficam guardados por prazo nenhum depois disso.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'O site não guarda prontuário: nenhuma evolução, avaliação, laudo ou registro de sessão passa por aqui.',
+      },
+      { tipo: 'p', texto: 'Duas coisas ficam, e só elas:' },
+      {
+        tipo: 'lista',
+        itens: [
+          'O número de registro, sem nada ligado a ele, para que um crachá antigo não passe a identificar outra pessoa.',
+          'O registro de que você aceitou e depois retirou o consentimento, com data e hora.',
+        ],
+      },
+      {
+        tipo: 'lei',
+        texto:
+          'Lei 13.709/2018 (LGPD), Art. 16 — eliminação dos dados após o fim do tratamento, ressalvado o cumprimento de obrigação legal.',
+      },
+    ],
+  },
+  {
+    id: 'compartilhamento',
+    titulo: 'Com quem a sua informação é compartilhada?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Hoje, com ninguém fora da associação. A empresa que hospeda o site trata os dados apenas para manter o site no ar.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'Não há venda de dado, não há publicidade e não há rastreador de terceiro neste site. A fonte de letra e tudo o mais que a página carrega vêm deste mesmo endereço.',
+      },
+    ],
+  },
+  {
+    id: 'foto',
+    titulo: 'E a foto do crachá?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'A foto aparece na página pública de verificação, porque é ela que responde se a pessoa na frente de quem confere é mesmo a dona do crachá.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'O que ela não tem é endereço próprio: a imagem viaja dentro da resposta da página, não existe link direto para o arquivo, e por isso ela não é encontrada por buscador nem se descola da página.',
+      },
+    ],
+  },
+  {
+    id: 'cookies',
+    titulo: 'O site usa cookies?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Só o necessário para manter você conectado depois que entra na sua área. Nada de cookie de publicidade ou de medição de terceiro.',
+      },
+    ],
+  },
+  {
+    id: 'pedir',
+    titulo: 'Como pedir correção ou exclusão?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto:
+          'Você pode conferir, corrigir, pedir cópia ou apagar a sua informação a qualquer momento. Quem tem conta faz isso pela área do associado, sozinho.',
+      },
+      {
+        tipo: 'p',
+        texto: 'Quem não tem conta pede por telefone ou por e-mail, com os contatos desta página.',
+      },
+    ],
+  },
+  {
+    id: 'mudancas',
+    titulo: 'O que acontece quando esta política mudar?',
+    blocos: [
+      {
+        tipo: 'p',
+        texto: 'A versão anterior continua publicada, com a data em que valeu, para você comparar.',
+      },
+      {
+        tipo: 'p',
+        texto: 'Mudança de forma — uma vírgula, uma palavra trocada — não pede aceite novo.',
+      },
+      {
+        tipo: 'p',
+        texto:
+          'Mudança no que você está autorizando pede: o aviso aparece quando você entrar na sua área, e a sua conta continua funcionando enquanto você decide.',
+      },
+      {
+        tipo: 'lei',
+        texto:
+          'Lei 13.709/2018 (LGPD), Art. 8º, §6º — alteração de informação sobre o tratamento exige informar o titular, com destaque.',
+      },
+    ],
+  },
+] as const
+
 export const REGIMENTO = [
   {
     titulo: 'Atendimento',

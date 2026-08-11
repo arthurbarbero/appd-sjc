@@ -28,7 +28,7 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: cada PB tem resposta escrita, ou uma data marcada para a resposta. PB-1 e PB-2
   precisam de apoio jurídico da associação — não são decisão do projeto nem do dono do repo.
 
-## T3 — Gerar e aprovar as duas telas no Claude Design
+## T3 [FEITO 2026-08-11] — Gerar e aprovar as duas telas no Claude Design
 
 - Dono: Arthur Barbero (opera o canvas)
 - Depende de: nada
@@ -37,6 +37,19 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   exclusão saíram** desta change (ADR-013) e são de `area-do-associado`.
 - Aceite: as listas de "Aceite visual" do prompt, referentes a estas duas telas, todas
   marcadas. Nenhuma tela entra em código antes disso — é a regra central do `CLAUDE.md`.
+- **Entregue**: `templates/privacidade/Privacidade.dc.html` e
+  `templates/direitos/Direitos.dc.html`, lidas por DesignSync e auditadas em
+  [`docs/handoff-design-privacidade.md`](../../../docs/handoff-design-privacidade.md).
+  As duas listas de aceite visual passam.
+- **O prompt foi reescrito para v2 antes de ir ao canvas**, e valeu: a v1 mandava desenhar
+  cinco coisas que tinham deixado de ser verdade, e nenhuma delas apareceu nas telas.
+- Quatro correções na implementação, todas por regra escrita: fontes do Google por CDN não
+  entram, a rota é `/seus-direitos`, o dado fictício do mock usa domínio que pode existir e
+  número de registro com cara de sequencial, e os dois cartões de confirmação e acesso
+  apontam de propósito para o mesmo bloco.
+- **Uma decisão saiu daqui e está aberta**: a tela afirma que retirar o consentimento tira o
+  tipo de deficiência do cadastro — e o `CHECK` de `inscricoes_atendimento` exige pelo menos
+  uma escolha no campo. Trava a T10; as opções e a recomendação estão no handoff.
 
 ## T4 [FEITO 2026-08-11] — Catálogo de termos versionado, com verificação de integridade
 
@@ -113,7 +126,7 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Handoff para o Validador: este componente é o ponto único onde o consentimento pode nascer
   errado. Vale teste de regressão dedicado.
 
-## T8 — Página `/privacidade`
+## T8 [FEITO 2026-08-11] — Página `/privacidade`
 
 - Depende de: T3
 - Entrega: as 15 seções na ordem do prompt, sumário navegável, blocos "No termo da lei", e as
@@ -121,6 +134,21 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: passam os 5 cenários de "Legibilidade da política" e os de acessibilidade da rota
   `/privacidade`. Teste que falha se aparecer prazo de retenção em dias, meses ou anos enquanto
   PB-1 estiver aberta.
+- **Entregue**: 12 seções em `shared/conteudo.ts` (ADR-006) e a página em
+  `app/pages/privacidade.vue`. **O sumário e os `h2` saem da mesma lista** — não é
+  organização, é o REQ-21: sumário escrito à mão ao lado de seções escritas à mão diverge no
+  primeiro dia, e aqui seria um documento legal apontando para o lugar errado.
+- **`[A CONFIRMAR]` sobrou um só**, o encarregado (PB-2). O prazo de retenção saiu porque o
+  ADR-017 o decidiu, e a marcação de PB-1 teria sido pendência falsa; PB-5 não tem objeto.
+- A versão e a data de vigência no topo **vêm do catálogo de termos**, não estão digitadas:
+  no dia em que a v2 entrar, a página muda sozinha.
+- **Verificado com a página de pé** (`npm run aceite`, 8 verificações novas): ordem do sumário
+  igual à dos títulos, foco que vai para a seção ao clicar no sumário, sumário aberto a 360px,
+  ausência de prazo, e **altura real de cada parágrafo**.
+- **O gate pegou o que o teste de unidade deixou passar**: o limite de "cinco linhas
+  renderizadas" (REQ-22) tinha virado "320 caracteres" no teste de texto, um chute. A 360px,
+  seis parágrafos passavam de cinco linhas. Foram divididos, e o teto virou 200 caracteres —
+  medido contra a régua renderizada, não escolhido.
 
 ## T9 — Página `/seus-direitos` e os direitos de leitura
 
