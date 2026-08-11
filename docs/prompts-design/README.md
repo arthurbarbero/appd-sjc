@@ -55,7 +55,8 @@ Se você mudar uma destas, mude em todos os prompts afetados:
   contornado em vermelho; a ação preenchida da página é a saída segura ("Cancelar").
 - **Confirmação destrutiva usa caixas de seleção, não digitação de palavra.** Teclar
   "EXCLUIR" em maiúsculas é barreira para quem tem dificuldade motora ou intelectual —
-  exatamente o público deste site. Vale em `area-do-associado.md` e `privacidade.md`.
+  exatamente o público deste site. Vale em `area-do-associado.md`, que é a dona do fluxo
+  de exclusão desde o ADR-013 — `privacidade.md` deixou de desenhá-lo na v2 do prompt.
 - **Nenhum telefone pessoal de responsável técnico é publicado** sem autorização
   registrada. Só os números da associação.
 - **Contribuição solidária aparece uma vez só**, no campo 15 do formulário.
