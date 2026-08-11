@@ -98,19 +98,36 @@ async function excluir() {
       </ul>
     </section>
 
+    <!--
+      T11 de `consentimento-e-privacidade`: o texto é desta change, a tela é desta aqui
+      (ADR-013). Cada item diz **por que** fica — item sem motivo escrito é item que a
+      pessoa não tem como contestar.
+
+      O `[A CONFIRMAR]` do prazo de guarda saiu em 2026-08-11: o ADR-017 decidiu que não há
+      prazo, porque não há retenção. Marcação de pendência onde já existe decisão é
+      pendência falsa, e some da tela.
+    -->
     <section aria-labelledby="t-mantido">
       <h2 id="t-mantido">O que a associação precisa manter</h2>
       <ul>
-        <li>O seu número de registro</li>
-        <li>O registro de que você autorizou o tratamento dos seus dados</li>
+        <li>
+          <strong>O seu número de registro</strong>, sem nada ligado a ele — para que nenhum crachá
+          antigo passe a identificar outra pessoa.
+        </li>
+        <li>
+          <strong>O registro de que você autorizou e depois retirou o consentimento</strong>, com
+          data e hora. É a prova de que a associação respeitou a sua escolha, e por isso ela não é
+          apagada junto (LGPD, Art. 16, inciso I).
+        </li>
       </ul>
       <p>
-        Por obrigação legal, esses dois itens não são apagados. O número fica guardado para que
-        nenhum crachá antigo passe a identificar outra pessoa.
+        Fora esses dois, nada fica guardado por prazo nenhum. O que sai, sai na hora, e não dá para
+        desfazer.
       </p>
-      <p class="confirmar">
-        <AppdSelo />
-        O prazo exato de guarda ainda será confirmado pela associação.
+      <p>
+        <strong>O que este site nunca teve é ficha de atendimento.</strong> Se você já foi atendida
+        na sede, a associação guarda esse documento em papel, por obrigação profissional. Para pedir
+        a exclusão dele, fale com a associação: apagar a sua conta aqui não apaga o arquivo de lá.
       </p>
     </section>
 
@@ -189,11 +206,6 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e3);
-}
-.confirmar {
-  display: flex;
-  align-items: center;
-  gap: var(--e2);
 }
 .fundo {
   position: fixed;

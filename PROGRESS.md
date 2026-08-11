@@ -21,8 +21,8 @@ cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
 
 | Comando          | O que cobre                                                                                                                                                                                                         |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 216 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
-| `npm run aceite` | 156 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
+| `npm test`       | 233 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
+| `npm run aceite` | 169 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
 | CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                                                      |
 
 **`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
@@ -40,10 +40,11 @@ de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e u
   contato, WhatsApp oficial e catálogo de serviços.
 - `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
   `consentimento-e-privacidade`.
-- `consentimento-e-privacidade` — **6 das 14 tasks fechadas em 2026-08-11** (T3, T4, T5, T6,
-  T8 e T12, mais metade da T11). O que sobra: T2 espera a APPD; T7, T9 e T13 estão
-  destravadas pelo handoff do design; **T10 espera uma decisão do dono** sobre a restrição
-  do banco; e T14 é o gate final.
+- `consentimento-e-privacidade` — **10 das 14 tasks fechadas em 2026-08-11** (T3 a T6, T8 a
+  T12). Sobram quatro: **T2** espera a APPD (PB-2 e PB-4); **T7**, o componente da caixa de
+  consentimento, é a última peça de código; **T13** é a passada de acessibilidade que falta
+  (teclado ponta a ponta e os itens `[manual]`); e **T14** é o gate de archive, que não passa
+  enquanto PB-2 e PB-4 estiverem abertas.
 
 **Sete decisões saíram do caminho em 2026-08-07**, todas do dono e registradas como ADR:
 conteúdo no código (006), foto e cuidador na verificação (015), recuperação de senha (016),
@@ -383,6 +384,26 @@ virado "320 caracteres" no vitest, que é chute. A 360px, seis parágrafos passa
 linhas. A medida certa é a do navegador — altura do parágrafo dividida pela entrelinha —, e
 ela agora roda no aceite. O teto do teste de texto virou 200, calibrado contra ela.
 
-**Uma decisão ficou aberta, e trava a T10**: a tela de retirada de consentimento afirma que
-o tipo de deficiência sai do cadastro, e o `CHECK` de `inscricoes_atendimento` exige pelo
-menos uma escolha no campo. Opções e recomendação no handoff.
+**A decisão que travava a T10 foi tomada pelo dono no mesmo dia**: retirar o consentimento
+**apaga** o tipo de deficiência, e o campo passa a guardar a palavra "Não consentido". Em
+vez de relaxar o `CHECK` do banco — que era a recomendação —, o contrato de dados fica
+intacto e o campo diz **por que** está vazio. Campo em branco se leria como "nunca
+respondeu"; este valor se lê como "respondeu e depois retirou".
+
+O custo está escrito: é um valor especial num campo de vocabulário fechado, e quem lê
+precisa saber que ele existe. Contido por três coisas — a constante única, o
+`semConsentimento()` por onde toda leitura passa, e o `z.enum` que impede a palavra de
+entrar pelo formulário.
+
+**`/seus-direitos` no ar** (T9 e T10): os dados guardados na tela, o histórico de
+consentimento com versão, data e impressão digital, a cópia em JSON, e a retirada em dois
+cliques. A retirada faz três coisas numa transação só — apaga o campo 12, desliga o opt-in
+de exibição (senão "Não consentido" apareceria na página pública) e grava a revogação.
+
+**Voltar atrás é consentir de novo**: a tela de correção recusa com 422 quem informa a
+deficiência de novo sem autorizar de novo, e grava o aceite junto com a correção. Sem isso,
+o histórico diria que o dado voltou sozinho.
+
+**T11 fechada**: o bloco "O que a associação precisa manter" passou a dizer por que cada
+item fica, com a base legal, e perdeu o `[A CONFIRMAR]` do prazo — a PB-1 caiu com o
+ADR-017, e pendência onde já existe decisão é pendência falsa.

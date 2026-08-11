@@ -23,7 +23,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { esquemaInscricao } from '../shared/inscricao'
+import { DEFICIENCIA_NAO_CONSENTIDA, DEFICIENCIAS, esquemaInscricao } from '../shared/inscricao'
 import { TERMO_ART11, versaoPorHash } from '../shared/termos'
 
 const RAIZ = join(import.meta.dirname, '..')
@@ -262,5 +262,113 @@ describe('sem consentimento o servidor recusa (REQ-7, T6)', () => {
     const r = esquemaInscricao.safeParse({ ...valido, termoHash: 'nao-e-hash' })
     expect(r.success).toBe(false)
     expect(r.error?.issues.map((i) => i.path[0])).toContain('termoHash')
+  })
+})
+
+describe('a retirada do consentimento (REQ-13, T10)', () => {
+  const rota = ler(API, 'area', 'consentimento.post.ts')
+
+  it('apaga o tipo de deficiência em vez de só registrar a retirada', () => {
+    // Retirar o consentimento e continuar guardando o dado é retirada de fachada. O valor
+    // que ocupa o campo diz **por que** está vazio — campo em branco se leria como
+    // "nunca respondeu".
+    expect(rota).toMatch(/DEFICIENCIA_NAO_CONSENTIDA/)
+    expect(rota).toMatch(/update\(schema\.inscricoesAtendimento\)/)
+    expect(rota).toMatch(/deficienciaOutro: null/)
+  })
+
+  it('desliga o opt-in junto, senão a palavra vaza para a página pública', () => {
+    expect(rota).toMatch(/crachaMostraDeficiencia: false/)
+  })
+
+  it('grava a revogação e não apaga nada de consentimentos', () => {
+    expect(rota).toMatch(/evento: 'revogacao'/)
+    expect(rota).not.toMatch(/delete\(schema\.consentimentos\)/)
+  })
+
+  it('as três gravações vão numa transação só', () => {
+    // Meia retirada é pior que nenhuma: dado apagado sem registro, ou registro sem dado
+    // apagado, deixam o histórico mentindo em direções opostas.
+    expect(rota).toMatch(/bd\.batch\(\[/)
+  })
+
+  it('exige confirmação explícita no corpo', () => {
+    expect(rota).toMatch(/corpo\?\.revogar !== true/)
+  })
+
+  it('não grava duas revogações seguidas', () => {
+    expect(rota).toMatch(/ultimo\?\.evento === 'revogacao'/)
+  })
+})
+
+describe('voltar atrás é consentir de novo (REQ-8, T10)', () => {
+  const correcao = ler(API, 'area', 'inscricao.put.ts')
+
+  it('a tela de correção recusa informar deficiência sem autorizar de novo', () => {
+    expect(correcao).toMatch(/semConsentimento\(/)
+    expect(correcao).toMatch(/estavaRetirado && !termo/)
+  })
+
+  it('e grava o aceite novo junto com a correção, na mesma transação', () => {
+    expect(correcao).toMatch(/evento: 'aceite'/)
+    expect(correcao).toMatch(/bd\.batch\(\[/)
+  })
+
+  it('o valor especial nunca entra pelo formulário', () => {
+    // O vocabulário fechado do Zod é o que impede a palavra de ser digitada como se fosse
+    // um tipo de deficiência. Se ela entrasse por aqui, o estado "retirado" seria
+    // forjável pela própria pessoa, e o histórico não bateria com o cadastro.
+    expect(DEFICIENCIAS as readonly string[]).not.toContain(DEFICIENCIA_NAO_CONSENTIDA)
+  })
+})
+
+describe('a cópia dos dados (REQ-15, T9)', () => {
+  const copia = ler(API, 'area', 'copia.get.ts')
+
+  it('exige sessão', () => {
+    expect(copia).toMatch(/if \(!sessao\) throw createError\(\{ statusCode: 401 \}\)/)
+  })
+
+  it('traz o histórico completo de consentimento, do mais antigo ao mais novo', () => {
+    expect(copia).toMatch(/consentimentos\.findMany/)
+    expect(copia).toMatch(/orderBy: asc/)
+    for (const campo of ['versao', 'hash', 'evento', 'registradoEm']) {
+      expect(copia).toMatch(new RegExp(`${campo}: true`))
+    }
+  })
+
+  it('a foto vai como caminho, nunca embutida', () => {
+    expect(copia).toMatch(/baixarEm: '\/api\/area\/foto'/)
+    // O comentário do arquivo explica por que não embute — o que não pode é o código
+    // fazer. Varre o código sem os comentários, senão a explicação reprova a si mesma.
+    const codigo = copia.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+    expect(codigo).not.toMatch(/base64|data:image/)
+  })
+})
+
+describe('o que a tela de exclusão diz (REQ-17, REQ-23, T11)', () => {
+  const tela = ler(RAIZ, 'app', 'pages', 'area', 'excluir.vue')
+
+  it('cita a base legal do que fica', () => {
+    expect(tela).toMatch(/Art\. 16/)
+  })
+
+  it('não marca mais o prazo de guarda como pendente', () => {
+    // O ADR-017 decidiu que não há retenção. Pendência onde já existe decisão é pendência
+    // falsa, e some da tela.
+    expect(tela).not.toMatch(/<AppdSelo/)
+    expect(tela).not.toMatch(/prazo exato de guarda/i)
+  })
+
+  it('não publica prazo de retenção em dias, meses ou anos', () => {
+    const corpo = tela.split('<template>')[1] ?? ''
+    expect(corpo).not.toMatch(/\b\d+\s*(dias?|meses|m[êe]s|anos?)\b/i)
+  })
+
+  it('não usa tom de ameaça nem desaconselha a exclusão', () => {
+    const corpo = (tela.split('<template>')[1] ?? '').toLowerCase()
+    for (const palavra of ['tem certeza que quer perder', 'você vai perder tudo', 'pense bem']) {
+      expect(corpo).not.toContain(palavra)
+    }
   })
 })

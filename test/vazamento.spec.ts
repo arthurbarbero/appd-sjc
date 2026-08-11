@@ -93,6 +93,13 @@ describe('o campo 12 tem um caminho só para sair do banco', () => {
     join('area', 'inscricao.get.ts'),
     join('area', 'inscricao.put.ts'),
     join('conta', 'cadastro.post.ts'),
+    // A cópia dos próprios dados (Art. 18): quem pede é a dona do dado, autenticada, sobre
+    // ela mesma. É o único lugar onde o campo 12 sai junto com o resto, e sai porque
+    // entregar a cópia sem ele seria entregar cópia incompleta.
+    join('area', 'copia.get.ts'),
+    // A revogação grava `DEFICIENCIA_NAO_CONSENTIDA` **por cima** do campo 12. Menciona a
+    // coluna para apagá-la, que é o oposto de vazar.
+    join('area', 'consentimento.post.ts'),
     // Desde o ADR-019, condicionada ao consentimento — provado pelo teste acima.
     join('verificar', '[numero].get.ts'),
   ]

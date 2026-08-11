@@ -38,6 +38,9 @@ const PUBLICAS = [
   '/entrar',
   '/atendimento/inscricao',
   '/privacidade',
+  // Pública de propósito: quem chega pelo rodapé sem conta precisa ver quais são os
+  // direitos e por onde pedir. Aqui ela é auditada **sem sessão**; com sessão, no 5c.
+  '/seus-direitos',
   // Número que não existe, de propósito: é o estado que qualquer pessoa alcança sem
   // conta, e o que a câmera do celular mais vai encontrar se o crachá estiver borrado.
   '/verificar/APPD-2026-ZZZZZZ',
@@ -677,6 +680,101 @@ try {
   await p.waitForURL(/\/area/, { timeout: 45000 }).catch(() => {})
   ok('entrar leva para /area', p.url().includes('/area'), p.url())
   ok('cabeçalho mostra "Minha área" depois de entrar', (await conta()) === 'Minha área')
+
+  /*
+    ── 5c. Seus direitos: a cópia dos dados e a retirada do consentimento ────
+
+    T9 e T10. Fica **aqui**, depois de tudo que depende do tipo de deficiência estar
+    registrado e antes da exclusão, porque a retirada apaga o campo 12: rodar antes
+    derrubaria as verificações do crachá e da tela de correção, e por um motivo certo.
+  */
+  await p.goto(`${BASE}/seus-direitos`, { waitUntil: 'networkidle' })
+  await p.waitForSelector('.painel', { timeout: 20000 })
+
+  const painelDireitos = await p.textContent('#meus-dados')
+  ok('a tela mostra os dados guardados de quem entrou', painelDireitos.includes(numeroRegistro))
+  ok('e mostra o tipo de deficiência para a própria pessoa', painelDireitos.includes('Física'))
+
+  const linhas = await p.$$eval('.historico tbody tr', (trs) => trs.map((t) => t.textContent))
+  ok(
+    'o histórico traz o aceite do cadastro',
+    linhas.length === 1 && linhas[0].includes('Autorizou'),
+  )
+  ok(
+    'cada evento mostra versão, data e a impressão digital do texto',
+    /Versão 1/.test(linhas[0]) && /\d{2}\/\d{2}\/\d{4}/.test(linhas[0]) && /…/.test(linhas[0]),
+  )
+
+  /*
+    Dois cliques, contados: "Retirar" e "Confirmar". O REQ-13 fixa esse teto porque o
+    caminho de desistir não pode ser mais longo que o de aceitar — e o de aceitar foi uma
+    caixa de seleção.
+  */
+  await p.click('#consentimento .acoes button')
+  ok('o primeiro clique pede confirmação, e não executa', await p.isVisible('.confirmar'))
+  await p.click('.confirmar .botao-primario')
+  await p.waitForSelector('.aviso-sucesso', { timeout: 20000 })
+  ok(
+    'o segundo clique conclui, e a tela diz que concluiu',
+    (await p.textContent('#consentimento')).includes('Consentimento retirado'),
+  )
+
+  await p.reload({ waitUntil: 'networkidle' })
+  await p.waitForSelector('.painel', { timeout: 20000 })
+  const depoisDaRetirada = await p.textContent('#meus-dados')
+  ok(
+    'o tipo de deficiência sai do cadastro, e a tela diz por quê',
+    !depoisDaRetirada.includes('Física') &&
+      depoisDaRetirada.includes('consentimento retirado') &&
+      // A palavra que ocupa o campo no banco não vaza para a tela como se fosse um tipo.
+      !depoisDaRetirada.includes('Não consentido —'),
+  )
+  const apos = await p.$$eval('.historico tbody tr', (trs) => trs.map((t) => t.textContent))
+  ok(
+    'o histórico ganha a retirada e mantém o aceite anterior',
+    apos.length === 2 && apos[0].includes('Autorizou') && apos[1].includes('Retirou'),
+    apos.length + ' linhas',
+  )
+
+  // A conta continua: retirar consentimento não é excluir conta (REQ-13).
+  ok('a conta continua acessível depois da retirada', (await conta()) === 'Minha área')
+
+  const publicaRetirada = await (await p.request.get(`${BASE}/verificar/${numeroRegistro}`)).text()
+  ok(
+    'a retirada desliga o opt-in: a página pública não mostra nem o tipo nem a palavra',
+    !/Física|Não consentido/.test(publicaRetirada),
+  )
+
+  /*
+    Voltar atrás é consentir de novo. A tela de correção precisa recusar quem informa
+    deficiência sem autorizar de novo — senão o dado volta e o histórico não registra nada.
+  */
+  const semAutorizar = await p.request.put(`${BASE}/api/area/inscricao`, {
+    headers: { 'content-type': 'application/json' },
+    data: {
+      deficiencias: ['Física'],
+      atendimentos: ['Fisioterapia'],
+      dias: ['Segundas'],
+    },
+  })
+  ok(
+    'informar a deficiência de novo sem autorizar de novo é recusado com 422',
+    semAutorizar.status() === 422,
+    `${semAutorizar.status()}`,
+  )
+
+  /*
+    A auditoria da tela **com sessão**, que é o estado que a lista de rotas públicas não
+    alcança: é aqui que existem a tabela do histórico e os três estados da retirada.
+  */
+  const axeDireitos = await new AxeBuilder({ page: p })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  ok(
+    'axe A/AA em /seus-direitos, com sessão e histórico na tela',
+    axeDireitos.violations.length === 0,
+    axeDireitos.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
+  )
 
   // ── 6. Exclusão ───────────────────────────────────────────────────────────
   await p.goto(`${BASE}/area/excluir`, { waitUntil: 'networkidle' })

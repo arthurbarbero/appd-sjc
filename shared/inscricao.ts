@@ -63,6 +63,34 @@ export const DIAS = [
 /** Único valor de status na V1 (ADR-014): a APPD não opera fila nem matrícula. */
 export const STATUS_INSCRICAO = 'Interesse registrado' as const
 
+/**
+ * O valor que ocupa o campo 12 depois que a pessoa **retira** o consentimento do Art. 11
+ * (`consentimento-e-privacidade` REQ-13, decisão do dono em 2026-08-11).
+ *
+ * Retirar o consentimento e continuar guardando o dado é retirada de fachada — então o
+ * tipo de deficiência é apagado. O que fica no lugar não é vazio: é esta palavra, dizendo
+ * **por que** está vazio. Campo em branco se lê como "nunca respondeu"; este valor se lê
+ * como "respondeu e depois retirou", que é a verdade.
+ *
+ * Escolhido em vez de relaxar o `CHECK` do banco, que exige pelo menos um item no campo
+ * (`modelo-de-dados`) — o contrato de dados fica intacto.
+ *
+ * **É um valor especial num campo de vocabulário fechado, e isso tem custo.** Quem lê o
+ * campo precisa saber que ele existe, senão a palavra aparece na tela como se fosse um
+ * tipo de deficiência. Por isso:
+ *
+ * - ele **não** está em `DEFICIENCIAS`, então o Zod recusa se alguém tentar enviá-lo pelo
+ *   formulário — só a rota de revogação consegue gravá-lo;
+ * - toda leitura passa por `semConsentimento()`, e há teste que varre as rotas atrás de
+ *   leitura que ignore isso.
+ */
+export const DEFICIENCIA_NAO_CONSENTIDA = 'Não consentido' as const
+
+/** Se o campo 12 está no estado de consentimento retirado. */
+export function semConsentimento(deficiencias: readonly string[]): boolean {
+  return deficiencias.includes(DEFICIENCIA_NAO_CONSENTIDA)
+}
+
 // ── Peças reutilizadas ───────────────────────────────────────────────────────────────
 
 const soDigitos = (valor: string) => valor.replace(/\D/g, '')

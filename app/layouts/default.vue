@@ -117,6 +117,7 @@ const atual = (para: string) =>
           <NuxtLink to="/regimento">Regimento interno</NuxtLink>
           <NuxtLink to="/comtrad">COMTRAD</NuxtLink>
           <NuxtLink to="/privacidade">Política de Privacidade</NuxtLink>
+          <NuxtLink to="/seus-direitos">Seus direitos</NuxtLink>
         </div>
       </div>
 

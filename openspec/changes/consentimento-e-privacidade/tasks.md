@@ -47,9 +47,10 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   entram, a rota é `/seus-direitos`, o dado fictício do mock usa domínio que pode existir e
   número de registro com cara de sequencial, e os dois cartões de confirmação e acesso
   apontam de propósito para o mesmo bloco.
-- **Uma decisão saiu daqui e está aberta**: a tela afirma que retirar o consentimento tira o
-  tipo de deficiência do cadastro — e o `CHECK` de `inscricoes_atendimento` exige pelo menos
-  uma escolha no campo. Trava a T10; as opções e a recomendação estão no handoff.
+- **Uma decisão saiu daqui, e o dono a tomou no mesmo dia**: a tela afirma que retirar o
+  consentimento tira o tipo de deficiência do cadastro, e o `CHECK` de
+  `inscricoes_atendimento` exige pelo menos uma escolha no campo. Em vez de relaxar o
+  `CHECK`, o campo passa a guardar a palavra "Não consentido". Registrada na T10.
 
 ## T4 [FEITO 2026-08-11] — Catálogo de termos versionado, com verificação de integridade
 
@@ -150,22 +151,48 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   seis parágrafos passavam de cinco linhas. Foram divididos, e o teto virou 200 caracteres —
   medido contra a régua renderizada, não escolhido.
 
-## T9 — Página `/seus-direitos` e os direitos de leitura
+## T9 [FEITO 2026-08-11] — Página `/seus-direitos` e os direitos de leitura
 
 - Depende de: T3, T5
 - Entrega: um cartão por direito, o bloco "Como pedir" com os três canais, confirmação de
   existência de tratamento, cópia dos dados em JSON e apresentação em tela.
 - Aceite: passam os 3 cenários de "Acesso, correção e portabilidade" e o de confirmação de
   existência. O JSON contém o histórico completo de eventos de consentimento.
+- **Entregue**: `app/pages/seus-direitos.vue` e `GET /api/area/copia`. A página é **pública**
+  — quem chega pelo rodapé sem conta vê os direitos e os canais; o bloco com os dados aparece
+  para quem tem sessão, e para quem não tem o caminho é entrar, não um erro.
+- A cópia sai em JSON pelo próprio navegador, montada do que já está na tela: nada de rota
+  nova para gerar arquivo, e o que se baixa é exatamente o que se lê.
+- **A foto vai como caminho, não embutida.** Um retrato em base64 no meio do JSON faria a
+  foto viajar em toda leitura da tela, quando o que a pessoa quase sempre quer é conferir.
+- O histórico mostra a impressão digital **encurtada** na tela e inteira no arquivo: 64
+  caracteres não cabem em celular, e encurtar é decisão de leitura, não de dado.
 
-## T10 — Revogação do consentimento
+## T10 [FEITO 2026-08-11] — Revogação do consentimento
 
 - Depende de: T5, T9
 - Entrega: o cartão destacado, a tela de consequência e a gravação do evento `revogacao`.
 - Aceite: passam os 3 cenários de "Revogação do consentimento" — dois cliques, conta
   preservada, histórico do aceite intacto.
+- **Decisão do dono, 2026-08-11**: retirar o consentimento **apaga o tipo de deficiência**, e
+  o campo passa a guardar `DEFICIENCIA_NAO_CONSENTIDA` — a palavra "Não consentido". Retirar
+  e continuar guardando o dado seria retirada de fachada; e o valor, em vez de vazio, diz
+  **por que** está vazio: campo em branco se lê como "nunca respondeu".
+- Escolhido em vez de relaxar o `CHECK` do banco (que exige pelo menos um item no campo): o
+  contrato de dados de `modelo-de-dados` fica intacto, sem migration.
+- **O custo, escrito**: é um valor especial num campo de vocabulário fechado. Quem lê o campo
+  precisa saber que ele existe, senão a palavra aparece na tela como se fosse um tipo de
+  deficiência. Contido por três coisas — a constante única em `shared/inscricao.ts`, o
+  `semConsentimento()` por onde toda leitura passa, e o `z.enum(DEFICIENCIAS)` que impede a
+  palavra de entrar pelo formulário.
+- **Três gravações numa transação só** (`POST /api/area/consentimento`): o campo 12 é
+  apagado, o opt-in de exibição é desligado — senão "Não consentido" apareceria na página
+  pública — e entra a linha de `revogacao`. Meia retirada é pior que nenhuma.
+- **Voltar atrás é consentir de novo**: a tela de correção recusa com 422 quem informa
+  deficiência de novo sem autorizar de novo, e o aceite novo é gravado junto com a correção.
+  Sem isso, o histórico diria que o dado voltou sozinho.
 
-## T11 — Conteúdo da tela de exclusão (a tela é de outra change)
+## T11 [FEITO 2026-08-11] — Conteúdo da tela de exclusão (a tela é de outra change)
 
 - Depende de: T4, e da PB-1 para sair do `[A CONFIRMAR]`.
 - Entrega: o **texto** que `area-do-associado` exibe em `/area/excluir` — o bloco "O que a
@@ -175,10 +202,14 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
   (ADR-013). Três changes escreviam esse fluxo antes; agora, uma.
 - Aceite: passam os 3 cenários de "O conteúdo que a tela de exclusão exibe"; as linhas
   anteriores de `consentimentos` continuam intactas depois da exclusão.
-- **Metade entregue em 2026-08-11**: a gravação da revogação está correta (aponta para o termo
-  que a pessoa aceitou) e o cenário das linhas anteriores intactas está coberto pela varredura
-  de append-only da T5. O que falta é o **texto** do bloco "O que a associação precisa manter",
-  e ele depende da PB-1 — prazo de conservação não se inventa.
+- **Entregue em 2026-08-11.** A gravação da revogação aponta para o termo que a pessoa
+  aceitou, e o cenário das linhas intactas está coberto pela varredura de append-only da T5.
+- O bloco "O que a associação precisa manter" passou a dizer **por que** cada item fica, com
+  a base legal (Art. 16, I) no item do consentimento — item sem motivo escrito é item que a
+  pessoa não tem como contestar.
+- **O `[A CONFIRMAR]` do prazo saiu**: a PB-1 caiu com o ADR-017, e marcação de pendência
+  onde já existe decisão é pendência falsa. A tela também passou a dizer o que o site **nunca
+  teve** — ficha de atendimento —, para não dar a entender que o botão alcança o papel da sede.
 
 ## T12 [FEITO 2026-08-11] — Proibição transversal do dado sensível
 
@@ -207,6 +238,11 @@ Ordem importa. T1 antes de qualquer código; T2 e T3 antes de qualquer tela.
 - Aceite: passam os 5 cenários de "Acessibilidade das cinco telas", incluindo os 5 exemplos do
   esquema de cenário. Zero violação de nível A ou AA. O veredito é do QA, não de quem
   implementou.
+- **Parcial, e continua aberta.** O que já roda no `npm run aceite`: axe A/AA em
+  `/privacidade`, em `/seus-direitos` sem sessão e em `/seus-direitos` com sessão e histórico
+  na tela; foco que o link do sumário move; altura real de cada parágrafo a 360px; sumário
+  aberto no celular. Falta a passada de teclado ponta a ponta e os itens marcados `[manual]`
+  na régua do projeto — zoom de 200% e `prefers-reduced-motion`.
 
 ## T14 — Gate de validação e archive
 
