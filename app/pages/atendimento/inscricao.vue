@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
+import { ASSOCIACAO } from '~~/shared/conteudo'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
 import { versaoVigente } from '~~/shared/termos'
@@ -41,6 +41,10 @@ const f = reactive({
   complemento: '',
   bairro: '',
   municipio: '',
+  estado: '',
+  // País nasce preenchido: a associação atende São José dos Campos e região, e obrigar a
+  // digitar "Brasil" seria trabalho sem informação. Continua editável.
+  pais: 'Brasil',
   cuidadorNome: '',
   cuidadorContato: '',
   deficiencias: [] as string[],
@@ -116,6 +120,7 @@ async function buscarCep() {
       endereco?: string
       bairro?: string
       municipio?: string
+      uf?: string
     }>(`/api/cep/${cep}`)
 
     if (!r.encontrado) {
@@ -127,9 +132,12 @@ async function buscarCep() {
     if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
     if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
     if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
+    // A rota já devolvia a UF desde sempre; até 2026-08-20 ninguém a usava.
+    if (!f.estado.trim() && r.uf) f.estado = r.uf
     Reflect.deleteProperty(erros, 'endereco')
     Reflect.deleteProperty(erros, 'bairro')
     Reflect.deleteProperty(erros, 'municipio')
+    Reflect.deleteProperty(erros, 'estado')
   } catch {
     avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
   } finally {
@@ -258,6 +266,8 @@ async function enviar() {
         ...(f.complemento.trim() ? { complemento: f.complemento.trim() } : {}),
         bairro: f.bairro.trim(),
         municipio: f.municipio.trim(),
+        estado: f.estado.trim(),
+        pais: f.pais.trim(),
         ...(f.cuidadorNome.trim() ? { cuidadorNome: f.cuidadorNome.trim() } : {}),
         ...(f.cuidadorContato.trim() ? { cuidadorContato: f.cuidadorContato } : {}),
         deficiencias: f.deficiencias,
@@ -329,12 +339,6 @@ async function enviar() {
         telefone que você informar.
       </p>
     </header>
-
-    <AppdAviso tipo="destaque" titulo="Antes de começar">
-      <ul class="lista">
-        <li v-for="regra in REGRAS_ATENDIMENTO" :key="regra">{{ regra }}</li>
-      </ul>
-    </AppdAviso>
 
     <div v-if="enviado" class="sucesso">
       <AppdAviso tipo="sucesso" titulo="Cadastro enviado">
@@ -495,14 +499,23 @@ async function enviar() {
             Endereço (rua/avenida/travessa) <span class="obrigatorio" aria-hidden="true">*</span>
           </label>
           <span id="ajuda-endereco" class="ajuda">Obrigatório.</span>
-          <textarea
+          <!--
+            Caixa de uma linha, não `textarea` (2026-08-20).
+
+            O campo era `textarea` por réplica do formulário de papel, onde a linha do
+            endereço é larga. Na tela, a caixa alta sugeria texto longo num campo que
+            recebe uma linha — "podia ser uma caixa normal de texto", disse o dono.
+            Rótulo, ordem e obrigatoriedade seguem intactos: a réplica é do conteúdo do
+            formulário, não do controle usado para preenchê-lo.
+          -->
+          <input
             id="endereco"
             v-model="f.endereco"
-            rows="2"
+            type="text"
             autocomplete="street-address"
             :aria-invalid="erros.endereco ? 'true' : undefined"
             :aria-describedby="erros.endereco ? 'erro-endereco' : 'ajuda-endereco'"
-          ></textarea>
+          />
           <span v-if="erros.endereco" id="erro-endereco" class="erro">
             {{ erros.endereco }}
           </span>
@@ -565,6 +578,44 @@ async function enviar() {
           />
           <span v-if="erros.municipio" id="erro-municipio" class="erro">
             {{ erros.municipio }}
+          </span>
+        </div>
+
+        <!--
+          Campos 20 e 21, acrescentados em 2026-08-20. Vêm depois do município porque é
+          onde a leitura do endereço termina: rua, número, bairro, cidade, estado, país.
+        -->
+        <div :class="['campo', { 'campo-erro': erros.estado }]">
+          <label for="estado">Estado <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-estado" class="ajuda">
+            Obrigatório. Ao informar o CEP, preenchemos para você.
+          </span>
+          <input
+            id="estado"
+            v-model="f.estado"
+            type="text"
+            autocomplete="address-level1"
+            :aria-invalid="erros.estado ? 'true' : undefined"
+            :aria-describedby="erros.estado ? 'erro-estado' : 'ajuda-estado'"
+          />
+          <span v-if="erros.estado" id="erro-estado" class="erro">
+            {{ erros.estado }}
+          </span>
+        </div>
+
+        <div :class="['campo', { 'campo-erro': erros.pais }]">
+          <label for="pais">País <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-pais" class="ajuda">Obrigatório.</span>
+          <input
+            id="pais"
+            v-model="f.pais"
+            type="text"
+            autocomplete="country-name"
+            :aria-invalid="erros.pais ? 'true' : undefined"
+            :aria-describedby="erros.pais ? 'erro-pais' : 'ajuda-pais'"
+          />
+          <span v-if="erros.pais" id="erro-pais" class="erro">
+            {{ erros.pais }}
           </span>
         </div>
       </fieldset>
@@ -697,6 +748,7 @@ async function enviar() {
             :value="f.cpf"
             type="text"
             inputmode="numeric"
+            placeholder="000.000.000-00"
             autocomplete="off"
             :aria-invalid="erros.cpf ? 'true' : undefined"
             aria-describedby="ajuda-cpf"

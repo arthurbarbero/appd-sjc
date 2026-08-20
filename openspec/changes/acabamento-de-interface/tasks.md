@@ -22,15 +22,32 @@ que hoje declaram largura por conta própria (`AppdOferta.vue`, `inscricao.vue`,
 inteiro, não das telas citadas no vídeo — a lição do marcador de lugar que sobreviveu na
 rota vizinha.
 
-### T2 — B2, o salto de rolagem
+### T2 — B2, o salto de rolagem — **NÃO REPRODUZIU**
 
 Cobre REQ-8, REQ-9.
 
-**Reproduzir antes de corrigir.** O defeito degradou durante a gravação, de "ao trocar de
-aba" para "a cada clique em qualquer lugar". A task só fecha com a causa nomeada por
-escrito na própria task; corrigir o sintoma reprova REQ-9.
+A task exigia nomear a causa antes de corrigir. O resultado da investigação é que **não
+há defeito confirmado no código**, e por isso nada foi corrigido — mexer aqui seria
+inventar conserto para sintoma que não se manifesta.
 
-**Aceite**: os dois cenários de rolagem, mais a causa registrada.
+O que foi tentado, em 2026-08-20:
+
+| Hipótese                                      | Como foi testada                                                                                   | Resultado                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Rolagem preservada ao trocar de seção         | Playwright, conta criada no dev, clique em cada item do menu com a página no topo e rolada         | `scrollY` volta a 0 sempre    |
+| Posição restaurada ao voltar para `/area`     | Sequência exata do vídeo: `/area` rolada → `/area/cracha` → "Início"                               | `scrollY` = 0 nas duas voltas |
+| Clique em região neutra rola                  | Clique em área sem controle, página rolada                                                         | `scrollY` não muda            |
+| Layout shift (conteúdo que carrega e empurra) | `PerformanceObserver` de `layout-shift` em `/area`, `/area/cracha` e `/`, no dev **e** em produção | CLS = 0,0000 em todas         |
+
+O que o vídeo mostra, e sustenta a leitura de estado transitório: o dono deu um refresh
+e disse "por aqui tá normal" (09:26); mais tarde relatou "fiz um refresh esquisito"
+(11:49). Na mesma sessão há um popup do LastPass aberto sobre a página (08:22).
+
+**O que falta**, e é do dono: dizer se o salto volta a acontecer, de preferência com as
+extensões do navegador desativadas. Se voltar, a gravação desse momento fecha a causa.
+
+Enquanto isso, REQ-8 e REQ-9 viram **teste de regressão** no aceite — o comportamento
+correto de hoje fica travado, e uma regressão futura reprova.
 
 ### T3 — B1, a foto ausente no cartão da área
 
@@ -82,7 +99,7 @@ Cobre REQ-21, REQ-22.
 
 Cobre REQ-23, REQ-24, REQ-28, REQ-29.
 
-### T11 — Cadastro: os campos 17 e 18
+### T11 — Cadastro: os campos 20 e 21
 
 Cobre REQ-25 a REQ-27.
 

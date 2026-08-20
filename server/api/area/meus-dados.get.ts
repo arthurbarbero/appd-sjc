@@ -32,6 +32,8 @@ export default defineEventHandler(async (event) => {
       complemento: true,
       bairro: true,
       municipio: true,
+      estado: true,
+      pais: true,
       situacao: true,
     },
   })

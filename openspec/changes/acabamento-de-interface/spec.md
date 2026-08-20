@@ -102,7 +102,7 @@ texto, repetido em todos os campos de `app/pages/atendimento/inscricao.vue`.
 - **REQ-23** — Sai o bloco "Antes de começar" inteiro, e o conteúdo sobe.
 - **REQ-24** — O campo 5 (endereço) deixa de ser `textarea` e passa a ser caixa de uma
   linha. Rótulo, ordem e obrigatoriedade não mudam.
-- **REQ-25** — O formulário ganha os campos **17 (Estado)** e **18 (País)**, na ordem, logo
+- **REQ-25** — O formulário ganha os campos **20 (Estado)** e **21 (País)**, na ordem, logo
   após Município. Os 15 campos originais e o 16 (CEP) permanecem intactos —
   [ver o contrato de dados](#contrato-de-dados).
 - **REQ-26** — Estado é preenchido automaticamente pela consulta de CEP, que já devolve a
@@ -174,15 +174,15 @@ Dois campos novos em `usuarios`, com migration versionada:
 
 | Coluna   | Tipo   | Nulo | Origem                                    |
 | -------- | ------ | ---- | ----------------------------------------- |
-| `estado` | `text` | sim  | campo 17, preenchido pela consulta de CEP |
-| `pais`   | `text` | sim  | campo 18, padrão "Brasil" no formulário   |
+| `estado` | `text` | sim  | campo 20, preenchido pela consulta de CEP |
+| `pais`   | `text` | sim  | campo 21, padrão "Brasil" no formulário   |
 
 Anuláveis porque as linhas já existentes não têm o dado, e porque a exclusão de conta
 anonimiza as colunas pessoais — o mesmo motivo das outras. `modelo-de-dados` está
 arquivada: pelo adendo dela, **coluna nova cabe; tabela nova reabriria a change**, e aqui
 não há tabela nova.
 
-`docs/campos-formulario.md` passa a listar os campos 17 e 18 com a data e o dono da
+`docs/campos-formulario.md` passa a listar os campos 20 e 21 com a data e o dono da
 decisão, no mesmo formato do campo 16.
 
 ## Fora de escopo (explícito)
@@ -461,7 +461,7 @@ Cenário: Os campos originais não mudaram
   Quando os seus campos são comparados com docs/campos-formulario.md
   Então os 15 originais mantêm rótulo, ordem e obrigatoriedade
   E o campo 7 (número) não teve validação nem dica alteradas
-  E os campos 17 e 18 aparecem após o município
+  E os campos 20 e 21 aparecem após o município
 
 Cenário: As colunas novas gravam
   Cobre REQ-25

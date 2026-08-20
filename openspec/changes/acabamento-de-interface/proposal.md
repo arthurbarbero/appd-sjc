@@ -133,7 +133,7 @@ inteiro, não só para esta change:
 **A regra protege os 15 campos originais contra alteração; ela não proíbe acrescentar.**
 O precedente é do próprio projeto: o CEP virou o campo 16 por decisão do dono em
 2026-08-06, registrado em `docs/campos-formulario.md`. C6 segue o mesmo caminho e vira os
-campos **17 (Estado)** e **18 (País)**. C4 troca o controle do campo 5 de `textarea` para
+campos **20 (Estado)** e **21 (País)**. C4 troca o controle do campo 5 de `textarea` para
 caixa de uma linha, sem tocar rótulo, ordem nem obrigatoriedade.
 
 Duas observações de desenho que a spec precisa resolver, e que não mudam a decisão:
@@ -145,7 +145,7 @@ Duas observações de desenho que a spec precisa resolver, e que não mudam a de
 
 **Tarefa de rito que sai daqui**: a redação da regra no `CLAUDE.md` bloqueia acréscimo
 sem querer, e já causou este levantamento duas vezes. Ela é emendada junto com a change,
-e `docs/campos-formulario.md` ganha os campos 17 e 18 com a data e o dono da decisão.
+e `docs/campos-formulario.md` ganha os campos 20 e 21 com a data e o dono da decisão.
 
 ## Impacto
 

@@ -101,6 +101,17 @@ export const usuarios = sqliteTable(
     complemento: text('complemento'),
     bairro: text('bairro'),
     municipio: text('municipio'),
+    /*
+      Campos 20 e 21, acrescentados em 2026-08-20 por decisão do dono.
+
+      A regra do `CLAUDE.md` protege os 15 campos originais contra alteração; acrescentar
+      sempre foi decisão dele, e o precedente é o CEP, que virou o campo 16 em 06/08.
+
+      Anuláveis pelo mesmo motivo das colunas vizinhas: as linhas que já existem não têm
+      o dado, e a exclusão de conta anonimiza tudo isto.
+    */
+    estado: text('estado'),
+    pais: text('pais'),
     cuidadorNome: text('cuidador_nome'),
     cuidadorContato: text('cuidador_contato'),
 

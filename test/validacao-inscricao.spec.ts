@@ -21,6 +21,8 @@ const VALIDO = {
   numero: 's/n',
   bairro: 'Bairro Fictício',
   municipio: 'São José dos Campos',
+  estado: 'SP',
+  pais: 'Brasil',
   deficiencias: ['Física'],
   atendimentos: ['Fisioterapia'],
   dias: ['Segundas'],

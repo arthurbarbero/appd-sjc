@@ -32,6 +32,8 @@ const f = reactive({
   complemento: '',
   bairro: '',
   municipio: '',
+  estado: '',
+  pais: '',
 })
 
 watchEffect(() => {
@@ -46,6 +48,8 @@ watchEffect(() => {
   f.complemento = conta.complemento ?? ''
   f.bairro = conta.bairro ?? ''
   f.municipio = conta.municipio ?? ''
+  f.estado = conta.estado ?? ''
+  f.pais = conta.pais ?? 'Brasil'
 })
 
 const erros = reactive<Record<string, string>>({})
@@ -70,6 +74,7 @@ async function buscarCep() {
       endereco?: string
       bairro?: string
       municipio?: string
+      uf?: string
     }>(`/api/cep/${cep}`)
 
     if (!r.encontrado) {
@@ -81,6 +86,7 @@ async function buscarCep() {
     if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
     if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
     if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
+    if (!f.estado.trim() && r.uf) f.estado = r.uf
   } catch {
     avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
   } finally {
@@ -100,6 +106,8 @@ function corpo() {
     ...(f.complemento.trim() ? { complemento: f.complemento.trim() } : {}),
     bairro: f.bairro.trim(),
     municipio: f.municipio.trim(),
+    estado: f.estado.trim(),
+    pais: f.pais.trim(),
   }
 }
 
@@ -328,6 +336,36 @@ async function salvar() {
             />
             <span v-if="erros.municipio" id="erro-municipio" class="erro">
               {{ erros.municipio }}
+            </span>
+          </div>
+
+          <div :class="['campo', { 'campo-erro': erros.estado }]">
+            <label for="estado">Estado <span class="obrigatorio" aria-hidden="true">*</span></label>
+            <input
+              id="estado"
+              v-model="f.estado"
+              type="text"
+              autocomplete="address-level1"
+              :aria-invalid="erros.estado ? 'true' : undefined"
+              :aria-describedby="erros.estado ? 'erro-estado' : undefined"
+            />
+            <span v-if="erros.estado" id="erro-estado" class="erro">
+              {{ erros.estado }}
+            </span>
+          </div>
+
+          <div :class="['campo', { 'campo-erro': erros.pais }]">
+            <label for="pais">País <span class="obrigatorio" aria-hidden="true">*</span></label>
+            <input
+              id="pais"
+              v-model="f.pais"
+              type="text"
+              autocomplete="country-name"
+              :aria-invalid="erros.pais ? 'true' : undefined"
+              :aria-describedby="erros.pais ? 'erro-pais' : undefined"
+            />
+            <span v-if="erros.pais" id="erro-pais" class="erro">
+              {{ erros.pais }}
             </span>
           </div>
         </fieldset>

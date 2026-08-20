@@ -165,6 +165,8 @@ export default defineEventHandler(async (event) => {
           complemento: d.complemento ?? null,
           bairro: d.bairro,
           municipio: d.municipio,
+          estado: d.estado,
+          pais: d.pais,
           cuidadorNome: d.cuidadorNome ?? null,
           cuidadorContato: d.cuidadorContato ?? null,
           situacao: 'ativo',

@@ -24,14 +24,18 @@ useHead({
 
       <div class="acoes">
         <div class="acao">
+          <!--
+            As legendas sob os dois botões saíram na revisão do dono de 2026-08-20. Elas
+            explicavam o que o destino já explica: quem clica em "Preciso de atendimento"
+            chega numa tela que diz, no primeiro parágrafo, que leva poucos minutos e que
+            o contato vem por telefone.
+          -->
           <NuxtLink to="/atendimento/inscricao" class="botao botao-primario">
             Preciso de atendimento
           </NuxtLink>
-          <p class="apoio">Cadastro gratuito. A associação entra em contato pelo telefone.</p>
         </div>
         <div class="acao">
           <NuxtLink to="/doar" class="botao botao-secundario">Quero doar</NuxtLink>
-          <p class="apoio">Doação de equipamento, fralda ou alimento.</p>
         </div>
       </div>
     </section>
@@ -45,8 +49,9 @@ useHead({
 
     <section aria-labelledby="atendimento">
       <div class="cabeca-secao">
+        <!-- A linha de apoio saiu (2026-08-20): "deixa só os quadrados". Os cartões
+             nomeiam os serviços, e contá-los antes era redundância. -->
         <h2 id="atendimento">Atendimento</h2>
-        <p>Os cinco serviços que você pode pedir pelo cadastro de atendimento.</p>
       </div>
       <!--
         Cartão inteiro clicável, com um único link envolvendo o título (REQ-4 a REQ-6).
@@ -69,7 +74,6 @@ useHead({
     <section aria-labelledby="projetos">
       <div class="cabeca-secao">
         <h2 id="projetos">Projetos</h2>
-        <p>Atividades contínuas de esporte, geração de renda, manutenção e inclusão digital.</p>
       </div>
       <ul class="grade">
         <li v-for="p in PROJETOS" :key="p.slug">
@@ -143,11 +147,6 @@ useHead({
 
 .acao .botao {
   width: 100%;
-}
-
-.apoio {
-  font-size: var(--texto-rotulo);
-  color: var(--texto-suave);
 }
 
 .cabeca-secao {
