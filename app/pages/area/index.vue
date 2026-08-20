@@ -108,14 +108,12 @@ function cepBr(cep?: string | null) {
     </AppdAviso>
 
     <template v-else-if="data">
-      <div class="identificacao">
-        <p class="nome">{{ data.conta.nome }}</p>
-        <p class="numero">
-          Registro <strong>{{ data.conta.numeroRegistro }}</strong>
-        </p>
-        <p class="fixo">Este número é seu e não muda.</p>
-      </div>
-
+      <!--
+        O cartão que repetia nome e número saiu em 2026-08-20: "esse número é seu e não
+        muda, não precisa". Ele dizia, no alto de toda visita, o que o cartão do crachá
+        logo abaixo já diz — e a frase "este número é seu e não muda" é justamente a que
+        não precisa ser repetida a cada abertura da área.
+      -->
       <AreaNavegacao atual="painel" />
 
       <section class="cartao destaque" aria-labelledby="t-inscricao">
@@ -296,27 +294,6 @@ function cepBr(cep?: string | null) {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-}
-.identificacao {
-  background: var(--superficie);
-  border-radius: var(--raio);
-  padding: var(--e3);
-  max-width: var(--medida);
-}
-.identificacao p {
-  margin: 0;
-}
-.nome {
-  font-size: 1.19rem;
-  font-weight: 700;
-}
-.numero {
-  font-size: 1.19rem;
-  font-variant-numeric: tabular-nums;
-}
-.fixo {
-  font-size: 0.94rem;
-  color: var(--texto-suave);
 }
 .destaque {
   border-color: var(--borda);

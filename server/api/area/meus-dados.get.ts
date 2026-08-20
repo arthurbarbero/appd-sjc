@@ -22,6 +22,8 @@ export default defineEventHandler(async (event) => {
       nome: true,
       nascimento: true,
       email: true,
+      // Exibido travado em /area/dados desde 2026-08-20, junto de e-mail e nascimento.
+      cpf: true,
       telefone: true,
       // A tela de correção precisa dele preenchido: sem isto o formulário assumiria um
       // valor padrão e gravaria por cima da resposta real da pessoa ao salvar.

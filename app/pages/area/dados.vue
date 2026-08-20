@@ -52,6 +52,9 @@ watchEffect(() => {
   f.pais = conta.pais ?? 'Brasil'
 })
 
+/** Os três que a tela exibe travados. Vêm do servidor e nunca entram em `f`. */
+const conta = computed(() => data.value?.conta ?? null)
+
 const erros = reactive<Record<string, string>>({})
 const salvando = ref(false)
 const salvo = ref(false)
@@ -94,6 +97,36 @@ async function buscarCep() {
   }
 }
 
+/*
+  Nada mudou ainda?
+
+  Até 2026-08-20 "Salvar alterações" ficava disponível numa tela recém-aberta, e apertá-lo
+  gravava por cima com os mesmos valores. Botão que aceita o clique sem ter o que fazer
+  ensina que o clique não significa nada.
+
+  A comparação é contra o que o servidor devolveu, normalizado pelo mesmo `corpo()` que
+  seria enviado — assim máscara de telefone e CEP não contam como alteração.
+*/
+const alterado = computed(() => {
+  const c = conta.value
+  if (!c) return false
+  const atual = corpo()
+  const original = {
+    nome: (c.nome ?? '').trim(),
+    telefone: mascaraTelefone(c.telefone ?? ''),
+    telefoneWhatsapp: c.telefoneWhatsapp ?? 'Sim',
+    cep: soDigitos(c.cep ?? ''),
+    endereco: (c.endereco ?? '').trim(),
+    numero: (c.numero ?? '').trim(),
+    ...((c.complemento ?? '').trim() ? { complemento: (c.complemento ?? '').trim() } : {}),
+    bairro: (c.bairro ?? '').trim(),
+    municipio: (c.municipio ?? '').trim(),
+    estado: (c.estado ?? '').trim(),
+    pais: (c.pais ?? 'Brasil').trim(),
+  }
+  return JSON.stringify(atual) !== JSON.stringify(original)
+})
+
 /** Corpo enviado ao servidor — e o mesmo objeto que o schema valida antes de sair daqui. */
 function corpo() {
   return {
@@ -129,6 +162,14 @@ async function salvar() {
     salvo.value = true
     // Recarrega para o painel e o crachá refletirem o nome novo na próxima visita.
     await refreshNuxtData()
+    /*
+      Volta ao topo e põe o foco na confirmação. Sem isto, quem salvava lá embaixo ficava
+      olhando para o mesmo formulário sem sinal de que algo tinha acontecido — e quem usa
+      leitor de tela não ouvia nada.
+    */
+    await nextTick()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    resumo.value?.focus()
   } catch (erro: unknown) {
     const dados = (erro as { data?: { data?: { erros?: Record<string, string> } } })?.data?.data
     Object.assign(erros, dados?.erros ?? { formulario: 'Não conseguimos salvar agora.' })
@@ -196,13 +237,31 @@ async function salvar() {
             </span>
           </div>
 
-          <div :class="['campo', 'largo']">
-            <span class="rotulo-fixo">E-mail, CPF e data de nascimento</span>
-            <span class="ajuda">
-              Não são alterados por aqui. O e-mail é a chave da sua entrada e do jeito como a sua
-              senha é protegida; trocá-lo exige refazer a senha. Para corrigir qualquer um dos três,
-              fale com a secretaria.
-            </span>
+          <!--
+            Os três campos que não se alteram aparecem **preenchidos e travados**, e não
+            como parágrafo explicando por que não se alteram (2026-08-20).
+
+            `readonly`, não `disabled`: campo desabilitado sai da ordem de tabulação e
+            costuma perder contraste, e estes existem para serem lidos — inclusive por
+            quem confere o próprio cadastro com leitor de tela. `readonly` mantém o valor
+            focável e legível, e continua recusando edição.
+
+            A explicação de por que eles não mudam saiu junto: quem abre esta tela quer
+            conferir os próprios dados, não ler o motivo de uma decisão de arquitetura.
+          -->
+          <div class="campo">
+            <label for="email-fixo">E-mail</label>
+            <input id="email-fixo" :value="conta?.email ?? ''" type="text" readonly />
+          </div>
+
+          <div class="campo">
+            <label for="cpf-fixo">CPF</label>
+            <input id="cpf-fixo" :value="conta?.cpf ?? ''" type="text" readonly />
+          </div>
+
+          <div class="campo">
+            <label for="nascimento-fixo">Data de nascimento</label>
+            <input id="nascimento-fixo" :value="conta?.nascimento ?? ''" type="text" readonly />
           </div>
         </fieldset>
 
@@ -230,14 +289,22 @@ async function salvar() {
             </span>
           </div>
 
+          <!--
+            "Sim" e "Não" lado a lado (2026-08-20). Empilhavam porque a `legend` é item do
+            mesmo flex do `fieldset` e consumia a linha; o invólucro devolve as duas
+            opções à mesma faixa sem tirar a legenda do grupo, que é o que dá nome ao
+            conjunto para o leitor de tela.
+          -->
           <fieldset class="grupo-escolha">
             <legend>É WhatsApp <span class="obrigatorio" aria-hidden="true">*</span></legend>
-            <label class="escolha">
-              <input v-model="f.whatsapp" type="radio" value="Sim" /> Sim
-            </label>
-            <label class="escolha">
-              <input v-model="f.whatsapp" type="radio" value="Não" /> Não
-            </label>
+            <div class="escolhas">
+              <label class="escolha">
+                <input v-model="f.whatsapp" type="radio" value="Sim" /> Sim
+              </label>
+              <label class="escolha">
+                <input v-model="f.whatsapp" type="radio" value="Não" /> Não
+              </label>
+            </div>
           </fieldset>
         </fieldset>
 
@@ -371,7 +438,7 @@ async function salvar() {
         </fieldset>
 
         <div class="acoes">
-          <button type="submit" class="botao botao-primario" :disabled="salvando">
+          <button type="submit" class="botao botao-primario" :disabled="salvando || !alterado">
             {{ salvando ? 'Salvando…' : 'Salvar alterações' }}
           </button>
           <NuxtLink class="botao botao-secundario" to="/area">Voltar para a minha área</NuxtLink>
@@ -417,10 +484,13 @@ async function salvar() {
   border: 0;
   padding: 0;
   margin: 0;
+}
+.grupo-escolha .escolhas {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--e3);
+  margin-top: var(--e1);
 }
 .acoes {
   display: flex;

@@ -99,12 +99,20 @@ a:visited {
 .fim {
   margin-left: auto;
 }
+/*
+  "Sair" na cor da marca, não no azul de link.
+
+  `--link` é o azul reservado a link de texto corrido, e nesta barra ele destoava de tudo
+  ao redor — "bagulho azul", disse o dono em 2026-08-20. `--primaria` é a mesma cor de
+  "Entrar" e "Minha área" no cabeçalho, que são as outras duas ações de sessão do site;
+  10,01:1 sobre o fundo, bem acima do AA.
+*/
 .sair {
   min-height: var(--alvo-min);
   padding: 0 12px;
   border: 0;
   background: none;
-  color: var(--link);
+  color: var(--primaria);
   font: inherit;
   font-weight: 700;
   text-decoration: underline;

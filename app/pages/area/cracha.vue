@@ -237,8 +237,15 @@ async function exportar(formato: 'png' | 'pdf') {
         <span>{{ erroExportar }}</span>
       </AppdAviso>
 
-      <!-- REQ-24: em corpo normal, não em nota de rodapé -->
-      <p class="local">O arquivo é gerado aqui no seu navegador. Nada é enviado para fora.</p>
+      <!--
+        As duas linhas "O arquivo é gerado aqui no seu navegador / Nada é enviado para
+        fora" saíram em 2026-08-20, por decisão do dono, que as apontou com o mouse.
+
+        Fica registrado o que se perdeu, porque a decisão é dele e o custo é real: elas
+        eram a única vez em que a tela dizia ao titular que a foto não sobe para servidor
+        nenhum. A garantia continua verdadeira — a geração é local, no navegador — e
+        deixou de ser dita. Se a promessa voltar a precisar ser feita, o lugar é aqui.
+      -->
 
       <!--
         REQ-25: caixa única, separada das demais, desmarcada por padrão. O texto descreve
@@ -364,12 +371,6 @@ figcaption {
 
 .motivo {
   margin: 0;
-  max-width: var(--medida);
-}
-
-.local {
-  margin: 0;
-  color: var(--texto-suave);
   max-width: var(--medida);
 }
 

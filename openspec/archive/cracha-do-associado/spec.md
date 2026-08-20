@@ -140,8 +140,14 @@ houver ([ADR-015](../../../docs/adr/adr-015-verificacao-publica-exibe-foto-e-cui
 - **REQ-23**: A exportação em PNG e em PDF DEVE ser produzida integralmente no navegador,
   sem chamada a serviço externo e sem rota de renderização no servidor. Durante a exportação,
   zero requisições de rede.
-- **REQ-24**: A tela DEVE informar em texto visível, com corpo ≥ 15 px, que o arquivo é
-  gerado no próprio navegador e não é enviado para fora.
+- ~~**REQ-24**: A tela DEVE informar em texto visível, com corpo ≥ 15 px, que o arquivo é
+  gerado no próprio navegador e não é enviado para fora.~~
+  `[REVOGADO, 2026-08-20 — decisão do dono, change acabamento-de-interface REQ-38]`
+  O dono mandou apagar as duas linhas na revisão em vídeo, apontando-as com o mouse.
+  **O comportamento não mudou**: a geração continua sendo local, no navegador, e nada é
+  enviado para fora. O que deixou de existir é a tela **dizer isso** ao titular — este
+  requisito era a única coisa que o obrigava. Registrado aqui para que a ausência não
+  seja lida no futuro como esquecimento.
 - **REQ-25** `[v4, 2026-08-07 — ADR-019]`: O opt-in de tipo de deficiência DEVE ser uma caixa
   de seleção única, **separada das demais**, **desmarcada por padrão**, com texto que descreve
   só a consequência de marcar e a de não marcar — e que **nomeia os dois destinos**, o crachá

@@ -124,11 +124,12 @@ async function excluir() {
         Fora esses dois, nada fica guardado por prazo nenhum. O que sai, sai na hora, e não dá para
         desfazer.
       </p>
-      <p>
-        <strong>O que este site nunca teve é ficha de atendimento.</strong> Se você já foi atendida
-        na sede, a associação guarda esse documento em papel, por obrigação profissional. Para pedir
-        a exclusão dele, fale com a associação: apagar a sua conta aqui não apaga o arquivo de lá.
-      </p>
+      <!--
+        O parágrafo sobre a ficha de atendimento em papel saiu em 2026-08-20, por decisão
+        do dono: "se ele nunca teve, então você não vai falar nada". Ele explicava a
+        ausência de algo que o site jamais guardou, e numa tela de exclusão isso levanta
+        uma dúvida em vez de encerrá-la.
+      -->
     </section>
 
     <AppdAviso tipo="atencao" titulo="Isto não pode ser desfeito">
