@@ -129,7 +129,7 @@ function enviar() {
             :aria-describedby="erros.nome ? 'erro-nome' : 'ajuda-nome'"
           />
           <span v-if="erros.nome" id="erro-nome" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nome }}
+            {{ erros.nome }}
           </span>
         </div>
 
@@ -145,7 +145,7 @@ function enviar() {
             :aria-describedby="erros.email ? 'erro-email' : 'ajuda-email'"
           />
           <span v-if="erros.email" id="erro-email" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.email }}
+            {{ erros.email }}
           </span>
         </div>
 
@@ -171,7 +171,7 @@ function enviar() {
             {{ a.rotulo }}
           </label>
           <span v-if="erros.assunto" id="erro-assunto" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.assunto }}
+            {{ erros.assunto }}
           </span>
         </fieldset>
 
@@ -195,7 +195,7 @@ function enviar() {
             :aria-describedby="erros.mensagem ? 'erro-mensagem' : undefined"
           ></textarea>
           <span v-if="erros.mensagem" id="erro-mensagem" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.mensagem }}
+            {{ erros.mensagem }}
           </span>
         </div>
 

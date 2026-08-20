@@ -400,7 +400,7 @@ async function enviar() {
             :aria-describedby="erros.nome ? 'erro-nome' : 'ajuda-nome'"
           />
           <span v-if="erros.nome" id="erro-nome" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nome }}
+            {{ erros.nome }}
           </span>
         </div>
 
@@ -424,7 +424,7 @@ async function enviar() {
             @input="f.nascimento = aplicarMascara($event, mascaraData)"
           />
           <span v-if="erros.nascimento" id="erro-nascimento" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nascimento }}
+            {{ erros.nascimento }}
           </span>
         </div>
 
@@ -447,7 +447,7 @@ async function enviar() {
             @input="f.telefone = aplicarMascara($event, mascaraTelefone)"
           />
           <span v-if="erros.telefone" id="erro-telefone" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.telefone }}
+            {{ erros.telefone }}
           </span>
         </div>
 
@@ -458,7 +458,7 @@ async function enviar() {
           <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Sim" /> Sim</label>
           <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Não" /> Não</label>
           <span v-if="erros.whatsapp" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.whatsapp }}
+            {{ erros.whatsapp }}
           </span>
         </fieldset>
       </fieldset>
@@ -484,7 +484,7 @@ async function enviar() {
             @blur="buscarCep"
           />
           <span v-if="erros.cep" id="erro-cep" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.cep }}
+            {{ erros.cep }}
           </span>
           <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
           <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
@@ -504,7 +504,7 @@ async function enviar() {
             :aria-describedby="erros.endereco ? 'erro-endereco' : 'ajuda-endereco'"
           ></textarea>
           <span v-if="erros.endereco" id="erro-endereco" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.endereco }}
+            {{ erros.endereco }}
           </span>
         </div>
 
@@ -519,7 +519,7 @@ async function enviar() {
             :aria-describedby="erros.numero ? 'erro-numero' : 'ajuda-numero'"
           />
           <span v-if="erros.numero" id="erro-numero" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.numero }}
+            {{ erros.numero }}
           </span>
         </div>
 
@@ -545,7 +545,7 @@ async function enviar() {
             :aria-describedby="erros.bairro ? 'erro-bairro' : 'ajuda-bairro'"
           />
           <span v-if="erros.bairro" id="erro-bairro" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.bairro }}
+            {{ erros.bairro }}
           </span>
         </div>
 
@@ -564,7 +564,7 @@ async function enviar() {
             :aria-describedby="erros.municipio ? 'erro-municipio' : 'ajuda-municipio'"
           />
           <span v-if="erros.municipio" id="erro-municipio" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.municipio }}
+            {{ erros.municipio }}
           </span>
         </div>
       </fieldset>
@@ -616,7 +616,7 @@ async function enviar() {
             <input id="deficiencia-outro" v-model="f.deficienciaOutro" type="text" />
           </div>
           <span v-if="erros.deficiencias" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.deficiencias }}
+            {{ erros.deficiencias }}
           </span>
         </fieldset>
 
@@ -637,7 +637,7 @@ async function enviar() {
             <input id="atendimento-outro" v-model="f.atendimentoOutro" type="text" />
           </div>
           <span v-if="erros.atendimentos" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.atendimentos }}
+            {{ erros.atendimentos }}
           </span>
         </fieldset>
 
@@ -653,7 +653,7 @@ async function enviar() {
             {{ d }}
           </label>
           <span v-if="erros.dias" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.dias }}
+            {{ erros.dias }}
           </span>
         </fieldset>
       </fieldset>
@@ -683,7 +683,7 @@ async function enviar() {
             aria-describedby="ajuda-email"
           />
           <span v-if="erros.email" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.email }}
+            {{ erros.email }}
           </span>
         </div>
 
@@ -703,7 +703,7 @@ async function enviar() {
             @input="f.cpf = aplicarMascara($event, mascaraCpf)"
           />
           <span v-if="erros.cpf" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.cpf }}
+            {{ erros.cpf }}
           </span>
         </div>
 
@@ -722,7 +722,7 @@ async function enviar() {
             aria-describedby="ajuda-senha"
           />
           <span v-if="erros.senha" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.senha }}
+            {{ erros.senha }}
           </span>
         </div>
       </fieldset>
@@ -755,7 +755,7 @@ async function enviar() {
             atendimento.
           </label>
           <span v-if="erros.consentimento" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.consentimento }}
+            {{ erros.consentimento }}
           </span>
         </div>
 
@@ -775,7 +775,7 @@ async function enviar() {
             Ciente
           </label>
           <span v-if="erros.ciente" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.ciente }}
+            {{ erros.ciente }}
           </span>
         </fieldset>
       </fieldset>

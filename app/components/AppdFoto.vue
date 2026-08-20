@@ -72,7 +72,40 @@ function limpar() {
   deslocY.value = 0
 }
 
-onBeforeUnmount(limpar)
+/*
+  A foto que já estava pronta antes de a pessoa abrir um novo recorte.
+
+  Sem isto, "Cancelar" no meio do recorte apagava a foto que já existia e devolvia a tela
+  ao estado vazio — a pessoa saía do recorte com menos do que tinha ao entrar. O dono
+  chamou de "deixar branco" na revisão de 2026-08-20, e a regra que ele deu é a óbvia:
+  desistir de trocar volta ao que havia, não ao nada.
+
+  A prévia anterior fica de fora do `limpar()` justamente para sobreviver a ele; quem a
+  revoga é `descartarGuardada()`, e só quando ela deixa de ser alcançável.
+*/
+const fotoGuardada = shallowRef<Blob | null>(null)
+const previaGuardada = ref('')
+
+function guardarAtual() {
+  descartarGuardada()
+  if (foto.value && previa.value) {
+    fotoGuardada.value = foto.value
+    // a URL da prévia atual passa a ser da guardada: quem revoga agora é descartarGuardada
+    previaGuardada.value = previa.value
+    previa.value = ''
+  }
+}
+
+function descartarGuardada() {
+  if (previaGuardada.value) URL.revokeObjectURL(previaGuardada.value)
+  previaGuardada.value = ''
+  fotoGuardada.value = null
+}
+
+onBeforeUnmount(() => {
+  limpar()
+  descartarGuardada()
+})
 
 async function escolher(evento: Event) {
   const arquivo = (evento.target as HTMLInputElement).files?.[0]
@@ -216,6 +249,7 @@ async function usarEstaFoto() {
     return
   }
 
+  descartarGuardada()
   foto.value = blob
   previa.value = URL.createObjectURL(blob)
   etapa.value = 'pronto'
@@ -223,13 +257,26 @@ async function usarEstaFoto() {
 
 function cancelar() {
   limpar()
+  if (entrada.value) entrada.value.value = ''
+
+  // Desistir do recorte devolve a foto que havia, não o vazio.
+  if (fotoGuardada.value) {
+    foto.value = fotoGuardada.value
+    previa.value = previaGuardada.value
+    fotoGuardada.value = null
+    previaGuardada.value = ''
+    etapa.value = 'pronto'
+    return
+  }
+
   foto.value = null
   etapa.value = 'vazio'
-  if (entrada.value) entrada.value.value = ''
 }
 
 function trocar() {
-  cancelar()
+  guardarAtual()
+  limpar()
+  if (entrada.value) entrada.value.value = ''
   entrada.value?.click()
 }
 

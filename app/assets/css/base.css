@@ -329,10 +329,20 @@ a:hover {
   background: var(--erro-fundo);
 }
 
+/*
+  Erro de campo: a frase, e só a frase.
+
+  O "✕" que vinha colado ao texto saiu na revisão do dono de 2026-08-20. Ele não era o
+  meio não-cromático de sinalizar o erro — era decoração `aria-hidden`, invisível para
+  quem usa leitor de tela. Quem carrega a sinalização é a própria frase, ligada ao campo
+  por `aria-describedby` e anunciada em região viva, mais a borda do campo em `.campo-erro`.
+  Por isso tirá-lo não fere o 1.4.1: nunca houve informação só na cor.
+
+  O corpo fica em `--texto-rotulo`, que é 15px — menor que o do campo, como o dono pediu,
+  e exatamente no piso duro do site. Não desce mais.
+*/
 .campo .erro {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--e1);
+  display: block;
   color: var(--erro);
   font-weight: var(--peso-forte);
   font-size: var(--texto-rotulo);

@@ -193,7 +193,18 @@ function cepBr(cep?: string | null) {
           </p>
 
           <div class="previa">
-            <div v-if="temFoto" class="foto" aria-hidden="true">Foto</div>
+            <!--
+              A foto de verdade, e não a palavra "Foto".
+
+              Até 2026-08-20 este bloco desenhava um retângulo cinza com o texto "Foto"
+              quando a pessoa **tinha** foto — um marcador de lugar que nunca foi trocado
+              pela imagem. Quem tinha acabado de enviar a sua via o cadastro dizer que
+              estava tudo certo e a área dizer o contrário.
+
+              `alt` vazio de propósito: o nome está no texto ao lado, e a foto aqui é
+              ilustração do crachá, não informação nova.
+            -->
+            <img v-if="temFoto" class="foto" src="/api/area/foto" alt="" width="96" height="120" />
             <div v-else class="foto sem-foto">Sem foto</div>
             <div>
               <p class="nome-cracha">{{ data.conta.nome }}</p>
@@ -356,6 +367,7 @@ dd {
   width: 96px;
   height: 120px;
   flex: none;
+  object-fit: cover;
   border-radius: var(--raio-botao);
   background: var(--superficie-forte);
   color: var(--texto-suave);

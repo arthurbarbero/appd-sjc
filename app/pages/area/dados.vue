@@ -184,7 +184,7 @@ async function salvar() {
               :aria-describedby="erros.nome ? 'erro-nome' : undefined"
             />
             <span v-if="erros.nome" id="erro-nome" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.nome }}
+              {{ erros.nome }}
             </span>
           </div>
 
@@ -218,7 +218,7 @@ async function salvar() {
               @input="f.telefone = aplicarMascara($event, mascaraTelefone)"
             />
             <span v-if="erros.telefone" id="erro-telefone" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.telefone }}
+              {{ erros.telefone }}
             </span>
           </div>
 
@@ -252,7 +252,7 @@ async function salvar() {
               @blur="buscarCep"
             />
             <span v-if="erros.cep" id="erro-cep" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.cep }}
+              {{ erros.cep }}
             </span>
             <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
             <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
@@ -271,7 +271,7 @@ async function salvar() {
               :aria-describedby="erros.endereco ? 'erro-endereco' : undefined"
             />
             <span v-if="erros.endereco" id="erro-endereco" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.endereco }}
+              {{ erros.endereco }}
             </span>
           </div>
 
@@ -286,7 +286,7 @@ async function salvar() {
               :aria-describedby="erros.numero ? 'erro-numero' : 'ajuda-numero'"
             />
             <span v-if="erros.numero" id="erro-numero" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.numero }}
+              {{ erros.numero }}
             </span>
           </div>
 
@@ -311,7 +311,7 @@ async function salvar() {
               :aria-describedby="erros.bairro ? 'erro-bairro' : undefined"
             />
             <span v-if="erros.bairro" id="erro-bairro" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.bairro }}
+              {{ erros.bairro }}
             </span>
           </div>
 
@@ -327,7 +327,7 @@ async function salvar() {
               :aria-describedby="erros.municipio ? 'erro-municipio' : undefined"
             />
             <span v-if="erros.municipio" id="erro-municipio" class="erro">
-              <span class="icone" aria-hidden="true">✕</span>{{ erros.municipio }}
+              {{ erros.municipio }}
             </span>
           </div>
         </fieldset>

@@ -104,7 +104,7 @@ const busca = ref('')
   display: flex;
   flex-direction: column;
   gap: var(--e1);
-  max-width: 36rem;
+  max-width: var(--bloco-estreito);
 }
 
 .busca label {
