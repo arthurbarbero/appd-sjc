@@ -131,9 +131,17 @@ useHead({
   color: var(--texto-suave);
 }
 
+/*
+  Teto de 340px por coluna, e não `1fr`.
+
+  Com `1fr` os dois botões esticavam para preencher a faixa inteira — e quando a faixa
+  passou a ser a do bloco, em 2026-08-20, viraram dois retângulos de quase 500px. Botão
+  não fica mais fácil de acertar por ser largo depois de certo ponto; fica só grande.
+*/
 .acoes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  justify-content: start;
   gap: var(--e4);
   margin-top: var(--e2);
   max-width: var(--bloco-medio);

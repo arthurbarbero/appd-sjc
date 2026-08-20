@@ -370,6 +370,28 @@ a:hover {
   padding: 0 var(--e2);
 }
 
+/*
+  Duas opções curtas ficam na mesma linha.
+
+  A coluna é o certo para as listas do formulário — tipos de deficiência, atendimentos,
+  dias —, onde há muitos itens e o olho desce. Para um par "Sim / Não" ela empilhava sem
+  motivo e esticava o grupo pela faixa inteira. O dono apontou isso em 2026-08-20: "pode
+  ficar lá na esquerda e na direita, não precisa disso".
+
+  `width: fit-content` porque um grupo de duas palavras não tem por que ocupar a largura
+  do cartão que o abriga.
+*/
+.grupo-escolha.em-linha {
+  width: fit-content;
+}
+
+.grupo-escolha.em-linha .escolhas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e3);
+}
+
 /* Cada opção é um bloco clicável inteiro, não só a caixinha. */
 .escolha {
   display: flex;

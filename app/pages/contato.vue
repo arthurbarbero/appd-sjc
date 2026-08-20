@@ -11,6 +11,31 @@ const assuntos = [
 ]
 
 const form = reactive({ nome: '', email: '', telefone: '', assunto: '', mensagem: '' })
+
+/*
+  Quem já entrou não redigita o que a associação já tem (2026-08-20).
+
+  "Se eu tô logado, por que você já não [preenche]?" — e a pergunta é justa: nome, e-mail
+  e telefone estão no cadastro. Os campos continuam editáveis, porque a pessoa pode querer
+  ser respondida em outro contato.
+
+  A busca é condicionada à sessão e falha em silêncio: esta é uma página pública, e um
+  erro ao buscar dados de conta não pode atrapalhar quem só quer escrever uma mensagem.
+*/
+const { loggedIn } = useUserSession()
+
+if (loggedIn.value) {
+  const { data: conta } = await useFetch('/api/area/meus-dados', {
+    onResponseError: () => {},
+  })
+  watchEffect(() => {
+    const c = conta.value?.conta
+    if (!c) return
+    if (!form.nome) form.nome = c.nome ?? ''
+    if (!form.email) form.email = c.email ?? ''
+    if (!form.telefone) form.telefone = mascararTelefone(c.telefone ?? '')
+  })
+}
 const erros = reactive<Record<string, string>>({})
 const enviado = ref(false)
 
@@ -201,10 +226,17 @@ function enviar() {
 
         <div class="envio">
           <!--
-            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito.
-            "Enviar mensagem" seria uma promessa que o sistema não cumpre.
+            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito e
+            não envia nada. "Enviar mensagem" seria promessa que o sistema não cumpre —
+            falta a associação definir quem recebe.
+
+            "Conferir minha mensagem" ainda deixava a pergunta que o dono fez em
+            2026-08-20: "se eu conferir, vai pra onde?". O rótulo agora responde antes do
+            clique, em vez de esperar o aviso amarelo acima explicar.
           -->
-          <button type="submit" class="botao botao-primario">Conferir minha mensagem</button>
+          <button type="submit" class="botao botao-primario">
+            Conferir o que escrevi (ainda não envia)
+          </button>
           <p class="discreto">
             <AppdSelo /> O prazo de resposta será publicado quando a associação definir quem
             responde.

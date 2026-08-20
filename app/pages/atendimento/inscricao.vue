@@ -455,12 +455,18 @@ async function enviar() {
           </span>
         </div>
 
-        <fieldset :class="['grupo-escolha', { 'campo-erro': erros.whatsapp }]">
+        <fieldset :class="['grupo-escolha', 'em-linha', { 'campo-erro': erros.whatsapp }]">
           <legend id="whatsapp">
             É WhatsApp <span class="obrigatorio" aria-hidden="true">*</span>
           </legend>
-          <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Sim" /> Sim</label>
-          <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Não" /> Não</label>
+          <div class="escolhas">
+            <label class="escolha"
+              ><input v-model="f.whatsapp" type="radio" value="Sim" /> Sim</label
+            >
+            <label class="escolha"
+              ><input v-model="f.whatsapp" type="radio" value="Não" /> Não</label
+            >
+          </div>
           <span v-if="erros.whatsapp" class="erro">
             {{ erros.whatsapp }}
           </span>

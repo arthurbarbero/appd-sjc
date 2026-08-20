@@ -295,7 +295,7 @@ async function salvar() {
             opções à mesma faixa sem tirar a legenda do grupo, que é o que dá nome ao
             conjunto para o leitor de tela.
           -->
-          <fieldset class="grupo-escolha">
+          <fieldset class="grupo-escolha em-linha">
             <legend>É WhatsApp <span class="obrigatorio" aria-hidden="true">*</span></legend>
             <div class="escolhas">
               <label class="escolha">
@@ -484,13 +484,6 @@ async function salvar() {
   border: 0;
   padding: 0;
   margin: 0;
-}
-.grupo-escolha .escolhas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--e3);
-  margin-top: var(--e1);
 }
 .acoes {
   display: flex;
