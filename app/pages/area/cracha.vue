@@ -327,7 +327,7 @@ async function exportar(formato: 'png' | 'pdf') {
 
 .chamada {
   font-size: var(--texto-corpo-g);
-  max-width: 56ch;
+  max-width: var(--medida);
 }
 
 .sem-foto-bloco {
@@ -364,13 +364,13 @@ figcaption {
 
 .motivo {
   margin: 0;
-  max-width: 32ch;
+  max-width: var(--medida);
 }
 
 .local {
   margin: 0;
   color: var(--texto-suave);
-  max-width: 40ch;
+  max-width: var(--medida);
 }
 
 .escolha-optin {
@@ -382,7 +382,7 @@ figcaption {
 }
 
 .escolha-optin p {
-  max-width: 60ch;
+  max-width: var(--medida);
 }
 
 #consequencias {

@@ -171,7 +171,7 @@ async function entrar() {
 
 <style scoped>
 .entrar {
-  max-width: 440px;
+  max-width: var(--bloco-estreito);
   margin: 0 auto;
   padding: var(--e5) var(--e3) var(--e7);
   display: flex;

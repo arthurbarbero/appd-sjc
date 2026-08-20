@@ -66,7 +66,24 @@
   --entrelinha-titulo: 1.12;
   --entrelinha-corpo: 1.65;
   --ajuste-titulo: -0.02em; /* títulos grandes respiram melhor apertados */
-  --medida: 68ch;
+
+  /*
+    Largura: duas coisas diferentes, que estavam misturadas.
+
+    `--medida` é **medida de leitura**: quantos caracteres cabem numa linha antes de o
+    olho se perder na volta. Vale para prosa, e só para prosa — por isso ela mora na
+    classe `.prosa`, e não no seletor `p`. Aplicada a todo parágrafo do site, ela
+    espremia formulário, cartão e coluna de grade, e foi a queixa que o dono repetiu em
+    sete telas na revisão de 2026-08-20.
+
+    `--bloco*` é **largura de layout**: o quanto um bloco ocupa do container. Antes desta
+    change havia treze valores avulsos espalhados pelas páginas (de 32ch a 1080px), cada
+    tela resolvendo a sua. Agora são três, e ninguém inventa o quarto.
+  */
+  --medida: 78ch;
+  --bloco: 1120px; /* o container do conteúdo, no layout */
+  --bloco-medio: 62rem; /* 992px — formulário e cartão de conteúdo */
+  --bloco-estreito: 30rem; /* 480px — entrar, modal, coluna curta */
 
   /* ---------- espaçamento (base 8, mais generoso) ---------- */
   --e1: 4px;

@@ -294,7 +294,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 36rem;
+  max-width: var(--bloco-medio);
 }
 
 .campo.largo {

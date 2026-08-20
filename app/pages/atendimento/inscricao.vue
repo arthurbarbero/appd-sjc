@@ -822,7 +822,7 @@ async function enviar() {
   display: flex;
   flex-direction: column;
   gap: var(--e5);
-  max-width: 44rem;
+  max-width: var(--bloco-medio);
 }
 
 .secao {
@@ -907,7 +907,7 @@ async function enviar() {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 44rem;
+  max-width: var(--bloco-medio);
 }
 
 .registro {

@@ -153,7 +153,7 @@ async function salvar() {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 640px;
+  max-width: var(--bloco-medio);
 }
 form {
   display: flex;

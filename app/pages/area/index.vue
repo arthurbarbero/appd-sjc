@@ -290,7 +290,7 @@ function cepBr(cep?: string | null) {
   background: var(--superficie);
   border-radius: var(--raio);
   padding: var(--e3);
-  max-width: 44ch;
+  max-width: var(--medida);
 }
 .identificacao p {
   margin: 0;

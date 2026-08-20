@@ -197,7 +197,7 @@ async function excluir() {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 66ch;
+  max-width: var(--medida);
 }
 h2 {
   margin-top: 0;
@@ -222,7 +222,7 @@ h2 {
   border-radius: var(--raio);
   box-shadow: var(--sombra-2);
   padding: var(--e4);
-  max-width: 480px;
+  max-width: var(--bloco-estreito);
   width: 100%;
   display: flex;
   flex-direction: column;

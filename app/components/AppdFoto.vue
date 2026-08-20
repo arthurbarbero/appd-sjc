@@ -387,7 +387,7 @@ const tamanhoPronto = computed(() => (foto.value ? `${Math.round(foto.value.size
   display: flex;
   flex-direction: column;
   gap: var(--e2);
-  max-width: 48ch;
+  max-width: var(--medida);
 }
 
 .foto-recorte,
@@ -469,7 +469,7 @@ const tamanhoPronto = computed(() => (foto.value ? `${Math.round(foto.value.size
   margin: 0;
   font-size: var(--texto-rotulo);
   color: var(--texto-suave);
-  max-width: 44ch;
+  max-width: var(--medida);
 }
 
 .foto-barra {

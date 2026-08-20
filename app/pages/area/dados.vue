@@ -348,7 +348,7 @@ async function salvar() {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 66ch;
+  max-width: var(--medida);
 }
 .secao {
   border: 1px solid var(--borda-suave);

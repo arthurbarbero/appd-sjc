@@ -47,8 +47,30 @@ h3 {
 
 p {
   margin: 0;
-  max-width: var(--medida);
   text-align: left; /* nunca justificado */
+}
+
+/*
+  A medida de leitura, aplicada onde ela é verdade.
+
+  Até 2026-08-20 isto era `max-width: var(--medida)` no seletor `p`, e por isso valia
+  para **todo** parágrafo: a dica de um campo, a legenda de um cartão, a célula de uma
+  grade. Num container de 1120px o resultado era metade da tela vazia, e foi assim que a
+  mesma queixa apareceu em sete telas diferentes na revisão do dono.
+
+  Agora quem carrega a medida é o bloco de prosa, declarado por quem escreve a tela.
+  Fora dele, a largura é decidida pelo pai — que é o certo para formulário, cartão e
+  qualquer coisa que já esteja dentro de uma coluna.
+*/
+.prosa {
+  /*
+    Centralizado, e não encostado à esquerda: o bloco de leitura estreito dentro de um
+    container largo parecia defeito quando o vazio ficava todo de um lado só. Simétrico,
+    ele lê como decisão.
+  */
+  max-width: var(--medida);
+  margin-inline: auto;
+  width: 100%;
 }
 
 /* Olho-de-seção: o pequeno rótulo acima do título. Dá hierarquia sem peso visual. */
@@ -251,7 +273,9 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: var(--e1);
-  max-width: 34rem;
+  /* 40rem, não 34: o cartão que abriga o campo passou a usar a largura do bloco, e o
+     controle preso em 544px lia como "espremido" ao lado dele. */
+  max-width: 40rem;
 }
 
 /* Rótulo em caixa alta e baixa: CAIXA ALTA reduz legibilidade porque apaga o

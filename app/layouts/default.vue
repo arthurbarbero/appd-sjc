@@ -139,7 +139,7 @@ const atual = (para: string) =>
 .conteudo {
   flex: 1;
   width: 100%;
-  max-width: 1120px;
+  max-width: var(--bloco);
   margin-inline: auto;
   padding: var(--e5) clamp(var(--e3), 4vw, var(--e6)) var(--e7);
   display: flex;
@@ -209,7 +209,7 @@ const atual = (para: string) =>
 /* Rodapé */
 .colunas {
   width: 100%;
-  max-width: 1120px;
+  max-width: var(--bloco);
   margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -246,7 +246,7 @@ const atual = (para: string) =>
 
 .aviso-rodape {
   width: 100%;
-  max-width: 1120px;
+  max-width: var(--bloco);
   margin-inline: auto;
   border-top: var(--borda-largura) solid rgba(255, 255, 255, 0.2);
   padding-top: var(--e3);

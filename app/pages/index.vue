@@ -132,7 +132,7 @@ useHead({
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--e4);
   margin-top: var(--e2);
-  max-width: 760px;
+  max-width: var(--bloco-medio);
 }
 
 .acao {

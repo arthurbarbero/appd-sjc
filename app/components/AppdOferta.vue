@@ -223,7 +223,7 @@ section {
 
 .ilustracao img {
   width: 100%;
-  max-width: 720px;
+  max-width: var(--bloco-medio);
   height: auto;
   border-radius: var(--raio);
   border: var(--borda-largura) solid var(--borda-suave);
