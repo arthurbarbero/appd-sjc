@@ -26,6 +26,24 @@ export default defineEventHandler(async (event) => {
       numeroRegistro: true,
       situacao: true,
       crachaMostraDeficiencia: true,
+      // Campos do cartão de papel (2026-08-21). Nenhum é sensível por si.
+      cras: true,
+      credencialTransporte: true,
+      contatoEmergencia: true,
+      cuidadorNome: true,
+      cuidadorContato: true,
+      criadoEm: true,
+      // O opt-in, não o dado: o CID só é buscado se ele estiver ligado, logo abaixo.
+      cidNoCracha: true,
+      /*
+        O valor vem para responder **uma** pergunta — existe CID guardado? —, e não para
+        ir à tela. É o que permite a área oferecer o opt-in de impressão a quem tem CID
+        sem que o diagnóstico trafegue enquanto a impressão está desligada.
+
+        Sem isto a lógica ficava circular: a tela só mostrava o controle se recebesse o
+        CID, e a rota só mandava o CID se o controle já estivesse ligado.
+      */
+      cid: true,
     },
   })
   if (!conta) throw createError({ statusCode: 401 })
@@ -41,6 +59,15 @@ export default defineEventHandler(async (event) => {
         .then((i) => (i ? (JSON.parse(i.deficiencias) as string[]) : []))
     : []
 
+  /*
+    O CID sai do banco **só** quando vai ser impresso — mesma regra que já valia para o
+    campo 12, e pelo mesmo motivo: sem opt-in, dado sensível não chega nem a ser lido.
+
+    A diferença em relação ao campo 12 é o que acontece depois. Aquele, com opt-in, também
+    aparece em `/verificar`; este nunca aparece lá, em nenhuma hipótese (ADR-020).
+  */
+  const cid = conta.cidNoCracha ? conta.cid : null
+
   const foto = await armazenamentoFoto(bd).ler(sessao.id)
 
   setHeader(event, 'Cache-Control', 'private, no-store')
@@ -51,6 +78,20 @@ export default defineEventHandler(async (event) => {
     situacao: conta.situacao as 'ativo' | 'inativo',
     mostraDeficiencia: conta.crachaMostraDeficiencia,
     deficiencias,
+    cidNoCracha: conta.cidNoCracha,
+    /* Booleano, não o valor: a tela precisa saber que existe, não qual é. */
+    temCid: Boolean(conta.cid),
+    cid,
+    cras: conta.cras,
+    credencialTransporte: conta.credencialTransporte,
+    /*
+      Sem contato de emergência, cai para o do cuidador — é o que "contato se houver"
+      quer dizer. A queda acontece aqui, e não no componente, para a tela de impressão e a
+      de tela mostrarem exatamente a mesma coisa.
+    */
+    contatoEmergencia: conta.contatoEmergencia ?? conta.cuidadorContato,
+    cuidadorNome: conta.cuidadorNome,
+    emissao: conta.criadoEm,
     foto: foto ? `data:${TIPO_ARMAZENADO};base64,${paraBase64(foto.conteudo)}` : null,
   }
 })

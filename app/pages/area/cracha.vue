@@ -129,6 +129,34 @@ async function alternarOptIn(evento: Event) {
   }
 }
 
+/**
+ * O opt-in de imprimir o CID.
+ *
+ * Espelha `alternarOptIn` de propósito, inclusive na volta da caixa quando a gravação
+ * falha: caixa que mostra um estado que o banco não tem é a pior falha possível aqui,
+ * porque a pessoa acharia que escolheu.
+ *
+ * O texto de confirmação diz o que **não** muda, e não é redundância: a diferença entre
+ * este opt-in e o do tipo de deficiência é justamente que aquele também libera a página
+ * pública, e este nunca (ADR-020).
+ */
+async function alternarCidNoCracha(evento: Event) {
+  const caixa = evento.target as HTMLInputElement
+  const marcado = caixa.checked
+  confirmacaoOptIn.value = ''
+  erroOptIn.value = ''
+  try {
+    await $fetch('/api/area/cracha', { method: 'PUT', body: { cidNoCracha: marcado } })
+    await refresh()
+    confirmacaoOptIn.value = marcado
+      ? 'Escolha guardada: o CID passa a aparecer no crachá. Ele continua fora da página pública.'
+      : 'Escolha guardada: o CID não aparece no crachá.'
+  } catch {
+    caixa.checked = !marcado
+    erroOptIn.value = 'Não conseguimos guardar a sua escolha agora. Nada mudou — tente de novo.'
+  }
+}
+
 async function exportar(formato: 'png' | 'pdf') {
   exportando.value = formato
   erroExportar.value = ''
@@ -259,6 +287,10 @@ async function exportar(formato: 'png' | 'pdf') {
               :situacao="data.situacao"
               :foto="data.foto"
               :deficiencias="data.deficiencias"
+              :cid="data.cidNoCracha ? data.cid : null"
+              :cras="data.cras"
+              :credencial-transporte="data.credencialTransporte"
+              :emissao="data.emissao"
               :url-verificacao="urlVerificacao"
             />
           </figure>
@@ -269,6 +301,8 @@ async function exportar(formato: 'png' | 'pdf') {
               :nome="data.nome ?? ''"
               :numero-registro="data.numeroRegistro"
               :situacao="data.situacao"
+              :contato-emergencia="data.contatoEmergencia"
+              :cuidador-nome="data.cuidadorNome"
               :url-verificacao="urlVerificacao"
             />
           </figure>
@@ -386,6 +420,49 @@ async function exportar(formato: 'png' | 'pdf') {
         só a consequência de marcar e a de não marcar — nada de "recomendado", "ajuda" ou
         "facilita", nada de emoji, nada de cor de ação.
       -->
+      <!--
+        O opt-in do CID aparece **só para quem tem CID guardado**.
+
+        Quem nunca informou não precisa ver uma caixa sobre um dado que não deu — seria
+        oferecer a impressão de algo inexistente, e convidar a pergunta errada.
+      -->
+      <section v-if="data.temCid" class="cartao opt-in" aria-labelledby="t-cid">
+        <h2 id="t-cid">O CID no meu crachá</h2>
+
+        <div class="escolha-optin">
+          <p class="estado-atual">
+            <strong>Hoje o seu crachá {{ data.cidNoCracha ? 'mostra' : 'não mostra' }}</strong>
+            o seu CID.
+          </p>
+
+          <label class="escolha" for="cid-no-cracha">
+            <input
+              id="cid-no-cracha"
+              type="checkbox"
+              :checked="data.cidNoCracha"
+              aria-describedby="cid-consequencias"
+              @change="alternarCidNoCracha"
+            />
+            <span>Mostrar o meu CID no crachá</span>
+          </label>
+
+          <div id="cid-consequencias">
+            <p>
+              Se você marcar, o código do seu diagnóstico é impresso na frente do cartão — e o
+              cartão é o documento que você mostra a quem pedir.
+            </p>
+            <p>
+              <strong>A página pública de verificação nunca mostra o seu CID</strong>, marcado ou
+              não. Ela é aberta a qualquer pessoa que tenha o seu número de registro.
+            </p>
+            <p>
+              Para apagar o CID de vez, retire a autorização em
+              <NuxtLink to="/seus-direitos">Seus direitos</NuxtLink>.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="cartao opt-in" aria-labelledby="t-aparece">
         <h2 id="t-aparece">O que aparece no meu crachá</h2>
         <p>

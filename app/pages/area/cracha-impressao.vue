@@ -112,6 +112,10 @@ function fechar() {
             :situacao="data.situacao"
             :foto="data.foto"
             :deficiencias="data.deficiencias"
+            :cid="data.cidNoCracha ? data.cid : null"
+            :cras="data.cras"
+            :credencial-transporte="data.credencialTransporte"
+            :emissao="data.emissao"
             :url-verificacao="urlVerificacao"
           />
         </div>
@@ -121,6 +125,8 @@ function fechar() {
             :nome="data.nome ?? ''"
             :numero-registro="data.numeroRegistro"
             :situacao="data.situacao"
+            :contato-emergencia="data.contatoEmergencia"
+            :cuidador-nome="data.cuidadorNome"
             :url-verificacao="urlVerificacao"
           />
         </div>
