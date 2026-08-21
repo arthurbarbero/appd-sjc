@@ -62,7 +62,9 @@ formulário atual é texto livre, o que produz data em cinco formatos diferentes
 vira campo de data com componente acessível, aceitando digitação direta em `dd/mm/aaaa`
 além do seletor. É melhoria de forma, não de conteúdo — a pergunta é a mesma.
 
-**3. TELEFONE PARA CONTATO** — obrigatório, com máscara. É o canal do primeiro contato:
+**3. TELEFONE PARA CONTATO** — obrigatório, com máscara. Desde 2026-08-21 o campo nasce
+com `+55` escrito e o valor é guardado em formato internacional (`+5512991657059`); a
+pessoa pode apagar o código do país, e quem mora fora do Brasil precisa poder. É o canal do primeiro contato:
 o bloco introdutório diz explicitamente para mantê-lo atualizado. Aceitar celular e
 fixo. A máscara nunca pode impedir o envio — se o número não casar com o padrão
 esperado, avisar, não bloquear silenciosamente.
@@ -84,8 +86,8 @@ fora de São José dos Campos, e uma lista fechada excluiria essas pessoas.
 
 **11. CONTATO DO CUIDADOR** — texto, opcional.
 
-**12. POSSUI ALGUMA DEFICIÊNCIA** — checkbox de múltipla escolha, obrigatório (pelo
-menos uma). Opções exatas:
+**12. POSSUI ALGUMA DEFICIÊNCIA** — checkbox de múltipla escolha, **opcional desde
+2026-08-21**. Opções exatas:
 
 - `Física`
 - `Intelectual ou Neurodivergentes`
@@ -98,8 +100,19 @@ menos uma). Opções exatas:
 > crachá sem opt-in explícito, e nunca aparece na verificação pública. Ver a change
 > `consentimento-e-privacidade`.
 
-**13. Tipo de Atendimento** — checkbox de múltipla escolha, obrigatório (pelo menos
-uma). Opções exatas:
+> **Deixou de ser obrigatório em 2026-08-21**, por decisão do dono: "eu posso não ter
+> nenhuma deficiência e querer ser voluntário (…) aqui é um cadastro, não só de quem tem
+> deficiência". Isto **altera um dos 15 originais**, e por isso está registrado com a
+> citação: a regra do `CLAUDE.md` protege os originais de mudança que não seja do dono, e
+> esta é dele.
+>
+> A consequência que não é óbvia: **o consentimento do Art. 11 passou a ser condicional**.
+> Sem deficiência marcada não há dado de saúde a tratar, e pedir a autorização assim mesmo
+> seria colher consentimento sobre o vazio — o contrário do que o artigo exige, que é
+> autorização específica para uma finalidade.
+
+**13. Tipo de Atendimento** — checkbox de múltipla escolha, **opcional desde 2026-08-21**
+(mesma decisão do campo 12). Opções exatas:
 
 - `Empréstimo Equipamentos`
 - `Fisioterapia`
@@ -114,7 +127,8 @@ uma). Opções exatas:
 > de Equipamentos. Mantemos as opções do formulário como estão até a associação
 > esclarecer. Ver [pendencias-appd.md](pendencias-appd.md).
 
-**14. Melhores dias** — checkbox de múltipla escolha, obrigatório. Rótulo completo:
+**14. Melhores dias** — checkbox de múltipla escolha, **opcional desde 2026-08-21** (mesma
+decisão do campo 12). Rótulo completo:
 _"Melhores dias (sessões SOMENTE no período da manhã)"_. A informação do período faz
 parte do rótulo e não pode ser escondida em tooltip. Opções exatas:
 
@@ -163,14 +177,28 @@ diagnóstico — `G82.4` é tetraplegia espástica, com código e classificaçã
 enquanto o campo 12 guarda categoria larga. Os dois são dado de saúde do Art. 11; só o 22 é
 prontuário, e só ele vai impresso num cartão que a pessoa mostra na rua.
 
-Por isso ele carrega três travas, todas no ADR-020 e nenhuma dispensável:
+Por isso ele carrega duas travas, e carregou três por algumas horas:
 
-1. **Consentimento próprio** para guardar, com termo de slug próprio — não é versão nova do
-   termo do Art. 11, porque a finalidade é outra.
-2. **Opt-in próprio** para imprimir, separado do consentimento de guardar e do opt-in do
-   tipo de deficiência. Guardar e estampar são decisões diferentes.
-3. **Nunca em `/verificar`**, sob nenhuma condição. Para o campo 12 há exceção sob opt-in;
-   para o 22 **não há exceção**.
+1. **Consentimento próprio** para guardar **e imprimir**, com termo de slug próprio — não é
+   versão nova do termo do Art. 11, porque a finalidade é outra.
+2. **Nunca em `/verificar`**, sob nenhuma condição. Para o campo 12 há exceção sob opt-in;
+   para o 22 **não há exceção**. Esta é a trava que o ADR-020 existe para sustentar.
+
+A terceira era um **opt-in próprio para imprimir**, separado do consentimento de guardar.
+Foi revogada em 2026-08-21 pelo [ADR-021](adr/adr-021-cracha-replica-o-cartao-de-papel.md),
+por decisão do dono: "o CID pode entrar junto do consentimento atual existente". Com uma
+caixa só, ela diz as duas coisas antes de ser marcada — é o que resta no lugar da
+separação.
+
+**A ordem dos blocos mudou em 2026-08-21**, e os campos são os mesmos. O bloco "3b. Para o
+seu crachá, se você quiser" deixou de existir por decisão do dono — "não precisa ter 3b,
+nem falar que é pro crachá". O CID subiu para o bloco 1, com a autorização colada nele;
+CRAS e credencial abrem o bloco de atendimento; o contato de emergência ficou logo abaixo
+do contato do cuidador, com a nota de que pode ficar em branco quando for a mesma pessoa.
+
+Um bloco chamado "para o seu crachá" ensinava que aqueles dados servem ao documento, quando
+servem ao atendimento: o CRAS é a porta de entrada da rede pública, e a credencial é o
+transporte que traz a pessoa até aqui.
 
 **Emissão não é campo.** É derivada da data do cadastro, e por isso ninguém a digita e
 ninguém a erra. **Validade também não existe** — o cartão de papel a condiciona à
