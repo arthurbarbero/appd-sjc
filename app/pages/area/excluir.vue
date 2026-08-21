@@ -81,7 +81,7 @@ async function excluir() {
 </script>
 
 <template>
-  <div class="excluir">
+  <div class="excluir area-moldura">
     <h1>Excluir minha conta</h1>
     <AreaNavegacao atual="excluir" />
 
@@ -124,11 +124,12 @@ async function excluir() {
         Fora esses dois, nada fica guardado por prazo nenhum. O que sai, sai na hora, e não dá para
         desfazer.
       </p>
-      <p>
-        <strong>O que este site nunca teve é ficha de atendimento.</strong> Se você já foi atendida
-        na sede, a associação guarda esse documento em papel, por obrigação profissional. Para pedir
-        a exclusão dele, fale com a associação: apagar a sua conta aqui não apaga o arquivo de lá.
-      </p>
+      <!--
+        O parágrafo sobre a ficha de atendimento em papel saiu em 2026-08-20, por decisão
+        do dono: "se ele nunca teve, então você não vai falar nada". Ele explicava a
+        ausência de algo que o site jamais guardou, e numa tela de exclusão isso levanta
+        uma dúvida em vez de encerrá-la.
+      -->
     </section>
 
     <AppdAviso tipo="atencao" titulo="Isto não pode ser desfeito">
@@ -193,12 +194,14 @@ async function excluir() {
 </template>
 
 <style scoped>
-.excluir {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-  max-width: 66ch;
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 h2 {
   margin-top: 0;
 }
@@ -222,7 +225,7 @@ h2 {
   border-radius: var(--raio);
   box-shadow: var(--sombra-2);
   padding: var(--e4);
-  max-width: 480px;
+  max-width: var(--bloco-estreito);
   width: 100%;
   display: flex;
   flex-direction: column;

@@ -4,68 +4,81 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar em <https://appd-sjc.appd-sjc.workers.dev>** (v0.2.0, 2026-08-07) — publicado a
-cada push na `main`, depois de prettier, eslint, vue-tsc, vitest e gitleaks passarem.
-Endereço de demonstração: o banco por trás dele não é de produção, e nada vai para o
-domínio da APPD antes de a associação revisar.
+**Branch `acabamento-de-interface`**, não publicada. A `main` publica a cada push, e a
+change ainda não passou pelo gate final.
 
-O ciclo de conta funciona ponta a ponta — cadastrar, entrar, ver a área, corrigir os
-próprios dados, sair e excluir a conta —, percorrido **contra produção**, não só local.
+A origem é uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
+áudio foi transcrito localmente (faster-whisper `large-v3-turbo`, offline) e cada item
+conferido contra o quadro do minuto citado: inventário em
+`docs/revisoes/revisao-dono-2026-08-20.md`, transcrição ao lado.
 
-**Cinco changes arquivadas**: `modelo-de-dados`, `revisao-de-interface`,
-`cracha-do-associado`, `area-do-associado` e `cadastro-e-login`. As três últimas fecharam
-**com validação item a item dos cenários** — cada uma tem `VALIDACAO.md` dizendo onde cada
-cenário roda e qual o veredito, com as ressalvas escritas em vez de escondidas.
+**Trinta apontamentos, e boa parte era um defeito só.** `p { max-width: var(--medida) }`
+com `--medida: 68ch` valia para todo parágrafo do site, dentro de um container de 1120px —
+a mesma queixa ("pequenininho", "espremido", "cortado") apareceu em sete telas
+independentes. A medida saiu do seletor de elemento e passou à classe `.prosa`,
+centralizada; as treze larguras avulsas que cada página tinha inventado viraram três
+tokens.
 
-**O aceite do produto não depende de leitura.** Dois comandos e o CI dizem o estado:
+**As três fases estão feitas.**
 
-| Comando          | O que cobre                                                                                                                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`       | 233 testes — restrição de banco, emissão concorrente, revalidação da foto, catálogo de termos e integridade, registro do consentimento, vazamento de dado sensível, varredura de segurança e regressão de interface |
-| `npm run aceite` | 169 verificações no workerd real, **repetível**: roda duas vezes seguidas sem reprovar, porque limpa a cota que ela mesma gasta. Aceita `APPD_BASE`                                                                 |
-| CI               | os dois acima, mais prettier, eslint, vue-tsc e gitleaks no histórico completo                                                                                                                                      |
+| Frente                   | Estado                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| Sistema de largura       | feito, com teste que reprova largura nova fora de token                                    |
+| B1, foto ausente na área | feito — **não era carregamento**: a tela desenhava a palavra "Foto" num retângulo cinza    |
+| B3, recorte em branco    | feito — cancelar devolvia o vazio no lugar da foto que havia                               |
+| B2, salto de rolagem     | **dispensado pelo dono**; o "subir ao clicar e ao salvar", que era outra coisa, foi feito  |
+| ✕ do erro de campo       | feito em 28 lugares; a frase passa a carregar a sinalização não-cromática                  |
+| Conteúdo e campos        | feito — 16 itens em home, cadastro, área, exclusão, crachá, sobre e contato                |
+| Campos 20 e 21           | feito — estado (do CEP, que já devolvia a UF) e país, com migration `0004`                 |
+| Cabeçalho e menu         | feito — painel deslizante da direita, hambúrguer, marca sem texto em largura intermediária |
+| Área do associado        | feito — menu à esquerda, conteúdo à direita, com fileira de volta abaixo de 760px          |
 
-**`npm test` cobre o produto, não o rito** — decisão do dono em 2026-08-07. A auditoria de
-spec que morava ali foi removida; o que ela conferia virou checklist manual em
-`openspec/PARECER-GATE-AUTOMATICO.md`.
+**A Fase 2 não passou pelo canvas por liberação do dono** em 2026-08-20: "estou liberando
+pra você pegar inspirações na internet e fazer você mesmo". No lugar do gate de design
+entrou medição: axe A/AA sem violação em 390, 1000 e 1280px, com o painel aberto e
+fechado, e o ciclo de teclado conferido — abrir, percorrer, `Esc`, foco de volta ao botão.
 
-**Próxima change**: o **painel administrativo** — proposal escrito, spec por fazer. Gerência
-de usuários, troca de senha, relatórios em CSV e PDF, trilha de auditoria, e um usuário
-`root` que cria o primeiro administrador.
+**A Fase 4 saiu da change.** A foto do crachá físico mostrou que não é diagramação: cinco
+campos que o modelo não tem, identidade visual fora do `DESIGN.md`, e a frente do cartão
+real imprimindo CID e CPF — contra o que a nossa própria tela promete (ADR-019). Vira
+proposal próprio.
 
-**O que resta nas outras três**:
+**Números**: `npm test` de 233 para **332**. `npm run aceite` de 143 para **211**
+verificações, repetível — roda duas vezes seguidas sem reprovar.
 
-- `site-institucional` — 15 tasks de medição e SEO (301, sitemap, robots, peso por rota,
-  CLS, contraste renderizado). Nada começado, e 3 pendências esperam a APPD: e-mail do
-  contato, WhatsApp oficial e catálogo de serviços.
-- `formulario-atendimento` — 8 das 10 tasks fechadas. As duas que restam esperam
-  `consentimento-e-privacidade`.
-- `consentimento-e-privacidade` — **10 das 14 tasks fechadas em 2026-08-11** (T3 a T6, T8 a
-  T12). Sobram quatro: **T2** espera a APPD (PB-2 e PB-4); **T7**, o componente da caixa de
-  consentimento, é a última peça de código; **T13** é a passada de acessibilidade que falta
-  (teclado ponta a ponta e os itens `[manual]`); e **T14** é o gate de archive, que não passa
-  enquanto PB-2 e PB-4 estiverem abertas.
+### A armadilha que custou a maior parte de uma sessão
 
-**Sete decisões saíram do caminho em 2026-08-07**, todas do dono e registradas como ADR:
-conteúdo no código (006), foto e cuidador na verificação (015), recuperação de senha (016),
-retenção após exclusão (017), mensagem de erro e enumeração (018) e **o consentimento
-governando a verificação pública** (019). Mais a T0.3 de `area-do-associado`: a tela de
-confirmação da exclusão **fica**; o que é imediato é o apagamento depois do Excluir.
+O gate parecia reprovar com `401` em toda rota de `/api/area`, e o mesmo acontecia no
+commit anterior à change — o que parecia defeito antigo do produto. Não era nenhum dos
+dois: eu subia o worker com `wrangler dev .output/server/index.mjs`, que **ignora o
+`wrangler.jsonc`** e portanto não carrega o segredo que sela o cookie de sessão. O cookie
+existia e não abria.
 
-**O que trava o resto**:
+`npm run aceite` sobe o servidor sozinho, do jeito certo. **Só passe `APPD_BASE` para
+apontar a um endereço que já está no ar** — nunca para um worker subido à mão.
 
-- **Redefinição de senha** — ADR-016: **SendGrid gratuito** com remetente avulso, sem DNS,
-  aceitando que parte cai em spam até haver domínio; **mais** o painel administrativo. Falta
-  a chave de API e o endereço a verificar como remetente, que são do dono.
-- **`consentimento-e-privacidade`** — PB-1 fechada pelo ADR-017; PB-2 a PB-5 seguem com a
-  associação. As duas telas esperam o canvas.
-- ~~O hash do consentimento é marcador de lugar.~~ **Fechado em duas etapas.** Em 2026-08-07 o
-  cadastro passou a gravar o SHA-256 do próprio texto. Em **2026-08-11** veio o resto: o
-  manifesto com `data_vigencia` e `tipo_mudanca`, a resolução de versão vigente, o teste de
-  integridade bloqueante — e o mesmo marcador de lugar **sobrevivendo na rota de exclusão**,
-  que gravava a revogação com 64 zeros e `v1` fixa. Continuam de fora os **links completos**
-  que a caixa vai citar: são versão nova do termo, e vêm com as telas.
-- **A APPD revisar o conteúdo** antes de qualquer coisa ir ao domínio dela.
+Outra, menor: rodar o aceite várias vezes junto de scripts que também criam conta estoura
+a cota de 12 cadastros por 15 minutos, e o `429` aparece disfarçado de outro defeito.
+Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"`.
+
+### Três coisas que ficaram com o dono
+
+1. ~~**A biografia da fundadora**~~ — **encerrado em 2026-08-20**. Conferi `appd.org.br`:
+   não existe texto sobre Maria Claudete além da frase de que ela fundou, e o dono
+   dispensou. A assimetria fica.
+2. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
+   constante segue em `shared/conteudo.ts`; se a informação importa, o lugar é
+   `/atendimento`.
+3. **A Fase 4** — o crachá impresso espera proposal próprio.
+
+### Uma revogação registrada
+
+Apagar as duas linhas do crachá **revoga o REQ-24 de `cracha-do-associado`**, que está
+arquivada e validada. O comportamento não mudou — a geração segue local, no navegador —,
+mas o requisito que obrigava a tela a dizer isso deixou de valer. Marcado na spec
+arquivada, e o gate de aceite agora exige a **ausência** da frase.
+
+---
 
 ## Decisões tomadas
 

@@ -145,7 +145,7 @@ useHead({
   display: flex;
   flex-direction: column;
   gap: var(--e3);
-  max-width: 62ch;
+  max-width: var(--medida);
 }
 
 .versao {
@@ -204,7 +204,7 @@ useHead({
   flex-direction: column;
   gap: var(--e6);
   /* Entre 60 e 75 caracteres por linha (REQ-30). */
-  max-width: 70ch;
+  max-width: var(--medida);
 }
 
 .secao {

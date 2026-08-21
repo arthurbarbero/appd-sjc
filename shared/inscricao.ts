@@ -167,6 +167,13 @@ const camposPessoais = {
   complemento: z.string().trim().max(60).optional(),
   bairro: z.string().trim().min(2, 'Informe o bairro.').max(80),
   municipio: z.string().trim().min(2, 'Informe o município.').max(80),
+  /*
+    Estado chega preenchido pela consulta de CEP, que já devolvia a UF e não era usada.
+    Continua digitável: CEP fora do ar não pode travar o cadastro, mesma regra dos outros
+    três campos que a consulta preenche.
+  */
+  estado: z.string().trim().min(2, 'Informe o estado.').max(60),
+  pais: z.string().trim().min(2, 'Informe o país.').max(60),
   cuidadorNome: z.string().trim().max(120).optional(),
   cuidadorContato: telefone.optional(),
 }
@@ -194,6 +201,8 @@ export const esquemaMeusDados = z
     complemento: camposPessoais.complemento,
     bairro: camposPessoais.bairro,
     municipio: camposPessoais.municipio,
+    estado: camposPessoais.estado,
+    pais: camposPessoais.pais,
   })
   .strict()
 

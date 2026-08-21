@@ -157,6 +157,12 @@ try {
   await p.fill('#numero', 's/n')
   await p.fill('#bairro', 'Centro')
   await p.fill('#municipio', 'São José dos Campos')
+  /*
+    Campos 20 e 21, acrescentados em 2026-08-20. O estado normalmente chega pela consulta
+    de CEP; aqui ele é preenchido à mão porque este percurso digita o endereço inteiro sem
+    depender do ViaCEP, que é serviço de terceiro e não pode reprovar o gate quando cai.
+  */
+  await p.fill('#estado', 'SP')
   await p.check('input[type=checkbox][value="Física"]')
   await p.check('input[type=checkbox][value="Bocha Paralímpica"]')
   await p.check('input[type=checkbox][value="Segundas"]')
@@ -214,6 +220,8 @@ try {
     numero: 's/n',
     bairro: 'Centro',
     municipio: 'São José dos Campos',
+    estado: 'SP',
+    pais: 'Brasil',
     deficiencias: ['Física'],
     atendimentos: ['Fisioterapia'],
     dias: ['Segundas'],
@@ -318,8 +326,10 @@ try {
     !/em análise|aguardando aprovação|aguarde a aprovação|validado pela associação/i.test(cracha),
   )
   ok(
-    'a tela diz que o arquivo é gerado no navegador',
-    cracha.includes('gerado aqui no seu navegador'),
+    'a tela NÃO promete mais que o arquivo é gerado no navegador',
+    // REQ-38: o dono mandou apagar as duas linhas em 2026-08-20, e isso revoga o REQ-24
+    // de `cracha-do-associado`. A geração continua local; a tela é que não diz mais.
+    !cracha.includes('gerado aqui no seu navegador'),
   )
 
   // Opt-in: desmarcado por padrão, e sem linguagem que empurre a marcar (REQ-25).
@@ -606,18 +616,34 @@ try {
     for (const rota of ['/', '/contato', '/area']) {
       await p.goto(BASE + rota, { waitUntil: 'networkidle' })
       const r = await p.evaluate(() => {
+        /*
+          Desde 2026-08-20 o menu estreito é um painel que se sobrepõe à página, e não a
+          sanfona que a empurrava. A medida antiga — `ul` e `.conta` na mesma linha —
+          descrevia a barra larga e passava por acidente na estreita, onde o `nav` ficava
+          `display: none`. Agora o painel existe sempre no DOM, então o que se afere
+          depende de qual dos dois cabeçalhos está na tela.
+        */
         const nav = document.querySelector('.cabecalho nav')
-        const visivel = nav && getComputedStyle(nav).display !== 'none'
+        const botao = document.querySelector('.alternar')
+        const ehPainel = botao ? getComputedStyle(botao).display !== 'none' : false
         const topo = (e) => (e ? Math.round(e.getBoundingClientRect().top) : null)
         const ul = nav?.querySelector('ul')
         const conta = nav?.querySelector('.conta')
+
         return {
           rolagem: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
-          umaLinha: !visivel || !ul || !conta ? true : Math.abs(topo(ul) - topo(conta)) < 8,
+          // Na barra larga, os dois blocos dividem a linha. No painel, empilhar é o certo.
+          umaLinha: ehPainel || !ul || !conta ? true : Math.abs(topo(ul) - topo(conta)) < 8,
+          // O painel fechado fica fora da tela e fora do alcance do teclado.
+          painelGuardado: !ehPainel || (nav?.hasAttribute('inert') ?? false),
+          // E o botão que o abre é alvo de toque legítimo.
+          alvoDoBotao: !ehPainel || (botao?.getBoundingClientRect().height ?? 0) >= 44,
         }
       })
       ok(`${largura}px ${rota}: sem rolagem horizontal`, !r.rolagem)
       ok(`${largura}px ${rota}: cabeçalho em uma linha`, r.umaLinha)
+      ok(`${largura}px ${rota}: painel fechado fora do alcance do teclado`, r.painelGuardado)
+      ok(`${largura}px ${rota}: o botão do menu tem alvo de 44px`, r.alvoDoBotao)
     }
   }
   await p.setViewportSize({ width: 1280, height: 900 })

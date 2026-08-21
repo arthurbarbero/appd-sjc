@@ -11,6 +11,31 @@ const assuntos = [
 ]
 
 const form = reactive({ nome: '', email: '', telefone: '', assunto: '', mensagem: '' })
+
+/*
+  Quem já entrou não redigita o que a associação já tem (2026-08-20).
+
+  "Se eu tô logado, por que você já não [preenche]?" — e a pergunta é justa: nome, e-mail
+  e telefone estão no cadastro. Os campos continuam editáveis, porque a pessoa pode querer
+  ser respondida em outro contato.
+
+  A busca é condicionada à sessão e falha em silêncio: esta é uma página pública, e um
+  erro ao buscar dados de conta não pode atrapalhar quem só quer escrever uma mensagem.
+*/
+const { loggedIn } = useUserSession()
+
+if (loggedIn.value) {
+  const { data: conta } = await useFetch('/api/area/meus-dados', {
+    onResponseError: () => {},
+  })
+  watchEffect(() => {
+    const c = conta.value?.conta
+    if (!c) return
+    if (!form.nome) form.nome = c.nome ?? ''
+    if (!form.email) form.email = c.email ?? ''
+    if (!form.telefone) form.telefone = mascararTelefone(c.telefone ?? '')
+  })
+}
 const erros = reactive<Record<string, string>>({})
 const enviado = ref(false)
 
@@ -129,7 +154,7 @@ function enviar() {
             :aria-describedby="erros.nome ? 'erro-nome' : 'ajuda-nome'"
           />
           <span v-if="erros.nome" id="erro-nome" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nome }}
+            {{ erros.nome }}
           </span>
         </div>
 
@@ -145,7 +170,7 @@ function enviar() {
             :aria-describedby="erros.email ? 'erro-email' : 'ajuda-email'"
           />
           <span v-if="erros.email" id="erro-email" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.email }}
+            {{ erros.email }}
           </span>
         </div>
 
@@ -171,7 +196,7 @@ function enviar() {
             {{ a.rotulo }}
           </label>
           <span v-if="erros.assunto" id="erro-assunto" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.assunto }}
+            {{ erros.assunto }}
           </span>
         </fieldset>
 
@@ -195,16 +220,23 @@ function enviar() {
             :aria-describedby="erros.mensagem ? 'erro-mensagem' : undefined"
           ></textarea>
           <span v-if="erros.mensagem" id="erro-mensagem" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.mensagem }}
+            {{ erros.mensagem }}
           </span>
         </div>
 
         <div class="envio">
           <!--
-            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito.
-            "Enviar mensagem" seria uma promessa que o sistema não cumpre.
+            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito e
+            não envia nada. "Enviar mensagem" seria promessa que o sistema não cumpre —
+            falta a associação definir quem recebe.
+
+            "Conferir minha mensagem" ainda deixava a pergunta que o dono fez em
+            2026-08-20: "se eu conferir, vai pra onde?". O rótulo agora responde antes do
+            clique, em vez de esperar o aviso amarelo acima explicar.
           -->
-          <button type="submit" class="botao botao-primario">Conferir minha mensagem</button>
+          <button type="submit" class="botao botao-primario">
+            Conferir o que escrevi (ainda não envia)
+          </button>
           <p class="discreto">
             <AppdSelo /> O prazo de resposta será publicado quando a associação definir quem
             responde.
@@ -294,7 +326,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 36rem;
+  max-width: var(--bloco-medio);
 }
 
 .campo.largo {

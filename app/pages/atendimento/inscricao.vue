@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ASSOCIACAO, REGRAS_ATENDIMENTO } from '~~/shared/conteudo'
+import { ASSOCIACAO } from '~~/shared/conteudo'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
 import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
 import { versaoVigente } from '~~/shared/termos'
@@ -41,6 +41,10 @@ const f = reactive({
   complemento: '',
   bairro: '',
   municipio: '',
+  estado: '',
+  // País nasce preenchido: a associação atende São José dos Campos e região, e obrigar a
+  // digitar "Brasil" seria trabalho sem informação. Continua editável.
+  pais: 'Brasil',
   cuidadorNome: '',
   cuidadorContato: '',
   deficiencias: [] as string[],
@@ -116,6 +120,7 @@ async function buscarCep() {
       endereco?: string
       bairro?: string
       municipio?: string
+      uf?: string
     }>(`/api/cep/${cep}`)
 
     if (!r.encontrado) {
@@ -127,9 +132,12 @@ async function buscarCep() {
     if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
     if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
     if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
+    // A rota já devolvia a UF desde sempre; até 2026-08-20 ninguém a usava.
+    if (!f.estado.trim() && r.uf) f.estado = r.uf
     Reflect.deleteProperty(erros, 'endereco')
     Reflect.deleteProperty(erros, 'bairro')
     Reflect.deleteProperty(erros, 'municipio')
+    Reflect.deleteProperty(erros, 'estado')
   } catch {
     avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
   } finally {
@@ -258,6 +266,8 @@ async function enviar() {
         ...(f.complemento.trim() ? { complemento: f.complemento.trim() } : {}),
         bairro: f.bairro.trim(),
         municipio: f.municipio.trim(),
+        estado: f.estado.trim(),
+        pais: f.pais.trim(),
         ...(f.cuidadorNome.trim() ? { cuidadorNome: f.cuidadorNome.trim() } : {}),
         ...(f.cuidadorContato.trim() ? { cuidadorContato: f.cuidadorContato } : {}),
         deficiencias: f.deficiencias,
@@ -330,12 +340,6 @@ async function enviar() {
       </p>
     </header>
 
-    <AppdAviso tipo="destaque" titulo="Antes de começar">
-      <ul class="lista">
-        <li v-for="regra in REGRAS_ATENDIMENTO" :key="regra">{{ regra }}</li>
-      </ul>
-    </AppdAviso>
-
     <div v-if="enviado" class="sucesso">
       <AppdAviso tipo="sucesso" titulo="Cadastro enviado">
         <span>Seus interesses ficaram registrados e a sua conta foi criada.</span>
@@ -400,7 +404,7 @@ async function enviar() {
             :aria-describedby="erros.nome ? 'erro-nome' : 'ajuda-nome'"
           />
           <span v-if="erros.nome" id="erro-nome" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nome }}
+            {{ erros.nome }}
           </span>
         </div>
 
@@ -424,7 +428,7 @@ async function enviar() {
             @input="f.nascimento = aplicarMascara($event, mascaraData)"
           />
           <span v-if="erros.nascimento" id="erro-nascimento" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.nascimento }}
+            {{ erros.nascimento }}
           </span>
         </div>
 
@@ -447,18 +451,24 @@ async function enviar() {
             @input="f.telefone = aplicarMascara($event, mascaraTelefone)"
           />
           <span v-if="erros.telefone" id="erro-telefone" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.telefone }}
+            {{ erros.telefone }}
           </span>
         </div>
 
-        <fieldset :class="['grupo-escolha', { 'campo-erro': erros.whatsapp }]">
+        <fieldset :class="['grupo-escolha', 'em-linha', { 'campo-erro': erros.whatsapp }]">
           <legend id="whatsapp">
             É WhatsApp <span class="obrigatorio" aria-hidden="true">*</span>
           </legend>
-          <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Sim" /> Sim</label>
-          <label class="escolha"><input v-model="f.whatsapp" type="radio" value="Não" /> Não</label>
+          <div class="escolhas">
+            <label class="escolha"
+              ><input v-model="f.whatsapp" type="radio" value="Sim" /> Sim</label
+            >
+            <label class="escolha"
+              ><input v-model="f.whatsapp" type="radio" value="Não" /> Não</label
+            >
+          </div>
           <span v-if="erros.whatsapp" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.whatsapp }}
+            {{ erros.whatsapp }}
           </span>
         </fieldset>
       </fieldset>
@@ -484,7 +494,7 @@ async function enviar() {
             @blur="buscarCep"
           />
           <span v-if="erros.cep" id="erro-cep" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.cep }}
+            {{ erros.cep }}
           </span>
           <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
           <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
@@ -495,16 +505,25 @@ async function enviar() {
             Endereço (rua/avenida/travessa) <span class="obrigatorio" aria-hidden="true">*</span>
           </label>
           <span id="ajuda-endereco" class="ajuda">Obrigatório.</span>
-          <textarea
+          <!--
+            Caixa de uma linha, não `textarea` (2026-08-20).
+
+            O campo era `textarea` por réplica do formulário de papel, onde a linha do
+            endereço é larga. Na tela, a caixa alta sugeria texto longo num campo que
+            recebe uma linha — "podia ser uma caixa normal de texto", disse o dono.
+            Rótulo, ordem e obrigatoriedade seguem intactos: a réplica é do conteúdo do
+            formulário, não do controle usado para preenchê-lo.
+          -->
+          <input
             id="endereco"
             v-model="f.endereco"
-            rows="2"
+            type="text"
             autocomplete="street-address"
             :aria-invalid="erros.endereco ? 'true' : undefined"
             :aria-describedby="erros.endereco ? 'erro-endereco' : 'ajuda-endereco'"
-          ></textarea>
+          />
           <span v-if="erros.endereco" id="erro-endereco" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.endereco }}
+            {{ erros.endereco }}
           </span>
         </div>
 
@@ -519,7 +538,7 @@ async function enviar() {
             :aria-describedby="erros.numero ? 'erro-numero' : 'ajuda-numero'"
           />
           <span v-if="erros.numero" id="erro-numero" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.numero }}
+            {{ erros.numero }}
           </span>
         </div>
 
@@ -545,7 +564,7 @@ async function enviar() {
             :aria-describedby="erros.bairro ? 'erro-bairro' : 'ajuda-bairro'"
           />
           <span v-if="erros.bairro" id="erro-bairro" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.bairro }}
+            {{ erros.bairro }}
           </span>
         </div>
 
@@ -564,7 +583,45 @@ async function enviar() {
             :aria-describedby="erros.municipio ? 'erro-municipio' : 'ajuda-municipio'"
           />
           <span v-if="erros.municipio" id="erro-municipio" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.municipio }}
+            {{ erros.municipio }}
+          </span>
+        </div>
+
+        <!--
+          Campos 20 e 21, acrescentados em 2026-08-20. Vêm depois do município porque é
+          onde a leitura do endereço termina: rua, número, bairro, cidade, estado, país.
+        -->
+        <div :class="['campo', { 'campo-erro': erros.estado }]">
+          <label for="estado">Estado <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-estado" class="ajuda">
+            Obrigatório. Ao informar o CEP, preenchemos para você.
+          </span>
+          <input
+            id="estado"
+            v-model="f.estado"
+            type="text"
+            autocomplete="address-level1"
+            :aria-invalid="erros.estado ? 'true' : undefined"
+            :aria-describedby="erros.estado ? 'erro-estado' : 'ajuda-estado'"
+          />
+          <span v-if="erros.estado" id="erro-estado" class="erro">
+            {{ erros.estado }}
+          </span>
+        </div>
+
+        <div :class="['campo', { 'campo-erro': erros.pais }]">
+          <label for="pais">País <span class="obrigatorio" aria-hidden="true">*</span></label>
+          <span id="ajuda-pais" class="ajuda">Obrigatório.</span>
+          <input
+            id="pais"
+            v-model="f.pais"
+            type="text"
+            autocomplete="country-name"
+            :aria-invalid="erros.pais ? 'true' : undefined"
+            :aria-describedby="erros.pais ? 'erro-pais' : 'ajuda-pais'"
+          />
+          <span v-if="erros.pais" id="erro-pais" class="erro">
+            {{ erros.pais }}
           </span>
         </div>
       </fieldset>
@@ -616,7 +673,7 @@ async function enviar() {
             <input id="deficiencia-outro" v-model="f.deficienciaOutro" type="text" />
           </div>
           <span v-if="erros.deficiencias" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.deficiencias }}
+            {{ erros.deficiencias }}
           </span>
         </fieldset>
 
@@ -637,7 +694,7 @@ async function enviar() {
             <input id="atendimento-outro" v-model="f.atendimentoOutro" type="text" />
           </div>
           <span v-if="erros.atendimentos" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.atendimentos }}
+            {{ erros.atendimentos }}
           </span>
         </fieldset>
 
@@ -653,7 +710,7 @@ async function enviar() {
             {{ d }}
           </label>
           <span v-if="erros.dias" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.dias }}
+            {{ erros.dias }}
           </span>
         </fieldset>
       </fieldset>
@@ -683,7 +740,7 @@ async function enviar() {
             aria-describedby="ajuda-email"
           />
           <span v-if="erros.email" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.email }}
+            {{ erros.email }}
           </span>
         </div>
 
@@ -697,13 +754,14 @@ async function enviar() {
             :value="f.cpf"
             type="text"
             inputmode="numeric"
+            placeholder="000.000.000-00"
             autocomplete="off"
             :aria-invalid="erros.cpf ? 'true' : undefined"
             aria-describedby="ajuda-cpf"
             @input="f.cpf = aplicarMascara($event, mascaraCpf)"
           />
           <span v-if="erros.cpf" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.cpf }}
+            {{ erros.cpf }}
           </span>
         </div>
 
@@ -722,7 +780,7 @@ async function enviar() {
             aria-describedby="ajuda-senha"
           />
           <span v-if="erros.senha" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.senha }}
+            {{ erros.senha }}
           </span>
         </div>
       </fieldset>
@@ -755,7 +813,7 @@ async function enviar() {
             atendimento.
           </label>
           <span v-if="erros.consentimento" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.consentimento }}
+            {{ erros.consentimento }}
           </span>
         </div>
 
@@ -775,7 +833,7 @@ async function enviar() {
             Ciente
           </label>
           <span v-if="erros.ciente" class="erro">
-            <span class="icone" aria-hidden="true">✕</span>{{ erros.ciente }}
+            {{ erros.ciente }}
           </span>
         </fieldset>
       </fieldset>
@@ -822,7 +880,7 @@ async function enviar() {
   display: flex;
   flex-direction: column;
   gap: var(--e5);
-  max-width: 44rem;
+  max-width: var(--bloco-medio);
 }
 
 .secao {
@@ -907,7 +965,7 @@ async function enviar() {
   display: flex;
   flex-direction: column;
   gap: var(--e4);
-  max-width: 44rem;
+  max-width: var(--bloco-medio);
 }
 
 .registro {

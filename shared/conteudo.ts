@@ -58,6 +58,15 @@ export const enderecoEmLinha = `${ASSOCIACAO.endereco.logradouro} — ${ASSOCIAC
  * sinaliza interesse, e alguém da associação entra em contato. Ver ADR-014; a correção
  * do texto na origem está em docs/pendencias-appd.md, item 5.
  */
+/*
+  Fora de tela desde 2026-08-20.
+
+  As duas frases abriam o cadastro num bloco destacado, e o dono mandou tirá-lo: "tira
+  todo esse bloco amarelo, sobe". A constante fica porque o conteúdo foi levantado com a
+  associação e continua verdadeiro — mas, enquanto ninguém a renderizar, **o site não diz
+  mais que o atendimento é de manhã**. Se isso importar ao visitante, o lugar natural é a
+  página `/atendimento`, e isso é decisão de conteúdo, não de layout.
+*/
 export const REGRAS_ATENDIMENTO = [
   'As sessões acontecem somente no período da manhã.',
   'Mantenha o telefone atualizado: é por ele que vem o primeiro contato.',

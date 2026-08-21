@@ -122,7 +122,7 @@ async function exportar(formato: 'png' | 'pdf') {
 </script>
 
 <template>
-  <div class="pagina-cracha">
+  <div class="pagina-cracha area-moldura">
     <h1>Meu crachá</h1>
     <p class="chamada">
       Seu crachá fica pronto assim que você envia a foto. Você mesmo baixa e imprime.
@@ -237,8 +237,15 @@ async function exportar(formato: 'png' | 'pdf') {
         <span>{{ erroExportar }}</span>
       </AppdAviso>
 
-      <!-- REQ-24: em corpo normal, não em nota de rodapé -->
-      <p class="local">O arquivo é gerado aqui no seu navegador. Nada é enviado para fora.</p>
+      <!--
+        As duas linhas "O arquivo é gerado aqui no seu navegador / Nada é enviado para
+        fora" saíram em 2026-08-20, por decisão do dono, que as apontou com o mouse.
+
+        Fica registrado o que se perdeu, porque a decisão é dele e o custo é real: elas
+        eram a única vez em que a tela dizia ao titular que a foto não sobe para servidor
+        nenhum. A garantia continua verdadeira — a geração é local, no navegador — e
+        deixou de ser dita. Se a promessa voltar a precisar ser feita, o lugar é aqui.
+      -->
 
       <!--
         REQ-25: caixa única, separada das demais, desmarcada por padrão. O texto descreve
@@ -319,15 +326,18 @@ async function exportar(formato: 'png' | 'pdf') {
 </template>
 
 <style scoped>
-.pagina-cracha {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 
 .chamada {
   font-size: var(--texto-corpo-g);
-  max-width: 56ch;
+  max-width: var(--medida);
 }
 
 .sem-foto-bloco {
@@ -364,13 +374,7 @@ figcaption {
 
 .motivo {
   margin: 0;
-  max-width: 32ch;
-}
-
-.local {
-  margin: 0;
-  color: var(--texto-suave);
-  max-width: 40ch;
+  max-width: var(--medida);
 }
 
 .escolha-optin {
@@ -382,7 +386,7 @@ figcaption {
 }
 
 .escolha-optin p {
-  max-width: 60ch;
+  max-width: var(--medida);
 }
 
 #consequencias {

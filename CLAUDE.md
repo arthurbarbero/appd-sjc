@@ -75,6 +75,9 @@ scripts/      # utilitários de desenvolvimento chamados pelos comandos npm
 - Não trocar D1/Workers por serviço que peça cartão (inclui R2).
 - Não alterar os 15 campos do formulário de atendimento — réplica fiel do form real
   (rótulos, ordem, obrigatoriedade). Fonte: `docs/campos-formulario.md`.
+  **Acrescentar campo é decisão do dono, e não é alterar** — CEP virou o 16 em 06/08,
+  estado e país viraram 20 e 21 em 20/08. A regra protege os 15 originais; ela já foi
+  lida como proibição geral duas vezes, e não é.
 - Não expor no `/verificar/<numero>` **o campo 12 (tipo de deficiência)** — dado sensível
   do Art. 11, e a página é pública. Nome, número, situação, foto e contato de cuidador
   entram, por decisão do dono ([ADR-015](docs/adr/adr-015-verificacao-publica-exibe-foto-e-cuidador.md)).

@@ -231,6 +231,28 @@ Pergunta: existem esses textos fora do site? Quais podem ser publicados?
 Impacto: doador procura transparência antes de doar. Sem prestação de contas nem número
 de atendidos, a Central de Doações fica sem argumento.
 
+### 8a. A biografia da fundadora — SEM OBJETO desde 2026-08-20
+
+Levantado na revisão do dono de 2026-08-20: "tem muito mais dados sobre essa pessoa lá
+que você não trouxe, e desse cara você trouxe tudo — quero que traga tudo dos dois".
+
+**Conferido na fonte, em 20/08**: `appd.org.br/sobre-nos` traz a seção "Nosso Presidente"
+com a biografia inteira de Luiz Carlos Lucas Barbosa, e sobre Maria Claudete apenas a
+frase de que a APPD foi "fundada em 29 de março de 2006 a partir da iniciativa da Srª
+Maria Claudete da Silveira Rabelo de Moura juntamente com pessoas com os mesmos ideais".
+**Não há biografia dela publicada.** A assimetria da tela vem da fonte, não da
+transcrição — nós republicamos tudo o que existia dos dois.
+
+Pergunta: a associação tem, fora do site, um texto sobre a fundadora — trajetória, o que
+a levou a fundar, papel atual? Pode ser publicado?
+Impacto: a página `/sobre` mostra um parágrafo para quem fundou e cinco para quem preside.
+A tela já comporta biografias do mesmo tamanho; falta o texto.
+
+**Encerrada pelo dono em 2026-08-20**: "ignora o texto da fundadora porque não tem mesmo".
+A assimetria fica como está, e é honesta — republicamos tudo o que existia sobre as duas
+pessoas. Se algum dia aparecer um texto sobre Maria Claudete, a tela o recebe sem mudança:
+`bio` já é uma lista de parágrafos.
+
 ### 9. Páginas órfãs e conteúdo vencido
 
 Sete páginas estão no ar sem entrada no menu, incluindo um evento de **15/12/2019** com

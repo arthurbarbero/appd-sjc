@@ -152,7 +152,7 @@ function fechar() {
 }
 
 .atencao {
-  max-width: 52ch;
+  max-width: var(--medida);
   font-size: var(--texto-corpo-g);
 }
 

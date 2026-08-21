@@ -36,6 +36,9 @@ const { data: dadosFoto, error: erroFoto } = await useFetch('/api/area/tem-foto'
 const inscricao = computed(() => dadosInscricao.value?.inscricao ?? null)
 const temFoto = computed(() => dadosFoto.value?.temFoto === true)
 
+/** Rota autenticada que serve a foto. Constante para não virar import de asset no build. */
+const ROTA_FOTO = '/api/area/foto'
+
 /** Chega preenchido quando a pessoa acabou de concluir o cadastro. */
 const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
 
@@ -79,7 +82,7 @@ function cepBr(cep?: string | null) {
 </script>
 
 <template>
-  <div class="area">
+  <div class="area area-moldura">
     <h1>Minha área</h1>
 
     <AppdAviso v-if="recemCadastrada" tipo="sucesso" titulo="Cadastro enviado">
@@ -108,14 +111,12 @@ function cepBr(cep?: string | null) {
     </AppdAviso>
 
     <template v-else-if="data">
-      <div class="identificacao">
-        <p class="nome">{{ data.conta.nome }}</p>
-        <p class="numero">
-          Registro <strong>{{ data.conta.numeroRegistro }}</strong>
-        </p>
-        <p class="fixo">Este número é seu e não muda.</p>
-      </div>
-
+      <!--
+        O cartão que repetia nome e número saiu em 2026-08-20: "esse número é seu e não
+        muda, não precisa". Ele dizia, no alto de toda visita, o que o cartão do crachá
+        logo abaixo já diz — e a frase "este número é seu e não muda" é justamente a que
+        não precisa ser repetida a cada abertura da área.
+      -->
       <AreaNavegacao atual="painel" />
 
       <section class="cartao destaque" aria-labelledby="t-inscricao">
@@ -193,7 +194,23 @@ function cepBr(cep?: string | null) {
           </p>
 
           <div class="previa">
-            <div v-if="temFoto" class="foto" aria-hidden="true">Foto</div>
+            <!--
+              A foto de verdade, e não a palavra "Foto".
+
+              Até 2026-08-20 este bloco desenhava um retângulo cinza com o texto "Foto"
+              quando a pessoa **tinha** foto — um marcador de lugar que nunca foi trocado
+              pela imagem. Quem tinha acabado de enviar a sua via o cadastro dizer que
+              estava tudo certo e a área dizer o contrário.
+
+              `alt` vazio de propósito: o nome está no texto ao lado, e a foto aqui é
+              ilustração do crachá, não informação nova.
+            -->
+            <!--
+              `:src`, e não `src`: com o caminho literal o Vite trata isto como asset a
+              resolver em tempo de build, e o `npm run build` falha com UNRESOLVED_IMPORT
+              enquanto o dev passa. É rota de servidor, não arquivo do bundle.
+            -->
+            <img v-if="temFoto" class="foto" :src="ROTA_FOTO" alt="" width="96" height="120" />
             <div v-else class="foto sem-foto">Sem foto</div>
             <div>
               <p class="nome-cracha">{{ data.conta.nome }}</p>
@@ -281,32 +298,14 @@ function cepBr(cep?: string | null) {
 </template>
 
 <style scoped>
-.area {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-}
-.identificacao {
-  background: var(--superficie);
-  border-radius: var(--raio);
-  padding: var(--e3);
-  max-width: 44ch;
-}
-.identificacao p {
-  margin: 0;
-}
-.nome {
-  font-size: 1.19rem;
-  font-weight: 700;
-}
-.numero {
-  font-size: 1.19rem;
-  font-variant-numeric: tabular-nums;
-}
-.fixo {
-  font-size: 0.94rem;
-  color: var(--texto-suave);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 .destaque {
   border-color: var(--borda);
   box-shadow: var(--sombra-1);
@@ -356,6 +355,7 @@ dd {
   width: 96px;
   height: 120px;
   flex: none;
+  object-fit: cover;
   border-radius: var(--raio-botao);
   background: var(--superficie-forte);
   color: var(--texto-suave);

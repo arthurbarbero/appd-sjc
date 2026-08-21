@@ -145,6 +145,17 @@ o endereço ganha o CEP, e a conta vem no fim, antes do consentimento.
 | 17  | E-MAIL | e-mail            | Sim         | [ADR-012](adr/adr-012-cadastro-embutido-no-formulario.md) |
 | 18  | CPF    | texto com máscara | Sim         | ADR-012                                                   |
 | 19  | SENHA  | senha             | Sim         | ADR-012                                                   |
+| 20  | ESTADO | texto             | Sim         | dono, 2026-08-20                                          |
+| 21  | PAÍS   | texto             | Sim         | dono, 2026-08-20                                          |
+
+**Estado e país entraram na revisão do dono de 2026-08-20**, pelo mesmo caminho do CEP:
+são acréscimo, e nenhum dos 15 originais muda. O estado chega preenchido pela consulta de
+CEP — a rota já devolvia a UF e ninguém a usava —, e o país nasce com "Brasil" porque a
+associação atende São José dos Campos e região; os dois continuam editáveis.
+
+Na mesma revisão, o campo 5 (endereço) deixou de ser `textarea` e passou a ser caixa de
+uma linha. **Rótulo, ordem e obrigatoriedade não mudaram**: a réplica fiel é do conteúdo
+do formulário de papel, não do controle de tela usado para preenchê-lo.
 
 **O CEP preenche rua, bairro e município** a partir do ViaCEP, que é gratuito e não exige
 cadastro. Três regras nessa busca:

@@ -47,8 +47,30 @@ h3 {
 
 p {
   margin: 0;
-  max-width: var(--medida);
   text-align: left; /* nunca justificado */
+}
+
+/*
+  A medida de leitura, aplicada onde ela é verdade.
+
+  Até 2026-08-20 isto era `max-width: var(--medida)` no seletor `p`, e por isso valia
+  para **todo** parágrafo: a dica de um campo, a legenda de um cartão, a célula de uma
+  grade. Num container de 1120px o resultado era metade da tela vazia, e foi assim que a
+  mesma queixa apareceu em sete telas diferentes na revisão do dono.
+
+  Agora quem carrega a medida é o bloco de prosa, declarado por quem escreve a tela.
+  Fora dele, a largura é decidida pelo pai — que é o certo para formulário, cartão e
+  qualquer coisa que já esteja dentro de uma coluna.
+*/
+.prosa {
+  /*
+    Centralizado, e não encostado à esquerda: o bloco de leitura estreito dentro de um
+    container largo parecia defeito quando o vazio ficava todo de um lado só. Simétrico,
+    ele lê como decisão.
+  */
+  max-width: var(--medida);
+  margin-inline: auto;
+  width: 100%;
 }
 
 /* Olho-de-seção: o pequeno rótulo acima do título. Dá hierarquia sem peso visual. */
@@ -59,6 +81,61 @@ p {
   text-transform: uppercase;
   color: var(--primaria);
   margin: 0;
+}
+
+/* ---------- a área do associado: menu à esquerda, conteúdo à direita ---------- */
+
+/*
+  Pedido do dono em 2026-08-20: "esse aqui eu colocaria pra esquerda, eu clico e aparecem
+  as coisas na direita — deixaria um single page com várias áreas".
+
+  A fileira de abas que ficava acima do conteúdo virou coluna. O que muda de verdade não é
+  a posição: com as abas em cima, cada seção começava depois de uma faixa que já tinha sido
+  lida, e a lista de destinos sumia da tela assim que a pessoa rolava. Na coluna, ela fica.
+
+  Feito com grade, e não com invólucro novo: as cinco telas da área já têm a mesma forma —
+  um `h1`, a navegação, e o conteúdo em irmãos. A grade coloca cada parte no seu lugar sem
+  que nenhuma delas precise ser reescrita.
+*/
+.area-moldura {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  column-gap: var(--e5);
+  row-gap: var(--e4);
+  align-items: start;
+}
+
+/* O título atravessa as duas colunas: ele nomeia a área toda, não a seção. */
+.area-moldura > h1 {
+  grid-column: 1 / -1;
+}
+
+.area-moldura > nav {
+  grid-column: 1;
+  grid-row: 2 / span 200;
+  position: sticky;
+  top: var(--e3);
+}
+
+/* Todo o resto vive na coluna da direita, na ordem em que a tela o declarou. */
+.area-moldura > *:not(h1):not(nav) {
+  grid-column: 2;
+}
+
+/*
+  Abaixo de 760px a coluna não cabe, e a navegação volta a ser uma faixa acima do
+  conteúdo — que é a forma certa quando a largura é o recurso escasso.
+*/
+@media (max-width: 760px) {
+  .area-moldura {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e4);
+  }
+
+  .area-moldura > nav {
+    position: static;
+  }
 }
 
 /* ---------- foco ---------- */
@@ -251,7 +328,9 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: var(--e1);
-  max-width: 34rem;
+  /* 40rem, não 34: o cartão que abriga o campo passou a usar a largura do bloco, e o
+     controle preso em 544px lia como "espremido" ao lado dele. */
+  max-width: 40rem;
 }
 
 /* Rótulo em caixa alta e baixa: CAIXA ALTA reduz legibilidade porque apaga o
@@ -305,10 +384,20 @@ a:hover {
   background: var(--erro-fundo);
 }
 
+/*
+  Erro de campo: a frase, e só a frase.
+
+  O "✕" que vinha colado ao texto saiu na revisão do dono de 2026-08-20. Ele não era o
+  meio não-cromático de sinalizar o erro — era decoração `aria-hidden`, invisível para
+  quem usa leitor de tela. Quem carrega a sinalização é a própria frase, ligada ao campo
+  por `aria-describedby` e anunciada em região viva, mais a borda do campo em `.campo-erro`.
+  Por isso tirá-lo não fere o 1.4.1: nunca houve informação só na cor.
+
+  O corpo fica em `--texto-rotulo`, que é 15px — menor que o do campo, como o dono pediu,
+  e exatamente no piso duro do site. Não desce mais.
+*/
 .campo .erro {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--e1);
+  display: block;
   color: var(--erro);
   font-weight: var(--peso-forte);
   font-size: var(--texto-rotulo);
@@ -334,6 +423,28 @@ a:hover {
 .grupo-escolha legend {
   font-weight: var(--peso-forte);
   padding: 0 var(--e2);
+}
+
+/*
+  Duas opções curtas ficam na mesma linha.
+
+  A coluna é o certo para as listas do formulário — tipos de deficiência, atendimentos,
+  dias —, onde há muitos itens e o olho desce. Para um par "Sim / Não" ela empilhava sem
+  motivo e esticava o grupo pela faixa inteira. O dono apontou isso em 2026-08-20: "pode
+  ficar lá na esquerda e na direita, não precisa disso".
+
+  `width: fit-content` porque um grupo de duas palavras não tem por que ocupar a largura
+  do cartão que o abriga.
+*/
+.grupo-escolha.em-linha {
+  width: fit-content;
+}
+
+.grupo-escolha.em-linha .escolhas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e3);
 }
 
 /* Cada opção é um bloco clicável inteiro, não só a caixinha. */

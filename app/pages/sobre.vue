@@ -32,7 +32,7 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
 
 <template>
   <div class="sobre">
-    <header class="topo">
+    <header class="topo prosa">
       <h1>Sobre nós</h1>
       <p class="lide">
         A {{ ASSOCIACAO.nomeCompleto }} atende pessoas com deficiência e suas famílias em São José
@@ -40,7 +40,7 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       </p>
     </header>
 
-    <section aria-labelledby="quem">
+    <section aria-labelledby="quem" class="prosa">
       <h2 id="quem">Quem somos</h2>
       <p>
         A APPD é uma associação sem fins lucrativos, formada por pessoas com deficiência, suas
@@ -64,7 +64,7 @@ const anos = new Date().getFullYear() - ASSOCIACAO.fundacao
       </p>
     </section>
 
-    <section aria-labelledby="compromisso">
+    <section aria-labelledby="compromisso" class="prosa">
       <h2 id="compromisso">Nosso compromisso</h2>
       <p>
         O compromisso da APPD é levar o máximo de informação possível. O número de pessoas que

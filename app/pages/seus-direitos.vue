@@ -411,12 +411,12 @@ useHead({
   display: flex;
   flex-direction: column;
   gap: var(--e3);
-  max-width: 62ch;
+  max-width: var(--medida);
 }
 
 .direitos p,
 .direitos dd {
-  max-width: 70ch;
+  max-width: var(--medida);
 }
 
 .canais,

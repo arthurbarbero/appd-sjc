@@ -39,6 +39,8 @@ export default defineEventHandler(async (event) => {
       complemento: d.complemento ?? null,
       bairro: d.bairro,
       municipio: d.municipio,
+      estado: d.estado,
+      pais: d.pais,
       atualizadoEm: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
     })
     .where(eq(schema.usuarios.id, sessao.id))

@@ -213,7 +213,7 @@ function consultar() {
 
 <style scoped>
 .verificar {
-  max-width: 680px;
+  max-width: var(--bloco-medio);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -286,14 +286,14 @@ function consultar() {
 
 .frase {
   font-size: var(--texto-corpo-g);
-  max-width: 56ch;
+  max-width: var(--medida);
 }
 
 .declaracao {
   display: flex;
   flex-direction: column;
   gap: var(--e2);
-  max-width: 60ch;
+  max-width: var(--medida);
 }
 
 .consulta {

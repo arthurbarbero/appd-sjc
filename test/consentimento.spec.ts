@@ -212,6 +212,8 @@ describe('sem consentimento o servidor recusa (REQ-7, T6)', () => {
     numero: '100',
     bairro: 'Centro',
     municipio: 'São José dos Campos',
+    estado: 'SP',
+    pais: 'Brasil',
     deficiencias: ['Física'],
     atendimentos: ['Fisioterapia'],
     dias: ['Segundas'],
