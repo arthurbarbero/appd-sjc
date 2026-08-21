@@ -16,7 +16,7 @@
  * está guardado.
  */
 
-import { and, asc, eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { semConsentimento } from '~~/shared/inscricao'
 
 export default defineEventHandler(async (event) => {
@@ -67,11 +67,16 @@ export default defineEventHandler(async (event) => {
 
   // Ordem crescente: o histórico se lê de cima para baixo, do primeiro aceite ao último
   // evento. É como a pessoa conta a própria história, e não como o banco a devolve.
+  /*
+    **Todos** os termos, e não só o do Art. 11.
+
+    O filtro por `deficiencia-art11` fazia sentido enquanto existia um termo só. Com o CID
+    (ADR-020) ele passou a esconder metade da verdade: a pessoa autorizava guardar o
+    diagnóstico e o histórico não mencionava, o que num lugar chamado "seus direitos" é o
+    oposto do que a tela promete. Pior — sem aparecer, não havia o que retirar.
+  */
   const eventos = await bd.query.consentimentos.findMany({
-    where: and(
-      eq(schema.consentimentos.usuarioId, sessao.id),
-      eq(schema.consentimentos.termoId, 'deficiencia-art11'),
-    ),
+    where: eq(schema.consentimentos.usuarioId, sessao.id),
     orderBy: asc(schema.consentimentos.registradoEm),
     columns: { termoId: true, versao: true, hash: true, evento: true, registradoEm: true },
   })

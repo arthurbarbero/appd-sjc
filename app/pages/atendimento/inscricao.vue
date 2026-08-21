@@ -47,6 +47,12 @@ const f = reactive({
   pais: 'Brasil',
   cuidadorNome: '',
   cuidadorContato: '',
+  // Campos 22 a 25 (crachá impresso). Todos opcionais.
+  cid: '',
+  consentimentoCid: false,
+  cras: '',
+  credencialTransporte: '',
+  contatoEmergencia: '',
   deficiencias: [] as string[],
   deficienciaOutro: '',
   atendimentos: [] as string[],
@@ -75,6 +81,11 @@ const chaveIdempotencia = crypto.randomUUID()
   em tela diz a mesma coisa em outras palavras.
 */
 const termoExibido = versaoVigente('deficiencia-art11')
+/*
+  O termo do CID é outro, e a tela o resolve separado de propósito: são duas autorizações,
+  e o hash que vai junto do envio precisa ser o do texto que a pessoa leu para **cada uma**.
+*/
+const termoCidExibido = versaoVigente('cid-diagnostico')
 
 /**
  * Foto do crachá: opcional, e **fora** da transação do cadastro (REQ-7f).
@@ -268,6 +279,34 @@ async function enviar() {
         municipio: f.municipio.trim(),
         estado: f.estado.trim(),
         pais: f.pais.trim(),
+        ...(f.cras.trim() ? { cras: f.cras.trim() } : {}),
+        ...(f.credencialTransporte.trim()
+          ? { credencialTransporte: f.credencialTransporte.trim() }
+          : {}),
+        ...(f.contatoEmergencia.trim() ? { contatoEmergencia: f.contatoEmergencia } : {}),
+        /*
+          O CID só viaja acompanhado da autorização e do hash do termo lido. Sem CID, os
+          três campos ficam de fora do corpo — e o servidor nem chega a consultar o
+          catálogo.
+        */
+        /*
+          O consentimento vai como a pessoa o deixou, e **nunca** fixo em `true`.
+
+          Na primeira versão deste bloco eu mandei `consentimentoCid: true` junto do CID,
+          e o efeito foi anular a caixa: o cliente afirmava a autorização que o servidor
+          iria conferir. O teste de ponta a ponta pegou — enviou o CID sem marcar nada e o
+          cadastro passou. Num campo comum seria bug; num consentimento do Art. 11 é a
+          própria trava se desligando sozinha.
+
+          Sem a caixa marcada, o esquema recusa com 422 e a tela mostra por quê.
+        */
+        ...(f.cid.trim()
+          ? {
+              cid: f.cid.trim(),
+              ...(f.consentimentoCid ? { consentimentoCid: true as const } : {}),
+              termoCidHash: termoCidExibido.hash,
+            }
+          : {}),
         ...(f.cuidadorNome.trim() ? { cuidadorNome: f.cuidadorNome.trim() } : {}),
         ...(f.cuidadorContato.trim() ? { cuidadorContato: f.cuidadorContato } : {}),
         deficiencias: f.deficiencias,
@@ -656,6 +695,54 @@ async function enviar() {
         </div>
       </fieldset>
 
+      <!--
+        Bloco 3b — o que o crachá impresso usa (2026-08-21).
+
+        Fica **depois** do cuidador e antes do atendimento porque é onde a pessoa já está
+        falando de documento e contato. Tudo opcional, e a tela diz isso na abertura: quem
+        não tem CRAS, credencial ou CID passa direto sem sentir que deixou algo pendente.
+      -->
+      <fieldset class="secao">
+        <legend>3b. Para o seu crachá, se você quiser</legend>
+        <p class="explicacao">
+          Nada aqui é obrigatório. Estes dados existem só para o crachá que você mesmo imprime — o
+          cadastro fica completo sem nenhum deles.
+        </p>
+
+        <div class="campo">
+          <label for="cras">CRAS de referência</label>
+          <span id="ajuda-cras" class="ajuda">Opcional.</span>
+          <input id="cras" v-model="f.cras" type="text" aria-describedby="ajuda-cras" />
+        </div>
+
+        <div class="campo">
+          <label for="credencial">Credencial de transporte</label>
+          <span id="ajuda-credencial" class="ajuda">Opcional. O número do passe municipal.</span>
+          <input
+            id="credencial"
+            v-model="f.credencialTransporte"
+            type="text"
+            aria-describedby="ajuda-credencial"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="contato-emergencia">Contato de emergência</label>
+          <span id="ajuda-emergencia" class="ajuda">
+            Opcional, com DDD. Sem ele, o crachá usa o contato do cuidador, se houver.
+          </span>
+          <input
+            id="contato-emergencia"
+            :value="f.contatoEmergencia"
+            type="text"
+            inputmode="numeric"
+            placeholder="(00) 00000-0000"
+            aria-describedby="ajuda-emergencia"
+            @input="f.contatoEmergencia = aplicarMascara($event, mascaraTelefone)"
+          />
+        </div>
+      </fieldset>
+
       <fieldset class="secao">
         <legend>4. Sobre o atendimento</legend>
 
@@ -817,6 +904,55 @@ async function enviar() {
           </span>
         </div>
 
+        <!--
+          O CID e a sua autorização, no mesmo bloco.
+
+          Ficam juntos porque um não existe sem o outro: informar o código **é** o ato que
+          precisa de consentimento, e separá-los em lugares diferentes da página criaria o
+          intervalo em que a pessoa digita o diagnóstico sem ter lido o que está
+          autorizando.
+
+          E ficam **aqui**, no bloco 7, e não no 3b com os outros dados do crachá, porque
+          este é o lugar da página onde se fala de dado de saúde e de autorização. O CRAS é
+          um número; o CID é diagnóstico (ADR-020).
+
+          A caixa aparece só depois que há algo escrito no campo: pedir autorização para um
+          dado que a pessoa não informou é ruído, e caixa marcada sem dado seria
+          consentimento de nada.
+        -->
+        <div class="cid-bloco">
+          <div class="campo">
+            <label for="cid">CID, se você quiser que ele saia no crachá</label>
+            <span id="ajuda-cid" class="ajuda">
+              Opcional. É o código do seu diagnóstico, como está no laudo — por exemplo, G82.4.
+            </span>
+            <input id="cid" v-model="f.cid" type="text" aria-describedby="ajuda-cid" />
+          </div>
+
+          <div
+            v-if="f.cid.trim()"
+            :class="['grupo-escolha', 'consentir', { 'campo-erro': erros.consentimentoCid }]"
+          >
+            <p class="explicacao">
+              O CID diz mais sobre a sua saúde do que o tipo de deficiência que você marcou acima:
+              aquele descreve a condição em linhas gerais, este identifica o diagnóstico. Por isso
+              precisa de uma autorização separada.
+            </p>
+            <label class="escolha" for="consentimento-cid">
+              <input id="consentimento-cid" v-model="f.consentimentoCid" type="checkbox" />
+              Autorizo a APPD a guardar o meu CID para que ele possa sair no meu crachá.
+            </label>
+            <p class="explicacao">
+              <strong>Guardar não é imprimir.</strong> O CID só aparece no crachá se você marcar
+              essa opção depois, na sua área — e ela começa desmarcada. Ele
+              <strong>nunca</strong> aparece na página pública de verificação.
+            </p>
+            <span v-if="erros.consentimentoCid" class="erro">
+              {{ erros.consentimentoCid }}
+            </span>
+          </div>
+        </div>
+
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.ciente }]">
           <legend id="ciente">
             Ciência da Contribuição Solidária
@@ -907,6 +1043,12 @@ async function enviar() {
 
 .consentir {
   background: var(--fundo);
+}
+
+.cid-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
 }
 
 .campo.aninhado {
