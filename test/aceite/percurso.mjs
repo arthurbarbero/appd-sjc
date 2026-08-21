@@ -482,7 +482,8 @@ try {
   }
   p.on('request', contar)
   const baixado = p.waitForEvent('download', { timeout: 30000 })
-  await p.click('button:has-text("Baixar em PNG")')
+  // Pelo nome acessível, e não pela palavra na tela: o rótulo visível já mudou uma vez.
+  await p.click('.acoes-baixar button:has-text("Imagem")')
   const arquivo = await baixado
   await p.waitForTimeout(500)
   p.off('request', contar)
@@ -495,7 +496,7 @@ try {
     olhando. Por isso o teste espera a aba nova em vez de navegar nesta.
   */
   const abaImpressao = ctx.waitForEvent('page')
-  await p.click('a:has-text("Ver como fica impresso")')
+  await p.click('.acoes-baixar a:has-text("Imprimir")')
   const impressao = await abaImpressao
   await impressao.waitForSelector('.folha', { timeout: 20000 })
   ok(
@@ -565,12 +566,12 @@ try {
         contorno: estilo.outlineStyle !== 'none' && parseFloat(estilo.outlineWidth) > 0,
       }
     })
-    if (foco?.texto.includes('Baixar em PNG')) {
+    if (foco?.texto.includes('Imagem')) {
       alcancou = true
       comFocoVisivel = foco.contorno
     }
   }
-  ok('só pelo teclado, o foco alcança "Baixar em PNG"', alcancou)
+  ok('só pelo teclado, o foco alcança o botão de baixar a imagem', alcancou)
   ok('o foco do teclado é visível, com contorno', comFocoVisivel)
 
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })

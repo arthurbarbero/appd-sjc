@@ -208,7 +208,7 @@ function enviar() {
           </span>
         </AppdAviso>
 
-        <div :class="['campo', 'largo', { 'campo-erro': erros.mensagem }]">
+        <div :class="['campo', { 'campo-erro': erros.mensagem }]">
           <label for="mensagem">
             Mensagem <span class="obrigatorio" aria-hidden="true">*</span>
           </label>
@@ -327,10 +327,6 @@ section {
   flex-direction: column;
   gap: var(--e4);
   max-width: var(--bloco-medio);
-}
-
-.campo.largo {
-  max-width: 100%;
 }
 
 .lista-erros {

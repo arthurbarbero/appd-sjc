@@ -151,8 +151,23 @@ const escolhaMultipla = <T extends readonly [string, ...string[]]>(opcoes: T, ca
  * Redeclarar a régua na tela de correção seria a duplicação que o REQ-8 proíbe — e a
  * forma mais previsível de as duas divergirem sem ninguém notar.
  */
+/*
+  Toda regra abaixo carrega a própria mensagem, e isso não é capricho de estilo.
+
+  Zod tem texto padrão para quando falta um: **"Invalid input"**, em inglês. Ele não fica
+  no console — sobe pela resposta 422, cai no resumo de erros e aparece para a pessoa,
+  exatamente onde ela precisa entender o que fazer. Aconteceu em produção em 2026-08-21:
+  quem marcou "Outro" e escreveu uma letra só no "Qual?" leu "Invalid input" e não tinha
+  como saber que faltava a segunda letra.
+
+  O teste `test/mensagens-de-erro.spec.ts` reprova qualquer validação sem mensagem.
+*/
 const camposPessoais = {
-  nome: z.string().trim().min(2, 'Informe o nome completo.').max(120),
+  nome: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome completo.')
+    .max(120, 'O nome cabe em 120 caracteres.'),
   nascimento: z
     .string()
     .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Use o formato dia/mês/ano, como 12/03/1978.'),
@@ -162,19 +177,31 @@ const camposPessoais = {
     .string()
     .transform(soDigitos)
     .refine((v) => v.length === 8, 'O CEP tem 8 números. Exemplo: 12239-530.'),
-  endereco: z.string().trim().min(3, 'Informe a rua, avenida ou travessa.').max(300),
-  numero: z.string().trim().min(1, 'Informe o número, ou "s/n".').max(20),
-  complemento: z.string().trim().max(60).optional(),
-  bairro: z.string().trim().min(2, 'Informe o bairro.').max(80),
-  municipio: z.string().trim().min(2, 'Informe o município.').max(80),
+  endereco: z
+    .string()
+    .trim()
+    .min(3, 'Informe a rua, avenida ou travessa.')
+    .max(300, 'O endereço cabe em 300 caracteres.'),
+  numero: z
+    .string()
+    .trim()
+    .min(1, 'Informe o número, ou "s/n".')
+    .max(20, 'O número cabe em 20 caracteres.'),
+  complemento: z.string().trim().max(60, 'O complemento cabe em 60 caracteres.').optional(),
+  bairro: z.string().trim().min(2, 'Informe o bairro.').max(80, 'O bairro cabe em 80 caracteres.'),
+  municipio: z
+    .string()
+    .trim()
+    .min(2, 'Informe o município.')
+    .max(80, 'O município cabe em 80 caracteres.'),
   /*
     Estado chega preenchido pela consulta de CEP, que já devolvia a UF e não era usada.
     Continua digitável: CEP fora do ar não pode travar o cadastro, mesma regra dos outros
     três campos que a consulta preenche.
   */
-  estado: z.string().trim().min(2, 'Informe o estado.').max(60),
-  pais: z.string().trim().min(2, 'Informe o país.').max(60),
-  cuidadorNome: z.string().trim().max(120).optional(),
+  estado: z.string().trim().min(2, 'Informe o estado.').max(60, 'O estado cabe em 60 caracteres.'),
+  pais: z.string().trim().min(2, 'Informe o país.').max(60, 'O país cabe em 60 caracteres.'),
+  cuidadorNome: z.string().trim().max(120, 'O nome cabe em 120 caracteres.').optional(),
   cuidadorContato: telefone.optional(),
 }
 
@@ -215,9 +242,19 @@ export const esquemaInscricao = z
 
     // 12 a 15 — o que a pessoa precisa, gravado em `inscricoes_atendimento`.
     deficiencias: escolhaMultipla(DEFICIENCIAS, 'tipo de deficiência'),
-    deficienciaOutro: z.string().trim().min(2).max(100).optional(),
+    deficienciaOutro: z
+      .string()
+      .trim()
+      .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
+      .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
+      .optional(),
     atendimentos: escolhaMultipla(ATENDIMENTOS, 'tipo de atendimento'),
-    atendimentoOutro: z.string().trim().min(2).max(100).optional(),
+    atendimentoOutro: z
+      .string()
+      .trim()
+      .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
+      .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
+      .optional(),
     dias: escolhaMultipla(DIAS, 'melhores dias'),
     cienciaContribuicao: z.literal('Ciente'),
 
@@ -225,16 +262,21 @@ export const esquemaInscricao = z
     // 254 é o teto de um endereço de e-mail pela RFC 5321; 20 cobre o CPF com pontuação
     // e sobra. Os dois faltavam, e eram os únicos campos de texto sem teto — sem eles, um
     // corpo de megabytes chegava a ser transformado e validado antes de ser recusado.
-    email: z.string().trim().toLowerCase().max(254).pipe(z.email('Informe um e-mail válido.')),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(254, 'Este e-mail é longo demais.')
+      .pipe(z.email('Informe um e-mail válido.')),
     cpf: z
       .string()
-      .max(20)
+      .max(20, 'Confira o CPF: veio texto demais.')
       .transform(soDigitos)
       .refine(cpfValido, 'Confira o CPF: os dígitos não batem.'),
     senha: z
       .string()
       .min(10, 'A senha precisa ter pelo menos 10 caracteres.')
-      .max(200)
+      .max(200, 'A senha cabe em 200 caracteres.')
       // Sem exigência de símbolo, maiúscula ou dígito, e sem recusar espaço, de propósito
       // (`cadastro-e-login` REQ-9): regra de composição aumenta abandono e não aumenta
       // segurança, e o público deste site é o que mais paga por isso.
@@ -255,7 +297,12 @@ export const esquemaInscricao = z
       .string()
       .regex(/^[0-9a-f]{64}$/, 'Recarregue a página e leia o termo de novo antes de enviar.'),
 
-    chaveIdempotencia: z.uuid(),
+    /*
+      Gerada pelo navegador, nunca digitada — a mensagem existe porque a regra do
+      projeto é que nenhuma validação caia no texto padrão do Zod, e não porque alguém
+      vá lê-la num uso normal. Se ela aparecer, o problema é nosso, e o texto diz isso.
+    */
+    chaveIdempotencia: z.uuid('O envio veio sem identificador. Recarregue a página.'),
   })
   // `.strict()`: campo desconhecido é recusado com 422, nunca ignorado em silêncio (REQ-10).
   .strict()

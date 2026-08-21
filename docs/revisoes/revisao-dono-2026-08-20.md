@@ -136,6 +136,51 @@ estrago ficava invisível para o teste e visível só para quem tentasse usar. F
 `width: 100%` no container que rola. Virou verificação própria no aceite: o que transborda
 tem de ser exatamente o que rola.
 
+## Terceira passada, no computador, com áudio — 2026-08-21
+
+Dois Jams. O primeiro sem microfone; a análise automática do Jam leu o percurso e concluiu
+"login attempt fails, no visible error message" com impacto alto. **Era invenção**: os
+eventos brutos mostram que nenhuma requisição de login foi feita e nenhum clique no botão
+"Entrar" aconteceu — o dono estava conferindo o ícone de olho, e o botão nunca foi
+acionado. Ele mesmo corrigiu: "não houve falha de login".
+
+Fica a lição, porque ela vai se repetir: **a leitura automática de um Jam é uma hipótese,
+não uma evidência.** Os eventos, a rede e os quadros são a evidência, e neste caso os três
+diziam o contrário do resumo.
+
+O segundo Jam veio com áudio, e é a fonte desta lista.
+
+| #   | O que o dono disse                                                                                      | O que era                                                                                               |
+| --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| J1  | "Todos esses campos precisam chegar ao máximo… o endereço tá certo, o restante deveria tá igual"        | `.campo` tinha teto de 40rem; o endereço era o único sem teto, e por isso o único que preenchia a caixa |
+| J2  | "Esse botão podia tá dentro do campo, e o campo até o limite, pra ficar na mesma largura"               | o olho ao lado encurtava a senha e a deixava mais estreita que o e-mail                                 |
+| J3  | "No meu cadastro, quando eu salvo, não tá subindo… nos meus dados acontece"                             | `/area/dados` rolava ao topo ao salvar; `/area/inscricoes` não                                          |
+| J4  | "Esses botões são muito grandes… ajustar e trocar pode ser o mesmo botão"                               | três botões grandes para baixar, e duas portas para o mesmo recorte                                     |
+| J5  | "Não deveria tá crashando, deveria virar duas linhas… um pouco mais que isso já deveria ser hambúrguer" | ponto de quebra em pixel, que não acompanha a fonte                                                     |
+| J6  | "Se for muito difícil, não quero que você perca tempo nesse último"                                     | dispensado pelo próprio dono                                                                            |
+
+**J5 foi o mais interessante, e não reproduzia.** Em fonte padrão a barra vai até 880px em
+uma linha e o hambúrguer entra em 860 — nada quebra. Reproduziu com **fonte base a 150%**:
+quebra em duas linhas entre 864 e 880px, antes de o hambúrguer aparecer. A causa é o ponto
+de quebra estar em pixel, que não sabe que a fonte cresceu; e quem aumenta a fonte é
+justamente o público deste site.
+
+Trocado por `53.75em`. Em media query, `em` mede a fonte escolhida **no navegador**, então
+o ponto se move sozinho: 16px → 860px (idêntico ao de antes), 20px → 1060px, 24px →
+1280px, sem nenhuma largura quebrada em nenhum dos três.
+
+**Uma recusa, e o motivo.** O pedido em J4 foi "esses dois podem ser só ícones de SVG". Os
+botões viraram compactos e da mesma cor, mas **o rótulo ficou**: quem usa este site inclui
+pessoas com deficiência intelectual e pessoas idosas, e um quadrado com uma seta não diz se
+o que sai é imagem, documento ou impressão. O ícone faz o que o dono queria — reconhecer
+rápido, pesar menos — e a palavra faz o que só ela faz.
+
+**Um defeito que ninguém pediu, achado no caminho.** O 422 do primeiro Jam trouxe à tela
+**"Invalid input"**, em inglês: `deficienciaOutro: z.string().trim().min(2).max(100)` não
+tinha mensagem, e o Zod respondeu por conta própria. Quem marcou "Outro" e escreveu uma
+letra só leu isso e não tinha como saber o que faltava. Corrigido em onze validações nos
+dois esquemas, com `test/mensagens-de-erro.spec.ts` reprovando qualquer regra sem mensagem.
+
 ## O que o dono pediu ao final (16:23 a 16:38)
 
 > "Acho que ele já viu todas as telas. Eu preciso que você organize primeiro, faça um

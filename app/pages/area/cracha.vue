@@ -33,7 +33,7 @@ const temFoto = computed(() => Boolean(data.value?.foto))
 
 /** Abre o recorte para quem já tem foto. Fecha sozinho quando a nova foto entra. */
 const trocandoFoto = ref(false)
-const tituloDaTroca = ref('Trocar a minha foto')
+const tituloDaTroca = ref('Mudar a minha foto')
 
 /*
   A rota que serve a foto guardada, para o recorte poder reabri-la. Constante e não
@@ -43,15 +43,8 @@ const tituloDaTroca = ref('Trocar a minha foto')
 const ROTA_FOTO = '/api/area/foto'
 const campoFoto = ref<{ editarAtual: () => Promise<void> } | null>(null)
 
-/** Abre o seletor de arquivo para uma foto nova. */
-function abrirTroca() {
-  tituloDaTroca.value = 'Trocar a minha foto'
-  trocandoFoto.value = true
-}
-
 /** Abre o recorte já carregado com a foto atual, sem passar pelo seletor de arquivo. */
 async function ajustarFoto() {
-  tituloDaTroca.value = 'Ajustar o enquadramento'
   trocandoFoto.value = true
   await nextTick()
   await campoFoto.value?.editarAtual()
@@ -201,14 +194,35 @@ async function exportar(formato: 'png' | 'pdf') {
             Separá-los é o que evita a pergunta que o dono fez ao tentar mexer na foto:
             um botão só, chamado "trocar", não parece prometer reenquadramento.
           -->
-          <div v-if="!trocandoFoto" class="acoes-foto">
-            <button type="button" class="botao botao-secundario" @click="ajustarFoto">
-              Ajustar o enquadramento
-            </button>
-            <button type="button" class="botao botao-secundario" @click="abrirTroca">
-              Trocar a minha foto
-            </button>
-          </div>
+          <!--
+            Um botão só, e não dois (2026-08-21).
+
+            "Ajustar o enquadramento" e "Trocar a minha foto" eram duas portas para a mesma
+            sala: o recorte. O dono viu isso na hora — "pode ser o mesmo botão" —, e ele
+            tem razão, porque a diferença entre as duas nunca foi de intenção, e sim de
+            **onde a imagem vem**. Agora quem decide isso é o recorte: ele abre com a foto
+            de agora, e lá dentro há "Escolher outra imagem" para quem quer outra.
+
+            O caminho curto também ficou mais curto: reenquadrar era o caso comum e exigia
+            escolher entre dois botões antes de qualquer coisa.
+          -->
+          <button
+            v-if="!trocandoFoto"
+            type="button"
+            class="botao botao-secundario compacto"
+            @click="ajustarFoto"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                d="M4 8V5a1 1 0 0 1 1-1h3m8 0h3a1 1 0 0 1 1 1v3m0 8v3a1 1 0 0 1-1 1h-3m-8 0H5a1 1 0 0 1-1-1v-3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            Mudar a minha foto
+          </button>
 
           <template v-else>
             <h2>{{ tituloDaTroca }}</h2>
@@ -264,21 +278,55 @@ async function exportar(formato: 'png' | 'pdf') {
       <!-- Ações de baixar -->
       <div class="acoes-baixar">
         <template v-if="temFoto">
+          <!--
+            Ícone com rótulo curto, e não ícone sozinho (2026-08-21).
+
+            O dono pediu "só ícones de SVG", e os botões eram grandes demais — isso está
+            resolvido: viraram compactos e da mesma cor. Mas o rótulo fica, e a razão é o
+            público: quem usa este site inclui pessoas com deficiência intelectual e
+            pessoas idosas, e um quadrado com uma seta não diz se o que sai é imagem,
+            documento ou impressão. Ícone sozinho transfere para elas o custo de adivinhar.
+
+            O ícone faz o trabalho que o dono queria — reconhecimento rápido e menos peso
+            visual —, e a palavra faz o que só ela faz.
+          -->
           <button
             type="button"
-            class="botao botao-primario"
+            class="botao botao-secundario compacto"
             :disabled="Boolean(exportando)"
             @click="exportar('png')"
           >
-            {{ exportando === 'png' ? 'Gerando…' : 'Baixar em PNG' }}
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                d="M12 3v10m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {{ exportando === 'png' ? 'Gerando…' : 'Imagem' }}
+            <span class="so-leitor-de-tela">do crachá, em PNG</span>
           </button>
           <button
             type="button"
-            class="botao botao-secundario"
+            class="botao botao-secundario compacto"
             :disabled="Boolean(exportando)"
             @click="exportar('pdf')"
           >
-            {{ exportando === 'pdf' ? 'Gerando…' : 'Baixar em PDF' }}
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 0v6h5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {{ exportando === 'pdf' ? 'Gerando…' : 'PDF' }}
+            <span class="so-leitor-de-tela">do crachá</span>
           </button>
           <!--
             Abre em **outra aba** (decisão do dono, 2026-08-07). A folha A4 não é um bloco
@@ -287,13 +335,23 @@ async function exportar(formato: 'png' | 'pdf') {
             entrega à aba nova uma referência à que a abriu.
           -->
           <a
-            class="botao botao-secundario"
+            class="botao botao-secundario compacto"
             href="/area/cracha-impressao"
             target="_blank"
             rel="noopener"
           >
-            Ver como fica impresso
-            <span class="so-leitor-de-tela">(abre em outra aba)</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                d="M7 9V4h10v5M7 19H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 15h10v6H7z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Imprimir
+            <span class="so-leitor-de-tela">— ver como fica impresso (abre em outra aba)</span>
           </a>
         </template>
 
@@ -418,10 +476,10 @@ async function exportar(formato: 'png' | 'pdf') {
   gap: var(--e3);
 }
 
-.acoes-foto {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e3);
+/* Botão de ação secundária compacto: cabe mais de um na linha sem virar barra de menu. */
+.compacto {
+  min-height: var(--alvo-min);
+  padding: 0 var(--e3);
 }
 
 .chamada {

@@ -290,3 +290,64 @@ describe('Dá para trocar E ajustar a foto que já existe (M5, 2026-08-21)', () 
     expect(FOTO).toMatch(/não volta/)
   })
 })
+
+describe('Segunda revisão no computador, com áudio (2026-08-21)', () => {
+  const LAYOUT = readFileSync(join(RAIZ, 'app', 'layouts', 'default.vue'), 'utf8')
+  const ENTRAR = readFileSync(join(RAIZ, 'app', 'pages', 'entrar.vue'), 'utf8')
+  const CRACHA = readFileSync(join(RAIZ, 'app', 'pages', 'area', 'cracha.vue'), 'utf8')
+  const INSCRICOES = readFileSync(join(RAIZ, 'app', 'pages', 'area', 'inscricoes.vue'), 'utf8')
+
+  it('J1: o campo não tem teto próprio — quem decide a largura é a coluna', () => {
+    const regra = BASE_CSS.match(/\.campo \{[^}]*\}/)?.[0] ?? ''
+    expect(regra).not.toMatch(/max-width:\s*\d/)
+  })
+
+  it('J2: o olho fica dentro do campo, e o campo ocupa a largura toda', () => {
+    const estilo = apenasEstilo(ENTRAR)
+    expect(estilo).toMatch(/\.olho \{[^}]*position:\s*absolute/)
+    expect(estilo).toMatch(/\.com-olho input \{[^}]*width:\s*100%/)
+    // padding reservado, senão a senha corre por baixo do ícone
+    expect(estilo).toMatch(/\.com-olho input \{[^}]*padding-right/)
+  })
+
+  it('J3: salvar em /area/inscricoes volta ao topo, como em /area/dados', () => {
+    const salvar = INSCRICOES.match(/salvo\.value = true[\s\S]{0,600}/)?.[0] ?? ''
+    expect(salvar).toMatch(/window\.scrollTo/)
+    expect(salvar).toMatch(/resumo\.value\?\.focus\(\)/)
+  })
+
+  it('J4: um botão só para mudar a foto, e não dois', () => {
+    expect(CRACHA).toMatch(/Mudar a minha foto/)
+    // sem comentário: a explicação da mudança cita o rótulo antigo, e não é tela
+    expect(semComentario(join(RAIZ, 'app', 'pages', 'area', 'cracha.vue'))).not.toMatch(
+      /Ajustar o enquadramento/,
+    )
+    // e trocar de arquivo passou a viver dentro do recorte
+    const FOTO = readFileSync(join(RAIZ, 'app', 'components', 'AppdFoto.vue'), 'utf8')
+    expect(FOTO).toMatch(/Escolher outra imagem/)
+  })
+
+  it('J4: os botões de baixar têm ícone e mantêm o rótulo', () => {
+    // Ícone sozinho foi recusado: o público inclui quem não decifra pictograma.
+    expect(CRACHA).toMatch(/compacto/)
+    expect(CRACHA).toMatch(/<svg[\s\S]*?aria-hidden="true"/)
+    expect(CRACHA).toMatch(/Imagem/)
+    expect(CRACHA).toMatch(/PDF/)
+    expect(CRACHA).toMatch(/Imprimir/)
+  })
+
+  it('J5: o ponto de quebra do menu está em em, não em pixel', () => {
+    /*
+      Em media query, `em` mede a fonte escolhida no navegador. Com o valor em pixel, quem
+      aumentava a fonte via a barra quebrar em duas linhas numa faixa logo acima de 860px,
+      antes de o hambúrguer entrar — reproduzido com fonte base a 150%.
+    */
+    expect(LAYOUT).toMatch(/PONTO_DE_QUEBRA = '\(max-width: 53\.75em\)'/)
+    expect(apenasEstilo(LAYOUT)).not.toMatch(/max-width:\s*860px|width <= 860px/)
+    expect(apenasEstilo(LAYOUT)).toMatch(/53\.75em/)
+  })
+
+  it('J5: a barra larga não quebra em duas linhas', () => {
+    expect(apenasEstilo(LAYOUT)).toMatch(/\.cabecalho nav ul \{[^}]*flex-wrap:\s*nowrap/)
+  })
+})
