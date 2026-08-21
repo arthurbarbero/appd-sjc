@@ -98,25 +98,34 @@ erro — ele estava certo, só era de outro cartão. O dono baixou três.
 `0006` recria `inscricoes_atendimento` e `usuarios` — em SQLite um `CHECK` não se altera, a
 tabela é refeita. Duas coisas foram escritas à mão sobre o que o drizzle-kit gerou:
 
-1. **`PRAGMA defer_foreign_keys=ON`, no lugar de `foreign_keys=OFF`.** O drizzle-kit escreve
-   o par `OFF`/`ON` em volta de **cada** tabela recriada; com duas recriações, a segunda
-   fica fora do par e o `DROP TABLE usuarios` encontra as FKs de `inscricoes_atendimento`,
-   `fotos` e `consentimentos`. Além disso `foreign_keys` é ignorado dentro de transação, e o
-   D1 executa a migration numa.
+1. **Um par `PRAGMA foreign_keys=OFF`/`ON` só, em volta das duas recriações.** O
+   drizzle-kit escreve um par em volta de **cada** tabela: com duas recriações, a segunda
+   fica fora e o `DROP TABLE usuarios` encontra as FKs de `inscricoes_atendimento`, `fotos`
+   e `consentimentos`.
+
+   Passei antes por `defer_foreign_keys`, que resolve o mesmo problema e é a receita
+   recomendada quando a migration roda dentro de transação. **No D1 remoto ele não vale**:
+   o deploy respondeu `D1 DB was reset and rolled back (…) FOREIGN KEY constraint failed`
+   depois de o local aceitar. O `foreign_keys=OFF` vale — a migration `0002` já tinha
+   recriado `usuarios` inteiro assim e passado. Quando duas receitas resolvem o mesmo
+   problema, a que já rodou naquele ambiente ganha da que a documentação prefere.
+
 2. **A cópia do telefone passa por um `CASE`** que prefixa `+55` no que não tem prefixo. O
    CHECK novo exige código de país, e um `SELECT "telefone"` cru faria a migration abortar.
    Não é migração de dados — o dono dispensou —, é o mínimo para a recriação não cair.
 
-**E um defeito meu, que só apareceu no deploy.** O arquivo tinha comentários explicando
-essas duas decisões, e o D1 **remoto** recusa migration com `/* ... */`:
-`SQL code did not contain a statement`. O D1 local aceita, então a migration passou no
-`db:migrate`, nos 386 testes e nas 276 verificações de aceite para reprovar depois de a
-branch já estar na main.
+**E dois defeitos meus, os dois só visíveis no deploy.** O D1 local e o D1 remoto não são o
+mesmo motor para migrations, e esta foi a lição do dia:
 
-É o tipo de defeito que só um teste sobre o **arquivo** pega, e não sobre o comportamento —
-como os dois que já moravam ali (placeholder de bind, GLOB com mais de 10 classes). Virou o
-terceiro: `test/modelo-de-dados.spec.ts` reprova comentário de bloco em qualquer migration.
-A explicação passou a morar aqui.
+1. **Comentário de bloco.** O arquivo tinha `/* ... */` explicando as decisões acima, e o
+   remoto responde `SQL code did not contain a statement`. O local aceita.
+2. **`defer_foreign_keys`.** Descrito acima: local aceita, remoto reverte.
+
+Nos dois casos a migration passou no `db:migrate`, nos 387 testes e nas 276 verificações de
+aceite para reprovar no deploy, com a branch já na main. O primeiro virou teste — sobre o
+**arquivo**, como os dois que já moravam ali (placeholder de bind, GLOB com mais de dez
+classes). O segundo não dá para testar sem um D1 remoto, e fica registrado aqui: **migration
+que recria tabela usa `foreign_keys=OFF`, não `defer_foreign_keys`**.
 
 ## Ressalvas escritas, em vez de escondidas
 

@@ -1,4 +1,4 @@
-PRAGMA defer_foreign_keys=ON;--> statement-breakpoint
+PRAGMA foreign_keys=OFF;--> statement-breakpoint
 CREATE TABLE `__new_inscricoes_atendimento` (
 	`id` text PRIMARY KEY NOT NULL,
 	`usuario_id` text NOT NULL,
@@ -112,4 +112,5 @@ ALTER TABLE `__new_usuarios` RENAME TO `usuarios`;--> statement-breakpoint
 CREATE UNIQUE INDEX `usuarios_numero_registro_unique` ON `usuarios` (`numero_registro`);--> statement-breakpoint
 CREATE UNIQUE INDEX `usuarios_email_unique` ON `usuarios` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `usuarios_cpf_unique` ON `usuarios` (`cpf`);--> statement-breakpoint
-CREATE UNIQUE INDEX `usuarios_chave_idempotencia_unique` ON `usuarios` (`chave_idempotencia`);
+CREATE UNIQUE INDEX `usuarios_chave_idempotencia_unique` ON `usuarios` (`chave_idempotencia`);--> statement-breakpoint
+PRAGMA foreign_keys=ON;
