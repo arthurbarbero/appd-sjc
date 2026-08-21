@@ -15,7 +15,7 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, sep } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const RAIZ = join(import.meta.dirname, '..')
@@ -161,6 +161,53 @@ describe('as rotas do painel da área não trazem o campo 12 (area REQ-5, T6.1)'
     const painel = ler(join(RAIZ, 'app', 'pages', 'area', 'index.vue'))
     expect(painel).not.toMatch(/deficiencia/i)
   })
+})
+
+/*
+  O CID é o segundo alvo da proibição transversal, e é mais estrito que o primeiro.
+
+  Para o campo 12 existe **uma** exceção: com o opt-in marcado, ele sai em `/verificar`
+  (ADR-019). Para o CID **não existe exceção nenhuma** (ADR-020): ele é diagnóstico, e a
+  página de verificação é aberta a quem tiver o número de registro. O opt-in do CID governa
+  só o crachá impresso, que é documento que a própria pessoa entrega a quem escolhe.
+
+  A diferença precisa estar no teste, e não só no texto do ADR: sem ela, o dia em que
+  alguém "uniformizar" as duas regras não vai acender luz nenhuma.
+*/
+describe('o CID nunca sai em rota pública, com ou sem opt-in (ADR-020)', () => {
+  const ROTAS_PUBLICAS = arquivos(API).filter(
+    (a) => a.includes(`${sep}verificar${sep}`) || a.endsWith(`${sep}cep${sep}[cep].get.ts`),
+  )
+
+  it('a verificação pública não projeta o CID nem o opt-in dele', () => {
+    const rota = ler(join(API, 'verificar', '[numero].get.ts'))
+    expect(rota).not.toMatch(/\bcid\b/i)
+  })
+
+  it.each(ROTAS_PUBLICAS)('%s não menciona o CID', (arquivo) => {
+    expect(ler(arquivo)).not.toMatch(/\bcid\b/i)
+  })
+
+  it('a página pública de verificação não exibe o CID', () => {
+    const pagina = ler(join(RAIZ, 'app', 'pages', 'verificar', '[numero].vue'))
+    expect(pagina).not.toMatch(/\bcid\b/i)
+  })
+
+  it('o opt-in do CID governa o crachá, e nada além dele', () => {
+    /*
+      `cidNoCracha` pode aparecer onde o crachá é montado e onde a pessoa o marca. Se
+      aparecer numa rota pública, a regra foi quebrada — e é essa a busca aqui.
+    */
+    const infratoras = ROTAS_PUBLICAS.filter((a) => ler(a).includes('cidNoCracha'))
+    expect(infratoras, `rota pública mencionando cidNoCracha: ${infratoras}`).toEqual([])
+  })
+
+  /*
+    Não há teste proibindo o CID nas rotas autenticadas, e a ausência é deliberada: é
+    exatamente ali que ele precisa estar, porque é onde a pessoa o informa, confere e
+    apaga. A regra do ADR-020 é sobre rota **pública** — a que qualquer um alcança com
+    o número de registro na mão.
+  */
 })
 
 describe('seed e fixtures não carregam dado de pessoa real (REQ-43, T6.4)', () => {

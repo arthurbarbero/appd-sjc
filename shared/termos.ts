@@ -85,8 +85,56 @@ export const TERMO_ART11: VersaoTermo = {
   ].join('\n'),
 }
 
+/**
+ * O termo do CID, versão 1.
+ *
+ * **Termo próprio, e não versão nova do `deficiencia-art11`** — a distinção é o ponto do
+ * [ADR-020](../docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md). Consentimento do Art. 11
+ * é específico **por finalidade**, e "organizar o meu atendimento" não cobre "guardar o
+ * meu diagnóstico para imprimi-lo num cartão". São duas autorizações, e o histórico
+ * precisa poder responder qual delas a pessoa deu — o que um `termoId` só tornaria
+ * impossível.
+ *
+ * O texto diz três coisas que a pessoa não teria como deduzir, e por isso nenhuma delas é
+ * dispensável: que o CID diz mais que o tipo de deficiência; que **guardar não é
+ * imprimir**; e que a página pública nunca o mostra, nem com a impressão marcada.
+ */
+export const TERMO_CID: VersaoTermo = {
+  termoId: 'cid-diagnostico',
+  versao: 'v1',
+  dataVigencia: '2026-08-21T00:00:00Z',
+  tipoMudanca: 'material',
+  hash: '7e4cef3ee818b7e09e4b59d3655768e0232904ebcfe06cbaa673ce8331058453',
+  texto: [
+    'Autorização para a APPD-SJC guardar o seu CID.',
+    '',
+    'O CID é o código do seu diagnóstico — por exemplo, G82.4. Ele diz mais sobre a sua',
+    'saúde do que o tipo de deficiência que você já informou: enquanto aquele descreve uma',
+    'condição em linhas gerais, o CID identifica o diagnóstico com nome e classificação.',
+    '',
+    'Por isso ele precisa de uma autorização separada, e não da mesma que você deu antes.',
+    '',
+    'Ao aceitar, você autoriza a Associação das Pessoas Portadoras de Deficiências de São',
+    'José dos Campos a guardar o seu CID com uma finalidade só: poder imprimi-lo no seu',
+    'crachá, se você pedir.',
+    '',
+    'Guardar não é imprimir. O CID só aparece no crachá se você marcar essa opção depois,',
+    'na sua área do associado — e ela começa desmarcada.',
+    '',
+    'O seu CID nunca aparece na página pública de verificação do crachá, mesmo que você',
+    'marque a opção de imprimi-lo. Aquela página é aberta a qualquer pessoa que tenha o seu',
+    'número de registro.',
+    '',
+    'A associação não vende, não compartilha com outra empresa e não usa essa informação',
+    'para publicidade.',
+    '',
+    'Você pode retirar esta autorização quando quiser, na sua área do associado. Retirar',
+    'apaga o seu CID e desmarca a impressão no crachá, na hora.',
+  ].join('\n'),
+}
+
 /** Todas as versões já publicadas. Nenhuma sai daqui. */
-export const TERMOS: VersaoTermo[] = [TERMO_ART11]
+export const TERMOS: VersaoTermo[] = [TERMO_ART11, TERMO_CID]
 
 /**
  * Recusa o catálogo inteiro se qualquer versão estiver malformada (REQ-1).
