@@ -438,6 +438,16 @@ a:hover {
 */
 .grupo-escolha.em-linha {
   width: fit-content;
+  /*
+    Coluna com as opções empurradas para a base.
+
+    Ao lado de um campo de texto, o grupo ficava mais alto que ele: o campo tem rótulo,
+    linha de ajuda e caixa, e o grupo só tem legenda e opções — sem a linha do meio, as
+    bolinhas subiam e o "Sim/Não" flutuava acima do telefone. Com `margin-top: auto` nas
+    opções, os dois controles encostam na mesma base, que é onde o olho os compara.
+  */
+  display: flex;
+  flex-direction: column;
 }
 
 .grupo-escolha.em-linha .escolhas {
@@ -445,6 +455,7 @@ a:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--e3);
+  margin-top: auto;
 }
 
 /* Cada opção é um bloco clicável inteiro, não só a caixinha. */

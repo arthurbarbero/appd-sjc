@@ -636,6 +636,23 @@ try {
           umaLinha: ehPainel || !ul || !conta ? true : Math.abs(topo(ul) - topo(conta)) < 8,
           // O painel fechado fica fora da tela e fora do alcance do teclado.
           painelGuardado: !ehPainel || (nav?.hasAttribute('inert') ?? false),
+          /*
+            No telefone a navegação da área é uma fileira que rola. Se ela transbordar em
+            vez de rolar, os últimos itens ficam fora da tela **sem** rolagem que os
+            alcance — e o `overflow-x: hidden` da página esconde o estrago, deixando a
+            verificação de rolagem horizontal passar.
+
+            Aconteceu em 2026-08-21 com "Sair", e é por isso que a medida é esta: o que
+            transborda tem de ser exatamente o que rola.
+          */
+          navegacaoDaAreaAlcancavel: (() => {
+            const lista = document.querySelector('nav[aria-label="Área do associado"] ul')
+            if (!lista) return true
+            const transborda = lista.scrollWidth > lista.clientWidth + 1
+            const rola = getComputedStyle(lista).overflowX === 'auto'
+            const cabe = lista.scrollWidth <= lista.clientWidth + 1
+            return cabe || (transborda && rola)
+          })(),
           // E o botão que o abre é alvo de toque legítimo.
           alvoDoBotao: !ehPainel || (botao?.getBoundingClientRect().height ?? 0) >= 44,
         }
@@ -643,6 +660,10 @@ try {
       ok(`${largura}px ${rota}: sem rolagem horizontal`, !r.rolagem)
       ok(`${largura}px ${rota}: cabeçalho em uma linha`, r.umaLinha)
       ok(`${largura}px ${rota}: painel fechado fora do alcance do teclado`, r.painelGuardado)
+      ok(
+        `${largura}px ${rota}: nenhum item da navegação da área fica inalcançável`,
+        r.navegacaoDaAreaAlcancavel,
+      )
       ok(`${largura}px ${rota}: o botão do menu tem alvo de 44px`, r.alvoDoBotao)
     }
   }

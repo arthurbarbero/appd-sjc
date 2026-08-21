@@ -30,6 +30,32 @@ const exportando = ref('')
 const erroExportar = ref('')
 
 const temFoto = computed(() => Boolean(data.value?.foto))
+
+/** Abre o recorte para quem já tem foto. Fecha sozinho quando a nova foto entra. */
+const trocandoFoto = ref(false)
+const tituloDaTroca = ref('Trocar a minha foto')
+
+/*
+  A rota que serve a foto guardada, para o recorte poder reabri-la. Constante e não
+  literal: com o caminho cru no atributo, o Vite tenta resolvê-lo como asset em tempo de
+  build e o `npm run build` falha enquanto o dev passa.
+*/
+const ROTA_FOTO = '/api/area/foto'
+const campoFoto = ref<{ editarAtual: () => Promise<void> } | null>(null)
+
+/** Abre o seletor de arquivo para uma foto nova. */
+function abrirTroca() {
+  tituloDaTroca.value = 'Trocar a minha foto'
+  trocandoFoto.value = true
+}
+
+/** Abre o recorte já carregado com a foto atual, sem passar pelo seletor de arquivo. */
+async function ajustarFoto() {
+  tituloDaTroca.value = 'Ajustar o enquadramento'
+  trocandoFoto.value = true
+  await nextTick()
+  await campoFoto.value?.editarAtual()
+}
 const urlVerificacao = computed(() => `${origem}/verificar/${data.value?.numeroRegistro ?? ''}`)
 
 const dadosCracha = computed<DadosCracha>(() => ({
@@ -67,6 +93,9 @@ async function enviarFoto() {
     })
     enviandoFoto.value = null
     await refresh()
+    // Só recolhe o bloco de troca quando a foto nova entrou de verdade: em caso de erro,
+    // o recorte precisa continuar na tela para a pessoa tentar de novo.
+    trocandoFoto.value = false
   } catch {
     erroEnvio.value =
       'Não conseguimos enviar a foto agora. Seu recorte continua aqui — tente de novo em instantes.'
@@ -146,6 +175,53 @@ async function exportar(formato: 'png' | 'pdf') {
         <section v-if="!temFoto" class="sem-foto-bloco">
           <h2>Falta a sua foto para o crachá ficar pronto</h2>
           <AppdFoto v-model="enviandoFoto" rotulo="Foto para o crachá" />
+        </section>
+
+        <!--
+          Estado 1b — trocar a foto que já existe (2026-08-21).
+
+          Até aqui o envio de foto só era montado quando **não** havia foto: quem já tinha
+          enviado a sua não tinha caminho nenhum para trocá-la, e o dono topou com isso ao
+          tentar conferir o recorte. Errar a foto uma vez condenava a pessoa àquela foto.
+
+          Fica fechado por padrão, e não aberto: a tela é sobre o crachá pronto, e um
+          seletor de arquivo permanentemente aberto no alto sugere que algo está faltando.
+        -->
+        <section v-else class="trocar-bloco">
+          <!--
+            Dois caminhos, porque são duas intenções diferentes (2026-08-21).
+
+            **Ajustar** trabalha sobre a foto que já está guardada: serve para centralizar
+            o rosto ou aproximar, sem precisar caçar o arquivo original no aparelho — que
+            muitas vezes já nem existe mais.
+
+            **Trocar** pede um arquivo novo, e é o único caminho quando a foto em si é a
+            errada.
+
+            Separá-los é o que evita a pergunta que o dono fez ao tentar mexer na foto:
+            um botão só, chamado "trocar", não parece prometer reenquadramento.
+          -->
+          <div v-if="!trocandoFoto" class="acoes-foto">
+            <button type="button" class="botao botao-secundario" @click="ajustarFoto">
+              Ajustar o enquadramento
+            </button>
+            <button type="button" class="botao botao-secundario" @click="abrirTroca">
+              Trocar a minha foto
+            </button>
+          </div>
+
+          <template v-else>
+            <h2>{{ tituloDaTroca }}</h2>
+            <AppdFoto
+              ref="campoFoto"
+              v-model="enviandoFoto"
+              rotulo="Nova foto para o crachá"
+              :imagem-inicial="ROTA_FOTO"
+            />
+            <button type="button" class="botao botao-fantasma" @click="trocandoFoto = false">
+              Manter a foto de agora
+            </button>
+          </template>
         </section>
 
         <p v-if="salvandoFoto" role="status" class="carregando">Guardando a sua foto…</p>
@@ -334,6 +410,19 @@ async function exportar(formato: 'png' | 'pdf') {
   era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
   só o que é da tela; a forma da área é da moldura.
 */
+
+.trocar-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e3);
+}
+
+.acoes-foto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e3);
+}
 
 .chamada {
   font-size: var(--texto-corpo-g);

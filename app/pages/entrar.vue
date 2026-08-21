@@ -134,14 +134,49 @@ async function entrar() {
             autocomplete="current-password"
             :disabled="!temJs || entrando"
           />
+          <!--
+            Ícone de olho, e não a palavra (2026-08-21).
+
+            "Mostrar senha" escrito ao lado do campo ocupava quase tanto quanto o próprio
+            campo no telefone, e empurrava a senha para uma caixa estreita — "esse mostrar
+            senha gigantesco é feio", disse o dono.
+
+            O **nome do controle continua sendo texto**: `aria-label` alterna entre
+            "Mostrar senha" e "Ocultar senha", que é o que leitor de tela anuncia. Trocar
+            a palavra visível pelo desenho não pode custar o nome — foi o mesmo cuidado
+            que o hambúrguer do menu exigiu.
+
+            Sem `aria-pressed` junto: com o rótulo já dizendo a ação seguinte, o estado
+            pressionado faria o leitor anunciar duas informações que se contradizem.
+          -->
           <button
             type="button"
             class="olho"
-            :aria-pressed="senhaVisivel"
+            :aria-label="senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'"
             :disabled="!temJs || entrando"
             @click="senhaVisivel = !senhaVisivel"
           >
-            {{ senhaVisivel ? 'Ocultar senha' : 'Mostrar senha' }}
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+              <path
+                v-if="!senhaVisivel"
+                d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"
+                fill="currentColor"
+              />
+              <template v-else>
+                <path
+                  d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"
+                  fill="currentColor"
+                  opacity="0.45"
+                />
+                <path
+                  d="M4 3.5 20.5 20"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  fill="none"
+                />
+              </template>
+            </svg>
           </button>
         </div>
       </div>
@@ -197,6 +232,36 @@ form {
 .com-olho input {
   flex: 1;
   min-width: 0;
+}
+
+/*
+  Alvo de 44px em quadrado, que é o mínimo do WCAG 2.5.8 e também o que a mão precisa.
+  Sem borda: ele mora dentro da linha do campo, e um segundo retângulo ao lado do
+  primeiro criaria a impressão de dois controles de mesmo peso.
+*/
+.olho {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--alvo-min);
+  height: var(--alvo-min);
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio-botao);
+  background: none;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.olho:hover:not(:disabled) {
+  background: var(--superficie-forte);
+  color: var(--texto);
+}
+
+.olho:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .demora {
   margin: 0;
