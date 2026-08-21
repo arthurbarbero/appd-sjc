@@ -32,11 +32,17 @@ function semComentario(caminho: string): string {
 }
 
 /*
-  `@media (max-width: 860px)` é ponto de quebra, não largura de conteúdo — e casaria com
-  a busca por `max-width:` sem esta poda.
+  Só o bloco de estilo interessa, e dentro dele só as declarações.
+
+  Duas coisas casam com `max-width:` sem serem largura de conteúdo: a condição de uma
+  media query (`@media (max-width: 860px)`) e uma string no script — o layout guarda o
+  ponto de quebra em `const PONTO_DE_QUEBRA = '(max-width: 860px)'` para saber, no
+  JavaScript, quando o menu é painel. Ambas são podadas aqui.
 */
-function semCondicaoDeMedia(fonte: string): string {
-  return fonte.replace(/@media[^{]*\{/g, '{')
+function apenasEstilo(fonte: string): string {
+  const blocos = [...fonte.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1] ?? '')
+  const css = blocos.length > 0 ? blocos.join('\n') : fonte
+  return css.replace(/@media[^{]*\{/g, '{')
 }
 
 const TELAS = arquivosDe(join(RAIZ, 'app'), '.vue')
@@ -78,7 +84,7 @@ describe('As larguras de conteúdo saem de token (REQ-3)', () => {
   it.each(TELAS)('%s não inventa largura própria', (caminho) => {
     const nome = caminho.split(/[\\/]/).pop() ?? ''
     const permitidos = EXCECOES.get(nome) ?? []
-    const crus = [...semCondicaoDeMedia(semComentario(caminho)).matchAll(/max-width:\s*([^;]+);/g)]
+    const crus = [...apenasEstilo(semComentario(caminho)).matchAll(/max-width:\s*([^;]+);/g)]
       .map((m) => m[1]!.trim())
       .filter((valor) => valor !== '100%' && valor !== 'none' && valor !== 'fit-content')
       .filter((valor) => !TOKENS_DE_BLOCO.some((token) => valor.includes(token)))
@@ -91,7 +97,10 @@ describe('A foto do crachá aparece na área, e não a palavra "Foto" (REQ-7)', 
   const AREA = semComentario(join(RAIZ, 'app', 'pages', 'area', 'index.vue'))
 
   it('o cartão serve a imagem da rota autenticada', () => {
-    expect(AREA).toMatch(/<img[^>]*src="\/api\/area\/foto"/)
+    // `:src` com constante, e não `src` literal: com o caminho cru o Vite tenta resolver
+    // a rota como asset e o build de produção falha, enquanto o dev passa.
+    expect(AREA).toMatch(/<img[^>]*:src="ROTA_FOTO"/)
+    expect(AREA).toMatch(/ROTA_FOTO = '\/api\/area\/foto'/)
   })
 
   it('nenhum bloco desenha a palavra "Foto" no lugar da imagem', () => {
