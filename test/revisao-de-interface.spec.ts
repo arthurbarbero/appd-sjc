@@ -136,15 +136,26 @@ describe('Os projetos são opções do formulário, não texto livre (REQ-19)', 
   })
 })
 
-describe('A tela de contato não finge que envia (REQ-18)', () => {
+describe('A tela de contato (REQ-18)', () => {
   const contato = textoVisivel(join(RAIZ, 'app/pages/contato.vue'))
 
-  it('avisa antes de a pessoa escrever', () => {
-    expect(contato).toMatch(/Este formulário ainda não envia/)
-  })
+  /*
+    Os dois testes que estavam aqui foram **revogados** em 2026-08-21, e não corrigidos.
 
-  it('o botão não promete envio', () => {
-    expect(contato).not.toMatch(/>\s*Enviar mensagem\s*</)
+    Eles guardavam o REQ-18 de `site-institucional`: a tela avisava, antes de a pessoa
+    escrever, que o formulário não envia, e o botão dizia "Conferir o que escrevi (ainda
+    não envia)". O dono mandou tirar as duas coisas — "era uma coisa que eu falei pra você,
+    não era pra escrever".
+
+    Registrado aqui, e não apagado em silêncio, porque o requisito não deixou de fazer
+    sentido: o formulário continua sem destinatário. O que mudou foi a decisão de quem
+    manda, e o dia em que a APPD informar o e-mail o assunto se encerra sozinho.
+
+    O que **continua** testado é a confirmação depois do clique, que é o que sobrou de
+    verdadeiro na tela.
+  */
+  it('a confirmação depois do envio continua dizendo que não foi enviada', () => {
+    expect(contato).toMatch(/não foi enviado/)
   })
 
   it('telefone é texto com botão de copiar, não botão de bloco (REQ-16)', () => {

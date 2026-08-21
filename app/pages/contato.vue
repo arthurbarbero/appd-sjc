@@ -113,19 +113,21 @@ function enviar() {
       <h2 id="escrever">Escrever uma mensagem</h2>
 
       <!--
-        REQ-18: a tela diz que o formulário não envia, **antes** de a pessoa escrever, e
-        não depois de ela apertar o botão. Escrever uma mensagem para descobrir no fim que
-        ela não foi a lugar nenhum é o pior desenho possível para quem procura ajuda.
-        Sai quando a APPD informar o e-mail que recebe (`docs/pendencias-appd.md`, item 4).
-      -->
-      <AppdAviso tipo="atencao" titulo="Este formulário ainda não envia">
-        <span>
-          A associação ainda não definiu qual e-mail recebe as mensagens do site, então nada escrito
-          aqui chega a alguém. Para falar hoje, use o telefone ou o WhatsApp acima — esses
-          funcionam.
-        </span>
-      </AppdAviso>
+        O aviso "Este formulário ainda não envia" saiu em 2026-08-21, por decisão do dono:
 
+        > tira esse negócio de "ainda não envia" (…) era uma coisa que eu falei pra você,
+        > não era pra escrever
+
+        Fica registrado o que isto custa, porque o custo é real e é dele a decisão: o
+        formulário continua **sem destinatário** — a associação ainda não informou qual
+        e-mail recebe (`docs/pendencias-appd.md`, item 4) —, e a tela deixou de dizer isso
+        antes de a pessoa escrever. Quem procura ajuda escreve a mensagem inteira e só
+        descobre depois do clique.
+
+        O que sobrou de verdadeiro está na confirmação abaixo, que aparece depois do envio,
+        e nos telefones logo acima, que funcionam hoje. Quando o e-mail existir, esta
+        ressalva perde o objeto.
+      -->
       <AppdAviso v-if="enviado" tipo="sucesso" titulo="Mensagem conferida, mas não enviada">
         <span>
           O que você escreveu está completo e sem erro. Ele <strong>não foi enviado</strong>:
@@ -226,17 +228,15 @@ function enviar() {
 
         <div class="envio">
           <!--
-            O rótulo diz o que o botão faz de verdade hoje: confere o que foi escrito e
-            não envia nada. "Enviar mensagem" seria promessa que o sistema não cumpre —
-            falta a associação definir quem recebe.
+            O rótulo voltou a ser "Enviar mensagem" em 2026-08-21, junto com a saída do
+            aviso — o dono mandou tirar a frase dos dois lugares.
 
-            "Conferir minha mensagem" ainda deixava a pergunta que o dono fez em
-            2026-08-20: "se eu conferir, vai pra onde?". O rótulo agora responde antes do
-            clique, em vez de esperar o aviso amarelo acima explicar.
+            Ele dizia "Conferir o que escrevi (ainda não envia)", que era honesto e feio. O
+            que fica no lugar promete o que o sistema ainda não cumpre, e a única defesa
+            contra isso é a confirmação logo acima, que aparece depois do clique e continua
+            dizendo a verdade.
           -->
-          <button type="submit" class="botao botao-primario">
-            Conferir o que escrevi (ainda não envia)
-          </button>
+          <button type="submit" class="botao botao-primario">Enviar mensagem</button>
           <p class="discreto">
             <AppdSelo /> O prazo de resposta será publicado quando a associação definir quem
             responde.

@@ -342,15 +342,33 @@ describe('Segunda revisão no computador, com áudio (2026-08-21)', () => {
     expect(CRACHA).toMatch(/Imprimir/)
   })
 
-  it('J5: o ponto de quebra do menu está em em, não em pixel', () => {
+  it('J5: os dois pontos de quebra do cabeçalho estão em em, não em pixel', () => {
     /*
       Em media query, `em` mede a fonte escolhida no navegador. Com o valor em pixel, quem
-      aumentava a fonte via a barra quebrar em duas linhas numa faixa logo acima de 860px,
-      antes de o hambúrguer entrar — reproduzido com fonte base a 150%.
+      aumentava a fonte via a barra quebrar em duas linhas antes de o hambúrguer entrar.
+
+      Os números mudaram em 2026-08-21, depois de **medir** em vez de estimar: 53.75em virou
+      62em e o `1080px` do nome da marca virou `72em` — este era o que faltava, e é o que
+      produzia a segunda faixa quebrada.
+
+      Mudaram duas vezes no mesmo dia. A primeira medição foi feita **deslogado**, e o
+      cabeçalho de quem entrou traz "Minha área" no lugar de "Entrar": a navegação passa de
+      707 para 748px, e 58em/70em ainda deixavam faixa quebrada. Medir o estado mais fácil
+      é como um ponto de quebra nasce errado.
+
+      O teste que **prova** que não quebra é o de medição, mais abaixo. Este aqui só impede
+      que os valores voltem a ser fixos em pixel, o que reabriria a porta sem reprovar nada.
     */
-    expect(LAYOUT).toMatch(/PONTO_DE_QUEBRA = '\(max-width: 53\.75em\)'/)
-    expect(apenasEstilo(LAYOUT)).not.toMatch(/max-width:\s*860px|width <= 860px/)
-    expect(apenasEstilo(LAYOUT)).toMatch(/53\.75em/)
+    expect(LAYOUT).toMatch(/PONTO_DE_QUEBRA = '\(max-width: 62em\)'/)
+    /*
+      As condições das media queries são lidas **antes** da poda: `apenasEstilo` troca
+      `@media (...) {` por `{` para que a condição não conte como largura de conteúdo, e
+      isso apaga justamente o que se quer conferir aqui.
+    */
+    const condicoes = [...LAYOUT.matchAll(/@media\s*\(([^)]*)\)/g)].map((m) => m[1]!)
+    expect(condicoes.join(' | ')).toMatch(/62em/)
+    expect(condicoes.join(' | ')).toMatch(/72em/)
+    expect(condicoes.join(' | ')).not.toMatch(/860px|1080px/)
   })
 
   it('J5: a barra larga não quebra em duas linhas', () => {
