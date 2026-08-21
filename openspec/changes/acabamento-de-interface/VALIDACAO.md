@@ -82,7 +82,7 @@ item — que é onde o foco entra.
 | REQ-36          | leitura | **passa** — "Sair" na cor da marca                                                   |
 | REQ-37          | leitura | **passa** — o parágrafo da ficha em papel saiu                                       |
 | REQ-38          | aceite  | **passa** — o gate agora exige a **ausência** da frase                               |
-| REQ-39          | —       | **bloqueado pela fonte** — não existe biografia da fundadora. Pendência 8a           |
+| REQ-39          | —       | **encerrado pelo dono** — o texto não existe, e a assimetria fica                    |
 | REQ-40          | leitura | **passa** — quem está autenticado encontra os campos preenchidos                     |
 | REQ-41          | leitura | **passa** — o rótulo diz que ainda não envia                                         |
 | REQ-46          | axe     | **passa** — `readonly`, não `disabled`; contraste AA mantido                         |
@@ -95,8 +95,10 @@ item — que é onde o foco entra.
    antes de a change ir para `archive/`. Ao escrever esta validação eu havia marcado o
    requisito como "parcial" sem ter implementado nada; o registro fica para lembrar que o
    parecer se confere contra o código, não contra a memória.
-2. **REQ-39, as duas biografias.** A tela já comporta biografias do mesmo tamanho; o que
-   falta é o texto, e ele não existe em lugar nenhum. Conferido na fonte em 20/08.
+2. **REQ-39, as duas biografias.** Conferido na fonte em 20/08: `appd.org.br` não tem
+   biografia da fundadora, só a frase de que ela fundou. **Encerrado pelo dono no mesmo
+   dia** — "ignora, porque não tem mesmo". A assimetria fica, e é honesta: republicamos
+   tudo o que existia sobre as duas pessoas.
 3. **O atendimento de manhã saiu do site.** Era a única frase que dizia isso, e estava no
    bloco que o dono mandou remover. A constante segue em `shared/conteudo.ts`.
 4. **REQ-24 de `cracha-do-associado` foi revogado** por esta change. Está marcado na spec

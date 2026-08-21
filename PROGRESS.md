@@ -63,9 +63,9 @@ Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativ
 
 ### Três coisas que ficaram com o dono
 
-1. **A biografia da fundadora** — conferi `appd.org.br` em 20/08: não existe texto sobre
-   Maria Claudete além da frase de que ela fundou. A assimetria da tela vem da fonte, não
-   da transcrição. Pendência 8a em `docs/pendencias-appd.md`.
+1. ~~**A biografia da fundadora**~~ — **encerrado em 2026-08-20**. Conferi `appd.org.br`:
+   não existe texto sobre Maria Claudete além da frase de que ela fundou, e o dono
+   dispensou. A assimetria fica.
 2. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
    constante segue em `shared/conteudo.ts`; se a informação importa, o lugar é
    `/atendimento`.

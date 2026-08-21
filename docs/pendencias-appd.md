@@ -231,7 +231,7 @@ Pergunta: existem esses textos fora do site? Quais podem ser publicados?
 Impacto: doador procura transparência antes de doar. Sem prestação de contas nem número
 de atendidos, a Central de Doações fica sem argumento.
 
-### 8a. A biografia da fundadora não existe em lugar nenhum
+### 8a. A biografia da fundadora — SEM OBJETO desde 2026-08-20
 
 Levantado na revisão do dono de 2026-08-20: "tem muito mais dados sobre essa pessoa lá
 que você não trouxe, e desse cara você trouxe tudo — quero que traga tudo dos dois".
@@ -247,6 +247,11 @@ Pergunta: a associação tem, fora do site, um texto sobre a fundadora — traje
 a levou a fundar, papel atual? Pode ser publicado?
 Impacto: a página `/sobre` mostra um parágrafo para quem fundou e cinco para quem preside.
 A tela já comporta biografias do mesmo tamanho; falta o texto.
+
+**Encerrada pelo dono em 2026-08-20**: "ignora o texto da fundadora porque não tem mesmo".
+A assimetria fica como está, e é honesta — republicamos tudo o que existia sobre as duas
+pessoas. Se algum dia aparecer um texto sobre Maria Claudete, a tela o recebe sem mudança:
+`bio` já é uma lista de parágrafos.
 
 ### 9. Páginas órfãs e conteúdo vencido
 
