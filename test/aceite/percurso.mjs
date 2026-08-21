@@ -157,6 +157,12 @@ try {
   await p.fill('#numero', 's/n')
   await p.fill('#bairro', 'Centro')
   await p.fill('#municipio', 'São José dos Campos')
+  /*
+    Campos 20 e 21, acrescentados em 2026-08-20. O estado normalmente chega pela consulta
+    de CEP; aqui ele é preenchido à mão porque este percurso digita o endereço inteiro sem
+    depender do ViaCEP, que é serviço de terceiro e não pode reprovar o gate quando cai.
+  */
+  await p.fill('#estado', 'SP')
   await p.check('input[type=checkbox][value="Física"]')
   await p.check('input[type=checkbox][value="Bocha Paralímpica"]')
   await p.check('input[type=checkbox][value="Segundas"]')
@@ -214,6 +220,8 @@ try {
     numero: 's/n',
     bairro: 'Centro',
     municipio: 'São José dos Campos',
+    estado: 'SP',
+    pais: 'Brasil',
     deficiencias: ['Física'],
     atendimentos: ['Fisioterapia'],
     dias: ['Segundas'],

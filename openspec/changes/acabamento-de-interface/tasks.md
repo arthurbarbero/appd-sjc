@@ -127,7 +127,33 @@ mesma profundidade, mas o texto da fundadora é dele.
 
 ## Fechamento
 
-### T15 — Gate de validação
+### T15 — Gate de validação — **PENDENTE, com um achado**
+
+`npm test` está verde: **307 testes**, contra 233 antes desta change. `npm run lint`,
+`npm run typecheck` e `npm run build` também passam.
+
+`npm run aceite` **ainda não passou**, e a razão precisa ser investigada com calma, não no
+fim de uma sessão longa:
+
+- O percurso ganhou os campos 20 e 21 no preenchimento (sem isso ele nem chegava à área).
+- Depois disso, ele avança até a etapa 6 e **falha em `/area/excluir`, que redireciona
+  para `/entrar?sessao=terminada`** — a sessão não existe mais nesse ponto. As etapas
+  anteriores, inclusive a retirada de consentimento em `/seus-direitos`, acontecem com
+  sessão válida.
+- Reproduzido isoladamente, `/area/excluir` funciona: conta criada, consentimento
+  retirado, a tela abre com o botão no lugar. **O percurso completo é que perde a
+  sessão**, e não a tela.
+- Ainda não sei se isto é regressão desta change ou comportamento que já existia — o
+  percurso não rodava desde 2026-08-11. **Descobrir isso é o primeiro passo**: rodar o
+  aceite no commit `330a9b4`, antes de qualquer mudança daqui, e comparar.
+
+Cuidado que custou tempo nesta sessão e vale registrar: rodar o aceite várias vezes
+seguidas, junto de scripts de reprodução que também criam conta, **estoura a cota de 12
+cadastros por 15 minutos** e o percurso passa a falhar com 429 em lugares que parecem
+outro defeito. Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM
+tentativas;"`.
+
+### T15b — Fechamento
 
 Rodar `npm test`, `npm run aceite`, lint, typecheck e a passada de acessibilidade;
 escrever `VALIDACAO.md` com o veredito de cada cenário e onde ele roda, no padrão das três

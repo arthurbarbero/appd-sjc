@@ -36,6 +36,9 @@ const { data: dadosFoto, error: erroFoto } = await useFetch('/api/area/tem-foto'
 const inscricao = computed(() => dadosInscricao.value?.inscricao ?? null)
 const temFoto = computed(() => dadosFoto.value?.temFoto === true)
 
+/** Rota autenticada que serve a foto. Constante para não virar import de asset no build. */
+const ROTA_FOTO = '/api/area/foto'
+
 /** Chega preenchido quando a pessoa acabou de concluir o cadastro. */
 const recemCadastrada = computed(() => String(rota.query.cadastro ?? ''))
 
@@ -202,7 +205,12 @@ function cepBr(cep?: string | null) {
               `alt` vazio de propósito: o nome está no texto ao lado, e a foto aqui é
               ilustração do crachá, não informação nova.
             -->
-            <img v-if="temFoto" class="foto" src="/api/area/foto" alt="" width="96" height="120" />
+            <!--
+              `:src`, e não `src`: com o caminho literal o Vite trata isto como asset a
+              resolver em tempo de build, e o `npm run build` falha com UNRESOLVED_IMPORT
+              enquanto o dev passa. É rota de servidor, não arquivo do bundle.
+            -->
+            <img v-if="temFoto" class="foto" :src="ROTA_FOTO" alt="" width="96" height="120" />
             <div v-else class="foto sem-foto">Sem foto</div>
             <div>
               <p class="nome-cracha">{{ data.conta.nome }}</p>
