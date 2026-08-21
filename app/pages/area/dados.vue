@@ -291,7 +291,7 @@ async function salvar() {
               type="tel"
               inputmode="tel"
               autocomplete="tel"
-              placeholder="(00) 00000-0000"
+              placeholder="+55 (00) 00000-0000"
               :aria-invalid="erros.telefone ? 'true' : undefined"
               :aria-describedby="erros.telefone ? 'erro-telefone' : 'ajuda-telefone'"
               @input="f.telefone = aplicarMascara($event, mascaraTelefone)"

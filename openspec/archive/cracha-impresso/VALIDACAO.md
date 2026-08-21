@@ -77,7 +77,26 @@ Nenhum estava previsto; todos foram pegos por medição, e é o que mais vale re
 4. **Nenhuma medição usou impressora de verdade.** A tira cabe na folha por aritmética e
    na tela por medida em milímetros; se o papel sair diferente, é aqui que a conta falha.
 
-## Por que a change não vai para `archive/` ainda
+## Fechamento, em 2026-08-21
 
-A ressalva 1 espera a passada de axe e teclado; a 2 espera a palavra do dono sobre
-fidelidade visual; e a 4 espera uma impressão real. O gate **do produto** passou.
+As três pendências venceram no mesmo dia, na change
+[`cartao-fiel-e-cadastro-aberto`](../cartao-fiel-e-cadastro-aberto/VALIDACAO.md):
+
+- **Ressalva 1** — a conta do percurso de aceite passou a informar CID, e com isso o axe da
+  tela de impressão roda **com o diagnóstico na tela**, nas duas larguras. O teclado no
+  controle novo deixou de existir junto com o controle: o opt-in de impressão foi revogado.
+- **Ressalva 2** — o dono deu a palavra, e foi contra o que eu tinha feito: "o cartão tinha
+  que estar noventa por cento igual aquele lá". O cartão virou réplica, e a exceção ao
+  design system está registrada no
+  [ADR-021](../../../docs/adr/adr-021-cracha-replica-o-cartao-de-papel.md).
+- **Ressalva 4** — a impressão de verdade **continua pendente**, e migrou para o parecer da
+  change nova. A tira cabe por aritmética e por milímetro na tela; se o papel sair
+  diferente, é aí que a conta falha.
+
+A ressalva 3 (o CID não é validado contra a tabela oficial) segue de pé, por decisão de
+escopo.
+
+**Uma trava deste parecer foi revogada no dia seguinte ao dia em que nasceu.** O opt-in
+próprio de impressão — a segunda linha da tabela lá em cima — deixou de existir por decisão
+do dono. A tabela fica como está, porque ela descreve o que era verdade quando foi escrita,
+e o ADR-020 carrega a emenda.

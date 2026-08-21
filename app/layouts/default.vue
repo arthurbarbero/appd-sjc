@@ -59,16 +59,26 @@ const botaoMenu = ref<HTMLElement | null>(null)
   O ponto de quebra do menu está em `em`, e não em pixel — de propósito.
 
   Em media query, `em` mede a **fonte que a pessoa escolheu no navegador**, não a do
-  documento. 53.75em dá os mesmos 860px de sempre para quem usa o padrão de 16px; para
-  quem configurou 24px, vira 1290px, e o hambúrguer aparece mais cedo — que é exatamente
-  quando ele precisa aparecer, porque com fonte maior os seis links deixam de caber antes.
+  documento. Com o valor em pixel essa conta não acontecia, e o dono viu a barra quebrar em
+  duas linhas numa faixa estreita antes de o hambúrguer entrar. O público deste site é o
+  que mais aumenta a fonte, então a faixa quebrada era justamente a dele.
 
-  Com o valor em pixel, essa conta não acontecia: o dono viu a barra quebrar em duas
-  linhas numa faixa estreita, logo acima de 860px, antes de o hambúrguer entrar. Reproduzi
-  com fonte base a 150% — quebra entre 864 e 880px. O público deste site é o que mais
-  aumenta a fonte, então a faixa quebrada era justamente a dele.
+  **62em, e não 53.75em** — corrigido em 2026-08-21 depois de medir, e corrigido duas
+  vezes no mesmo dia. O valor antigo dava 860px em fonte padrão, e a barra já não cabia em
+  912: havia uma faixa em que o menu horizontal não cabia e o hambúrguer ainda não tinha
+  entrado.
+
+  A primeira correção foi para 58em, e ainda ficou curta — porque eu medi **deslogado**. O
+  cabeçalho de quem entrou traz "Minha área" no lugar de "Entrar", e a navegação passa de
+  707 para 748px. Medir o estado mais fácil é como um ponto de quebra nasce errado.
+
+  Os números que mandam, medidos logado, do pior caso: a barra sem o nome da marca precisa
+  de 57,1em, e com o nome, de 66,4em. 62em e 72em deixam a folga do padding do container e
+  ainda escalam com a fonte.
+
+  O par com o CSS continua valendo: se um dos dois mudar, o outro muda junto.
 */
-const PONTO_DE_QUEBRA = '(max-width: 53.75em)'
+const PONTO_DE_QUEBRA = '(max-width: 62em)'
 const estreito = ref(false)
 
 onMounted(() => {
@@ -426,13 +436,13 @@ const atual = (para: string) =>
 }
 /*
   A divisória vertical só vira horizontal quando a navegação **já** virou coluna, e isso
-  acontece em 53.75em (a regra do painel, mais abaixo). Enquanto os dois números
-  discordavam — a divisória em 900px, o menu em 53.75em —, a faixa de 861 a 900px recebia
+  acontece em 58em (a regra do painel, mais abaixo). Enquanto os dois números
+  discordavam — a divisória em 900px, o menu em 58em —, a faixa de 861 a 900px recebia
   `width: 100%` numa navegação ainda horizontal, e o bloco da conta caía para a segunda
   linha. Era o mesmo defeito do REQ-1, sobrevivendo numa faixa estreita de largura.
   Se um dos dois mudar, o outro muda junto.
 */
-@media (width <= 53.75em) {
+@media (width <= 62em) {
   .cabecalho nav .conta {
     padding-left: 0;
     border-left: 0;
@@ -510,12 +520,30 @@ const atual = (para: string) =>
 /*
   Largura intermediária: o nome escrito sai, o símbolo fica.
 
-  Entre 861 e 1080px os seis links, o bloco da conta e o nome por extenso disputavam a
-  mesma linha, e o nome era a parte que podia sair sem perda — ele está no rodapé de toda
-  página, e o símbolo continua levando para o início. "Pode ficar só o logo, esses todos
-  vêm pra cima", disse o dono em 2026-08-20.
+  Os seis links, o bloco da conta e o nome por extenso disputavam a mesma linha, e o nome
+  era a parte que podia sair sem perda — ele está no rodapé de toda página, e o símbolo
+  continua levando para o início. "Pode ficar só o logo, esses todos vêm pra cima", disse o
+  dono em 2026-08-20.
+
+  ## Por que `70em`, e por que **medido**
+
+  Este valor era `1080px`, escolhido por estimativa, e o dono voltou ao assunto duas vezes
+  no mesmo vídeo: "não é a fonte, é o pixel aqui (…) quebrou de novo, continua quebrando".
+  A medição explicou o teimoso — em fonte padrão o cabeçalho quebrava entre 861 e 912 px e
+  de novo entre 1081 e 1108, duas faixas que nenhum dos dois pontos cobria.
+
+  O que a medição mostrou de mais útil é que **nenhum ponto fixo resolve sozinho**: a
+  largura de que a barra precisa cresce com a fonte (nav de 706 → 818 → 929 px em 16, 20 e
+  24 px de fonte-raiz), mas o logo e os espaçamentos são fixos em px, então a necessidade
+  não é proporcional. Em `em`, o ponto de quebra ideal seria 69, 63 e 59 — e escolher o
+  **maior** é o que garante que não sobre quebra em nenhuma das três: o nome sai cedo
+  demais em fonte grande, o que não custa nada, em vez de tarde demais em fonte pequena,
+  que era o defeito.
+
+  `test/acabamento-de-interface.spec.ts` mede as três fontes e reprova qualquer largura em
+  que a navegação caia para a segunda linha.
 */
-@media (max-width: 1080px) {
+@media (max-width: 72em) {
   /*
     O nome sai da tela, **não** da árvore de acessibilidade.
 
@@ -552,7 +580,7 @@ const atual = (para: string) =>
   `translateX(100%)` no estado fechado, e não `display: none`: é o que permite deslizar.
   A visibilidade é desligada junto para o painel fechado não receber foco.
 */
-@media (max-width: 53.75em) {
+@media (max-width: 62em) {
   .alternar {
     display: inline-flex;
   }

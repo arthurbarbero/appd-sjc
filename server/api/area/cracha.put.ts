@@ -5,6 +5,9 @@
  * é de propósito: qualquer outra coisa que entrasse aqui viraria caminho lateral para
  * alterar cadastro sem passar pela validação de `/api/area/meus-dados`.
  *
+ * Em 2026-08-21 ela chegou a aceitar dois campos, com o opt-in do CID; ele foi revogado no
+ * mesmo dia, por decisão do dono, e a rota voltou ao desenho de um campo só.
+ *
  * A escolha vale **só para o crachá**. Nenhuma outra rota lê esta coluna.
  */
 
@@ -14,43 +17,17 @@ export default defineEventHandler(async (event) => {
   const sessao = await sessaoAtual(event)
   if (!sessao) throw createError({ statusCode: 401 })
 
-  const corpo = await readBody<{ mostraDeficiencia?: unknown; cidNoCracha?: unknown }>(event)
-
   /*
-    Um opt-in por vez, e cada um com o próprio nome.
+    Um campo, de novo — o do CID saiu em 2026-08-21.
 
-    A alternativa — um campo `qual` mais um booleano — deixaria a rota escolher o alvo pelo
-    corpo, e o alvo aqui é sempre dado sensível. Dois campos nomeados custam duas linhas e
-    não abrem essa porta.
+    Havia dois opt-ins nesta rota: imprimir o tipo de deficiência e imprimir o CID. O
+    segundo deixou de existir por decisão do dono, que juntou "guardar" e "imprimir" no
+    consentimento do formulário. Sem opt-in não há o que gravar aqui, e a rota volta a
+    aceitar **um único campo booleano** — que era o desenho original e o motivo dele:
+    qualquer coisa a mais vira caminho lateral para alterar cadastro sem passar pela
+    validação de `/api/area/meus-dados`.
   */
-  if (typeof corpo?.cidNoCracha === 'boolean') {
-    const bd = usarBanco(event)
-    /*
-      Ligar a impressão exige que exista CID guardado. Sem isso, a marca ficaria pendurada
-      apontando para o nada e voltaria a valer sozinha no dia em que a pessoa informasse um
-      CID novo — sem ninguém ter pedido.
-    */
-    if (corpo.cidNoCracha) {
-      const conta = await bd.query.usuarios.findFirst({
-        where: eq(schema.usuarios.id, sessao.id),
-        columns: { cid: true },
-      })
-      if (!conta?.cid) {
-        throw createError({
-          statusCode: 422,
-          data: { motivo: 'Não há CID guardado para imprimir.' },
-        })
-      }
-    }
-    await bd
-      .update(schema.usuarios)
-      .set({
-        cidNoCracha: corpo.cidNoCracha,
-        atualizadoEm: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-      })
-      .where(eq(schema.usuarios.id, sessao.id))
-    return { cidNoCracha: corpo.cidNoCracha }
-  }
+  const corpo = await readBody<{ mostraDeficiencia?: unknown }>(event)
 
   if (typeof corpo?.mostraDeficiencia !== 'boolean') {
     throw createError({ statusCode: 422, data: { motivo: 'Informe verdadeiro ou falso.' } })

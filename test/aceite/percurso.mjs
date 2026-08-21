@@ -46,7 +46,14 @@ const PUBLICAS = [
   '/verificar/APPD-2026-ZZZZZZ',
 ]
 
-const LARGURAS = [360, 414, 768, 880, 1024, 1280, 1440]
+/*
+  As larguras do gate.
+
+  912, 1024 e 1100 entraram em 2026-08-21: são as três faixas em que o dono viu o cabeçalho
+  quebrar em duas linhas e que a lista antiga pulava. Largura de teste escolhida por
+  arredondamento é largura que não passa onde o defeito mora.
+*/
+const LARGURAS = [360, 414, 768, 880, 912, 1024, 1100, 1280, 1440]
 
 /**
  * JPEG válido de 1 × 1 pixel, em base64.
@@ -163,6 +170,19 @@ try {
     depender do ViaCEP, que é serviço de terceiro e não pode reprovar o gate quando cai.
   */
   await p.fill('#estado', 'SP')
+  /*
+    A conta do percurso passa a ter **CID** desde 2026-08-21.
+
+    A ressalva 1 do parecer de `cracha-impresso` pedia exatamente isto: axe na tela de
+    impressão **com o CID ligado**, e o teclado no controle novo. Com a conta principal sem
+    CID, todas as verificações do crachá rodavam no estado em que o dado não existe — que é
+    o estado em que um vazamento não pode acontecer.
+
+    Agora o CID atravessa o percurso inteiro: aparece no cartão, entra no axe da impressão,
+    e a varredura de `/verificar` passa a ter algo para não encontrar.
+  */
+  await p.fill('#cid', 'G82.4 Tetraplegia')
+  await p.check('#consentimento-cid')
   await p.check('input[type=checkbox][value="Física"]')
   await p.check('input[type=checkbox][value="Bocha Paralímpica"]')
   await p.check('input[type=checkbox][value="Segundas"]')
@@ -373,11 +393,20 @@ try {
     não pode aparecer é o dado **da pessoa**.
   */
   const cartoes = await p.textContent('.lados')
+  /*
+    O que o cartão traz mudou em 2026-08-21 com o [ADR-021], e este teste virou do avesso.
+
+    Ele guardava o REQ-22 de `cracha-do-associado`: endereço, telefone e nascimento **não**
+    entravam no crachá. O dono mandou replicar o cartão de papel "noventa por cento", e o
+    de papel traz os três. Agora o teste prova o contrário: eles precisam estar lá.
+
+    O que **não** mudou, e continua sendo verificado logo abaixo: o tipo de deficiência só
+    aparece com opt-in, e `/verificar` nunca mostra CID nem CPF.
+  */
   ok(
-    'o crachá NÃO traz endereço, telefone nem nascimento da pessoa',
-    !cartoes.includes('Rua Fictícia') &&
-      !cartoes.includes('12/03/1978') &&
-      !cartoes.includes('99165-7059'),
+    'o crachá traz nascimento e endereço, como o cartão de papel (ADR-021)',
+    cartoes.includes('Rua Fictícia') && cartoes.includes('12/03/1978'),
+    cartoes.slice(0, 200),
   )
   ok('sem o opt-in, o crachá NÃO traz o tipo de deficiência', !cartoes.includes('Física'))
 
@@ -445,7 +474,23 @@ try {
     a varredura cobre a resposta completa, com o retrato dentro.
   */
   const json = await (await p.request.get(`${BASE}/api/verificar/${numeroRegistro}`)).text()
-  const PROIBIDOS = ['deficiencia', 'cpf', 'nascimento', 'endereco', 'Rua Fictícia', '1978']
+  /*
+    `G82` e `cid` entraram na lista em 2026-08-21, e são o item mais importante dela.
+
+    É a trava do ADR-020 que **não** foi revogada: para o campo 12 há exceção sob opt-in;
+    para o CID não há exceção nenhuma. Com a conta do percurso carregando um CID de
+    verdade, esta linha deixou de ser afirmação e virou medida.
+  */
+  const PROIBIDOS = [
+    'deficiencia',
+    'cpf',
+    'nascimento',
+    'endereco',
+    'Rua Fictícia',
+    '1978',
+    'G82',
+    'cid',
+  ]
   const vazados = PROIBIDOS.filter((campo) => new RegExp(campo, 'i').test(json))
   ok(
     'a resposta de API da verificação não traz campo proibido',
@@ -594,8 +639,9 @@ try {
   // ── 4. Meus dados ─────────────────────────────────────────────────────────
   await p.goto(`${BASE}/area/dados`, { waitUntil: 'networkidle' })
   ok(
-    'formulário carrega o telefone com máscara',
-    (await p.inputValue('#telefone')) === '(12) 99165-7059',
+    'formulário carrega o telefone com código do país e máscara',
+    (await p.inputValue('#telefone')) === '+55 (12) 99165-7059',
+    await p.inputValue('#telefone'),
   )
   ok('não existe campo de e-mail editável', !(await p.$('input[type=email]')))
 
@@ -603,7 +649,20 @@ try {
   await p.fill('#telefone', '129916')
   await p.click('button[type=submit]')
   await p.waitForTimeout(600)
-  ok('telefone curto é recusado', (await p.textContent('body')).includes('Falta corrigir'))
+  /*
+    `129916` são seis dígitos, e com o `+55` na frente viram oito — que **cabem** no mínimo
+    do E.164. Ao abrir o campo a números de qualquer país, a exigência de DDD e número
+    desapareceu junto, e este cenário foi o que pegou: um número claramente incompleto
+    passando na régua de "número internacional plausível".
+
+    A regra ficou com duas alturas: `+55` exige 10 ou 11 dígitos depois do código; qualquer
+    outro país exige só um comprimento crível, porque não conhecemos o plano de numeração
+    dele e inventá-lo recusaria quem a regra não entende.
+  */
+  ok(
+    'telefone brasileiro incompleto é recusado',
+    (await p.textContent('body')).includes('Falta corrigir'),
+  )
   ok('o que foi digitado não se perde', (await p.inputValue('#bairro')) === 'Jardim Fictício')
 
   await p.fill('#telefone', '12991657059')
@@ -713,6 +772,175 @@ try {
     (await p.content()).includes('Física'),
   )
 
+  // ── 5c. O cabeçalho não quebra, em nenhuma fonte ──────────────────────────
+  /*
+    O defeito que o dono apontou duas vezes no mesmo vídeo — "não é a fonte, é o pixel
+    aqui (…) quebrou de novo, continua quebrando aqui".
+
+    ## A fonte é mudada pelo CDP, e não por CSS
+
+    A primeira versão deste cenário fazia `document.documentElement.style.fontSize = '24px'`
+    e acusava quebra onde não havia. O erro é sutil e vale registrar: em **media query**,
+    `em` mede a fonte padrão do navegador, não a fonte do documento. Mexer no `<html>` faz
+    o layout crescer sem mover nenhum ponto de quebra — simula um estado que não existe, e
+    reprova o produto por um defeito do teste.
+
+    `Page.setFontSizes` do DevTools Protocol muda a preferência de verdade, que é o que a
+    pessoa altera nas configurações do navegador — e é o que move as media queries junto.
+
+    ## Por que três fontes
+
+    A largura de que a barra precisa cresce com a fonte, mas o logo e os espaçamentos são
+    fixos em px: a necessidade não é proporcional, e um ponto de quebra calibrado em 16px
+    deixa faixas quebradas em 20 e 24. O público deste site é o que mais aumenta a fonte.
+
+    O passo é de 8px porque as faixas quebradas de 2026-08-21 tinham menos de 50px cada.
+  */
+  {
+    const cdp = await ctx.newCDPSession(p)
+    for (const fonteRaiz of [16, 20, 24]) {
+      await cdp.send('Page.setFontSizes', { fontSizes: { standard: fonteRaiz, fixed: fonteRaiz } })
+      await p.goto(`${BASE}/`, { waitUntil: 'networkidle' })
+
+      const quebradas = []
+      for (let largura = 1440; largura >= 700; largura -= 8) {
+        await p.setViewportSize({ width: largura, height: 900 })
+        const quebrou = await p.evaluate(() => {
+          const nav = document.querySelector('.cabecalho nav')
+          const marca = document.querySelector('.marca')
+          const botao = document.querySelector('.alternar')
+          // Com o painel na tela, a navegação está fora do fluxo: não há linha a quebrar.
+          if (!botao || getComputedStyle(botao).display !== 'none') return false
+          if (!nav || !marca) return false
+          // Quebrou = a navegação começa abaixo do fim da marca.
+          return nav.getBoundingClientRect().top >= marca.getBoundingClientRect().bottom - 2
+        })
+        if (quebrou) quebradas.push(largura)
+      }
+      ok(
+        `cabeçalho em uma linha em toda largura, com fonte padrão de ${fonteRaiz}px`,
+        quebradas.length === 0,
+        quebradas.length ? `quebra em ${quebradas[quebradas.length - 1]}–${quebradas[0]}px` : '',
+      )
+    }
+    await cdp.send('Page.setFontSizes', { fontSizes: { standard: 16, fixed: 16 } })
+    await cdp.detach()
+  }
+  await p.setViewportSize({ width: 1280, height: 900 })
+
+  // ── 5d. Nenhuma página da área termina em vazio ───────────────────────────
+  /*
+    O "erro crítico" de 2026-08-21, e o teste que impede a volta dele.
+
+    A causa era `grid-row: 2 / span 200` na navegação lateral: o truque põe a coluna ao
+    lado de um número qualquer de irmãos sem precisar de invólucro, e **cria** 200 linhas
+    implícitas. Vazias elas medem zero, mas o `row-gap` de 24px entre elas não — cerca de
+    4.800px de branco no fim de toda página da área, com a moldura em 5.760px e o conteúdo
+    terminando em 1.229.
+
+    A medida é a **folga**, e não o CSS. Um teste que procurasse `span 200` no arquivo não
+    pegaria a próxima forma de produzir vazio, e foi a ausência de qualquer medida de folga
+    que deixou o defeito subir junto com 375 testes verdes.
+  */
+  for (const rota of [
+    '/area',
+    '/area/cracha',
+    '/area/dados',
+    '/area/inscricoes',
+    '/area/excluir',
+  ]) {
+    await p.goto(BASE + rota, { waitUntil: 'networkidle' })
+    const folga = await p.evaluate(() => {
+      const moldura = document.querySelector('.area-moldura')
+      if (!moldura) return null
+      const fim = moldura.getBoundingClientRect().bottom
+      const fimDoConteudo = Math.max(
+        ...[...moldura.children].map((f) => f.getBoundingClientRect().bottom),
+      )
+      return Math.round(fim - fimDoConteudo)
+    })
+    // Uma linha de grade de folga é o teto: acima disso é vazio, não respiro.
+    ok(`${rota} não termina em vazio`, folga !== null && folga <= 40, `folga de ${folga}px`)
+  }
+
+  // ── 5e. O cadastro de quem não tem deficiência ────────────────────────────
+  /*
+    REQ-21 a REQ-24: o formulário abriu a quem não tem deficiência, e o consentimento do
+    Art. 11 virou condicional.
+
+    Roda numa aba anônima porque o percurso já está logado, e logado o formulário não é o
+    mesmo. O que se prova aqui é o par inteiro: sem deficiência marcada, o cadastro conclui
+    **e** a autorização não é pedida; com ela marcada, a autorização volta a ser exigida.
+
+    O primeiro teste deste cenário reprovou por um motivo que vale registrar: a validação
+    do cliente continuava exigindo as três múltiplas escolhas depois de o esquema ter
+    deixado de exigir. O servidor aceitava e a tela recusava — a duplicação de régua se
+    pagando, como sempre, no pior momento.
+  */
+  {
+    const anonimo = await navegador.newContext({ viewport: { width: 1280, height: 900 } })
+    const v = await anonimo.newPage()
+    await v.goto(`${BASE}/atendimento/inscricao`, { waitUntil: 'networkidle' })
+    ok(
+      'sem deficiência marcada, a autorização do Art. 11 nem aparece',
+      (await v.$('#consentimento')) === null,
+    )
+
+    await v.fill('#nome', 'Voluntário Fictício de Teste')
+    await v.fill('#nascimento', '01/02/1990')
+    await v.fill('#telefone', '+55 12 99165-7059')
+    await v.check('input[type=radio][value="Sim"]')
+    await v.fill('#cep', '12239530')
+    await v.waitForTimeout(1500)
+    await v.fill('#endereco', 'Rua Fictícia')
+    await v.fill('#numero', '10')
+    await v.fill('#bairro', 'Centro')
+    await v.fill('#municipio', 'São José dos Campos')
+    await v.fill('#estado', 'SP')
+    await v.fill('#email', `voluntario.${Date.now()}@exemplo.invalido`)
+    await v.fill('#cpf', cpfAleatorio())
+    await v.fill('#senha', 'senha-de-teste-longa')
+    await v.check('input[type=radio][value="Ciente"]')
+    await v.click('button[type=submit]')
+    await v.waitForURL(/\/area/, { timeout: 45000 }).catch(() => {})
+    ok(
+      'cadastro sem deficiência, atendimento nem dias é aceito',
+      v.url().includes('/area'),
+      v.url(),
+    )
+
+    // E o crachá dessa conta abre, com os campos vazios ocupando o lugar deles.
+    await v.goto(`${BASE}/area/cracha`, { waitUntil: 'networkidle' })
+    ok('o crachá de quem não informou nada carrega', (await v.title()).includes('crachá'))
+
+    /*
+      Contexto **novo**, e não outra aba do mesmo.
+
+      A primeira aba concluiu um cadastro, e concluir cadastro abre sessão: uma segunda aba
+      do mesmo contexto chega ao formulário já logada, e logada o formulário não é o mesmo.
+      O gate travou esperando um checkbox que não estava na tela.
+    */
+    const anonimo2 = await navegador.newContext({ viewport: { width: 1280, height: 900 } })
+    const outra = await anonimo2.newPage()
+    await outra.goto(`${BASE}/atendimento/inscricao`, { waitUntil: 'networkidle' })
+    await outra.check('input[type=checkbox][value="Física"]')
+    await outra.waitForTimeout(200)
+    ok(
+      'marcar deficiência traz a autorização do Art. 11 de volta',
+      (await outra.$('#consentimento')) !== null,
+    )
+    await outra.click('button[type=submit]')
+    await outra.waitForTimeout(800)
+    const erros = await outra.$$eval('.erro', (es) => es.map((e) => e.textContent.trim()))
+    ok(
+      'com deficiência marcada e a caixa em branco, o envio é recusado',
+      erros.some((e) => e.includes('autorização')),
+      erros.join(' | '),
+    )
+    await anonimo2.close()
+    await anonimo.close()
+  }
+
   // ── 5b. Sair e voltar a entrar ────────────────────────────────────────────
   await p.goto(`${BASE}/area`, { waitUntil: 'networkidle' })
   await p.click('nav .sair')
@@ -744,9 +972,19 @@ try {
   ok('e mostra o tipo de deficiência para a própria pessoa', painelDireitos.includes('Física'))
 
   const linhas = await p.$$eval('.historico tbody tr', (trs) => trs.map((t) => t.textContent))
+  /*
+    **Duas** linhas, e não uma: a conta do percurso passou a informar CID, e o aceite do CID
+    é uma linha própria, com `termoId` próprio.
+
+    Isso é o desenho, não um efeito colateral: uma linha só, com o termo do Art. 11, diria
+    que a pessoa autorizou o atendimento e **calaria** sobre o diagnóstico. Sem aparecer no
+    histórico, não haveria o que retirar — foi um dos cinco defeitos que a medição pegou em
+    2026-08-21.
+  */
   ok(
-    'o histórico traz o aceite do cadastro',
-    linhas.length === 1 && linhas[0].includes('Autorizou'),
+    'o histórico traz os dois aceites do cadastro: Art. 11 e CID',
+    linhas.length === 2 && linhas.every((l) => l.includes('Autorizou')),
+    `${linhas.length} linhas`,
   )
   ok(
     'cada evento mostra versão, data e a impressão digital do texto',
@@ -779,9 +1017,21 @@ try {
   )
   const apos = await p.$$eval('.historico tbody tr', (trs) => trs.map((t) => t.textContent))
   ok(
-    'o histórico ganha a retirada e mantém o aceite anterior',
-    apos.length === 2 && apos[0].includes('Autorizou') && apos[1].includes('Retirou'),
+    'o histórico ganha a retirada e mantém os aceites anteriores',
+    apos.length === 3 &&
+      apos.filter((l) => l.includes('Autorizou')).length === 2 &&
+      apos.some((l) => l.includes('Retirou')),
     apos.length + ' linhas',
+  )
+  /*
+    A retirada é a do Art. 11, e **só** ela. O aceite do CID continua de pé, e é isso que
+    faz o histórico ter valor: se retirar um apagasse o outro, a pessoa não teria como saber
+    de que autorização saiu.
+  */
+  ok(
+    'retirar o Art. 11 não retira o CID',
+    apos.filter((l) => l.includes('Retirou')).length === 1,
+    apos.join(' | '),
   )
 
   // A conta continua: retirar consentimento não é excluir conta (REQ-13).

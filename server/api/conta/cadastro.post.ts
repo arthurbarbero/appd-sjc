@@ -131,8 +131,16 @@ export default defineEventHandler(async (event) => {
     Hash que não existe no catálogo é recusado: prova que ninguém consegue conferir é pior
     que campo vazio, porque o vazio se vê e o falso se acredita.
   */
-  const termo = versaoPorHash(d.termoHash)
-  if (!termo) {
+  /*
+    Sem deficiência marcada não há dado do Art. 11, e não há aceite a resolver.
+
+    O esquema já garante o par (marcou deficiência => mandou autorização e hash), então
+    aqui a ausência do termo é a ausência do dado, não um envio incompleto. Registrar um
+    aceite mesmo assim seria escrever no livro-razão do Art. 11 uma linha sobre nada.
+  */
+  const exigeArt11 = d.deficiencias.length > 0
+  const termo = exigeArt11 ? versaoPorHash(d.termoHash ?? '') : null
+  if (exigeArt11 && !termo) {
     throw createError({
       statusCode: 422,
       data: {
@@ -213,19 +221,24 @@ export default defineEventHandler(async (event) => {
           criadoEm: agora,
           atualizadoEm: agora,
         }),
-        bd.insert(schema.consentimentos).values({
-          id: crypto.randomUUID(),
-          usuarioId: id,
-          termoId: termo.termoId,
-          versao: termo.versao,
-          // SHA-256 do texto que a pessoa leu, resolvido no catálogo pelo hash que a tela
-          // exibiu. Até 2026-08-07 isto era '0' repetido 64 vezes — um valor que **parecia**
-          // prova e não era, o que é pior que campo vazio: o vazio se vê, o falso se acredita.
-          hash: termo.hash,
-          evento: 'aceite',
-          registradoEm: agora,
-          origem: '/atendimento/inscricao',
-        }),
+        ...(termo
+          ? [
+              bd.insert(schema.consentimentos).values({
+                id: crypto.randomUUID(),
+                usuarioId: id,
+                termoId: termo.termoId,
+                versao: termo.versao,
+                // SHA-256 do texto que a pessoa leu, resolvido no catálogo pelo hash que a
+                // tela exibiu. Até 2026-08-07 isto era '0' repetido 64 vezes — um valor que
+                // **parecia** prova e não era, o que é pior que campo vazio: o vazio se vê,
+                // o falso se acredita.
+                hash: termo.hash,
+                evento: 'aceite',
+                registradoEm: agora,
+                origem: '/atendimento/inscricao',
+              }),
+            ]
+          : []),
         /*
           O aceite do CID é **outra linha**, com `termoId` próprio.
 

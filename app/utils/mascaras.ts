@@ -27,7 +27,31 @@ export function aplicarMascara(evento: Event, mascara: (v: string) => string): s
   return formatado
 }
 
-export function mascaraTelefone(v: string) {
+/**
+ * Telefone com código do país à frente — `+55 (12) 99165-7059`.
+ *
+ * Mudou em 2026-08-21: o campo passa a nascer com `+55` escrito, por decisão do dono, e a
+ * pessoa pode apagar. Isso obriga a máscara a mudar de forma, porque o que ela formata
+ * deixou de ser um número brasileiro:
+ *
+ * - **com `+`**, ela só agrupa: `+55 12 99165 7059` vira `+5512991657059` legível em
+ *   blocos, sem impor parênteses de DDD a um número que pode ser de outro país;
+ * - **sem `+`**, ela continua a máscara nacional de sempre, para quem digita `12991657059`
+ *   direto como sempre digitou.
+ *
+ * A máscara nunca bloqueia a digitação — regra do REQ-16 de `formulario-atendimento`, e o
+ * motivo de ela formatar em vez de recusar.
+ */
+export function mascaraTelefone(v: string): string {
+  if (v.trim().startsWith('+')) {
+    const d = soDigitos(v).slice(0, 15)
+    if (!d) return '+'
+    // Brasil: `+55` e o número no formato que a pessoa reconhece.
+    if (d.startsWith('55') && d.length > 2) return `+55 ${mascaraTelefone(d.slice(2))}`
+    // Qualquer outro país: só o código separado do resto, sem inventar formato local.
+    if (d.length <= 3) return `+${d}`
+    return `+${d.slice(0, 3)} ${d.slice(3)}`
+  }
   const d = soDigitos(v).slice(0, 11)
   if (d.length <= 2) return d
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`

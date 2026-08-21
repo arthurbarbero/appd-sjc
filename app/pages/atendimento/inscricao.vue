@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ASSOCIACAO } from '~~/shared/conteudo'
 import { SENHA_MINIMO, normalizaEmail } from '~~/shared/senha'
-import { ATENDIMENTOS, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
+import { ATENDIMENTOS, DDI_PADRAO, DEFICIENCIAS, DIAS, cpfValido } from '~~/shared/inscricao'
 import { versaoVigente } from '~~/shared/termos'
 import { derivarChave } from '~/utils/derivar-senha'
 
@@ -30,10 +30,18 @@ const sessao = useUserSession()
   Agora vêm de `shared/inscricao`, o mesmo módulo que valida no servidor.
 */
 
+/*
+  O código do país já escrito nos campos de telefone (2026-08-21).
+
+  Decisão do dono: "comece a colocar o +55 como default, a pessoa pode apagar se quiser".
+  O "pode apagar" é a parte que obriga o resto — validação, máscara e o CHECK do banco
+  aceitam qualquer código de país, senão o campo aceitaria a edição e o servidor recusaria
+  depois.
+*/
 const f = reactive({
   nome: '',
   nascimento: '',
-  telefone: '',
+  telefone: DDI_PADRAO,
   whatsapp: '',
   cep: '',
   endereco: '',
@@ -46,13 +54,13 @@ const f = reactive({
   // digitar "Brasil" seria trabalho sem informação. Continua editável.
   pais: 'Brasil',
   cuidadorNome: '',
-  cuidadorContato: '',
+  cuidadorContato: DDI_PADRAO,
   // Campos 22 a 25 (crachá impresso). Todos opcionais.
   cid: '',
   consentimentoCid: false,
   cras: '',
   credencialTransporte: '',
-  contatoEmergencia: '',
+  contatoEmergencia: DDI_PADRAO,
   deficiencias: [] as string[],
   deficienciaOutro: '',
   atendimentos: [] as string[],
@@ -64,6 +72,14 @@ const f = reactive({
   cpf: '',
   senha: '',
 })
+
+/**
+ * Um campo de telefone que só tem o código do país está **vazio**.
+ *
+ * Sem isto, `+55` sozinho viajaria como telefone informado, seria normalizado para `+55` e
+ * recusado pela validação — a pessoa levaria um erro num campo opcional que ela não tocou.
+ */
+const preenchido = (telefone: string) => telefone.replace(/\D/g, '').length > 2
 
 /** Gerada uma vez ao abrir a página: clique duplo e retentativa não viram dois cadastros. */
 const chaveIdempotencia = crypto.randomUUID()
@@ -209,9 +225,21 @@ function validar() {
         : 'A data precisa ter dia, mês e ano. Exemplo: 12/03/1978.'
   }
 
+  /*
+    O campo nasce com `+55` escrito, então "vazio" passou a ser "só o código do país".
+
+    Sem esta conta, quem não tocasse no telefone veria "informe um telefone" com o campo
+    aparentemente preenchido — e quem apagasse o `+55` para escrever um número estrangeiro
+    seria recusado por um mínimo de dígitos que não vale lá fora.
+  */
   const tel = soDigitos(f.telefone)
-  if (!tel) erros.telefone = 'Informe um telefone: é por ele que vem o primeiro contato.'
-  else if (tel.length < 10) erros.telefone = 'O telefone precisa ter DDD. Exemplo: (12) 99165-7059.'
+  const digitosDoNumero = f.telefone.trim().startsWith('+') ? tel.slice(2) : tel
+  if (!digitosDoNumero) {
+    erros.telefone = 'Informe um telefone: é por ele que vem o primeiro contato.'
+  } else if (tel.length < 10) {
+    erros.telefone =
+      'O telefone precisa ter código do país, DDD e número. Exemplo: +55 12 99165-7059.'
+  }
 
   if (!f.whatsapp) erros.whatsapp = 'Diga se este número tem WhatsApp.'
   const cep = soDigitos(f.cep)
@@ -223,9 +251,15 @@ function validar() {
   if (!f.bairro.trim()) erros.bairro = 'Informe o bairro.'
   if (!f.municipio.trim()) erros.municipio = 'Informe o município.'
 
-  if (!f.deficiencias.length) erros.deficiencias = 'Marque pelo menos uma opção.'
-  if (!f.atendimentos.length) erros.atendimentos = 'Marque pelo menos um tipo de atendimento.'
-  if (!f.dias.length) erros.dias = 'Marque pelo menos um dia.'
+  /*
+    As três múltiplas escolhas deixaram de ser exigidas em 2026-08-21.
+
+    A validação daqui existe para dar a mensagem em pt-BR no campo certo antes de a
+    requisição sair; a régua de verdade é o `esquemaInscricao`, que os dois lados importam.
+    Enquanto esta cópia continuasse exigindo, o esquema aceitaria o cadastro sem deficiência
+    e a **tela** o recusaria — que foi exatamente o que aconteceu no primeiro teste do
+    cadastro de voluntário, com três mensagens de erro em campos opcionais.
+  */
   if (!f.email.trim()) {
     erros.email = 'Informe um e-mail: é com ele que você entra depois para corrigir o cadastro.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizaEmail(f.email))) {
@@ -242,7 +276,9 @@ function validar() {
   }
 
   if (!f.ciente) erros.ciente = 'Marque "Ciente" para concluir.'
-  if (!f.consentimento) {
+  // O consentimento do Art. 11 só é exigido quando há dado de saúde a autorizar — a mesma
+  // condição do esquema, e pelo mesmo motivo.
+  if (f.deficiencias.length && !f.consentimento) {
     erros.consentimento =
       'Sem esta autorização a associação não pode registrar a informação sobre deficiência.'
   }
@@ -283,7 +319,7 @@ async function enviar() {
         ...(f.credencialTransporte.trim()
           ? { credencialTransporte: f.credencialTransporte.trim() }
           : {}),
-        ...(f.contatoEmergencia.trim() ? { contatoEmergencia: f.contatoEmergencia } : {}),
+        ...(preenchido(f.contatoEmergencia) ? { contatoEmergencia: f.contatoEmergencia } : {}),
         /*
           O CID só viaja acompanhado da autorização e do hash do termo lido. Sem CID, os
           três campos ficam de fora do corpo — e o servidor nem chega a consultar o
@@ -308,7 +344,7 @@ async function enviar() {
             }
           : {}),
         ...(f.cuidadorNome.trim() ? { cuidadorNome: f.cuidadorNome.trim() } : {}),
-        ...(f.cuidadorContato.trim() ? { cuidadorContato: f.cuidadorContato } : {}),
+        ...(preenchido(f.cuidadorContato) ? { cuidadorContato: f.cuidadorContato } : {}),
         deficiencias: f.deficiencias,
         ...(f.deficienciaOutro.trim() ? { deficienciaOutro: f.deficienciaOutro.trim() } : {}),
         atendimentos: f.atendimentos,
@@ -317,8 +353,21 @@ async function enviar() {
         cienciaContribuicao: 'Ciente',
         email: normalizaEmail(f.email),
         cpf: soDigitos(f.cpf),
-        consentimentoSaude: true,
-        termoHash: termoExibido.hash,
+        /*
+          O mesmo cuidado que o CID já tinha, agora aqui — e ele faltava.
+
+          Isto era `consentimentoSaude: true` fixo, o que anulava a caixa exatamente como o
+          `consentimentoCid: true` fixo anulava a dela em 2026-08-21. Enquanto o campo 12
+          era obrigatório o defeito ficava sem efeito visível, porque quem não marcava a
+          caixa também não passava por outras validações. Com o consentimento condicional
+          ele passaria a valer: quem marcasse deficiência e deixasse a caixa em branco teria
+          o cliente afirmando a autorização por ele.
+
+          Vai como a pessoa deixou. Se faltar, o esquema recusa com 422 e a tela diz por quê.
+        */
+        ...(f.consentimento
+          ? { consentimentoSaude: true as const, termoHash: termoExibido.hash }
+          : {}),
         chaveIdempotencia,
         chaveDerivada,
       },
@@ -510,6 +559,58 @@ async function enviar() {
             {{ erros.whatsapp }}
           </span>
         </fieldset>
+        <!--
+          O CID no bloco de quem vai ser atendido (2026-08-21).
+
+          Subiu do bloco de consentimento por decisão do dono — "o CID, pra mim, tem que ir
+          lá em cima". A autorização vem colada nele, e não lá embaixo: informar o código
+          **é** o ato que precisa de consentimento, e separá-los criaria o intervalo em que
+          a pessoa digita o diagnóstico sem ter lido o que autoriza.
+
+          A caixa aparece só depois que há algo escrito. Pedir autorização para um dado que
+          ninguém informou é ruído, e caixa marcada sem dado seria consentimento de nada.
+        -->
+        <div class="cid-bloco">
+          <div class="campo">
+            <label for="cid">CID</label>
+            <span id="ajuda-cid" class="ajuda">
+              Opcional. É o código do seu diagnóstico, como está no laudo — por exemplo, G82.4.
+            </span>
+            <input id="cid" v-model="f.cid" type="text" aria-describedby="ajuda-cid" />
+          </div>
+
+          <div
+            v-if="f.cid.trim()"
+            :class="['grupo-escolha', 'consentir', { 'campo-erro': erros.consentimentoCid }]"
+          >
+            <p class="explicacao">
+              O CID diz mais sobre a sua saúde do que o tipo de deficiência: aquele descreve a
+              condição em linhas gerais, este identifica o diagnóstico. Por isso precisa de uma
+              autorização separada.
+            </p>
+            <label class="escolha" for="consentimento-cid">
+              <input id="consentimento-cid" v-model="f.consentimentoCid" type="checkbox" />
+              Autorizo a APPD a guardar o meu CID e a imprimi-lo no meu crachá.
+            </label>
+            <!--
+              O texto mudou em 2026-08-21, e a mudança não é de redação.
+
+              Até aqui havia duas decisões: guardar e imprimir, cada uma com a sua caixa.
+              O dono mandou juntá-las — "o CID pode entrar junto do consentimento atual
+              existente". Com uma caixa só, ela precisa dizer as duas coisas, senão vira
+              autorização obtida por omissão. O que **não** muda é a outra trava: a página
+              pública nunca mostra o CID, marcado ou não (ADR-020).
+            -->
+            <p class="explicacao">
+              Marcar autoriza as duas coisas: guardar o código e <strong>imprimi-lo</strong> na
+              frente do crachá, que é o documento que você mostra a quem pedir. Ele
+              <strong>nunca</strong> aparece na página pública de verificação.
+            </p>
+            <span v-if="erros.consentimentoCid" id="erro-cid" class="erro">
+              {{ erros.consentimentoCid }}
+            </span>
+          </div>
+        </div>
       </fieldset>
 
       <fieldset class="secao">
@@ -688,27 +789,51 @@ async function enviar() {
             :value="f.cuidadorContato"
             type="tel"
             inputmode="tel"
-            placeholder="(00) 00000-0000"
+            placeholder="+55 (00) 00000-0000"
             aria-describedby="ajuda-cuidador-contato"
             @input="f.cuidadorContato = aplicarMascara($event, mascaraTelefone)"
           />
         </div>
+
+        <!--
+          Contato de emergência, logo abaixo do do cuidador (2026-08-21).
+
+          O dono viu os dois em blocos separados e disse o que via: "pra mim cuidador e
+          contato de emergência é a mesma coisa, não faz muito sentido ter os dois". Ele
+          tem razão no caso comum — a pessoa que acompanha é a pessoa a quem se liga. Em vez
+          de fundir os campos, que perderia o caso em que **não** são a mesma pessoa, eles
+          ficam vizinhos e a ajuda diz o que fazer quando coincidem.
+        -->
+        <div class="campo">
+          <label for="contato-emergencia">Contato de emergência</label>
+          <span id="ajuda-emergencia" class="ajuda">
+            Opcional, com DDD. Se for a mesma pessoa do contato acima, deixe em branco — o crachá
+            usa o do cuidador.
+          </span>
+          <input
+            id="contato-emergencia"
+            :value="f.contatoEmergencia"
+            type="tel"
+            inputmode="tel"
+            placeholder="+55 (00) 00000-0000"
+            aria-describedby="ajuda-emergencia"
+            @input="f.contatoEmergencia = aplicarMascara($event, mascaraTelefone)"
+          />
+        </div>
       </fieldset>
 
-      <!--
-        Bloco 3b — o que o crachá impresso usa (2026-08-21).
-
-        Fica **depois** do cuidador e antes do atendimento porque é onde a pessoa já está
-        falando de documento e contato. Tudo opcional, e a tela diz isso na abertura: quem
-        não tem CRAS, credencial ou CID passa direto sem sentir que deixou algo pendente.
-      -->
       <fieldset class="secao">
-        <legend>3b. Para o seu crachá, se você quiser</legend>
-        <p class="explicacao">
-          Nada aqui é obrigatório. Estes dados existem só para o crachá que você mesmo imprime — o
-          cadastro fica completo sem nenhum deles.
-        </p>
+        <legend>4. Sobre o atendimento</legend>
 
+        <!--
+          CRAS e credencial abrem o bloco, e não têm mais um bloco só deles (2026-08-21).
+
+          O "3b. Para o seu crachá" foi cortado por decisão do dono — "não precisa ter 3b,
+          nem falar que é pro crachá". Ele estava certo pelo motivo que não disse: um bloco
+          inteiro chamado "para o seu crachá" ensinava que aqueles dados servem para o
+          documento, quando servem para o atendimento. O CRAS é a porta de entrada da rede
+          pública; a credencial é o transporte que traz a pessoa até aqui.
+        -->
         <div class="campo">
           <label for="cras">CRAS de referência</label>
           <span id="ajuda-cras" class="ajuda">Opcional.</span>
@@ -726,31 +851,19 @@ async function enviar() {
           />
         </div>
 
-        <div class="campo">
-          <label for="contato-emergencia">Contato de emergência</label>
-          <span id="ajuda-emergencia" class="ajuda">
-            Opcional, com DDD. Sem ele, o crachá usa o contato do cuidador, se houver.
-          </span>
-          <input
-            id="contato-emergencia"
-            :value="f.contatoEmergencia"
-            type="text"
-            inputmode="numeric"
-            placeholder="(00) 00000-0000"
-            aria-describedby="ajuda-emergencia"
-            @input="f.contatoEmergencia = aplicarMascara($event, mascaraTelefone)"
-          />
-        </div>
-      </fieldset>
-
-      <fieldset class="secao">
-        <legend>4. Sobre o atendimento</legend>
-
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.deficiencias }]">
-          <legend id="deficiencias">
-            Possui alguma deficiência <span class="obrigatorio" aria-hidden="true">*</span>
-          </legend>
-          <span class="ajuda">Obrigatório. Pode marcar mais de uma.</span>
+          <legend id="deficiencias">Possui alguma deficiência</legend>
+          <!--
+            Deixou de ser obrigatório em 2026-08-21, por decisão do dono:
+
+            > eu posso não ter nenhuma deficiência e querer ser voluntário, e só pra ajudar
+            > eles (…) aqui é um cadastro, não só de quem tem deficiência
+
+            O que isso reorganiza é maior que um asterisco: o consentimento do Art. 11 logo
+            abaixo passa a aparecer **só** quando há deficiência marcada, porque sem dado de
+            saúde não há finalidade a autorizar.
+          -->
+          <span class="ajuda">Opcional. Pode marcar mais de uma.</span>
           <label v-for="d in DEFICIENCIAS" :key="d" class="escolha">
             <input v-model="f.deficiencias" type="checkbox" :value="d" />
             {{ d }}
@@ -765,11 +878,9 @@ async function enviar() {
         </fieldset>
 
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.atendimentos }]">
-          <legend id="atendimentos">
-            Tipo de Atendimento <span class="obrigatorio" aria-hidden="true">*</span>
-          </legend>
+          <legend id="atendimentos">Tipo de Atendimento</legend>
           <span class="ajuda">
-            Obrigatório. Pode marcar mais de um. Para participar de um projeto (Bocha, Mão na Roda,
+            Opcional. Pode marcar mais de um. Para participar de um projeto (Bocha, Mão na Roda,
             Artesão, Informática), marque "Outro" e escreva o nome.
           </span>
           <label v-for="a in ATENDIMENTOS" :key="a" class="escolha">
@@ -786,11 +897,9 @@ async function enviar() {
         </fieldset>
 
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.dias }]">
-          <legend id="dias">
-            Melhores dias <span class="obrigatorio" aria-hidden="true">*</span>
-          </legend>
+          <legend id="dias">Melhores dias</legend>
           <span class="ajuda">
-            Obrigatório. <strong>As sessões acontecem somente no período da manhã.</strong>
+            Opcional. <strong>As sessões acontecem somente no período da manhã.</strong>
           </span>
           <label v-for="d in DIAS" :key="d" class="escolha">
             <input v-model="f.dias" type="checkbox" :value="d" />
@@ -887,71 +996,37 @@ async function enviar() {
       <fieldset class="secao consentimento">
         <legend>7. Consentimento</legend>
 
-        <p>
-          A informação sobre deficiência é <strong>dado de saúde</strong>. A Lei Geral de Proteção
-          de Dados trata esse tipo de dado como sensível e exige a sua autorização específica para
-          registrá-lo — separada de qualquer outra concordância.
-        </p>
-
-        <div :class="['grupo-escolha', 'consentir', { 'campo-erro': erros.consentimento }]">
-          <label class="escolha" for="consentimento">
-            <input id="consentimento" v-model="f.consentimento" type="checkbox" />
-            Autorizo a APPD a tratar a minha informação sobre deficiência para organizar o meu
-            atendimento.
-          </label>
-          <span v-if="erros.consentimento" class="erro">
-            {{ erros.consentimento }}
-          </span>
-        </div>
-
         <!--
-          O CID e a sua autorização, no mesmo bloco.
+          A autorização do Art. 11 aparece **só quando há deficiência marcada** (2026-08-21).
 
-          Ficam juntos porque um não existe sem o outro: informar o código **é** o ato que
-          precisa de consentimento, e separá-los em lugares diferentes da página criaria o
-          intervalo em que a pessoa digita o diagnóstico sem ter lido o que está
-          autorizando.
+          Com o campo 12 opcional, quem se cadastra para ser voluntário não informa condição
+          de saúde nenhuma — e pedir a autorização assim mesmo seria colher consentimento
+          sobre o vazio, que é o contrário do que o artigo exige: autorização específica
+          para uma finalidade. Uma caixa que ninguém precisa marcar também ensina que
+          marcar caixas é formalidade, e essa é a lição errada para o bloco onde ela mais
+          importa.
 
-          E ficam **aqui**, no bloco 7, e não no 3b com os outros dados do crachá, porque
-          este é o lugar da página onde se fala de dado de saúde e de autorização. O CRAS é
-          um número; o CID é diagnóstico (ADR-020).
-
-          A caixa aparece só depois que há algo escrito no campo: pedir autorização para um
-          dado que a pessoa não informou é ruído, e caixa marcada sem dado seria
-          consentimento de nada.
+          O esquema exige o mesmo par pelo mesmo critério, então tela e servidor não podem
+          divergir sem o teste reprovar.
         -->
-        <div class="cid-bloco">
-          <div class="campo">
-            <label for="cid">CID, se você quiser que ele saia no crachá</label>
-            <span id="ajuda-cid" class="ajuda">
-              Opcional. É o código do seu diagnóstico, como está no laudo — por exemplo, G82.4.
-            </span>
-            <input id="cid" v-model="f.cid" type="text" aria-describedby="ajuda-cid" />
-          </div>
+        <template v-if="f.deficiencias.length">
+          <p>
+            A informação sobre deficiência é <strong>dado de saúde</strong>. A Lei Geral de Proteção
+            de Dados trata esse tipo de dado como sensível e exige a sua autorização específica para
+            registrá-lo — separada de qualquer outra concordância.
+          </p>
 
-          <div
-            v-if="f.cid.trim()"
-            :class="['grupo-escolha', 'consentir', { 'campo-erro': erros.consentimentoCid }]"
-          >
-            <p class="explicacao">
-              O CID diz mais sobre a sua saúde do que o tipo de deficiência que você marcou acima:
-              aquele descreve a condição em linhas gerais, este identifica o diagnóstico. Por isso
-              precisa de uma autorização separada.
-            </p>
-            <label class="escolha" for="consentimento-cid">
-              <input id="consentimento-cid" v-model="f.consentimentoCid" type="checkbox" />
-              Autorizo a APPD a guardar o meu CID para que ele possa sair no meu crachá.
+          <div :class="['grupo-escolha', 'consentir', { 'campo-erro': erros.consentimento }]">
+            <label class="escolha" for="consentimento">
+              <input id="consentimento" v-model="f.consentimento" type="checkbox" />
+              Autorizo a APPD a tratar a minha informação sobre deficiência para organizar o meu
+              atendimento.
             </label>
-            <p class="explicacao">
-              <strong>Guardar não é imprimir.</strong> O CID só aparece no crachá se você marcar
-              essa opção depois, na sua área — e ela começa desmarcada. Ele
-              <strong>nunca</strong> aparece na página pública de verificação.
-            </p>
-            <span v-if="erros.consentimentoCid" class="erro">
-              {{ erros.consentimentoCid }}
+            <span v-if="erros.consentimento" class="erro">
+              {{ erros.consentimento }}
             </span>
           </div>
-        </div>
+        </template>
 
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.ciente }]">
           <legend id="ciente">

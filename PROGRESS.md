@@ -4,108 +4,80 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar em <https://appd-sjc.appd-sjc.workers.dev>**, conferido pelo dono no computador e
-no telefone. A change `acabamento-de-interface` **está arquivada**; a próxima é o crachá
-impresso, com proposal escrito esperando três decisões dele.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>** (versão de 20/08). Duas changes foram
+arquivadas em 21/08: `cracha-impresso` e `cartao-fiel-e-cadastro-aberto`. **A segunda ainda
+não subiu** — o dono precisa conferir.
 
-### O que a change fechou
+### `cartao-fiel-e-cadastro-aberto` — 21/08, a partir de dois Jams
 
-A origem foi uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
-áudio foi transcrito localmente (faster-whisper, offline) e cada item conferido contra o
-quadro do minuto citado: inventário em `docs/revisoes/revisao-dono-2026-08-20.md`.
+Origem: [Jam 1](https://jam.dev/c/da543e69-e2ee-4ef5-9a8d-7dfe19f550a2) e
+[Jam 2](https://jam.dev/c/f7327ae5-7df7-4e0f-beba-2e217e8d87c6), gravados depois da subida
+de ontem. Treze pedidos, três decisões novas do dono, e um defeito que ninguém pediu para
+procurar.
 
-**Trinta apontamentos, e boa parte era um defeito só.** `p { max-width: var(--medida) }`
-valia para todo parágrafo do site dentro de um container de 1120px — a mesma queixa
-apareceu em sete telas independentes. A medida passou à classe `.prosa`, centralizada, e
-as treze larguras avulsas viraram três tokens.
+**386 testes** · **aceite 276/276** · lint, typecheck e build limpos ·
+[parecer](openspec/archive/cartao-fiel-e-cadastro-aberto/VALIDACAO.md)
 
-Depois vieram mais duas revisões, no telefone e no computador com áudio, com onze pedidos
-— todos atendidos, menos um recusado com o motivo escrito (ícone puro nos botões de
-baixar; ver o `VALIDACAO.md`).
+#### O defeito crítico: 4.800 px de branco
 
-**Números**: `npm test` de 233 para **348**. `npm run aceite` de 143 para **232**,
-repetível.
+`grid-row: 2 / span 200` na navegação lateral criava duzentas linhas implícitas. Vazias
+medem zero; o `row-gap` de 24 px entre elas, não. **Toda página da área do associado
+terminava com cinco telas de branco**, e terminava desde a change anterior.
 
-### Os cinco defeitos que ninguém tinha pedido
+Medido: moldura de 5.760 px, conteúdo terminando em 1.229. Depois: 1.080 px, folga zero.
 
-Nenhum deles estava na lista do dono; apareceram no caminho, e é o que mais vale registrar:
+O que interessa guardar é por que **375 testes verdes não viram**: todos olhavam conteúdo, e
+a página tinha todo o conteúdo no lugar certo. O teste que entrou mede a **folga**, não o
+CSS — procurar `span 200` no arquivo não pegaria a próxima forma de produzir vazio.
 
-1. **A foto que não aparecia** na área era a palavra "Foto" num retângulo cinza — marcador
-   de lugar que nunca virou imagem.
-2. **O recorte apagava a foto anterior** quando a pessoa desistia.
-3. **A foto não podia ser trocada** por quem já tinha uma: errar uma vez condenava àquela
-   foto. E "editar" não existia — só "trocar".
-4. **A fileira rolável nasceu transbordando**: "Sair" fora da tela **sem rolagem que o
-   alcançasse**, com o `overflow-x: hidden` da página escondendo o estrago e o gate
-   passando.
-5. **"Invalid input" na tela**, em inglês, porque uma regra do Zod não tinha mensagem.
-   Onze validações corrigidas, com teste que reprova qualquer regra sem mensagem própria.
+E o dono acertou o sintoma e errou a causa ("depois que eu cliquei ali em PDF"), que é o
+normal de quem relata. O PDF não causava nada; só dava motivo para rolar até lá.
 
-### Duas armadilhas de ambiente, para não custarem de novo
+#### As três decisões do dono
 
-- **`npm run aceite` sobe o servidor sozinho, do jeito certo.** Passar `APPD_BASE` só serve
-  para apontar a um endereço que já está no ar. Subir o worker à mão com
-  `wrangler dev .output/server/index.mjs` ignora o `wrangler.jsonc` e não carrega o segredo
-  que sela o cookie: toda rota de `/api/area` responde 401, e parece defeito do produto.
-- **Rodar o aceite várias vezes junto de scripts que criam conta** estoura a cota de 12
-  cadastros por 15 minutos, e o 429 aparece disfarçado de outro defeito. Limpar com
-  `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"`.
+| Decisão                                          | O que ela custou                                                                                      |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **O cartão vira réplica do de papel**, 90% igual | CPF e endereço impressos sem opt-in — [ADR-021](docs/adr/adr-021-cracha-replica-o-cartao-de-papel.md) |
+| **Deficiência deixa de ser obrigatória**         | consentimento do Art. 11 virou condicional; campo 12 mudou                                            |
+| **`+55` no telefone**, guardado em E.164         | migration recriando duas tabelas; sem migrar dados, por decisão                                       |
 
-### O que ficou registrado e não se perde
+E uma quarta, tomada no mesmo dia: **o CID perdeu o opt-in de impressão**. O ADR-020 tinha
+três travas; a terceira ("guardar não é imprimir") foi revogada com um dia de vida. A que
+fica, inteira e sem exceção, é o CID **nunca** aparecer em `/verificar` — e agora ela é
+medida, porque a conta do percurso de aceite passou a ter CID de verdade.
 
-- **A regra dos 15 campos foi emendada**: ela protege os originais e nunca proibiu
-  acrescentar. CEP virou 16 em 06/08; estado e país, 20 e 21 em 20/08.
-- **O REQ-24 de `cracha-do-associado` foi revogado** — a tela não diz mais que o arquivo é
-  gerado no navegador. O comportamento não mudou; o requisito, sim. Marcado na spec
-  arquivada, e o gate exige a ausência da frase.
-- **O atendimento de manhã saiu do site** junto com o bloco "Antes de começar". A constante
-  segue em `shared/conteudo.ts`; se a informação importa, o lugar é `/atendimento`.
-- **A biografia da fundadora não existe** em lugar nenhum — conferido na fonte. Encerrado
-  pelo dono; a assimetria fica, e é honesta.
+#### O que mais mudou
 
-### `cracha-impresso` — implementada em 21/08
+- **O formulário foi reorganizado**: o bloco "3b. Para o seu crachá" deixou de existir, o
+  CID subiu para o bloco 1 com a autorização colada nele, CRAS e credencial abrem o bloco de
+  atendimento, e o contato de emergência ficou sob o do cuidador.
+- **O PNG e o PDF desenhavam o cartão de duas versões atrás** — em pé, sem CID, CRAS nem
+  emissão. Passou dois dias no ar porque o arquivo abre sem erro. `cracha-arquivo.spec.ts`
+  compara as duas implementações entre si.
+- **O cabeçalho não quebra mais em nenhuma largura**, em três fontes de navegador. Custou
+  duas correções: a primeira foi medida deslogado, e "Minha área" é mais largo que "Entrar".
+- **A folha de impressão saiu com frente e verso encostados**, para a dobra cair no meio.
 
-Proposal, spec, tasks e `VALIDACAO.md` escritos; código no ar na branch. **375 testes**,
-lint, typecheck e build limpos.
+#### Os defeitos meus que a medição pegou
 
-**A mudança de fundo é o CID.** O dono decidiu coletá-lo, e com isso o site passa a guardar
-**diagnóstico** — não mais categoria de deficiência. `G82.4` tem código e classificação
-clínica; `Física` não. Os dois são dado de saúde do Art. 11, só o primeiro é prontuário, e
-o crachá vai no bolso: é o dado mais exposto que este projeto produz.
+Sete, todos no [parecer](openspec/archive/cartao-fiel-e-cadastro-aberto/VALIDACAO.md). Os
+dois que mais vale repetir:
 
-Virou [ADR-020](docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md), com três travas que não
-são requisito entre outros — são a condição de a decisão se sustentar:
+- **O consentimento do Art. 11 era falsificado pelo cliente** — `consentimentoSaude: true`
+  fixo no corpo, o mesmo defeito que o CID teve ontem, no campo mais antigo do formulário.
+  Enquanto a deficiência era obrigatória ele ficava sem efeito visível.
+- **O teste de fonte grande simulava o que não existe**: mexer em
+  `documentElement.style.fontSize` faz o layout crescer sem mover media query nenhuma, porque
+  em media query `em` mede a fonte **do navegador**. O teste reprovava o produto por um
+  defeito dele mesmo.
 
-1. **Consentimento próprio** para guardar, com termo de slug próprio. "Organizar o meu
-   atendimento" não cobre "guardar o meu diagnóstico para imprimi-lo num cartão".
-2. **Opt-in próprio** para imprimir. Guardar e estampar são decisões diferentes.
-3. **Nunca em `/verificar`**, sem exceção. Para o campo 12 existe exceção sob opt-in; para
-   o CID não existe, e a diferença está no teste — não só no ADR.
+#### O que falta
 
-O cartão virou **paisagem**, 85,6 × 54 mm (ISO ID-1, a medida da carteira de motorista), e
-a folha traz frente e verso lado a lado com margem de corte. Campos novos: CID (22), CRAS
-(23), credencial de transporte (24) e contato de emergência (25) — todos opcionais.
-Emissão é derivada da data do cadastro; **validade não existe**, por decisão do dono.
-
-### Os cinco defeitos meus que a medição pegou
-
-Nenhum previsto, todos achados antes de sair daqui. Estão no `VALIDACAO.md` com detalhe; o
-que vale repetir:
-
-- **O consentimento estava sendo falsificado pelo cliente**: eu mandava `consentimentoCid:
-true` fixo, o que anulava a caixa. Enviei o CID sem marcar nada e o cadastro passou.
-- **A tira não cabia na folha** — dois cartões deitados somam 171,2 mm e a margem antiga
-  deixava 170 úteis. O cartão em pé cabia por acaso.
-- **O histórico filtrava por termo**, e com dois termos escondia metade da verdade: sem
-  aparecer, não havia o que retirar.
-
-### O que falta para arquivar
-
-- Passada de axe na tela de impressão **com o CID ligado**, e teclado no opt-in novo.
-- A palavra do dono sobre fidelidade visual: a identidade é **inspirada**, não replicada —
-  faixa, marca e duas colunas vieram do cartão; brasão em marca d'água e fundo, não.
-- Uma impressão de verdade. A tira cabe por aritmética e por medida em milímetros; se o
-  papel sair diferente, é aí que a conta falha.
+- **Subir e o dono conferir.** Nada disso está no ar.
+- **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
+  por milímetro na tela.
+- **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e
+  o destinatário continua não existindo (`docs/pendencias-appd.md`, item 4).
 
 ---
 

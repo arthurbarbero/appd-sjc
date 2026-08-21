@@ -153,7 +153,7 @@ describe('o que é gravado sai do catálogo, não do teclado (REQ-8, T6)', () =>
   const exclusao = ler(API, 'area', 'excluir.post.ts')
 
   it('o cadastro resolve a versão pelo hash que a tela exibiu', () => {
-    expect(cadastro).toMatch(/versaoPorHash\(\s*d\.termoHash\s*\)/)
+    expect(cadastro).toMatch(/versaoPorHash\(d\.termoHash \?\? ''\)/)
     expect(cadastro).toMatch(/versao: termo\.versao/)
     expect(cadastro).toMatch(/hash: termo\.hash/)
   })
@@ -244,25 +244,44 @@ describe('sem consentimento o servidor recusa (REQ-7, T6)', () => {
   })
 
   it('aceitar termos gerais não vale como consentimento do Art. 11', () => {
-    // `.strict()`: o campo estranho é recusado, e o consentimento específico continua
-    // faltando. Aceite genérico não compra o do Art. 11 (Art. 8º, §4º).
+    /*
+      Duas recusas independentes, testadas separadamente desde 2026-08-21.
+
+      Antes elas apareciam na mesma resposta porque `consentimentoSaude` era obrigatório no
+      objeto, e o Zod reportava a falta dele junto do campo estranho. Agora a exigência vem
+      de um `refine`, e `refine` não roda quando o objeto já falhou — então um teste só
+      passaria a provar meia regra sem que ninguém percebesse.
+    */
+    // 1. `.strict()`: campo desconhecido é recusado, nunca ignorado em silêncio.
+    const comExtra = esquemaInscricao.safeParse({ ...valido, aceiteTermosGerais: true })
+    expect(comExtra.success).toBe(false)
+
+    // 2. E o aceite genérico não substitui o específico: sem ele, a recusa aponta o campo.
     const { consentimentoSaude: _fora, ...sem } = valido
-    const r = esquemaInscricao.safeParse({ ...sem, aceiteTermosGerais: true })
+    const r = esquemaInscricao.safeParse(sem)
     expect(r.success).toBe(false)
-    const campos = r.error?.issues.map((i) => i.path[0])
-    expect(campos).toContain('consentimentoSaude')
+    expect(r.error?.issues.map((i) => i.path[0])).toContain('consentimentoSaude')
   })
 
   it('sem o hash do termo, recusa: não dá para provar o que foi lido', () => {
     const { termoHash: _fora, ...sem } = valido
     const r = esquemaInscricao.safeParse(sem)
     expect(r.success).toBe(false)
-    expect(r.error?.issues.map((i) => i.path[0])).toContain('termoHash')
+    /*
+      O erro aponta `consentimentoSaude`, e não `termoHash`, desde 2026-08-21.
+
+      O hash não tem campo na tela — ninguém o digita. Apontar para ele mandaria a pessoa
+      procurar um campo que não existe; apontar para a caixa mostra a mensagem onde ela
+      pode agir, que é recarregar a página e ler o termo de novo.
+    */
+    expect(r.error?.issues.map((i) => i.path[0])).toContain('consentimentoSaude')
   })
 
   it('hash fora do formato é recusado antes de chegar ao catálogo', () => {
     const r = esquemaInscricao.safeParse({ ...valido, termoHash: 'nao-e-hash' })
     expect(r.success).toBe(false)
+    // Aqui quem recusa é o `.regex()` do próprio campo, e não o refine — então o erro
+    // aponta `termoHash` mesmo.
     expect(r.error?.issues.map((i) => i.path[0])).toContain('termoHash')
   })
 })

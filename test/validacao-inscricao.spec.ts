@@ -40,7 +40,8 @@ const VALIDO = {
 describe('Schema da inscrição', () => {
   it('aceita o preenchimento válido e normaliza o que precisa', () => {
     const r = esquemaInscricao.parse(VALIDO)
-    expect(r.telefone).toBe('12900000001')
+    // Formato internacional desde 2026-08-21: o que se guarda é E.164.
+    expect(r.telefone).toBe('+5512900000001')
     expect(r.cpf).toBe('39053344705')
     expect(r.email).toBe('maria.ficticia@exemplo.test')
     // O CEP é guardado só com dígitos: máscara é formatação, não dado.
@@ -51,12 +52,18 @@ describe('Schema da inscrição', () => {
     expect(esquemaInscricao.safeParse({ ...VALIDO, cep: '1223' }).success).toBe(false)
   })
 
-  it('a máscara não bloqueia: três formatos de telefone colados são aceitos', () => {
+  it('a máscara não bloqueia: os formatos colados são aceitos e viram E.164', () => {
     const casos: [string, string][] = [
-      ['12991657059', '12991657059'],
-      // Copiado do WhatsApp, com código do país: o +55 é descartado, não recusado.
-      ['+55 12 99165-7059', '12991657059'],
-      ['(12) 3346-0605', '1233460605'],
+      // Sem código do país, o Brasil é assumido — é o campo que já nasce com +55.
+      ['12991657059', '+5512991657059'],
+      // Copiado do WhatsApp: o +55 é aproveitado, não descartado nem recusado.
+      ['+55 12 99165-7059', '+5512991657059'],
+      ['(12) 3346-0605', '+551233460605'],
+      // Colagem do WhatsApp sem o `+`, que também acontece.
+      ['5512991657059', '+5512991657059'],
+      // Número estrangeiro: quem escreveu o `+` disse qual é o país, e ninguém aqui sabe
+      // melhor. Passou a ser aceito quando o campo virou apagável (2026-08-21).
+      ['+351 912 345 678', '+351912345678'],
     ]
     for (const [colado, esperado] of casos) {
       expect(esquemaInscricao.parse({ ...VALIDO, telefone: colado }).telefone).toBe(esperado)
@@ -78,10 +85,48 @@ describe('Schema da inscrição', () => {
     expect(r.success).toBe(false)
   })
 
-  it('exige pelo menos uma opção em cada múltipla escolha', () => {
-    for (const campo of ['deficiencias', 'atendimentos', 'dias']) {
-      expect(esquemaInscricao.safeParse({ ...VALIDO, [campo]: [] }).success).toBe(false)
-    }
+  /*
+    A regra virou o contrário em 2026-08-21, e o teste vira com ela.
+
+    O dono abriu o cadastro a quem não tem deficiência — "eu posso não ter nenhuma
+    deficiência e querer ser voluntário". Os três campos de múltipla escolha passaram a ser
+    opcionais, e o consentimento do Art. 11 passou a ser exigido só quando há deficiência
+    marcada: sem dado de saúde não há finalidade a autorizar.
+  */
+  it('aceita as três múltiplas escolhas vazias', () => {
+    const semNada = esquemaInscricao.safeParse({
+      ...VALIDO,
+      deficiencias: [],
+      atendimentos: [],
+      dias: [],
+      // Sem deficiência, a autorização do Art. 11 não é pedida nem enviada.
+      consentimentoSaude: undefined,
+      termoHash: undefined,
+    })
+    expect(semNada.success).toBe(true)
+  })
+
+  it('o vocabulário continua fechado: opcional não é texto livre', () => {
+    expect(esquemaInscricao.safeParse({ ...VALIDO, dias: ['Sábado de manhã'] }).success).toBe(false)
+  })
+
+  it('marcar deficiência volta a exigir a autorização do Art. 11', () => {
+    const r = esquemaInscricao.safeParse({
+      ...VALIDO,
+      deficiencias: ['Física'],
+      consentimentoSaude: undefined,
+      termoHash: undefined,
+    })
+    expect(r.success).toBe(false)
+    if (r.success) return
+    expect(r.error.issues.some((i) => i.path.includes('consentimentoSaude'))).toBe(true)
+  })
+
+  it('marcar deficiência sem o hash do termo também é recusado', () => {
+    // A autorização e o texto que ela aceitou são uma peça só: consentimento gravado sem
+    // saber que texto a pessoa leu não prova nada.
+    const r = esquemaInscricao.safeParse({ ...VALIDO, termoHash: undefined })
+    expect(r.success).toBe(false)
   })
 
   it('marcar "Outro" torna o campo de especificação obrigatório', () => {
