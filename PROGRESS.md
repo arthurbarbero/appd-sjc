@@ -63,17 +63,49 @@ Nenhum deles estava na lista do dono; apareceram no caminho, e é o que mais val
 - **A biografia da fundadora não existe** em lugar nenhum — conferido na fonte. Encerrado
   pelo dono; a assimetria fica, e é honesta.
 
-### Próxima change: `cracha-impresso`
+### `cracha-impresso` — implementada em 21/08
 
-Proposal escrito, **esperando três decisões do dono**: se o crachá replica a identidade
-visual do cartão físico ou segue o design system; se emissão e contato de emergência viram
-campos; e o que fazer com validade, que depende de saber se a contribuição está em dia —
-coisa que o site não sabe.
+Proposal, spec, tasks e `VALIDACAO.md` escritos; código no ar na branch. **375 testes**,
+lint, typecheck e build limpos.
 
-Fica dito o que **não** entra, e por quê: **CID e diagnóstico**, porque o cartão real os
-imprime e o ADR-019 os proíbe. Replicar o cartão como ele é revogaria por decisão de
-layout a promessa que a tela faz hoje — "o seu crachá não mostra o seu tipo de
-deficiência" — sem ADR e sem consentimento novo.
+**A mudança de fundo é o CID.** O dono decidiu coletá-lo, e com isso o site passa a guardar
+**diagnóstico** — não mais categoria de deficiência. `G82.4` tem código e classificação
+clínica; `Física` não. Os dois são dado de saúde do Art. 11, só o primeiro é prontuário, e
+o crachá vai no bolso: é o dado mais exposto que este projeto produz.
+
+Virou [ADR-020](docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md), com três travas que não
+são requisito entre outros — são a condição de a decisão se sustentar:
+
+1. **Consentimento próprio** para guardar, com termo de slug próprio. "Organizar o meu
+   atendimento" não cobre "guardar o meu diagnóstico para imprimi-lo num cartão".
+2. **Opt-in próprio** para imprimir. Guardar e estampar são decisões diferentes.
+3. **Nunca em `/verificar`**, sem exceção. Para o campo 12 existe exceção sob opt-in; para
+   o CID não existe, e a diferença está no teste — não só no ADR.
+
+O cartão virou **paisagem**, 85,6 × 54 mm (ISO ID-1, a medida da carteira de motorista), e
+a folha traz frente e verso lado a lado com margem de corte. Campos novos: CID (22), CRAS
+(23), credencial de transporte (24) e contato de emergência (25) — todos opcionais.
+Emissão é derivada da data do cadastro; **validade não existe**, por decisão do dono.
+
+### Os cinco defeitos meus que a medição pegou
+
+Nenhum previsto, todos achados antes de sair daqui. Estão no `VALIDACAO.md` com detalhe; o
+que vale repetir:
+
+- **O consentimento estava sendo falsificado pelo cliente**: eu mandava `consentimentoCid:
+true` fixo, o que anulava a caixa. Enviei o CID sem marcar nada e o cadastro passou.
+- **A tira não cabia na folha** — dois cartões deitados somam 171,2 mm e a margem antiga
+  deixava 170 úteis. O cartão em pé cabia por acaso.
+- **O histórico filtrava por termo**, e com dois termos escondia metade da verdade: sem
+  aparecer, não havia o que retirar.
+
+### O que falta para arquivar
+
+- Passada de axe na tela de impressão **com o CID ligado**, e teclado no opt-in novo.
+- A palavra do dono sobre fidelidade visual: a identidade é **inspirada**, não replicada —
+  faixa, marca e duas colunas vieram do cartão; brasão em marca d'água e fundo, não.
+- Uma impressão de verdade. A tira cabe por aritmética e por medida em milímetros; se o
+  papel sair diferente, é aí que a conta falha.
 
 ---
 

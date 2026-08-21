@@ -22,7 +22,7 @@ cenários validados item a item, em `VALIDACAO.md` dentro de cada pasta.
 | `site-institucional`          | 15 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
 | `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam o catálogo completo de termos   |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
-| `cracha-impresso`             | **spec e tasks escritas**; T6 espera a decisão sobre o desenho            |
+| `cracha-impresso`             | **implementada**; archive espera axe na impressão e uma impressão real    |
 
 **`acabamento-de-interface` foi arquivada em 2026-08-21**, com `VALIDACAO.md` item a item.
 Nasceu de uma revisão do dono em vídeo — 30 apontamentos em doze telas, e boa parte deles
@@ -40,8 +40,9 @@ guardar diagnóstico, não mais categoria de deficiência. Virou
 quais a decisão não se sustenta — consentimento próprio para guardar, opt-in próprio para
 imprimir, e **nunca** em `/verificar`.
 
-As tasks começam pelas travas, e não pelo desenho: sem elas de pé não existe cartão para
-imprimir o dado.
+As tasks começaram pelas travas, e não pelo desenho: sem elas de pé não existe cartão para
+imprimir o dado. Todas as fases estão feitas, com `VALIDACAO.md` item a item — o archive
+espera uma passada de axe na tela de impressão com o CID ligado e uma impressão de verdade.
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,
 puxada para a V1 pelo dono em 2026-08-07 (ADR-016, que supersede em parte o ADR-014). Ela
