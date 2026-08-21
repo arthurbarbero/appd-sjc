@@ -1,29 +1,3 @@
-/*
-  0006 — telefone em formato internacional, e os três campos de múltipla escolha opcionais.
-
-  Duas mudanças de CHECK, e em SQLite CHECK não se altera: a tabela é recriada, os dados
-  são copiados e a antiga cai. É o que o drizzle-kit gerou; o que foi escrito à mão é a
-  cópia do telefone.
-
-  **Por que a cópia não pode ser um SELECT direto.** O CHECK novo exige `+` e código de
-  país. Toda linha já gravada tem `12991657059`, sem prefixo — e um `SELECT "telefone"`
-  cru faria a migration abortar no meio, com a tabela velha já derrubada em algumas
-  ordens de execução. O dono dispensou migrar dados ("é tudo teste"), e isso continua
-  valendo: o `CASE` abaixo não interpreta nem corrige nada, só prefixa o que não tem
-  prefixo, para que a recriação da tabela não caia.
-*/
-/*
-  `defer_foreign_keys`, e não `foreign_keys=OFF`.
-
-  O drizzle-kit escreve `PRAGMA foreign_keys=OFF` em volta de **cada** tabela recriada. Com
-  duas recriações na mesma migration, a segunda fica fora do par e o `DROP TABLE usuarios`
-  encontra as FKs de `inscricoes_atendimento`, `fotos` e `consentimentos` apontando para
-  ela — `FOREIGN KEY constraint failed`, que foi exatamente o que a aplicação local deu.
-
-  `foreign_keys` é ignorado dentro de transação, e o D1 executa a migration numa. O que
-  funciona ali é `defer_foreign_keys`: as checagens ficam para o fim da transação, quando
-  as tabelas novas já existem com os nomes definitivos.
-*/
 PRAGMA defer_foreign_keys=ON;--> statement-breakpoint
 CREATE TABLE `__new_inscricoes_atendimento` (
 	`id` text PRIMARY KEY NOT NULL,

@@ -93,6 +93,31 @@ E um oitavo, que não era meu de hoje mas passou dois dias no ar: **o PNG e o PD
 desenhavam o cartão de duas versões atrás**. Ninguém percebeu porque o arquivo abre sem
 erro — ele estava certo, só era de outro cartão. O dono baixou três.
 
+## A migration, e o que ela ensinou no deploy
+
+`0006` recria `inscricoes_atendimento` e `usuarios` — em SQLite um `CHECK` não se altera, a
+tabela é refeita. Duas coisas foram escritas à mão sobre o que o drizzle-kit gerou:
+
+1. **`PRAGMA defer_foreign_keys=ON`, no lugar de `foreign_keys=OFF`.** O drizzle-kit escreve
+   o par `OFF`/`ON` em volta de **cada** tabela recriada; com duas recriações, a segunda
+   fica fora do par e o `DROP TABLE usuarios` encontra as FKs de `inscricoes_atendimento`,
+   `fotos` e `consentimentos`. Além disso `foreign_keys` é ignorado dentro de transação, e o
+   D1 executa a migration numa.
+2. **A cópia do telefone passa por um `CASE`** que prefixa `+55` no que não tem prefixo. O
+   CHECK novo exige código de país, e um `SELECT "telefone"` cru faria a migration abortar.
+   Não é migração de dados — o dono dispensou —, é o mínimo para a recriação não cair.
+
+**E um defeito meu, que só apareceu no deploy.** O arquivo tinha comentários explicando
+essas duas decisões, e o D1 **remoto** recusa migration com `/* ... */`:
+`SQL code did not contain a statement`. O D1 local aceita, então a migration passou no
+`db:migrate`, nos 386 testes e nas 276 verificações de aceite para reprovar depois de a
+branch já estar na main.
+
+É o tipo de defeito que só um teste sobre o **arquivo** pega, e não sobre o comportamento —
+como os dois que já moravam ali (placeholder de bind, GLOB com mais de 10 classes). Virou o
+terceiro: `test/modelo-de-dados.spec.ts` reprova comentário de bloco em qualquer migration.
+A explicação passou a morar aqui.
+
 ## Ressalvas escritas, em vez de escondidas
 
 1. **A página de contato deixou de avisar que o formulário não envia.** Decisão do dono, e

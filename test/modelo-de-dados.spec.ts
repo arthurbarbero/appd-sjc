@@ -104,6 +104,23 @@ describe('A migration é aplicável no D1', () => {
     expect(sql).not.toMatch(/LIKE\s*\?/)
   })
 
+  it('nenhuma migration traz comentário de bloco', () => {
+    /*
+      O D1 **remoto** recusa o arquivo com `SQL code did not contain a statement` quando
+      ele tem `/* ... *\/`. O local aceita, e foi assim que a 0006 passou no
+      `npm run db:migrate`, no `npm test` e no `npm run aceite` para reprovar só no deploy,
+      depois de a branch já estar na main.
+
+      A explicação da migration vai para o parecer da change. Aqui fica a guarda, porque
+      quem escrever a próxima não vai lembrar — e o retorno é caro: falha em produção,
+      depois de tudo verde.
+    */
+    for (const arquivo of readdirSync(PASTA_MIGRATIONS).filter((f) => f.endsWith('.sql'))) {
+      const conteudo = readFileSync(join(PASTA_MIGRATIONS, arquivo), 'utf8')
+      expect(conteudo, `${arquivo} tem comentário de bloco`).not.toMatch(/\/\*/)
+    }
+  })
+
   it('nenhum padrão GLOB passa de 10 classes de caractere', () => {
     // Limite medido no D1 local em 2026-08-06: na 11ª classe ele responde
     // `LIKE or GLOB pattern too complex` e a inserção falha.
