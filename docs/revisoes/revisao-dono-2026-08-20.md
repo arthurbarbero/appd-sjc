@@ -92,6 +92,34 @@ o rodapé (00:59), os links de "Combinar a retirada" e "Falar sobre voluntariado
 | P4  | 16:04         | `/contato`: "se eu tô logado, por que você já não [preenche]?" — pré-preencher nome, e-mail e telefone de quem está autenticado.                                                                         |
 | P5  | 15:45 a 16:21 | `/contato`: "isso aqui eu não sei pra onde vai — se eu conferir, vai pra onde?" O botão "Conferir minha mensagem" não diz o destino, e o formulário ainda não envia (pendência aberta com a APPD).       |
 
+## Segunda passada, no celular — 2026-08-21
+
+O dono conferiu a versão publicada num telefone e apontou cinco coisas. A disposição geral
+foi aprovada: "pelo que vi no celular ficou bom".
+
+| #   | Pedido                                                                                          | O que era                                                                                                                           |
+| --- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| M1  | "Esse Mostrar senha gigantesco é feio, podia ser só um símbolo de olho igual os login modernos" | O rótulo ocupava quase tanto quanto o campo e o espremia. Virou ícone, com o nome preservado em `aria-label`.                       |
+| M2  | "Os botões [do É WhatsApp] não estão na mesma altura dos outros"                                | O grupo não tem a linha de ajuda que o campo vizinho tem, e subia. Agora as opções encostam na mesma base do telefone.              |
+| M3  | "Como a minha área fica no celular, muito feio… talvez um accordion ou formas mais modernas"    | As cinco abas quebravam em três linhas com "Sair" sobrando. Virou fileira rolável — accordion foi descartado, ver abaixo.           |
+| M4  | "Essa foto no canto superior esquerdo tira por favor"                                           | O retrato que eu havia posto no topo do menu lateral como "cabeçalho mini". Removido.                                               |
+| M5  | "Não consigo trocar/editar a foto pra testar a parada da pinça"                                 | **Defeito pré-existente**: o envio de foto só era montado para quem **não** tinha foto. Errar a foto uma vez condenava àquela foto. |
+
+**Por que não accordion, em M3.** Ele custa dois toques — abrir e escolher — e esconde os
+destinos enquanto está fechado. Para cinco seções do mesmo nível, trocadas com frequência,
+a fileira rolável é o padrão consolidado ([Smashing
+Magazine](https://www.smashingmagazine.com/2022/11/navigation-design-mobile-ux/),
+[UXPin](https://www.uxpin.com/studio/blog/mobile-navigation-examples/)). Accordion serve
+para conteúdo longo, não para navegação.
+
+**O defeito que a fileira rolável escondeu, e que quase passou.** Na primeira versão dela,
+o `ul` transbordava em vez de rolar: 702px de itens numa tela de 360, `scrollLeft` travado
+em 0, e **"Sair" fora da tela sem rolagem que o alcançasse**. O `overflow-x: hidden` da
+página cortava o excesso, então a verificação de rolagem horizontal do gate passava — o
+estrago ficava invisível para o teste e visível só para quem tentasse usar. Faltava
+`width: 100%` no container que rola. Virou verificação própria no aceite: o que transborda
+tem de ser exatamente o que rola.
+
 ## O que o dono pediu ao final (16:23 a 16:38)
 
 > "Acho que ele já viu todas as telas. Eu preciso que você organize primeiro, faça um

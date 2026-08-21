@@ -30,6 +30,9 @@ const exportando = ref('')
 const erroExportar = ref('')
 
 const temFoto = computed(() => Boolean(data.value?.foto))
+
+/** Abre o recorte para quem já tem foto. Fecha sozinho quando a nova foto entra. */
+const trocandoFoto = ref(false)
 const urlVerificacao = computed(() => `${origem}/verificar/${data.value?.numeroRegistro ?? ''}`)
 
 const dadosCracha = computed<DadosCracha>(() => ({
@@ -67,6 +70,9 @@ async function enviarFoto() {
     })
     enviandoFoto.value = null
     await refresh()
+    // Só recolhe o bloco de troca quando a foto nova entrou de verdade: em caso de erro,
+    // o recorte precisa continuar na tela para a pessoa tentar de novo.
+    trocandoFoto.value = false
   } catch {
     erroEnvio.value =
       'Não conseguimos enviar a foto agora. Seu recorte continua aqui — tente de novo em instantes.'
@@ -146,6 +152,35 @@ async function exportar(formato: 'png' | 'pdf') {
         <section v-if="!temFoto" class="sem-foto-bloco">
           <h2>Falta a sua foto para o crachá ficar pronto</h2>
           <AppdFoto v-model="enviandoFoto" rotulo="Foto para o crachá" />
+        </section>
+
+        <!--
+          Estado 1b — trocar a foto que já existe (2026-08-21).
+
+          Até aqui o envio de foto só era montado quando **não** havia foto: quem já tinha
+          enviado a sua não tinha caminho nenhum para trocá-la, e o dono topou com isso ao
+          tentar conferir o recorte. Errar a foto uma vez condenava a pessoa àquela foto.
+
+          Fica fechado por padrão, e não aberto: a tela é sobre o crachá pronto, e um
+          seletor de arquivo permanentemente aberto no alto sugere que algo está faltando.
+        -->
+        <section v-else class="trocar-bloco">
+          <button
+            v-if="!trocandoFoto"
+            type="button"
+            class="botao botao-secundario"
+            @click="trocandoFoto = true"
+          >
+            Trocar a minha foto
+          </button>
+
+          <template v-else>
+            <h2>Trocar a minha foto</h2>
+            <AppdFoto v-model="enviandoFoto" rotulo="Nova foto para o crachá" />
+            <button type="button" class="botao botao-fantasma" @click="trocandoFoto = false">
+              Manter a foto de agora
+            </button>
+          </template>
         </section>
 
         <p v-if="salvandoFoto" role="status" class="carregando">Guardando a sua foto…</p>
@@ -334,6 +369,13 @@ async function exportar(formato: 'png' | 'pdf') {
   era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
   só o que é da tela; a forma da área é da moldura.
 */
+
+.trocar-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e3);
+}
 
 .chamada {
   font-size: var(--texto-corpo-g);

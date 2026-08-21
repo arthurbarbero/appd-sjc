@@ -4,8 +4,14 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**Branch `acabamento-de-interface`**, não publicada. A `main` publica a cada push, e a
-change ainda não passou pelo gate final.
+**No ar desde 2026-08-20** em <https://appd-sjc.appd-sjc.workers.dev>, com CI e deploy
+verdes e a migration `0004` aplicada no D1 remoto.
+
+O dono conferiu no celular em 21/08 e aprovou a disposição geral — "ficou bom" —, com
+cinco ajustes, que estão na branch `ajustes-mobile`: o "Mostrar senha" virou ícone de
+olho, o "Sim/Não" do WhatsApp encostou na base do campo vizinho, a área do associado
+ganhou fileira rolável no telefone, o retrato do topo saiu, e **quem já tem foto pode
+trocá-la** — não podia, e isso era defeito pré-existente.
 
 A origem é uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
 áudio foi transcrito localmente (faster-whisper `large-v3-turbo`, offline) e cada item
@@ -69,7 +75,8 @@ Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativ
 2. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
    constante segue em `shared/conteudo.ts`; se a informação importa, o lugar é
    `/atendimento`.
-3. **A Fase 4** — o crachá impresso espera proposal próprio.
+3. **A Fase 4** — o crachá impresso espera proposal próprio, e a palavra do dono depois
+   de conferir esta leva de ajustes.
 
 ### Uma revogação registrada
 

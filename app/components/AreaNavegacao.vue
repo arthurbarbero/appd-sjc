@@ -22,17 +22,6 @@ defineProps<{ atual: 'painel' | 'cracha' | 'dados' | 'inscricoes' | 'excluir' }>
 const sessao = useUserSession()
 const saindo = ref(false)
 
-/*
-  A mesma rota que o cartão de `/area` usa. Constante, e não literal no `src`, porque com
-  o caminho cru o Vite tenta resolvê-lo como asset e o build de produção quebra.
-
-  `useFetch` com chave fixa: as cinco telas da área montam esta navegação, e sem a chave
-  cada uma pediria de novo a mesma resposta ao trocar de seção.
-*/
-const ROTA_FOTO = '/api/area/foto'
-const { data: dadosFoto } = await useFetch('/api/area/tem-foto', { key: 'area-tem-foto' })
-const temFoto = computed(() => dadosFoto.value?.temFoto === true)
-
 async function sair() {
   saindo.value = true
   try {
@@ -46,19 +35,6 @@ async function sair() {
 
 <template>
   <nav aria-label="Área do associado">
-    <!--
-      O cabeçalho mínimo da área: a foto e nada mais.
-
-      "Esse de cima tá ok, eu até colocaria pra ficar mini — tipo bem mini, só foto e o
-      linkinho", disse o dono em 2026-08-20, no lugar do cartão que repetia nome e número
-      a cada visita. Quem não enviou foto não vê moldura vazia: o bloco simplesmente não
-      existe, porque um retângulo tracejado no alto de toda tela cobra sem necessidade.
-
-      `alt` vazio: é a mesma pessoa que está logada, e o nome dela está no cabeçalho do
-      site. Anunciar "sua foto" a cada tela da área é ruído.
-    -->
-    <img v-if="temFoto" :src="ROTA_FOTO" alt="" width="72" height="90" class="retrato" />
-
     <ul>
       <li>
         <NuxtLink to="/area" :aria-current="atual === 'painel' ? 'page' : undefined">
@@ -99,14 +75,6 @@ nav {
   display: flex;
   flex-direction: column;
   gap: var(--e3);
-}
-
-.retrato {
-  width: 72px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: var(--raio-p);
-  border: var(--borda-largura) solid var(--borda-suave);
 }
 
 ul {
@@ -192,24 +160,97 @@ a[aria-current='page']::after {
   background: var(--primaria);
 }
 
-/* Na faixa estreita a navegação volta a ser fileira, e a marca volta a ser embaixo. */
+/*
+  No telefone, uma fileira que rola — não uma que quebra.
+
+  Cinco seções mais "Sair" não cabem na largura de um telefone, e com `flex-wrap` elas
+  desciam para duas e três linhas, com o "Sair" sobrando sozinho na última. O dono viu e
+  descreveu como "muito feio", e estava certo: a altura da navegação passava a depender do
+  comprimento dos rótulos.
+
+  Fileira rolável é o padrão consolidado para este caso — poucas seções, todas do mesmo
+  nível, trocadas com frequência. Foi preferida a um accordion porque navegar não deveria
+  custar dois toques: o accordion esconde os destinos e obriga a abrir antes de escolher.
+
+  Três cuidados que a rolagem lateral exige, e sem os quais ela vira armadilha:
+
+  - `overscroll-behavior-x: contain` para o gesto não escapar para a página e virar
+    "voltar" do navegador;
+  - `scroll-snap` para o item parar alinhado, em vez de meio cortado;
+  - a máscara nas bordas, que mostra que há mais coisa depois do que se vê. Sem ela, uma
+    fileira cortada no talo parece uma fileira que acabou.
+
+  A rolagem é do container, nunca da página — o gate de aceite reprova rolagem horizontal
+  no documento, e com razão.
+*/
 @media (max-width: 760px) {
   nav {
     border-bottom: 1px solid var(--borda-suave);
     padding-bottom: var(--e2);
-  }
+    gap: var(--e2);
+    /*
+      `min-width: 0` é o que faz a fileira rolar em vez de transbordar.
 
-  .retrato {
-    display: none;
+      Sem ele, um item de flex adota a largura do próprio conteúdo — os seis rótulos
+      somavam 702px numa tela de 360, o `ul` esticava o `nav` junto, e `overflow-x: auto`
+      não tinha o que rolar porque `scrollWidth` e `clientWidth` eram iguais.
+
+      O pior é o que isso escondia: o `overflow-x: hidden` da página cortava o excesso, e
+      "Sair" ficava fora da tela **sem rolagem que o alcançasse** — um item de navegação
+      inalcançável, com o teste de rolagem horizontal passando.
+    */
+    min-width: 0;
+    /*
+      `width: 100%` amarra o `nav` à largura do pai. Só `min-width: 0` não bastava: em
+      coluna, o item de flex ainda cresce até o conteúdo, e a fileira de 702px esticava o
+      `nav` junto — sobrava transbordo, não rolagem.
+    */
+    width: 100%;
   }
 
   ul {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    min-width: 0;
+    width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: var(--e1);
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 12px,
+      #000 calc(100% - 20px),
+      transparent 100%
+    );
   }
 
+  ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  a {
+    white-space: nowrap;
+  }
+
+  /*
+    "Sair" continua sendo o último, e continua separado — mas por uma divisória vertical,
+    que é a que faz sentido numa fileira. A horizontal era da coluna.
+  */
   .fim {
-    margin-left: auto;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    margin-left: var(--e2);
+    padding-left: var(--e3);
+    border-left: 1px solid var(--borda-suave);
   }
 
   a[aria-current='page']::after {
