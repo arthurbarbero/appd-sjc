@@ -148,6 +148,35 @@ o endereço ganha o CEP, e a conta vem no fim, antes do consentimento.
 | 20  | ESTADO | texto             | Sim         | dono, 2026-08-20                                          |
 | 21  | PAÍS   | texto             | Sim         | dono, 2026-08-20                                          |
 
+Os quatro seguintes existem para o **crachá impresso** servir ao que o cartão de papel da
+associação serve. Todos **opcionais**: o cadastro conclui sem qualquer um deles.
+
+| #   | Rótulo                   | Tipo     | Obrigatório | Decisão                                                                  |
+| --- | ------------------------ | -------- | ----------- | ------------------------------------------------------------------------ |
+| 22  | CID                      | texto    | **Não**     | dono, 2026-08-21 — [ADR-020](adr/adr-020-cid-no-cadastro-e-no-cracha.md) |
+| 23  | CRAS                     | texto    | **Não**     | dono, 2026-08-21                                                         |
+| 24  | CREDENCIAL DE TRANSPORTE | texto    | **Não**     | dono, 2026-08-21                                                         |
+| 25  | CONTATO DE EMERGÊNCIA    | telefone | **Não**     | dono, 2026-08-21                                                         |
+
+**O campo 22 não é um campo como os outros, e não deve ser tratado como um.** O CID é
+diagnóstico — `G82.4` é tetraplegia espástica, com código e classificação clínica —,
+enquanto o campo 12 guarda categoria larga. Os dois são dado de saúde do Art. 11; só o 22 é
+prontuário, e só ele vai impresso num cartão que a pessoa mostra na rua.
+
+Por isso ele carrega três travas, todas no ADR-020 e nenhuma dispensável:
+
+1. **Consentimento próprio** para guardar, com termo de slug próprio — não é versão nova do
+   termo do Art. 11, porque a finalidade é outra.
+2. **Opt-in próprio** para imprimir, separado do consentimento de guardar e do opt-in do
+   tipo de deficiência. Guardar e estampar são decisões diferentes.
+3. **Nunca em `/verificar`**, sob nenhuma condição. Para o campo 12 há exceção sob opt-in;
+   para o 22 **não há exceção**.
+
+**Emissão não é campo.** É derivada da data do cadastro, e por isso ninguém a digita e
+ninguém a erra. **Validade também não existe** — o cartão de papel a condiciona à
+contribuição em dia, e o site não sabe nada sobre pagamento; decisão do dono em 21/08 foi
+deixar para depois.
+
 **Estado e país entraram na revisão do dono de 2026-08-20**, pelo mesmo caminho do CEP:
 são acréscimo, e nenhum dos 15 originais muda. O estado chega preenchido pela consulta de
 CEP — a rota já devolvia a UF e ninguém a usava —, e o país nasce com "Brasil" porque a
