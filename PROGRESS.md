@@ -4,86 +4,76 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar desde 2026-08-20** em <https://appd-sjc.appd-sjc.workers.dev>, com CI e deploy
-verdes e a migration `0004` aplicada no D1 remoto.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>**, conferido pelo dono no computador e
+no telefone. A change `acabamento-de-interface` **está arquivada**; a próxima é o crachá
+impresso, com proposal escrito esperando três decisões dele.
 
-O dono conferiu no celular em 21/08 e aprovou a disposição geral — "ficou bom" —, com
-cinco ajustes, que estão na branch `ajustes-mobile`: o "Mostrar senha" virou ícone de
-olho, o "Sim/Não" do WhatsApp encostou na base do campo vizinho, a área do associado
-ganhou fileira rolável no telefone, o retrato do topo saiu, e **quem já tem foto pode
-trocá-la** — não podia, e isso era defeito pré-existente.
+### O que a change fechou
 
-A origem é uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
-áudio foi transcrito localmente (faster-whisper `large-v3-turbo`, offline) e cada item
-conferido contra o quadro do minuto citado: inventário em
-`docs/revisoes/revisao-dono-2026-08-20.md`, transcrição ao lado.
+A origem foi uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
+áudio foi transcrito localmente (faster-whisper, offline) e cada item conferido contra o
+quadro do minuto citado: inventário em `docs/revisoes/revisao-dono-2026-08-20.md`.
 
 **Trinta apontamentos, e boa parte era um defeito só.** `p { max-width: var(--medida) }`
-com `--medida: 68ch` valia para todo parágrafo do site, dentro de um container de 1120px —
-a mesma queixa ("pequenininho", "espremido", "cortado") apareceu em sete telas
-independentes. A medida saiu do seletor de elemento e passou à classe `.prosa`,
-centralizada; as treze larguras avulsas que cada página tinha inventado viraram três
-tokens.
+valia para todo parágrafo do site dentro de um container de 1120px — a mesma queixa
+apareceu em sete telas independentes. A medida passou à classe `.prosa`, centralizada, e
+as treze larguras avulsas viraram três tokens.
 
-**As três fases estão feitas.**
+Depois vieram mais duas revisões, no telefone e no computador com áudio, com onze pedidos
+— todos atendidos, menos um recusado com o motivo escrito (ícone puro nos botões de
+baixar; ver o `VALIDACAO.md`).
 
-| Frente                   | Estado                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| Sistema de largura       | feito, com teste que reprova largura nova fora de token                                    |
-| B1, foto ausente na área | feito — **não era carregamento**: a tela desenhava a palavra "Foto" num retângulo cinza    |
-| B3, recorte em branco    | feito — cancelar devolvia o vazio no lugar da foto que havia                               |
-| B2, salto de rolagem     | **dispensado pelo dono**; o "subir ao clicar e ao salvar", que era outra coisa, foi feito  |
-| ✕ do erro de campo       | feito em 28 lugares; a frase passa a carregar a sinalização não-cromática                  |
-| Conteúdo e campos        | feito — 16 itens em home, cadastro, área, exclusão, crachá, sobre e contato                |
-| Campos 20 e 21           | feito — estado (do CEP, que já devolvia a UF) e país, com migration `0004`                 |
-| Cabeçalho e menu         | feito — painel deslizante da direita, hambúrguer, marca sem texto em largura intermediária |
-| Área do associado        | feito — menu à esquerda, conteúdo à direita, com fileira de volta abaixo de 760px          |
+**Números**: `npm test` de 233 para **348**. `npm run aceite` de 143 para **232**,
+repetível.
 
-**A Fase 2 não passou pelo canvas por liberação do dono** em 2026-08-20: "estou liberando
-pra você pegar inspirações na internet e fazer você mesmo". No lugar do gate de design
-entrou medição: axe A/AA sem violação em 390, 1000 e 1280px, com o painel aberto e
-fechado, e o ciclo de teclado conferido — abrir, percorrer, `Esc`, foco de volta ao botão.
+### Os cinco defeitos que ninguém tinha pedido
 
-**A Fase 4 saiu da change.** A foto do crachá físico mostrou que não é diagramação: cinco
-campos que o modelo não tem, identidade visual fora do `DESIGN.md`, e a frente do cartão
-real imprimindo CID e CPF — contra o que a nossa própria tela promete (ADR-019). Vira
-proposal próprio.
+Nenhum deles estava na lista do dono; apareceram no caminho, e é o que mais vale registrar:
 
-**Números**: `npm test` de 233 para **332**. `npm run aceite` de 143 para **211**
-verificações, repetível — roda duas vezes seguidas sem reprovar.
+1. **A foto que não aparecia** na área era a palavra "Foto" num retângulo cinza — marcador
+   de lugar que nunca virou imagem.
+2. **O recorte apagava a foto anterior** quando a pessoa desistia.
+3. **A foto não podia ser trocada** por quem já tinha uma: errar uma vez condenava àquela
+   foto. E "editar" não existia — só "trocar".
+4. **A fileira rolável nasceu transbordando**: "Sair" fora da tela **sem rolagem que o
+   alcançasse**, com o `overflow-x: hidden` da página escondendo o estrago e o gate
+   passando.
+5. **"Invalid input" na tela**, em inglês, porque uma regra do Zod não tinha mensagem.
+   Onze validações corrigidas, com teste que reprova qualquer regra sem mensagem própria.
 
-### A armadilha que custou a maior parte de uma sessão
+### Duas armadilhas de ambiente, para não custarem de novo
 
-O gate parecia reprovar com `401` em toda rota de `/api/area`, e o mesmo acontecia no
-commit anterior à change — o que parecia defeito antigo do produto. Não era nenhum dos
-dois: eu subia o worker com `wrangler dev .output/server/index.mjs`, que **ignora o
-`wrangler.jsonc`** e portanto não carrega o segredo que sela o cookie de sessão. O cookie
-existia e não abria.
+- **`npm run aceite` sobe o servidor sozinho, do jeito certo.** Passar `APPD_BASE` só serve
+  para apontar a um endereço que já está no ar. Subir o worker à mão com
+  `wrangler dev .output/server/index.mjs` ignora o `wrangler.jsonc` e não carrega o segredo
+  que sela o cookie: toda rota de `/api/area` responde 401, e parece defeito do produto.
+- **Rodar o aceite várias vezes junto de scripts que criam conta** estoura a cota de 12
+  cadastros por 15 minutos, e o 429 aparece disfarçado de outro defeito. Limpar com
+  `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"`.
 
-`npm run aceite` sobe o servidor sozinho, do jeito certo. **Só passe `APPD_BASE` para
-apontar a um endereço que já está no ar** — nunca para um worker subido à mão.
+### O que ficou registrado e não se perde
 
-Outra, menor: rodar o aceite várias vezes junto de scripts que também criam conta estoura
-a cota de 12 cadastros por 15 minutos, e o `429` aparece disfarçado de outro defeito.
-Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"`.
+- **A regra dos 15 campos foi emendada**: ela protege os originais e nunca proibiu
+  acrescentar. CEP virou 16 em 06/08; estado e país, 20 e 21 em 20/08.
+- **O REQ-24 de `cracha-do-associado` foi revogado** — a tela não diz mais que o arquivo é
+  gerado no navegador. O comportamento não mudou; o requisito, sim. Marcado na spec
+  arquivada, e o gate exige a ausência da frase.
+- **O atendimento de manhã saiu do site** junto com o bloco "Antes de começar". A constante
+  segue em `shared/conteudo.ts`; se a informação importa, o lugar é `/atendimento`.
+- **A biografia da fundadora não existe** em lugar nenhum — conferido na fonte. Encerrado
+  pelo dono; a assimetria fica, e é honesta.
 
-### Três coisas que ficaram com o dono
+### Próxima change: `cracha-impresso`
 
-1. ~~**A biografia da fundadora**~~ — **encerrado em 2026-08-20**. Conferi `appd.org.br`:
-   não existe texto sobre Maria Claudete além da frase de que ela fundou, e o dono
-   dispensou. A assimetria fica.
-2. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
-   constante segue em `shared/conteudo.ts`; se a informação importa, o lugar é
-   `/atendimento`.
-3. **A Fase 4** — o crachá impresso espera proposal próprio, e a palavra do dono depois
-   de conferir esta leva de ajustes.
+Proposal escrito, **esperando três decisões do dono**: se o crachá replica a identidade
+visual do cartão físico ou segue o design system; se emissão e contato de emergência viram
+campos; e o que fazer com validade, que depende de saber se a contribuição está em dia —
+coisa que o site não sabe.
 
-### Uma revogação registrada
-
-Apagar as duas linhas do crachá **revoga o REQ-24 de `cracha-do-associado`**, que está
-arquivada e validada. O comportamento não mudou — a geração segue local, no navegador —,
-mas o requisito que obrigava a tela a dizer isso deixou de valer. Marcado na spec
-arquivada, e o gate de aceite agora exige a **ausência** da frase.
+Fica dito o que **não** entra, e por quê: **CID e diagnóstico**, porque o cartão real os
+imprime e o ADR-019 os proíbe. Replicar o cartão como ele é revogaria por decisão de
+layout a promessa que a tela faz hoje — "o seu crachá não mostra o seu tipo de
+deficiência" — sem ADR e sem consentimento novo.
 
 ---
 

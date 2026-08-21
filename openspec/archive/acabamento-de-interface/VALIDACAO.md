@@ -3,8 +3,8 @@
 Parecer do gate, no padrão das três changes já arquivadas: cada requisito com onde ele é
 verificado e qual o veredito. O que ficou de fora está dito, e não escondido.
 
-- Data: 2026-08-20
-- `npm test`: **329 testes**, 12 arquivos, todos passando (eram 233 antes da change)
+- Data: 2026-08-20, com uma segunda leva em 21/08 depois das duas revisões do dono
+- `npm test`: **348 testes**, 13 arquivos, todos passando (eram 233 antes da change)
 - `npm run aceite`: **211/211 verificações** no workerd real, em duas execuções seguidas
   (eram 143 antes da change)
 - `npm run lint`, `npm run typecheck`, `npm run build`: limpos
@@ -89,12 +89,16 @@ item — que é onde o foco entra.
 
 ## Ressalvas escritas, em vez de escondidas
 
-1. **REQ-29, o zoom por toque no recorte.** O gesto de pinça foi implementado e tem teste
-   de código, mas **nenhuma medição aqui usou um aparelho de toque de verdade** — o
-   navegador do gate não tem tela sensível. Fica como conferência manual num telefone
-   antes de a change ir para `archive/`. Ao escrever esta validação eu havia marcado o
-   requisito como "parcial" sem ter implementado nada; o registro fica para lembrar que o
-   parecer se confere contra o código, não contra a memória.
+1. ~~**REQ-29, o zoom por toque no recorte.**~~ **Conferido pelo dono num telefone em
+   2026-08-21**: "a pinça no celular ficou muito bom". Era o único item que nenhuma
+   medição daqui alcançava — o navegador do gate não tem tela sensível.
+
+   Fica o caminho até aqui, que é a parte útil: ao escrever esta validação eu marquei o
+   requisito como "parcial — não medido em aparelho real" **sem ter implementado nada**.
+   Parecer de gate se confere contra o código, não contra a memória de quem escreveu. E o
+   gesto só pôde ser testado depois que "mudar a minha foto" passou a existir — até então
+   não havia como reabrir o recorte tendo foto.
+
 2. **REQ-39, as duas biografias.** Conferido na fonte em 20/08: `appd.org.br` não tem
    biografia da fundadora, só a frase de que ela fundou. **Encerrado pelo dono no mesmo
    dia** — "ignora, porque não tem mesmo". A assimetria fica, e é honesta: republicamos
@@ -105,7 +109,45 @@ item — que é onde o foco entra.
    arquivada, e o gate passou a exigir a ausência da frase — para que ninguém a recoloque
    achando que corrige um esquecimento.
 
-## Por que a change não vai para `archive/`
+## A segunda e a terceira passada do dono
 
-A Fase 4 (crachá impresso) saiu daqui e vira proposal próprio; a ressalva 1 espera
-conferência manual; e a 2 espera conteúdo do dono. O gate **do produto** passou.
+A change foi ao ar em 20/08 e o dono conferiu duas vezes: no telefone em 21/08, e no
+computador logo depois, gravando com áudio. Onze pedidos, todos atendidos, e três achados
+que ninguém tinha pedido.
+
+| Leva                 | O que entrou                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Telefone (M1 a M5)   | olho no lugar de "Mostrar senha"; "Sim/Não" na base do campo; fileira rolável na área; retrato removido; **trocar a foto** |
+| Computador (J1 a J5) | campos até a borda; olho dentro do campo; salvar sobe em `/area/inscricoes`; um botão de foto; ponto de quebra em `em`     |
+
+**Três defeitos apareceram nessas passadas, e nenhum estava na lista:**
+
+1. **A foto não podia ser trocada** por quem já tinha uma — errar a foto uma vez condenava
+   a pessoa àquela foto. Anterior a esta change.
+2. **A fileira rolável nasceu transbordando**, com "Sair" fora da tela e **sem rolagem que
+   o alcançasse**. O `overflow-x: hidden` da página escondia o estrago e o gate passava.
+3. **"Invalid input" na tela**, em inglês: `deficienciaOutro` não tinha mensagem e o Zod
+   respondeu por conta própria. Onze validações corrigidas.
+
+**Uma parte foi recusada, com o motivo escrito.** O dono pediu ícone puro nos botões de
+baixar; eles ficaram compactos e da mesma cor, mas mantiveram o rótulo. Um quadrado com
+uma seta não diz se o que sai é imagem, documento ou impressão, e este site atende quem
+menos deveria ter de adivinhar. A palavra final é dele.
+
+## Parecer final — 2026-08-21
+
+**A change está pronta para `archive/`.** As quatro ressalvas foram resolvidas ou
+encerradas por decisão do dono:
+
+| Ressalva                   | Desfecho                                                      |
+| -------------------------- | ------------------------------------------------------------- |
+| 1 — zoom por toque         | conferido num telefone: "ficou muito bom"                     |
+| 2 — biografia da fundadora | encerrada: o texto não existe, e a assimetria é honesta       |
+| 3 — o atendimento de manhã | registrada; a constante segue em `shared/conteudo.ts`         |
+| 4 — REQ-24 revogado        | marcado na spec arquivada, e o gate exige a ausência da frase |
+
+A Fase 4 (crachá impresso) nunca fez parte desta change — saiu dela em 20/08 e tem
+proposal próprio em `openspec/changes/cracha-impresso/`.
+
+**No ar e conferido pelo dono** em <https://appd-sjc.appd-sjc.workers.dev>, no computador
+e no telefone.
