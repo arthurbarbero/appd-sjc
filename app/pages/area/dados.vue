@@ -74,36 +74,36 @@ const resumo = ref<HTMLElement | null>(null)
 
 const buscandoCep = ref(false)
 const avisoCep = ref('')
+/*
+  O CEP que preencheu o endereço da última vez.
 
-/** Mesma regra da tela de inscrição: nunca sobrescreve o que já está digitado. */
+  Sem ele, "substituir quando o CEP muda" viraria "substituir toda vez": sair do campo e
+  voltar dispara a busca de novo, e a correção que a pessoa acabou de digitar na rua
+  desapareceria sem que ninguém tivesse pedido.
+*/
+const cepQuePreencheu = ref('')
+const avisoSubstituicao = ref('')
+
+/*
+  A regra vive em `app/utils/endereco-por-cep.ts` desde 2026-08-21, e não mais aqui.
+
+  Ela estava copiada nesta tela e na outra, e mudou de lado no mesmo dia: a associação pediu
+  que **o CEP novo substitua** o endereço já preenchido. Duas cópias mudando junto é o
+  arranjo que produz duas telas com regras diferentes.
+*/
 async function buscarCep() {
-  const cep = soDigitos(f.cep)
-  avisoCep.value = ''
-  if (cep.length !== 8) return
-
   buscandoCep.value = true
   try {
-    const r = await $fetch<{
-      encontrado: boolean
-      indisponivel?: boolean
-      endereco?: string
-      bairro?: string
-      municipio?: string
-      uf?: string
-    }>(`/api/cep/${cep}`)
-
-    if (!r.encontrado) {
-      avisoCep.value = r.indisponivel
-        ? 'A busca por CEP está fora do ar. Preencha o endereço à mão.'
-        : 'Não encontramos este CEP. Confira, ou preencha o endereço à mão.'
-      return
-    }
-    if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
-    if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
-    if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
-    if (!f.estado.trim() && r.uf) f.estado = r.uf
-  } catch {
-    avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
+    const r = await preencherPorCep(f.cep, f, cepQuePreencheu.value, (cep) =>
+      $fetch<EnderecoDoCep>(`/api/cep/${cep}`),
+    )
+    avisoCep.value = r.aviso
+    cepQuePreencheu.value = r.cepQuePreencheu
+    // A pessoa precisa saber que o que ela tinha escrito foi trocado — quem pôs o
+    // complemento dentro do campo da rua acabou de perdê-lo.
+    avisoSubstituicao.value = r.substituiu
+      ? 'Preenchemos rua, bairro, cidade e estado com os dados deste CEP.'
+      : ''
   } finally {
     buscandoCep.value = false
   }
@@ -343,6 +343,10 @@ async function salvar() {
             </span>
             <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
             <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
+            <!-- Mesmo aviso da tela de inscrição: trocar em silêncio é a pessoa descobrir depois. -->
+            <span v-else-if="avisoSubstituicao" role="status" class="ajuda">
+              {{ avisoSubstituicao }}
+            </span>
           </div>
 
           <div :class="['campo', 'largo', { 'campo-erro': erros.endereco }]">

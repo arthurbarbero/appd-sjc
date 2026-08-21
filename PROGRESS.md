@@ -107,6 +107,41 @@ imagem do grafismo e o arquivo cai de 140 KB para 64. Conferido nas duas direç�
 #### O que falta
 
 - **O dono conferir no ar**, e imprimir de novo.
+
+### `pedidos-da-appd` — 21/08, a primeira revisão feita por quem atende
+
+**417 testes** · **aceite 283/283** ·
+[parecer](openspec/archive/pedidos-da-appd/VALIDACAO.md)
+
+Cinco pontos vindos da **associação**, e isso muda a natureza do trabalho: ajuste que o dono
+pede é preferência dele sobre o produto dele; ajuste que a APPD pede é informação nova sobre
+o mundo, e o site está errado até ser corrigido.
+
+- **A Bocha Paralímpica acabou** e saiu do site inteiro — projeto, rota, opção do campo 13 e
+  menções em texto. Era o único dos cinco que era informação falsa no ar: o site anunciava
+  locais e horários de treino, e alguém podia atravessar a cidade por causa disso.
+- **O CEP voltou a substituir o endereço**, invertendo decisão registrada. Substitui **quando
+  o CEP muda**, não a cada busca — senão o campo se limparia sozinho ao sair e voltar. A
+  regra virou uma função só para as duas telas, que tinham cópias parecidas.
+- **Modo atendimento** ([ADR-022](docs/adr/adr-022-modo-atendimento-para-mutirao.md)): o teto
+  de cadastros sobe para o navegador que provar ser o balcão, por senha e por seis horas. O
+  teto do público não muda.
+- **Dois rótulos** corrigidos para o vocabulário de quem preenche: "Número do CRAS" e o
+  "Acesso Já".
+
+O login pelas pessoas vulneráveis **não** entrou aqui: foi para a proposal do painel
+administrativo, com o limite que o dono fixou — "não quero outro tipo de login, só formas de
+ter como o administrador fazer e gerenciar os usuários". Lá ficam as quatro decisões que
+aquela change não pode empurrar, e a maior é **quem responde pelo consentimento do Art. 11
+quando é o atendente que preenche**.
+
+#### O que falta desta change
+
+- **`npx wrangler secret put MODO_ATENDIMENTO_SENHA`** no Cloudflare. Até lá o modo não liga.
+- **O número do teto** precisa vir da APPD: quantas pessoas cabem num mutirão.
+- **As fotos do projeto encerrado** continuam versionadas e servidas em `public/imagens/`,
+  sem nenhuma página que as use. São rostos de atletas com deficiência — **decisão do dono**.
+- **O Facebook da Bocha** continua no ar anunciando treinos. Fora do repositório.
 - **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
   por milímetro na tela.
 - **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e

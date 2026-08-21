@@ -267,85 +267,19 @@ export const SERVICOS: Oferta[] = [
   },
 ]
 
-/** Projetos: atividades contínuas. Não estão no campo "Tipo de Atendimento". */
+/*
+  Projetos: atividades contínuas. Não estão no campo "Tipo de Atendimento".
+
+  **A Bocha Paralímpica saiu em 2026-08-21**, e não por reorganização: a associação avisou
+  que o projeto acabou — "remover de todo o site, não tem mais".
+
+  O que estava aqui era a única publicação dos horários e dos dois locais de treino, e é por
+  isso que a remoção vale um comentário: o site anunciava um esporte de segunda a sexta, das
+  13h às 16h30, em duas quadras da cidade. Alguém com deficiência severa podia atravessar São
+  José por causa disso. Se o projeto voltar, o conteúdo está no histórico do git, no commit
+  que o removeu.
+*/
 export const PROJETOS: Oferta[] = [
-  {
-    slug: 'bocha-paralimpica',
-    nome: 'Bocha Paralímpica',
-    resumo:
-      'Esporte paralímpico praticado em cadeira de rodas, com treinos em dois locais da cidade.',
-    noFormulario: true,
-    paraQuem: [
-      'Pessoas com deficiência severa, inclusive quem tem pouca mobilidade de braços',
-      'Quem quer praticar esporte e conviver',
-      'Quem busca competição, do nível iniciante ao paralímpico',
-    ],
-    sobre: [
-      'A bocha paralímpica é um dos poucos esportes pensados para pessoas com deficiência severa. Quem não consegue lançar com as mãos joga com uma calha e um auxiliar — e compete em igualdade.',
-      'O jogo é de precisão: aproximar as bolas da bola branca. Exige estratégia, controle e concentração, não força.',
-      'É esporte paralímpico oficial desde 1984 e tem classes funcionais que agrupam atletas com condições parecidas.',
-    ],
-    oQueEsperar: [
-      'Treinos em quadra, com acompanhamento técnico.',
-      'Convivência com outras pessoas com deficiência e suas famílias.',
-      'Possibilidade de competir, se você quiser.',
-    ],
-    naAppd: [
-      'Há treinos em dois locais da cidade, de segunda a sexta, sempre das 13h às 16h30.',
-      'O projeto tem uma página própria no Facebook, mantida pela equipe.',
-    ],
-    aConfirmar: [
-      'Como entrar no projeto',
-      'Se há avaliação de classe funcional',
-      'Se a associação empresta o material de jogo',
-      'Se há vagas abertas e limite de idade',
-      'Se os horários seguem valendo em 2026',
-    ],
-    imagem: {
-      arquivo: '/imagens/a009cc5930f44abeaf7dacfcb834e613.webp',
-      alt: 'Equipe de bocha paralímpica da APPD reunida na quadra: atletas em cadeiras de rodas, com uniforme azul e verde, à frente de acompanhantes e profissionais de jaleco branco. Bolas de bocha azuis e vermelhas no chão.',
-    },
-    galeria: [
-      {
-        arquivo: '/imagens/2c64ff0311dc405a83953654da0baf7a.webp',
-        alt: 'Bolas de bocha vermelhas e a bola branca alvo, paradas no chão da quadra.',
-      },
-      {
-        arquivo: '/imagens/bc6c0245add54ce2a56d12f5203aad0e.webp',
-        alt: 'Dois atletas em cadeira de rodas jogando bocha com auxílio de calhas, acompanhados por auxiliares na quadra.',
-      },
-      {
-        arquivo: '/imagens/35085704197240fba6584a9f6102c7a9.webp',
-        alt: 'Atleta lançando a bola por uma calha, com o auxiliar posicionando o equipamento.',
-      },
-      {
-        arquivo: '/imagens/d19b56ab24c14baf8e65b4fa632972db.webp',
-        alt: 'Atleta em cadeira de rodas alinhando a calha antes do lançamento, com o auxiliar ao lado.',
-      },
-      {
-        arquivo: '/imagens/af5d4f1e51d54ef0b7399d09b029cf40.webp',
-        alt: 'Vista ampla da quadra durante o treino, com atletas espalhados e bolas em jogo.',
-      },
-      {
-        arquivo: '/imagens/cb1173521d1145ba96e0bbb8c7970967.webp',
-        alt: 'Dois integrantes do projeto lado a lado, um deles exibindo a medalha conquistada.',
-      },
-    ],
-    horarios: [
-      {
-        local: 'Praça de Esportes Pedro Otávio',
-        endereco: 'Rua Palmares, 841 — Parque Industrial, São José dos Campos/SP',
-        dias: 'Segundas, quartas e sextas',
-        horario: '13h às 16h30',
-      },
-      {
-        local: 'Centro Esportivo Palmeiras São José',
-        endereco: 'Rua Saudades de Querência, 225 — Palmeiras de São José, São José dos Campos/SP',
-        dias: 'Terças e quintas',
-        horario: '13h às 16h30',
-      },
-    ],
-  },
   {
     slug: 'mao-na-roda',
     nome: 'Oficina Mão na Roda',

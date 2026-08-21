@@ -24,19 +24,32 @@ export const DEFICIENCIAS = [
 ] as const
 
 /*
-  Os cinco atendimentos do formulário oficial **mais os quatro projetos** (REQ-19).
+  Os cinco atendimentos do formulário oficial **mais os projetos** (REQ-19).
 
-  Antes, quem queria Bocha Paralímpica marcava "Outro" e digitava o nome — o que
-  transformava uma escolha fechada em texto livre, com toda variação de grafia que isso
-  traz para quem depois lê as inscrições. "Outro" volta a significar outro.
+  Antes, quem queria um projeto marcava "Outro" e digitava o nome — o que transformava uma
+  escolha fechada em texto livre, com toda variação de grafia que isso traz para quem depois
+  lê as inscrições. "Outro" volta a significar outro.
 
   **Isto altera as perguntas do formulário oficial**, contra o que `docs/campos-formulario.md`
   trava como réplica fiel. É decisão do dono, registrada em `docs/pendencias-appd.md`
   item 4a: quem recebe as inscrições construiu o atendimento em cima da lista antiga e
   precisa saber que ela mudou.
 
-  Nada some da lista: os valores antigos continuam aqui, e inscrição já gravada com
-  "Outro" segue válida.
+  ## Bocha Paralímpica saiu em 2026-08-21, e valor que sai daqui é diferente de valor que entra
+
+  A associação avisou que o projeto acabou. O valor saiu da lista **sem** nenhum tratamento
+  para o que já está gravado, por decisão do dono: "sobre bocha olímpica no banco deixa lá, é
+  só teste agora que tem lá".
+
+  Fica dito o que essa decisão custaria se o dado fosse real, porque a próxima oferta a sair
+  pode ser: uma inscrição gravada com um valor que não está mais no vocabulário **não é
+  recusada na leitura** — a tela de correção simplesmente não a mostra marcada —, mas é
+  recusada **no envio**, e aí o cadastro inteiro da pessoa fica travado por causa de um
+  projeto encerrado. Ela abriria `/area/inscricoes` para trocar o telefone e não conseguiria
+  salvar.
+
+  O caminho, nesse dia, é o do `DEFICIENCIA_NAO_CONSENTIDA` logo abaixo: o gravado continua
+  legível, e só a oferta some. **Reveja isto antes de tirar a próxima.**
 */
 export const ATENDIMENTOS = [
   'Empréstimo Equipamentos',
@@ -44,7 +57,6 @@ export const ATENDIMENTOS = [
   'Orientações Gerais',
   'Psicologia',
   'Serviço Social',
-  'Bocha Paralímpica',
   'Oficina Mão na Roda',
   'Artesão da Inclusão',
   'Informática Nota 10',

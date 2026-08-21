@@ -41,7 +41,18 @@ function paraDataIso(brasileira: string): string {
  * Guardar o IP de quem procura uma associação de pessoas com deficiência seria produzir
  * exatamente o registro que este mecanismo existe para não criar.
  */
-const LIMITE = { escopo: 'inscricao', maximo: 12, janelaSegundos: 900 } as const
+/*
+  Dois tetos desde 2026-08-21: o do público e o do balcão.
+
+  A associação cadastra em mutirão — fila de pessoas, uma rede, muitas vezes um aparelho só —
+  e do lado do servidor isso é indistinguível de um robô. Aumentar o teto para todo mundo
+  enfraqueceria a proteção 24 horas por dia para resolver quatro horas por mês; o modo
+  atendimento eleva o teto **daquele navegador**, por seis horas, mediante senha.
+
+  Os dois números vivem em `server/utils/modo-atendimento.ts`, num lugar só, porque o do
+  atendimento é provisório: ele precisa vir de quantas pessoas cabem num mutirão, e a
+  pergunta está em `docs/pendencias-appd.md`, item 4c.
+*/
 
 /**
  * Teto do corpo, **derivado dos campos**, não chutado.
@@ -66,7 +77,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const { excedeu } = await registrarTentativa(event, bd, ipDoPedido(event), LIMITE)
+  const limite = (await emModoAtendimento(event)) ? LIMITE_ATENDIMENTO : LIMITE_PUBLICO
+  const { excedeu } = await registrarTentativa(event, bd, ipDoPedido(event), limite)
   if (excedeu) {
     throw createError({
       statusCode: 429,

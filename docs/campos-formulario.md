@@ -168,7 +168,7 @@ associação serve. Todos **opcionais**: o cadastro conclui sem qualquer um dele
 | #   | Rótulo                   | Tipo     | Obrigatório | Decisão                                                                  |
 | --- | ------------------------ | -------- | ----------- | ------------------------------------------------------------------------ |
 | 22  | CID                      | texto    | **Não**     | dono, 2026-08-21 — [ADR-020](adr/adr-020-cid-no-cadastro-e-no-cracha.md) |
-| 23  | CRAS                     | texto    | **Não**     | dono, 2026-08-21                                                         |
+| 23  | NÚMERO DO CRAS           | texto    | **Não**     | dono, 2026-08-21; rótulo corrigido pela APPD no mesmo dia                |
 | 24  | CREDENCIAL DE TRANSPORTE | texto    | **Não**     | dono, 2026-08-21                                                         |
 | 25  | CONTATO DE EMERGÊNCIA    | telefone | **Não**     | dono, 2026-08-21                                                         |
 
@@ -199,6 +199,16 @@ do contato do cuidador, com a nota de que pode ficar em branco quando for a mesm
 Um bloco chamado "para o seu crachá" ensinava que aqueles dados servem ao documento, quando
 servem ao atendimento: o CRAS é a porta de entrada da rede pública, e a credencial é o
 transporte que traz a pessoa até aqui.
+
+**Os rótulos dos campos 23 e 24 foram corrigidos pela associação em 2026-08-21**, e as duas
+correções são sobre vocabulário de quem preenche:
+
+- **"CRAS de referência" virou "Número do CRAS".** "De referência" é como fala quem trabalha
+  na rede socioassistencial — o CRAS de referência é o que atende aquele território. Quem
+  preenche hesitava entre o nome da unidade e o número.
+- **A credencial de transporte passou a citar o "Acesso Já"**. "Passe municipal" é o nome do
+  documento; "Acesso Já" é o nome que a pessoa ouviu no balcão, e nem sempre ela sabe que são
+  a mesma coisa.
 
 **Emissão não é campo.** É derivada da data do cadastro, e por isso ninguém a digita e
 ninguém a erra. **Validade também não existe** — o cartão de papel a condiciona à

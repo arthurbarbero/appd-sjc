@@ -105,13 +105,41 @@ describe('Cartão clicável tem um link só (REQ-6)', () => {
   })
 })
 
-describe('Os projetos são opções do formulário, não texto livre (REQ-19)', () => {
-  const PROJETOS = [
-    'Bocha Paralímpica',
-    'Oficina Mão na Roda',
-    'Artesão da Inclusão',
-    'Informática Nota 10',
+describe('Um projeto encerrado some do site inteiro', () => {
+  /*
+    A Bocha Paralímpica acabou, e a associação mandou tirar: "remover de todo o site, não tem
+    mais".
+
+    O teste varre o **código que vira tela**, e não só a lista de ofertas, porque a menção que
+    sobrevive a uma remoção é sempre a do texto corrido — o exemplo na busca da 404, a ajuda
+    de um campo, a frase de uma home. Foi assim em três lugares desta vez.
+
+    O que ele **não** varre: `docs/`, que registra o que havia. Inventário de site antigo não
+    é promessa ao público.
+  */
+  const ONDE = [
+    'shared/conteudo.ts',
+    'shared/inscricao.ts',
+    'app/error.vue',
+    'app/pages/atendimento/inscricao.vue',
   ]
+
+  it.each(ONDE)('%s não anuncia a Bocha Paralímpica', (arquivo) => {
+    // Sem comentários: eles explicam a remoção, e reprovar a explicação seria absurdo.
+    const fonte = readFileSync(join(RAIZ, arquivo), 'utf8')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '')
+    expect(fonte).not.toMatch(/bocha/i)
+  })
+})
+
+describe('Os projetos são opções do formulário, não texto livre (REQ-19)', () => {
+  /*
+    A Bocha Paralímpica saiu desta lista em 2026-08-21: a associação avisou que o projeto
+    acabou. O teste que garante que ela **não** voltou está logo abaixo.
+  */
+  const PROJETOS = ['Oficina Mão na Roda', 'Artesão da Inclusão', 'Informática Nota 10']
 
   it.each(PROJETOS)('%s é opção de atendimento', (projeto) => {
     expect(ATENDIMENTOS).toContain(projeto)

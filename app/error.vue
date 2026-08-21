@@ -29,7 +29,7 @@ const busca = ref('')
       <form role="search" class="busca" @submit.prevent>
         <label for="busca">Procurar no site</label>
         <span id="ajuda-busca" class="ajuda">
-          Digite o que você procura. Por exemplo: fisioterapia, doação, bocha.
+          Digite o que você procura. Por exemplo: fisioterapia, doação, oficina.
         </span>
         <div class="linha">
           <input id="busca" v-model="busca" type="search" aria-describedby="ajuda-busca" />

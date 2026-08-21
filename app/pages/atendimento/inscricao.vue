@@ -121,6 +121,15 @@ const erroGeral = ref('')
 
 const buscandoCep = ref(false)
 const avisoCep = ref('')
+/*
+  O CEP que preencheu o endereço da última vez.
+
+  Sem ele, "substituir quando o CEP muda" viraria "substituir toda vez": sair do campo e
+  voltar dispara a busca de novo, e a correção que a pessoa acabou de digitar na rua
+  desapareceria sem que ninguém tivesse pedido.
+*/
+const cepQuePreencheu = ref('')
+const avisoSubstituicao = ref('')
 
 /**
  * Preenche endereço, bairro e município a partir do CEP.
@@ -134,39 +143,29 @@ const avisoCep = ref('')
  * - CEP não encontrado ou serviço fora do ar **não bloqueia nada**: avisa e segue. O
  *   endereço continua sendo digitável à mão, que é o caminho que sempre funciona.
  */
-async function buscarCep() {
-  const cep = soDigitos(f.cep)
-  avisoCep.value = ''
-  if (cep.length !== 8) return
+/*
+  A regra vive em `app/utils/endereco-por-cep.ts` desde 2026-08-21, e não mais aqui.
 
+  Ela estava copiada nesta tela e na outra, e mudou de lado no mesmo dia: a associação pediu
+  que **o CEP novo substitua** o endereço já preenchido. Duas cópias mudando junto é o
+  arranjo que produz duas telas com regras diferentes.
+*/
+async function buscarCep() {
   buscandoCep.value = true
   try {
-    const r = await $fetch<{
-      encontrado: boolean
-      indisponivel?: boolean
-      endereco?: string
-      bairro?: string
-      municipio?: string
-      uf?: string
-    }>(`/api/cep/${cep}`)
-
-    if (!r.encontrado) {
-      avisoCep.value = r.indisponivel
-        ? 'A busca por CEP está fora do ar. Preencha o endereço à mão.'
-        : 'Não encontramos este CEP. Confira, ou preencha o endereço à mão.'
-      return
+    const r = await preencherPorCep(f.cep, f, cepQuePreencheu.value, (cep) =>
+      $fetch<EnderecoDoCep>(`/api/cep/${cep}`),
+    )
+    avisoCep.value = r.aviso
+    cepQuePreencheu.value = r.cepQuePreencheu
+    // A pessoa precisa saber que o que ela tinha escrito foi trocado — quem pôs o
+    // complemento dentro do campo da rua acabou de perdê-lo.
+    avisoSubstituicao.value = r.substituiu
+      ? 'Preenchemos rua, bairro, cidade e estado com os dados deste CEP.'
+      : ''
+    for (const campo of ['endereco', 'bairro', 'municipio', 'estado']) {
+      if (f[campo as 'endereco'].trim()) Reflect.deleteProperty(erros, campo)
     }
-    if (!f.endereco.trim() && r.endereco) f.endereco = r.endereco
-    if (!f.bairro.trim() && r.bairro) f.bairro = r.bairro
-    if (!f.municipio.trim() && r.municipio) f.municipio = r.municipio
-    // A rota já devolvia a UF desde sempre; até 2026-08-20 ninguém a usava.
-    if (!f.estado.trim() && r.uf) f.estado = r.uf
-    Reflect.deleteProperty(erros, 'endereco')
-    Reflect.deleteProperty(erros, 'bairro')
-    Reflect.deleteProperty(erros, 'municipio')
-    Reflect.deleteProperty(erros, 'estado')
-  } catch {
-    avisoCep.value = 'A busca por CEP falhou. Preencha o endereço à mão.'
   } finally {
     buscandoCep.value = false
   }
@@ -638,6 +637,17 @@ async function enviar() {
           </span>
           <span v-if="buscandoCep" role="status" class="ajuda">Buscando o endereço…</span>
           <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
+          <!--
+            O aviso de que o endereço foi **trocado** (2026-08-21).
+
+            Desde que o CEP novo passou a substituir, alguém pode perder o que digitou — quem
+            escreveu "apto 42" dentro do campo da rua, por exemplo. Trocar em silêncio seria
+            a pessoa descobrir depois de enviar, ou não descobrir. `role="status"` porque
+            quem usa leitor de tela também precisa saber.
+          -->
+          <span v-else-if="avisoSubstituicao" role="status" class="ajuda">
+            {{ avisoSubstituicao }}
+          </span>
         </div>
 
         <div :class="['campo', { 'campo-erro': erros.endereco }]">
@@ -834,15 +844,36 @@ async function enviar() {
           documento, quando servem para o atendimento. O CRAS é a porta de entrada da rede
           pública; a credencial é o transporte que traz a pessoa até aqui.
         -->
+        <!--
+          "Número do CRAS", e não "CRAS de referência" — correção da associação, 2026-08-21.
+
+          "De referência" é o vocabulário de quem trabalha na rede socioassistencial: o CRAS
+          de referência é o que atende aquele território. Quem preenche o formulário não fala
+          assim, e diante do rótulo antigo hesita entre escrever o nome da unidade e o
+          número. O rótulo novo diz o que se espera na caixa.
+
+          No crachá o rótulo continua `CRAS`, como no cartão de papel: lá o espaço é o que
+          manda, e o número é o único valor possível.
+        -->
         <div class="campo">
-          <label for="cras">CRAS de referência</label>
+          <label for="cras">Número do CRAS</label>
           <span id="ajuda-cras" class="ajuda">Opcional.</span>
           <input id="cras" v-model="f.cras" type="text" aria-describedby="ajuda-cras" />
         </div>
 
+        <!--
+          O "Acesso Já" na ajuda — correção da associação, 2026-08-21.
+
+          "Passe municipal" é o nome do documento; "Acesso Já" é o nome que a pessoa ouviu no
+          balcão. Quem tem a credencial não sabe necessariamente que ela é o passe municipal —
+          sabe que tem o Acesso Já. Campo opcional cujo rótulo a pessoa não reconhece é campo
+          que ela pula.
+        -->
         <div class="campo">
           <label for="credencial">Credencial de transporte</label>
-          <span id="ajuda-credencial" class="ajuda">Opcional. O número do passe municipal.</span>
+          <span id="ajuda-credencial" class="ajuda">
+            Opcional. Para quem utiliza o "Acesso Já", o passe municipal de transporte.
+          </span>
           <input
             id="credencial"
             v-model="f.credencialTransporte"
@@ -880,8 +911,8 @@ async function enviar() {
         <fieldset :class="['grupo-escolha', { 'campo-erro': erros.atendimentos }]">
           <legend id="atendimentos">Tipo de Atendimento</legend>
           <span class="ajuda">
-            Opcional. Pode marcar mais de um. Para participar de um projeto (Bocha, Mão na Roda,
-            Artesão, Informática), marque "Outro" e escreva o nome.
+            Opcional. Pode marcar mais de um. Para participar de um projeto (Mão na Roda, Artesão,
+            Informática), marque "Outro" e escreva o nome.
           </span>
           <label v-for="a in ATENDIMENTOS" :key="a" class="escolha">
             <input v-model="f.atendimentos" type="checkbox" :value="a" />
