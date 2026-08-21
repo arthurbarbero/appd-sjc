@@ -88,9 +88,25 @@ O que funciona é não violar: as filhas vão para cópias sem restrição, são
 tabelas são recriadas e os dados voltam. Os dois primeiros viraram teste; o terceiro virou
 um teste que aplica a última migration sobre um banco **com dados** e com `foreign_keys = ON`.
 
+#### O cartão saía sem fundo no papel
+
+Achado pelo dono depois da subida, imprimindo do celular: faixa azul sumida, grafismo
+sumido, "APPD" em branco sobre branco. **Navegador não imprime `background` por padrão** — é
+a opção "Gráficos de plano de fundo", que nasce desligada e que quase ninguém abre.
+
+`print-color-adjust: exact` resolve, e a regra diz o que precisa ser dito: num documento de
+identificação a cor **é** conteúdo. Sem o grafismo da associação, o crachá deixa de ser
+reconhecível na porta do ônibus, que é a única coisa que ele precisa fazer.
+
+Junto foi a margem da folha, que no papel saía zerada e colava a tira no canto com as marcas
+de corte fora da página — agora vem do `@page`, que é o lugar dela.
+
+O teste mede o **tamanho do PDF** nos dois modos: sem a regra, o modo sem gráficos descarta a
+imagem do grafismo e o arquivo cai de 140 KB para 64. Conferido nas duas direções.
+
 #### O que falta
 
-- **O dono conferir no ar.**
+- **O dono conferir no ar**, e imprimir de novo.
 - **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
   por milímetro na tela.
 - **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e
@@ -202,12 +218,12 @@ um teste que aplica a última migration sobre um banco **com dados** e com `fore
 
 ## Em aberto / próximos passos
 
-- **CSS puro nunca foi decidido pelo dono** (apontado por ele em 2026-08-07). A folha de
-  tokens e a base vieram do import do Claude Design em 2026-08-05 e ficaram como estão
-  por inércia, não por escolha registrada. **Não é decisão tomada** — é estado de fato.
-  Se virar decisão, vira ADR; se virar troca (Tailwind, UnoCSS, biblioteca de
-  componentes), o custo é reescrever o estilo de 20 telas e refazer o gate de
-  acessibilidade, porque as regras de foco, alvo e contraste hoje moram na folha base.
+- ~~**CSS puro nunca foi decidido pelo dono.**~~ **Resolvido em 2026-08-21, e a resolução é
+  não resolver**: "css puro não é uma decisão, fica sempre em aberto, vai do momento".
+  Não vira ADR e sai da lista de pendências — não é dívida, é postura. O custo de trocar
+  continua o mesmo (reescrever o estilo de ~20 telas e refazer o gate de acessibilidade,
+  porque foco, alvo e contraste moram na folha base), e é a conta a fazer no momento em que
+  a troca for considerada.
 
 - [x] QR do PIX **conferido pelo dono em 2026-08-05**: escaneia e resolve.
 - [x] Fotos do Sobre nós **confirmadas pelo dono**: a mulher é a fundadora Maria

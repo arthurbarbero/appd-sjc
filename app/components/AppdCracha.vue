@@ -278,6 +278,23 @@ const cpfLegivel = computed(() => {
   width: 85.6mm;
   height: 54mm;
   box-sizing: border-box;
+  /*
+    Sem isto, **o cartão sai sem fundo no papel**.
+
+    Navegador não imprime `background-color` nem `background-image` por padrão — é a opção
+    "Gráficos de plano de fundo" do diálogo de impressão, que nasce desligada e que a
+    maioria das pessoas nunca abre. O dono mandou imprimir do celular e recebeu um cartão
+    branco: faixa azul sumida, grafismo sumido, e o "APPD" em branco sobre branco.
+
+    `print-color-adjust: exact` diz que a cor **é o conteúdo**, e não decoração. Num
+    documento de identificação isso é literal: sem o grafismo da associação, o crachá deixa
+    de ser reconhecível na porta do ônibus, que é a única coisa que ele precisa fazer.
+
+    O prefixo `-webkit-` fica porque o Chrome do Android — que é onde o dono imprimiu — só
+    o entende assim em versões que ainda circulam.
+  */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
   background: #fff;
   color: #14161a;
   border: 0.3mm solid #c8ccd2;
@@ -287,6 +304,16 @@ const cpfLegivel = computed(() => {
   font-size: 2.1mm;
   line-height: 1.2;
   font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+}
+
+/*
+  Herdado em tese, declarado na prática: `print-color-adjust` é herdável, mas basta um
+  `all: initial` ou um reset de biblioteca no caminho para o cartão voltar a sair branco —
+  e o defeito só aparece no papel de outra pessoa.
+*/
+.cracha * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .cracha p {

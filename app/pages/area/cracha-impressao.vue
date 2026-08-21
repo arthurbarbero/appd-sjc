@@ -245,6 +245,23 @@ function fechar() {
   cinza em volta do cartão.
 */
 @media print {
+  /*
+    A margem da folha sai do `@page`, e não do `padding` — corrigido em 2026-08-21.
+
+    No papel a `.folha` perde o `padding: 12mm` (senão ele somaria à margem que a
+    impressora já aplica), e o resultado era a tira **colada no canto superior esquerdo**,
+    com as marcas de corte a `-6mm` fora da página. Quem corta precisa de folga dos dois
+    lados da linha, e as marcas existem para ele não precisar medir.
+
+    `@page` é o lugar certo dessa margem: ela vale para a folha inteira, é o que o
+    navegador entende como área imprimível, e não empurra o conteúdo para dentro do
+    cartão.
+  */
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
   .nao-imprime {
     display: none !important;
   }
@@ -266,6 +283,18 @@ function fechar() {
     padding: 0;
     width: auto;
     height: auto;
+  }
+
+  /*
+    O mesmo motivo do cartão: sem isto o navegador descarta fundo e cor ao imprimir, e a
+    folha sai branca. Declarado aqui também porque a `.folha` não é filha do `.cracha`, e a
+    herança não a alcança.
+  */
+  .impressao,
+  .folha,
+  .tira {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 </style>

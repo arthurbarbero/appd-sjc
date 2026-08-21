@@ -588,6 +588,28 @@ try {
   }
 
   /*
+    O cartão sai **com fundo** mesmo quando a opção de imprimir gráficos está desligada.
+
+    Ela nasce desligada em todo navegador, e quase ninguém abre o menu que a mostra. O dono
+    mandou imprimir do celular e recebeu um cartão branco: faixa azul sumida, grafismo
+    sumido, "APPD" em branco sobre branco. Num documento de identificação a cor não é
+    decoração — sem o grafismo da associação, o crachá deixa de ser reconhecível na porta do
+    ônibus, que é a única coisa que ele precisa fazer.
+
+    A medida é o **tamanho do PDF** gerado nos dois modos. Sem `print-color-adjust: exact`,
+    o modo sem gráficos descarta a imagem do grafismo e o arquivo encolhe; com ele, os dois
+    saem do mesmo tamanho. É indireta, e é a única que roda sem um olho humano no papel.
+  */
+  const pdfSemGraficos = await impressao.pdf({ format: 'A4', printBackground: false })
+  const pdfComGraficos = await impressao.pdf({ format: 'A4', printBackground: true })
+  const diferenca = Math.abs(pdfComGraficos.length - pdfSemGraficos.length) / pdfComGraficos.length
+  ok(
+    'o cartão imprime com fundo mesmo sem a opção de gráficos do navegador',
+    diferenca < 0.05,
+    `${pdfSemGraficos.length} vs ${pdfComGraficos.length} bytes`,
+  )
+
+  /*
     T6.3 — o percurso do crachá só pelo teclado.
 
     Não é conferência de acessibilidade genérica: é a garantia de que quem não usa mouse
