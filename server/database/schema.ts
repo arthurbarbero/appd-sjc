@@ -66,6 +66,19 @@ const soHex = (c: unknown, n: number) =>
   sql`length(${c}) = ${sql.raw(String(n))} AND ${c} NOT GLOB '*[^0-9a-f]*'`
 
 /**
+ * Telefone em formato internacional — `+` seguido de 8 a 15 dígitos (E.164).
+ *
+ * Substituiu, em 2026-08-21, o CHECK que exigia 10 ou 11 dígitos sem prefixo. Decisão do
+ * dono: o campo passa a nascer com `+55` escrito, e quem mora fora do Brasil pode apagá-lo.
+ * Um CHECK preso ao DDD brasileiro tornaria esse "pode apagar" mentira — o banco recusaria
+ * a gravação depois de a tela ter aceitado.
+ */
+const telefoneE164 = (c: unknown) =>
+  sql`substr(${c}, 1, 1) = '+'
+    AND substr(${c}, 2) NOT GLOB '*[^0-9]*'
+    AND length(${c}) BETWEEN 9 AND 16`
+
+/**
  * Uma linha por **pessoa atendida**. Criada pelo envio do formulário de atendimento
  * (ADR-012): não existe tela de cadastro separada.
  *
@@ -201,10 +214,7 @@ export const usuarios = sqliteTable(
       'usuarios_nascimento_formato',
       sql`${t.nascimento} IS NULL OR (${dataSimples(t.nascimento)})`,
     ),
-    check(
-      'usuarios_telefone_digitos',
-      sql`${t.telefone} IS NULL OR (${t.telefone} NOT GLOB '*[^0-9]*' AND length(${t.telefone}) IN (10, 11))`,
-    ),
+    check('usuarios_telefone_digitos', sql`${t.telefone} IS NULL OR (${telefoneE164(t.telefone)})`),
     check(
       'usuarios_whatsapp',
       sql`${t.telefoneWhatsapp} IS NULL OR ${t.telefoneWhatsapp} IN ('Sim', 'Não')`,
@@ -237,7 +247,11 @@ export const usuarios = sqliteTable(
     ),
     check(
       'usuarios_cuidador_contato_digitos',
-      sql`${t.cuidadorContato} IS NULL OR (${t.cuidadorContato} NOT GLOB '*[^0-9]*' AND length(${t.cuidadorContato}) IN (10, 11))`,
+      sql`${t.cuidadorContato} IS NULL OR (${telefoneE164(t.cuidadorContato)})`,
+    ),
+    check(
+      'usuarios_contato_emergencia_digitos',
+      sql`${t.contatoEmergencia} IS NULL OR (${telefoneE164(t.contatoEmergencia)})`,
     ),
     check('usuarios_criado_em_utc', isoUtc(t.criadoEm)),
     check('usuarios_atualizado_em_utc', isoUtc(t.atualizadoEm)),
@@ -288,19 +302,26 @@ export const inscricoesAtendimento = sqliteTable(
   (t) => [
     check('inscricoes_status', sql`${t.status} = 'Interesse registrado'`),
     check('inscricoes_ciencia', sql`${t.cienciaContribuicao} = 'Ciente'`),
-    // json_valid + json_array_length garantem "array JSON com pelo menos um item" no
-    // próprio banco: string solta e array vazio são recusados na escrita.
+    /*
+      `json_valid` garante array JSON de verdade: string solta é recusada na escrita.
+
+      O `>= 1` virou `>= 0` em 2026-08-21. Os três campos passaram a ser opcionais por
+      decisão do dono — "eu posso não ter nenhuma deficiência e querer ser voluntário" —, e
+      um CHECK exigindo um item transformaria a decisão em erro 500 na hora de gravar. O
+      comprimento continua sendo verificado porque o que importa aqui é o **formato**: o dia
+      em que alguém gravar `"Física"` em vez de `["Física"]`, o banco recusa.
+    */
     check(
       'inscricoes_deficiencias_json',
-      sql`json_valid(${t.deficiencias}) AND json_type(${t.deficiencias}) = 'array' AND json_array_length(${t.deficiencias}) >= 1`,
+      sql`json_valid(${t.deficiencias}) AND json_type(${t.deficiencias}) = 'array' AND json_array_length(${t.deficiencias}) >= 0`,
     ),
     check(
       'inscricoes_atendimentos_json',
-      sql`json_valid(${t.atendimentos}) AND json_type(${t.atendimentos}) = 'array' AND json_array_length(${t.atendimentos}) >= 1`,
+      sql`json_valid(${t.atendimentos}) AND json_type(${t.atendimentos}) = 'array' AND json_array_length(${t.atendimentos}) >= 0`,
     ),
     check(
       'inscricoes_dias_json',
-      sql`json_valid(${t.dias}) AND json_type(${t.dias}) = 'array' AND json_array_length(${t.dias}) >= 1`,
+      sql`json_valid(${t.dias}) AND json_type(${t.dias}) = 'array' AND json_array_length(${t.dias}) >= 0`,
     ),
     check(
       'inscricoes_outro_tamanho',

@@ -95,31 +95,62 @@ export function semConsentimento(deficiencias: readonly string[]): boolean {
 
 const soDigitos = (valor: string) => valor.replace(/\D/g, '')
 
-/**
- * Dígitos do telefone, sem o código do país.
- *
- * Colar `+55 12 99165-7059` do WhatsApp produz 13 dígitos e seria recusado — mas o REQ-16
- * diz, com todas as letras, que essa colagem tem de ser aceita. Quem copia o próprio
- * número do WhatsApp leva o `+55` junto, e recusar isso é a máscara brigando com a pessoa.
- */
-const digitosTelefone = (valor: string) => {
-  const digitos = soDigitos(valor)
-  return (digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55')
-    ? digitos.slice(2)
-    : digitos
-}
+/** Código do país que o campo já traz escrito. A pessoa pode apagar. */
+export const DDI_PADRAO = '+55'
 
 /**
- * Telefone com 10 ou 11 dígitos e DDD entre 11 e 99.
+ * Telefone em formato internacional (E.164): `+` e de 8 a 15 dígitos.
  *
- * A máscara nunca bloqueia a digitação (REQ-16): o valor chega como a pessoa colou —
- * `(12) 3346-0605`, `+55 12 99165-7059` ou só dígitos — e é normalizado aqui.
+ * Mudou em 2026-08-21, por decisão do dono: o campo passa a nascer com `+55` escrito, e o
+ * que é guardado passa a ser `+5512991657059` em vez de `12991657059`.
+ *
+ * A normalização continua sendo generosa com o que entra, que era o ponto do REQ-16: colar
+ * `(12) 3346-0605`, `+55 12 99165-7059` ou só dígitos tem de funcionar. O que muda é a
+ * saída, e a regra é uma só — **se não vier código de país, assume-se o Brasil**:
+ *
+ * - `12991657059` (11 dígitos, DDD brasileiro) vira `+5512991657059`
+ * - `+55 12 99165-7059` vira `+5512991657059`
+ * - `+351 912 345 678` fica `+351912345678`, porque veio com `+` e não é nosso lugar
+ *   adivinhar que Portugal é engano
+ *
+ * O DDD deixa de ser verificado. Não é descuido: com número estrangeiro aceito, "os dois
+ * primeiros dígitos são o DDD" deixa de ser verdade, e uma regra que só vale para parte
+ * dos valores recusa justamente quem ela não entende.
  */
+const normalizarTelefone = (valor: string) => {
+  const bruto = valor.trim()
+  const digitos = soDigitos(bruto)
+  if (!digitos) return ''
+  // Veio com `+`: a pessoa disse qual é o país, e ninguém aqui sabe melhor.
+  if (bruto.startsWith('+')) return `+${digitos}`
+  // Colagem do WhatsApp sem o `+`, mas com o 55 na frente.
+  if ((digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55')) {
+    return `+${digitos}`
+  }
+  // Número nacional escrito como se escreve por aqui.
+  return `${DDI_PADRAO}${digitos}`
+}
+
+/*
+  Número brasileiro exige DDD e número; estrangeiro só exige um comprimento plausível.
+
+  Sem esta distinção, `129916` — seis dígitos, um número claramente incompleto — virava
+  `+55129916` e **passava**: oito dígitos cabem no mínimo do E.164, que é a régua de um
+  número internacional qualquer. O gate pegou, e o defeito é do tipo que só aparece quando
+  a regra fica frouxa para acomodar um caso novo: ao abrir o campo ao mundo, a exigência
+  que valia para o Brasil desapareceu junto.
+*/
 const telefone = z
   .string()
-  .transform(digitosTelefone)
-  .refine((v) => v.length === 10 || v.length === 11, 'Informe DDD e número, com 10 ou 11 dígitos.')
-  .refine((v) => Number(v.slice(0, 2)) >= 11, 'O DDD precisa estar entre 11 e 99.')
+  .transform(normalizarTelefone)
+  .refine(
+    (v) => /^\+\d{8,15}$/.test(v),
+    'Informe o telefone com código do país, DDD e número — como +55 12 99165-7059.',
+  )
+  .refine(
+    (v) => !v.startsWith('+55') || v.length === 13 || v.length === 14,
+    'Confira o telefone: com o +55, são DDD e número — 10 ou 11 dígitos.',
+  )
 
 /** CPF conferido pelos dois dígitos verificadores, não só pelo comprimento (REQ-7). */
 export function cpfValido(entrada: string): boolean {
@@ -137,9 +168,20 @@ export function cpfValido(entrada: string): boolean {
   return digito(9) === Number(cpf[9]) && digito(10) === Number(cpf[10])
 }
 
-/** Escolha múltipla: pelo menos uma opção, todas do vocabulário oficial. */
-const escolhaMultipla = <T extends readonly [string, ...string[]]>(opcoes: T, campo: string) =>
-  z.array(z.enum(opcoes)).min(1, `Marque pelo menos uma opção em ${campo}.`)
+/**
+ * Escolha múltipla dentro do vocabulário oficial, **sem mínimo**.
+ *
+ * O `.min(1)` saiu em 2026-08-21, por decisão do dono:
+ *
+ * > eu posso não ter nenhuma deficiência e querer ser voluntário (…) então isso aqui não
+ * > deveria ser obrigatório
+ *
+ * Vale para os três campos de múltipla escolha — deficiência, tipo de atendimento e
+ * melhores dias. O vocabulário continua fechado: opcional quer dizer que a lista pode vir
+ * vazia, não que qualquer palavra serve.
+ */
+const escolhaMultipla = <T extends readonly [string, ...string[]]>(opcoes: T) =>
+  z.array(z.enum(opcoes)).default([])
 
 // ── Os 15 campos + os 3 do cadastro embutido ─────────────────────────────────────────
 
@@ -248,21 +290,21 @@ export const esquemaInscricao = z
     ...camposPessoais,
 
     // 12 a 15 — o que a pessoa precisa, gravado em `inscricoes_atendimento`.
-    deficiencias: escolhaMultipla(DEFICIENCIAS, 'tipo de deficiência'),
+    deficiencias: escolhaMultipla(DEFICIENCIAS),
     deficienciaOutro: z
       .string()
       .trim()
       .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
       .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
       .optional(),
-    atendimentos: escolhaMultipla(ATENDIMENTOS, 'tipo de atendimento'),
+    atendimentos: escolhaMultipla(ATENDIMENTOS),
     atendimentoOutro: z
       .string()
       .trim()
       .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
       .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
       .optional(),
-    dias: escolhaMultipla(DIAS, 'melhores dias'),
+    dias: escolhaMultipla(DIAS),
     cienciaContribuicao: z.literal('Ciente'),
 
     // 16 a 18 — cadastro embutido (ADR-012).
@@ -289,8 +331,20 @@ export const esquemaInscricao = z
       // segurança, e o público deste site é o que mais paga por isso.
       .describe('Mínimo de 10 caracteres. Não exigimos símbolo nem letra maiúscula.'),
 
-    // Art. 11 da LGPD — sem isto, nada é gravado (REQ-41).
-    consentimentoSaude: z.literal(true, 'É preciso autorizar para concluir o cadastro.'),
+    /*
+      Art. 11 da LGPD — exigido **quando há deficiência marcada**, e só então.
+
+      Até 2026-08-21 era obrigatório em todo cadastro, porque todo cadastro trazia dado de
+      saúde. Com o campo 12 opcional isso deixou de ser verdade: quem se cadastra para ser
+      voluntário não informa condição de saúde nenhuma, e pedir a autorização assim mesmo
+      seria colher consentimento sobre o vazio — o oposto do que o artigo pede, que é
+      autorização **específica para uma finalidade**.
+
+      A regra que amarra os dois está no `superRefine` do fim do esquema, junto com a do
+      `termoHash`: sem deficiência, os dois são dispensados; com deficiência, os dois são
+      exigidos com a mesma mensagem de antes.
+    */
+    consentimentoSaude: z.literal(true, 'É preciso autorizar para concluir o cadastro.').optional(),
 
     /*
       Campo 22 — o CID, e o consentimento que ele exige.
@@ -327,7 +381,8 @@ export const esquemaInscricao = z
      */
     termoHash: z
       .string()
-      .regex(/^[0-9a-f]{64}$/, 'Recarregue a página e leia o termo de novo antes de enviar.'),
+      .regex(/^[0-9a-f]{64}$/, 'Recarregue a página e leia o termo de novo antes de enviar.')
+      .optional(),
 
     /*
       Gerada pelo navegador, nunca digitada — a mensagem existe porque a regra do
@@ -338,6 +393,22 @@ export const esquemaInscricao = z
   })
   // `.strict()`: campo desconhecido é recusado com 422, nunca ignorado em silêncio (REQ-10).
   .strict()
+  /*
+    Marcar deficiência é o que faz o consentimento do Art. 11 ser exigido.
+
+    A condição é a mesma dos dois `refine` seguintes porque as duas peças são uma só: a
+    autorização e o texto que ela aceitou. Consentimento gravado sem saber que texto a
+    pessoa leu não prova nada, e é por isso que o hash não é opcional quando a autorização
+    não é.
+  */
+  .refine((d) => d.deficiencias.length === 0 || d.consentimentoSaude === true, {
+    path: ['consentimentoSaude'],
+    message: 'É preciso autorizar para concluir o cadastro.',
+  })
+  .refine((d) => d.deficiencias.length === 0 || !!d.termoHash, {
+    path: ['consentimentoSaude'],
+    message: 'Recarregue a página e leia o termo de novo antes de enviar.',
+  })
   // "Outro" marcado torna o campo de especificação obrigatório (D7).
   .refine((d) => !d.deficiencias.includes('Outro') || !!d.deficienciaOutro, {
     path: ['deficienciaOutro'],

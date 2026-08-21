@@ -43,6 +43,13 @@
       "when": 1787281917060,
       "tag": "0005_stale_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787313033812,
+      "tag": "0006_superb_wild_child",
+      "breakpoints": true
     }
   ]
 }

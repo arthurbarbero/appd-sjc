@@ -57,7 +57,7 @@ function criaUsuario(db: DatabaseSync, sobrescreve: Record<string, string> = {})
     senha_params: '{"N":16384,"r":8,"p":1,"sal":"ficticio"}',
     nome: 'Maria Fictícia da Silva',
     nascimento: '1978-03-12',
-    telefone: '12900000001',
+    telefone: '+5512900000001',
     telefone_whatsapp: 'Sim',
     cep: '12239530',
     endereco: 'Rua de Teste',
@@ -197,7 +197,15 @@ describe('Integridade do modelo de dados', () => {
     ).toThrow(/CHECK/i)
   })
 
-  it('múltipla escolha vazia ou não-array é recusada', () => {
+  /*
+    O `[]` saiu da lista de recusados em 2026-08-21.
+
+    Os três campos viraram opcionais por decisão do dono, e o CHECK passou de `>= 1` para
+    `>= 0`. O que ele ainda guarda é o **formato**: o dia em que alguém gravar `"Física"`
+    em vez de `["Física"]`, o banco recusa — e é esse o defeito que o CHECK existe para
+    pegar, não a lista curta.
+  */
+  it('múltipla escolha vazia é aceita; o que não é array continua recusado', () => {
     const usuarioId = criaUsuario(db)
     const insere = (deficiencias: string) =>
       db
@@ -209,7 +217,8 @@ describe('Integridade do modelo de dados', () => {
         )
         .run(usuarioId, deficiencias, AGORA, AGORA)
 
-    expect(() => insere('[]')).toThrow(/CHECK/i)
+    expect(() => insere('[]')).not.toThrow()
+    db.prepare('DELETE FROM inscricoes_atendimento').run()
     expect(() => insere('Física')).toThrow(/CHECK/i)
     expect(() => insere('{"tipo":"Física"}')).toThrow(/CHECK/i)
   })
