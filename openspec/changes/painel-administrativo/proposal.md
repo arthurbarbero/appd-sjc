@@ -44,6 +44,46 @@ que empurrava o painel para a V1.1.
 - **Disparar troca de senha** — nunca escolher a senha da pessoa, nunca ver hash.
 - Ativar e inativar cadastro.
 
+#### O administrador cadastra pela pessoa (acrescentado em 2026-08-21)
+
+Pedido da **APPD**, trazido pelo dono: o login pesa demais para parte do público.
+
+> ver como fica esse login para pessoas vulneráveis [talvez deixar o admin poder criar
+> cadastros com e-mail]
+
+E com um limite que ele fixou na mesma frase, e que governa esta seção inteira:
+
+> não quero outro tipo de login, só formas de ter como o administrador fazer e gerenciar os
+> usuários
+
+**Não nasce um segundo caminho de autenticação.** Nada de entrar por CPF, por código
+entregue no balcão, por sessão sem senha ou por link mágico. A porta continua sendo e-mail e
+senha, com a derivação do ADR-005. O que nasce é a capacidade de **um atendente criar a
+conta no lugar da pessoa**, com ela ali na frente.
+
+O que isso obriga a decidir, e que esta change não pode empurrar:
+
+1. **Como a senha chega à pessoa.** O site **não envia e-mail** enquanto não houver o
+   domínio `appd.org.br` ([ADR-016](../../../docs/adr/adr-016-recuperacao-de-senha-depende-do-dominio.md)),
+   e esse bloqueio nunca foi de provedor — é do domínio. Sem e-mail, sobra o balcão: senha
+   provisória escrita ou impressa na hora, com troca obrigatória no primeiro acesso. É uma
+   senha que trafega em papel, e isso precisa estar no ADR com o custo escrito.
+2. **A senha do ADR-005 é derivada no navegador**, com o e-mail como sal. Uma senha criada
+   pelo atendente é derivada no navegador **dele**, não no da pessoa — o desenho continua
+   funcionando, mas quem digitou a senha original foi outra pessoa, e o registro precisa
+   dizer isso.
+3. **Quem responde pelo consentimento do Art. 11.** Se o atendente preenche o formulário, é
+   ele quem marca a caixa — e consentimento marcado por terceiro não é consentimento. O
+   caminho provável é o mesmo do papel: a pessoa assina, e o registro guarda que foi colhido
+   presencialmente, por quem e quando. **É a decisão mais séria desta change**, maior que
+   qualquer tela.
+4. **E-mail de quem não tem e-mail.** Parte do público não tem endereço, e o e-mail é a
+   chave do login. Inventar um endereço no ato é criar uma conta que a pessoa nunca
+   recupera sozinha.
+
+Nenhuma dessas quatro tem resposta óbvia, e três delas são de fundo. A spec desta change não
+começa antes de o dono decidir 1 e 3.
+
 ### Relatórios
 
 - **Exportação em CSV sobre todos os dados**, com filtros. Inclui o campo 12 — decisão do
@@ -64,7 +104,10 @@ prova, e num sistema com dado de saúde isso não se sustenta.
 ## Fora de escopo
 
 - Edição do cadastro de terceiro pelo administrador. Ele **dispara** troca de senha e muda
-  situação; corrigir dado é da própria pessoa (ADR-014).
+  situação; corrigir dado é da própria pessoa (ADR-014). **Criar** a conta passou a estar no
+  escopo em 2026-08-21; corrigir dado alheio continua fora.
+- **Qualquer forma nova de autenticação.** Dito pelo dono com todas as letras: "não quero
+  outro tipo de login". A porta continua sendo e-mail e senha.
 - Painel com gráfico, cruzamento livre ou ferramenta de exploração. Ver a seção abaixo.
 - Envio de e-mail. É o segundo estágio do ADR-016 e depende da chave do SendGrid.
 

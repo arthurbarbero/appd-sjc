@@ -174,6 +174,36 @@ associação custa uma migration, não uma reescrita.
 
 ---
 
+### 4c. Quantas pessoas a APPD cadastra num mutirão
+
+**Bloqueia o teto do limite de cadastros.** A associação pediu para aumentá-lo — "existe
+multidão também" —, e o número precisa vir de quem faz o mutirão, não de estimativa nossa.
+
+O limite existe contra cadastro automatizado em massa, e do lado do servidor um mutirão
+legítimo é indistinguível de um robô: mesma rede, muitas vezes o mesmo aparelho, uma
+inscrição atrás da outra. Um teto folgado demais desliga a proteção; um teto apertado demais
+manda a fila embora.
+
+Perguntas a levar:
+
+1. Quantas pessoas vocês cadastram num mutirão, e em quanto tempo?
+2. É de um aparelho só, ou cada pessoa usa o celular dela?
+3. Com que frequência isso acontece — uma vez por mês, por semestre?
+
+Enquanto não houver resposta, o teto continua em **12 cadastros por IP a cada 15 minutos**.
+
+### 4d. O projeto de Bocha Paralímpica acabou
+
+Informado pela associação em 2026-08-21: "remover de todo o site, não tem mais".
+
+**Não é pendência, é confirmação registrada** — está aqui porque o site anunciava horários e
+locais de treino, e uma pessoa podia atravessar a cidade por causa disso. A remoção é a
+change `pedidos-da-appd`.
+
+Fica uma pergunta, para o dia em que houver reunião: **o Facebook do projeto continua no
+ar** (`facebook.com/bochaparalimpicasjc`, 2.274 curtidas) e ainda anuncia os treinos. Quem
+encerra aquela página, ou ela fica?
+
 ## P1 — Comprometem a qualidade
 
 ### 5. Regras do atendimento que hoje só existem dentro do formulário
