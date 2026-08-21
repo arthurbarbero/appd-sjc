@@ -82,7 +82,7 @@ function cepBr(cep?: string | null) {
 </script>
 
 <template>
-  <div class="area">
+  <div class="area area-moldura">
     <h1>Minha área</h1>
 
     <AppdAviso v-if="recemCadastrada" tipo="sucesso" titulo="Cadastro enviado">
@@ -298,11 +298,14 @@ function cepBr(cep?: string | null) {
 </template>
 
 <style scoped>
-.area {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 .destaque {
   border-color: var(--borda);
   box-shadow: var(--sombra-1);

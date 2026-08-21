@@ -83,6 +83,61 @@ p {
   margin: 0;
 }
 
+/* ---------- a área do associado: menu à esquerda, conteúdo à direita ---------- */
+
+/*
+  Pedido do dono em 2026-08-20: "esse aqui eu colocaria pra esquerda, eu clico e aparecem
+  as coisas na direita — deixaria um single page com várias áreas".
+
+  A fileira de abas que ficava acima do conteúdo virou coluna. O que muda de verdade não é
+  a posição: com as abas em cima, cada seção começava depois de uma faixa que já tinha sido
+  lida, e a lista de destinos sumia da tela assim que a pessoa rolava. Na coluna, ela fica.
+
+  Feito com grade, e não com invólucro novo: as cinco telas da área já têm a mesma forma —
+  um `h1`, a navegação, e o conteúdo em irmãos. A grade coloca cada parte no seu lugar sem
+  que nenhuma delas precise ser reescrita.
+*/
+.area-moldura {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  column-gap: var(--e5);
+  row-gap: var(--e4);
+  align-items: start;
+}
+
+/* O título atravessa as duas colunas: ele nomeia a área toda, não a seção. */
+.area-moldura > h1 {
+  grid-column: 1 / -1;
+}
+
+.area-moldura > nav {
+  grid-column: 1;
+  grid-row: 2 / span 200;
+  position: sticky;
+  top: var(--e3);
+}
+
+/* Todo o resto vive na coluna da direita, na ordem em que a tela o declarou. */
+.area-moldura > *:not(h1):not(nav) {
+  grid-column: 2;
+}
+
+/*
+  Abaixo de 760px a coluna não cabe, e a navegação volta a ser uma faixa acima do
+  conteúdo — que é a forma certa quando a largura é o recurso escasso.
+*/
+@media (max-width: 760px) {
+  .area-moldura {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e4);
+  }
+
+  .area-moldura > nav {
+    position: static;
+  }
+}
+
 /* ---------- foco ---------- */
 
 :focus-visible {

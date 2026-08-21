@@ -122,7 +122,7 @@ async function exportar(formato: 'png' | 'pdf') {
 </script>
 
 <template>
-  <div class="pagina-cracha">
+  <div class="pagina-cracha area-moldura">
     <h1>Meu crachá</h1>
     <p class="chamada">
       Seu crachá fica pronto assim que você envia a foto. Você mesmo baixa e imprime.
@@ -326,11 +326,14 @@ async function exportar(formato: 'png' | 'pdf') {
 </template>
 
 <style scoped>
-.pagina-cracha {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 
 .chamada {
   font-size: var(--texto-corpo-g);

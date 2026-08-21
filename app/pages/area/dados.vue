@@ -55,6 +55,18 @@ watchEffect(() => {
 /** Os três que a tela exibe travados. Vêm do servidor e nunca entram em `f`. */
 const conta = computed(() => data.value?.conta ?? null)
 
+/*
+  O banco guarda a data em ISO; a tela mostra no formato de quem lê.
+
+  Sem isto o campo travado exibia "1978-03-12" — que é o jeito de guardar, não o jeito de
+  ler, e destoa do próprio formulário de cadastro, que pede e mostra dia/mês/ano.
+*/
+const nascimentoLegivel = computed(() => {
+  const bruto = conta.value?.nascimento ?? ''
+  const iso = bruto.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : bruto
+})
+
 const erros = reactive<Record<string, string>>({})
 const salvando = ref(false)
 const salvo = ref(false)
@@ -183,7 +195,7 @@ async function salvar() {
 </script>
 
 <template>
-  <div class="dados">
+  <div class="dados area-moldura">
     <h1>Meus dados</h1>
     <AreaNavegacao atual="dados" />
 
@@ -256,12 +268,12 @@ async function salvar() {
 
           <div class="campo">
             <label for="cpf-fixo">CPF</label>
-            <input id="cpf-fixo" :value="conta?.cpf ?? ''" type="text" readonly />
+            <input id="cpf-fixo" :value="mascaraCpf(conta?.cpf ?? '')" type="text" readonly />
           </div>
 
           <div class="campo">
             <label for="nascimento-fixo">Data de nascimento</label>
-            <input id="nascimento-fixo" :value="conta?.nascimento ?? ''" type="text" readonly />
+            <input id="nascimento-fixo" :value="nascimentoLegivel" type="text" readonly />
           </div>
         </fieldset>
 
@@ -449,12 +461,14 @@ async function salvar() {
 </template>
 
 <style scoped>
-.dados {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-  max-width: var(--medida);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 .secao {
   border: 1px solid var(--borda-suave);
   border-radius: var(--raio);

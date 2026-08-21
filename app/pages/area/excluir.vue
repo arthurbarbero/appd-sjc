@@ -81,7 +81,7 @@ async function excluir() {
 </script>
 
 <template>
-  <div class="excluir">
+  <div class="excluir area-moldura">
     <h1>Excluir minha conta</h1>
     <AreaNavegacao atual="excluir" />
 
@@ -194,12 +194,14 @@ async function excluir() {
 </template>
 
 <style scoped>
-.excluir {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e4);
-  max-width: var(--medida);
-}
+/*
+  A coluna vem de `.area-moldura`, em base.css.
+
+  Esta regra declarava `display: flex; flex-direction: column`, e o estilo com escopo da
+  página carrega depois do base — mesma especificidade, cascata a favor dela. O resultado
+  era o menu na esquerda e o conteúdo embaixo dele, em vez de ao lado. O que sobra aqui é
+  só o que é da tela; a forma da área é da moldura.
+*/
 h2 {
   margin-top: 0;
 }

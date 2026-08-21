@@ -140,3 +140,103 @@ describe('Desistir do recorte devolve a foto que havia (REQ-10)', () => {
     expect(FOTO).toMatch(/function descartarGuardada\(\)[\s\S]*?revokeObjectURL\(previaGuardada/)
   })
 })
+
+describe('Toda rota começa no topo (REQ-8)', () => {
+  const ROTAS = readFileSync(join(RAIZ, 'app', 'router.options.ts'), 'utf8')
+
+  it('existe scrollBehavior levando ao topo', () => {
+    expect(ROTAS).toMatch(/scrollBehavior/)
+    expect(ROTAS).toMatch(/top:\s*0/)
+  })
+
+  it('âncora e histórico continuam mandando', () => {
+    expect(ROTAS).toMatch(/posicaoSalva/)
+    expect(ROTAS).toMatch(/para\.hash/)
+  })
+
+  it('movimento reduzido desliga a animação da rolagem', () => {
+    expect(ROTAS).toMatch(/prefers-reduced-motion/)
+  })
+})
+
+describe('O menu estreito é painel, não sanfona (REQ-15 a REQ-17)', () => {
+  const LAYOUT = readFileSync(join(RAIZ, 'app', 'layouts', 'default.vue'), 'utf8')
+
+  it('o botão é ícone, e mantém nome acessível', () => {
+    expect(semComentario(join(RAIZ, 'app', 'layouts', 'default.vue'))).not.toMatch(
+      /class="[^"]*alternar[^"]*"[^>]*>\s*Menu\s*</,
+    )
+    expect(LAYOUT).toMatch(/:aria-label="menuAberto \? 'Fechar menu' : 'Abrir menu'"/)
+    expect(LAYOUT).toMatch(/:aria-expanded="menuAberto"/)
+  })
+
+  it('o painel desliza da direita e se sobrepõe', () => {
+    const estilo = apenasEstilo(LAYOUT)
+    expect(estilo).toMatch(/position:\s*fixed/)
+    expect(estilo).toMatch(/translateX\(100%\)/)
+  })
+
+  it('a página de trás não é empurrada nem rola', () => {
+    expect(LAYOUT).toMatch(/document\.body\.style\.overflow/)
+  })
+
+  it('Esc fecha e devolve o foco ao botão', () => {
+    expect(LAYOUT).toMatch(/evento\.key === 'Escape'/)
+    expect(LAYOUT).toMatch(/botaoMenu\.value\?\.focus\(\)/)
+  })
+
+  it('o que está atrás fica inerte, e o painel fechado também', () => {
+    expect(LAYOUT).toMatch(/:inert="estreito && menuAberto"/)
+    expect(LAYOUT).toMatch(/:inert="estreito && !menuAberto"/)
+  })
+
+  it('há saída visível dentro do painel', () => {
+    expect(LAYOUT).toMatch(/class="fechar"[^>]*aria-label="Fechar menu"/)
+  })
+
+  it('o nome da marca sai da tela sem sair da árvore de acessibilidade', () => {
+    // `display: none` aqui deixou o link da marca sem nome — o axe acusou link-name.
+    const estilo = apenasEstilo(LAYOUT)
+    const regra = estilo.match(/\.marca \.nome \{[^}]*\}/)?.[0] ?? ''
+    expect(regra).not.toMatch(/display:\s*none/)
+    expect(regra).toMatch(/clip-path/)
+  })
+})
+
+describe('A área do associado tem menu à esquerda (REQ-18, REQ-19)', () => {
+  const TELAS_DA_AREA = ['index.vue', 'cracha.vue', 'dados.vue', 'excluir.vue', 'inscricoes.vue']
+
+  it('a moldura de duas colunas existe no design system', () => {
+    expect(BASE_CSS).toMatch(/\.area-moldura\s*\{[^}]*grid-template-columns/)
+    expect(BASE_CSS).toMatch(/\.area-moldura > nav\s*\{[^}]*grid-column:\s*1/)
+  })
+
+  it.each(TELAS_DA_AREA)('%s usa a moldura', (nome) => {
+    const fonte = readFileSync(join(RAIZ, 'app', 'pages', 'area', nome), 'utf8')
+    expect(fonte).toMatch(/area-moldura/)
+  })
+
+  it.each(TELAS_DA_AREA)('%s não declara a própria coluna', (nome) => {
+    /*
+      O escopo da página carrega depois do base e vencia a grade — o menu ficava na
+      esquerda e o conteúdo embaixo, em vez de ao lado.
+
+      A classe do container é lida do template, e não adivinhada por uma lista: em
+      `index.vue` existe um bloco interno chamado `.excluir`, homônimo do container de
+      outra tela, e a busca por nome pegava o bloco errado.
+    */
+    const fonte = readFileSync(join(RAIZ, 'app', 'pages', 'area', nome), 'utf8')
+    const classes = fonte.match(/<div class="([^"]*area-moldura[^"]*)"/)?.[1] ?? ''
+    const container = classes.split(/\s+/).find((c) => c && c !== 'area-moldura')
+    expect(container).toBeTruthy()
+    const regra = apenasEstilo(fonte).match(new RegExp('\\.' + container + '\\s*\\{[^}]*\\}'))?.[0]
+    if (!regra) return
+    expect(regra).not.toMatch(/display:\s*flex/)
+  })
+
+  it('a seção atual é marcada por meio não-cromático', () => {
+    const NAV = readFileSync(join(RAIZ, 'app', 'components', 'AreaNavegacao.vue'), 'utf8')
+    expect(NAV).toMatch(/aria-current/)
+    expect(apenasEstilo(NAV)).toMatch(/a\[aria-current='page'\]::after/)
+  })
+})
