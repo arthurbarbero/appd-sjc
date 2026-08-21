@@ -1,8 +1,19 @@
 # ADR-020: o CID entra no cadastro e pode sair no crachá, sob consentimento próprio
 
-Status: Aceito
+Status: Aceito, **parcialmente emendado** pelo
+[ADR-021](adr-021-cracha-replica-o-cartao-de-papel.md) no mesmo dia
 Data: 2026-08-21
 Decisores: Arthur Barbero (dono do projeto)
+
+> **Emenda de 2026-08-21.** A segunda das três travas abaixo — o **opt-in próprio para
+> imprimir**, separado do consentimento de coleta — foi **revogada** por decisão do dono
+> horas depois de escrita: "o CID pode entrar junto do consentimento atual existente".
+> Quem autoriza guardar autoriza imprimir, e o texto do formulário passou a dizer isso
+> antes da caixa.
+>
+> **A trava do `/verificar` continua inteira e sem exceção**, e é a que este ADR existe
+> para sustentar. O raciocínio abaixo sobre por que guardar e imprimir são decisões
+> diferentes fica registrado como está: ele não deixou de ser verdadeiro por ter perdido.
 
 Estende o [ADR-019](adr-019-consentimento-governa-a-verificacao-publica.md), que já fizera
 o consentimento governar o que a verificação pública mostra. Aqui entra um dado **mais

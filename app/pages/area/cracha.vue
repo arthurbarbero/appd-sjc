@@ -51,6 +51,13 @@ async function ajustarFoto() {
 }
 const urlVerificacao = computed(() => `${origem}/verificar/${data.value?.numeroRegistro ?? ''}`)
 
+/*
+  O que o arquivo baixado desenha — **exatamente** o que o componente da tela recebe.
+
+  Este objeto e as props de `<AppdCracha>` são a mesma lista, e precisam continuar sendo:
+  em 2026-08-21 elas divergiram por dois dias e quem baixou o PDF levou o cartão de
+  anteontem, sem CID, CRAS nem emissão. `test/cracha-arquivo.spec.ts` reprova a divergência.
+*/
 const dadosCracha = computed<DadosCracha>(() => ({
   nome: data.value?.nome ?? '',
   numeroRegistro: data.value?.numeroRegistro ?? '',
@@ -58,11 +65,26 @@ const dadosCracha = computed<DadosCracha>(() => ({
   foto: data.value?.foto ?? null,
   deficiencias: data.value?.deficiencias ?? [],
   urlVerificacao: urlVerificacao.value,
+  cid: data.value?.cid ?? null,
+  cras: data.value?.cras ?? null,
+  credencialTransporte: data.value?.credencialTransporte ?? null,
+  contatoEmergencia: data.value?.contatoEmergencia ?? null,
+  cuidadorNome: data.value?.cuidadorNome ?? null,
+  emissao: data.value?.emissao ?? null,
+  nascimento: data.value?.nascimento ?? null,
+  cpf: data.value?.cpf ?? null,
+  enderecoPessoa: data.value?.enderecoPessoa ?? null,
   associacao: {
     nome: ASSOCIACAO.nome,
+    nomeCompleto: ASSOCIACAO.nomeCompleto,
+    cidade: ASSOCIACAO.endereco.cidade,
+    uf: ASSOCIACAO.endereco.uf,
     endereco: enderecoEmLinha,
     cnpj: ASSOCIACAO.cnpj,
+    inscricaoMunicipal: ASSOCIACAO.inscricaoMunicipal,
+    utilidadePublica: ASSOCIACAO.utilidadePublica,
     telefone: sede.numero,
+    telefoneSecundario: ASSOCIACAO.telefones[1]!.numero,
   },
 }))
 
@@ -129,34 +151,6 @@ async function alternarOptIn(evento: Event) {
   }
 }
 
-/**
- * O opt-in de imprimir o CID.
- *
- * Espelha `alternarOptIn` de propósito, inclusive na volta da caixa quando a gravação
- * falha: caixa que mostra um estado que o banco não tem é a pior falha possível aqui,
- * porque a pessoa acharia que escolheu.
- *
- * O texto de confirmação diz o que **não** muda, e não é redundância: a diferença entre
- * este opt-in e o do tipo de deficiência é justamente que aquele também libera a página
- * pública, e este nunca (ADR-020).
- */
-async function alternarCidNoCracha(evento: Event) {
-  const caixa = evento.target as HTMLInputElement
-  const marcado = caixa.checked
-  confirmacaoOptIn.value = ''
-  erroOptIn.value = ''
-  try {
-    await $fetch('/api/area/cracha', { method: 'PUT', body: { cidNoCracha: marcado } })
-    await refresh()
-    confirmacaoOptIn.value = marcado
-      ? 'Escolha guardada: o CID passa a aparecer no crachá. Ele continua fora da página pública.'
-      : 'Escolha guardada: o CID não aparece no crachá.'
-  } catch {
-    caixa.checked = !marcado
-    erroOptIn.value = 'Não conseguimos guardar a sua escolha agora. Nada mudou — tente de novo.'
-  }
-}
-
 async function exportar(formato: 'png' | 'pdf') {
   exportando.value = formato
   erroExportar.value = ''
@@ -174,10 +168,12 @@ async function exportar(formato: 'png' | 'pdf') {
 <template>
   <div class="pagina-cracha area-moldura">
     <h1>Meu crachá</h1>
-    <p class="chamada">
-      Seu crachá fica pronto assim que você envia a foto. Você mesmo baixa e imprime.
-    </p>
-
+    <!--
+      A frase "Seu crachá fica pronto assim que você envia a foto. Você mesmo baixa e
+      imprime." saiu em 2026-08-21: o dono a selecionou com o mouse e disse "isso aqui você
+      pode apagar também". Ela contava o que a tela já mostra — o cartão está ali, e os
+      botões dizem o que fazem.
+    -->
     <AreaNavegacao atual="cracha" />
 
     <p v-if="pending" role="status" class="carregando">Carregando o seu crachá…</p>
@@ -196,74 +192,6 @@ async function exportar(formato: 'png' | 'pdf') {
         <section v-if="!temFoto" class="sem-foto-bloco">
           <h2>Falta a sua foto para o crachá ficar pronto</h2>
           <AppdFoto v-model="enviandoFoto" rotulo="Foto para o crachá" />
-        </section>
-
-        <!--
-          Estado 1b — trocar a foto que já existe (2026-08-21).
-
-          Até aqui o envio de foto só era montado quando **não** havia foto: quem já tinha
-          enviado a sua não tinha caminho nenhum para trocá-la, e o dono topou com isso ao
-          tentar conferir o recorte. Errar a foto uma vez condenava a pessoa àquela foto.
-
-          Fica fechado por padrão, e não aberto: a tela é sobre o crachá pronto, e um
-          seletor de arquivo permanentemente aberto no alto sugere que algo está faltando.
-        -->
-        <section v-else class="trocar-bloco">
-          <!--
-            Dois caminhos, porque são duas intenções diferentes (2026-08-21).
-
-            **Ajustar** trabalha sobre a foto que já está guardada: serve para centralizar
-            o rosto ou aproximar, sem precisar caçar o arquivo original no aparelho — que
-            muitas vezes já nem existe mais.
-
-            **Trocar** pede um arquivo novo, e é o único caminho quando a foto em si é a
-            errada.
-
-            Separá-los é o que evita a pergunta que o dono fez ao tentar mexer na foto:
-            um botão só, chamado "trocar", não parece prometer reenquadramento.
-          -->
-          <!--
-            Um botão só, e não dois (2026-08-21).
-
-            "Ajustar o enquadramento" e "Trocar a minha foto" eram duas portas para a mesma
-            sala: o recorte. O dono viu isso na hora — "pode ser o mesmo botão" —, e ele
-            tem razão, porque a diferença entre as duas nunca foi de intenção, e sim de
-            **onde a imagem vem**. Agora quem decide isso é o recorte: ele abre com a foto
-            de agora, e lá dentro há "Escolher outra imagem" para quem quer outra.
-
-            O caminho curto também ficou mais curto: reenquadrar era o caso comum e exigia
-            escolher entre dois botões antes de qualquer coisa.
-          -->
-          <button
-            v-if="!trocandoFoto"
-            type="button"
-            class="botao botao-secundario compacto"
-            @click="ajustarFoto"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-              <path
-                d="M4 8V5a1 1 0 0 1 1-1h3m8 0h3a1 1 0 0 1 1 1v3m0 8v3a1 1 0 0 1-1 1h-3m-8 0H5a1 1 0 0 1-1-1v-3"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-            Mudar a minha foto
-          </button>
-
-          <template v-else>
-            <h2>{{ tituloDaTroca }}</h2>
-            <AppdFoto
-              ref="campoFoto"
-              v-model="enviandoFoto"
-              rotulo="Nova foto para o crachá"
-              :imagem-inicial="ROTA_FOTO"
-            />
-            <button type="button" class="botao botao-fantasma" @click="trocandoFoto = false">
-              Manter a foto de agora
-            </button>
-          </template>
         </section>
 
         <p v-if="salvandoFoto" role="status" class="carregando">Guardando a sua foto…</p>
@@ -287,10 +215,12 @@ async function exportar(formato: 'png' | 'pdf') {
               :situacao="data.situacao"
               :foto="data.foto"
               :deficiencias="data.deficiencias"
-              :cid="data.cidNoCracha ? data.cid : null"
+              :cid="data.cid"
               :cras="data.cras"
               :credencial-transporte="data.credencialTransporte"
               :emissao="data.emissao"
+              :nascimento="data.nascimento"
+              :cpf="data.cpf"
               :url-verificacao="urlVerificacao"
             />
           </figure>
@@ -303,11 +233,78 @@ async function exportar(formato: 'png' | 'pdf') {
               :situacao="data.situacao"
               :contato-emergencia="data.contatoEmergencia"
               :cuidador-nome="data.cuidadorNome"
+              :emissao="data.emissao"
+              :endereco-pessoa="data.enderecoPessoa"
               :url-verificacao="urlVerificacao"
             />
           </figure>
         </div>
       </div>
+
+      <!--
+        O bloco de trocar a foto, **abaixo** do cartão (2026-08-21).
+
+        Estava acima, e o dono apontou: "se mudar minha foto podia estar aqui embaixo, não
+        precisava estar aqui em cima". A ordem certa é a da tarefa — primeiro se vê o
+        cartão, depois se decide mexer nele. Em cima, o botão sugeria que faltava algo.
+      -->
+      <section v-if="temFoto" class="trocar-bloco">
+        <!--
+            Dois caminhos, porque são duas intenções diferentes (2026-08-21).
+
+            **Ajustar** trabalha sobre a foto que já está guardada: serve para centralizar
+            o rosto ou aproximar, sem precisar caçar o arquivo original no aparelho — que
+            muitas vezes já nem existe mais.
+
+            **Trocar** pede um arquivo novo, e é o único caminho quando a foto em si é a
+            errada.
+
+            Separá-los é o que evita a pergunta que o dono fez ao tentar mexer na foto:
+            um botão só, chamado "trocar", não parece prometer reenquadramento.
+          -->
+        <!--
+            Um botão só, e não dois (2026-08-21).
+
+            "Ajustar o enquadramento" e "Trocar a minha foto" eram duas portas para a mesma
+            sala: o recorte. O dono viu isso na hora — "pode ser o mesmo botão" —, e ele
+            tem razão, porque a diferença entre as duas nunca foi de intenção, e sim de
+            **onde a imagem vem**. Agora quem decide isso é o recorte: ele abre com a foto
+            de agora, e lá dentro há "Escolher outra imagem" para quem quer outra.
+
+            O caminho curto também ficou mais curto: reenquadrar era o caso comum e exigia
+            escolher entre dois botões antes de qualquer coisa.
+          -->
+        <button
+          v-if="!trocandoFoto"
+          type="button"
+          class="botao botao-secundario compacto"
+          @click="ajustarFoto"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+            <path
+              d="M4 8V5a1 1 0 0 1 1-1h3m8 0h3a1 1 0 0 1 1 1v3m0 8v3a1 1 0 0 1-1 1h-3m-8 0H5a1 1 0 0 1-1-1v-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          Mudar a minha foto
+        </button>
+
+        <template v-else>
+          <h2>{{ tituloDaTroca }}</h2>
+          <AppdFoto
+            ref="campoFoto"
+            v-model="enviandoFoto"
+            rotulo="Nova foto para o crachá"
+            :imagem-inicial="ROTA_FOTO"
+          />
+          <button type="button" class="botao botao-fantasma" @click="trocandoFoto = false">
+            Manter a foto de agora
+          </button>
+        </template>
+      </section>
 
       <!-- Ações de baixar -->
       <div class="acoes-baixar">
@@ -421,48 +418,17 @@ async function exportar(formato: 'png' | 'pdf') {
         "facilita", nada de emoji, nada de cor de ação.
       -->
       <!--
-        O opt-in do CID aparece **só para quem tem CID guardado**.
+        O opt-in de imprimir o CID saiu daqui em 2026-08-21.
 
-        Quem nunca informou não precisa ver uma caixa sobre um dado que não deu — seria
-        oferecer a impressão de algo inexistente, e convidar a pergunta errada.
+        Ele existia porque guardar e imprimir eram duas decisões, cada uma com a sua caixa.
+        O dono mandou juntá-las no consentimento do formulário — "o CID pode entrar junto do
+        consentimento atual existente" —, e uma tela que ainda oferecesse a escolha diria que
+        há uma escolha a fazer aqui, quando ela já foi feita lá.
+
+        Fica registrado o que se perdeu, porque o custo é real: quem se arrepende de ter o
+        diagnóstico impresso agora precisa retirar a autorização inteira em `/seus-direitos`,
+        o que apaga o CID — não há mais o meio-termo de guardar sem imprimir.
       -->
-      <section v-if="data.temCid" class="cartao opt-in" aria-labelledby="t-cid">
-        <h2 id="t-cid">O CID no meu crachá</h2>
-
-        <div class="escolha-optin">
-          <p class="estado-atual">
-            <strong>Hoje o seu crachá {{ data.cidNoCracha ? 'mostra' : 'não mostra' }}</strong>
-            o seu CID.
-          </p>
-
-          <label class="escolha" for="cid-no-cracha">
-            <input
-              id="cid-no-cracha"
-              type="checkbox"
-              :checked="data.cidNoCracha"
-              aria-describedby="cid-consequencias"
-              @change="alternarCidNoCracha"
-            />
-            <span>Mostrar o meu CID no crachá</span>
-          </label>
-
-          <div id="cid-consequencias">
-            <p>
-              Se você marcar, o código do seu diagnóstico é impresso na frente do cartão — e o
-              cartão é o documento que você mostra a quem pedir.
-            </p>
-            <p>
-              <strong>A página pública de verificação nunca mostra o seu CID</strong>, marcado ou
-              não. Ela é aberta a qualquer pessoa que tenha o seu número de registro.
-            </p>
-            <p>
-              Para apagar o CID de vez, retire a autorização em
-              <NuxtLink to="/seus-direitos">Seus direitos</NuxtLink>.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section class="cartao opt-in" aria-labelledby="t-aparece">
         <h2 id="t-aparece">O que aparece no meu crachá</h2>
         <p>

@@ -33,17 +33,28 @@ export default defineEventHandler(async (event) => {
       cuidadorNome: true,
       cuidadorContato: true,
       criadoEm: true,
-      // O opt-in, não o dado: o CID só é buscado se ele estiver ligado, logo abaixo.
-      cidNoCracha: true,
+      // Nascimento, que o cartão de papel traz e o nosso não trazia (ADR-021).
+      nascimento: true,
       /*
-        O valor vem para responder **uma** pergunta — existe CID guardado? —, e não para
-        ir à tela. É o que permite a área oferecer o opt-in de impressão a quem tem CID
-        sem que o diagnóstico trafegue enquanto a impressão está desligada.
+        O CID, sem opt-in de impressão pelo meio (2026-08-21).
 
-        Sem isto a lógica ficava circular: a tela só mostrava o controle se recebesse o
-        CID, e a rota só mandava o CID se o controle já estivesse ligado.
+        Havia dois consentimentos — guardar e imprimir — e o dono mandou juntá-los no do
+        formulário: "o CID pode entrar junto do consentimento atual existente". Quem
+        autoriza guardar autoriza imprimir, e a tela do cadastro diz isso com todas as
+        letras antes da caixa.
+
+        `cidNoCracha` continua no banco e deixou de ser lido. Derrubar a coluna exigiria
+        migração destrutiva por uma decisão de um dia de idade.
       */
       cid: true,
+      // Campo 17 e endereço, impressos desde 2026-08-21 por decisão do dono (ADR-021).
+      cpf: true,
+      endereco: true,
+      numero: true,
+      complemento: true,
+      bairro: true,
+      municipio: true,
+      estado: true,
     },
   })
   if (!conta) throw createError({ statusCode: 401 })
@@ -59,15 +70,6 @@ export default defineEventHandler(async (event) => {
         .then((i) => (i ? (JSON.parse(i.deficiencias) as string[]) : []))
     : []
 
-  /*
-    O CID sai do banco **só** quando vai ser impresso — mesma regra que já valia para o
-    campo 12, e pelo mesmo motivo: sem opt-in, dado sensível não chega nem a ser lido.
-
-    A diferença em relação ao campo 12 é o que acontece depois. Aquele, com opt-in, também
-    aparece em `/verificar`; este nunca aparece lá, em nenhuma hipótese (ADR-020).
-  */
-  const cid = conta.cidNoCracha ? conta.cid : null
-
   const foto = await armazenamentoFoto(bd).ler(sessao.id)
 
   setHeader(event, 'Cache-Control', 'private, no-store')
@@ -78,10 +80,15 @@ export default defineEventHandler(async (event) => {
     situacao: conta.situacao as 'ativo' | 'inativo',
     mostraDeficiencia: conta.crachaMostraDeficiencia,
     deficiencias,
-    cidNoCracha: conta.cidNoCracha,
-    /* Booleano, não o valor: a tela precisa saber que existe, não qual é. */
-    temCid: Boolean(conta.cid),
-    cid,
+    /*
+      O CID vai para o cartão sempre que existir. A trava que continua de pé, inteira e sem
+      exceção, é a outra: `/verificar` nunca o mostra, e o teste transversal em
+      `test/vazamento.spec.ts` é quem guarda isso.
+    */
+    cid: conta.cid,
+    cpf: conta.cpf,
+    /* Endereço da pessoa, como no cartão de papel. */
+    enderecoPessoa: enderecoDaPessoa(conta),
     cras: conta.cras,
     credencialTransporte: conta.credencialTransporte,
     /*
@@ -92,9 +99,31 @@ export default defineEventHandler(async (event) => {
     contatoEmergencia: conta.contatoEmergencia ?? conta.cuidadorContato,
     cuidadorNome: conta.cuidadorNome,
     emissao: conta.criadoEm,
+    nascimento: conta.nascimento,
     foto: foto ? `data:${TIPO_ARMAZENADO};base64,${paraBase64(foto.conteudo)}` : null,
   }
 })
+
+/**
+ * O endereço numa linha, como o cartão de papel o traz.
+ *
+ * Montado aqui, e não no componente, pelo mesmo motivo da queda do contato de emergência:
+ * a tela e o arquivo baixado precisam mostrar exatamente a mesma coisa, e duas montagens
+ * são duas chances de divergirem.
+ */
+function enderecoDaPessoa(c: {
+  endereco: string | null
+  numero: string | null
+  complemento: string | null
+  bairro: string | null
+  municipio: string | null
+  estado: string | null
+}): string {
+  const rua = [c.endereco, c.numero].filter(Boolean).join(', ')
+  const comComplemento = [rua, c.complemento].filter(Boolean).join(' — ')
+  const cidade = [c.municipio, c.estado].filter(Boolean).join('/')
+  return [comComplemento, c.bairro, cidade].filter(Boolean).join(' · ')
+}
 
 function paraBase64(bytes: Uint8Array): string {
   let binario = ''

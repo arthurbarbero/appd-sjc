@@ -19,6 +19,18 @@ import { TERMOS, versaoVigente } from '../shared/termos'
 const RAIZ = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
 const ler = (...partes: string[]) => readFileSync(join(RAIZ, ...partes), 'utf8')
 
+/**
+ * O `<template>` de um componente, sem comentários.
+ *
+ * Existe porque os testes de "isto não pode aparecer no cartão" precisam olhar o que sai
+ * impresso, e não o arquivo: os comentários deste projeto explicam justamente o que ficou
+ * de fora, então lê-los reprovaria a explicação junto com o defeito.
+ */
+function textoDoTemplate(arquivo: string): string {
+  const template = arquivo.slice(arquivo.indexOf('<template>'), arquivo.indexOf('</template>'))
+  return template.replace(/<!--[\s\S]*?-->/g, '')
+}
+
 describe('O termo do CID é próprio, e não uma versão do Art. 11', () => {
   it('existe no catálogo com slug distinto', () => {
     const cid = TERMOS.find((t) => t.termoId === 'cid-diagnostico')
@@ -121,29 +133,47 @@ describe('A tela não afirma o consentimento pela pessoa', () => {
   })
 })
 
-describe('O opt-in de imprimir é outro, e o CID nunca é público', () => {
-  it('a rota do crachá só devolve o CID com o opt-in ligado', () => {
+/*
+  O opt-in de imprimir o CID foi **revogado** em 2026-08-21, no mesmo dia em que nasceu.
+
+  O ADR-020 tinha três travas, e a terceira era "guardar não é imprimir": consentir em
+  ceder o diagnóstico e consentir em estampá-lo num cartão que se mostra na rua eram
+  decisões separadas, com caixas separadas. O dono mandou juntá-las ao consentimento do
+  formulário — "o CID pode entrar junto do consentimento atual existente".
+
+  Os quatro testes que guardavam essa trava não foram corrigidos: foram apagados, porque a
+  regra que eles provavam deixou de existir. Fica no lugar o que **continua** valendo, e
+  que é a trava mais importante das três.
+*/
+describe('O CID sai no cartão quando existe, e nunca em /verificar', () => {
+  it('a rota do crachá devolve o CID sem consultar opt-in nenhum', () => {
     const rota = ler('server', 'api', 'area', 'cracha.get.ts')
-    expect(rota).toMatch(/const cid = conta\.cidNoCracha \? conta\.cid : null/)
+    expect(rota).toMatch(/cid: conta\.cid/)
+    // O opt-in de impressão sumiu da leitura; a coluna ficou no banco.
+    expect(rota).not.toMatch(/cidNoCracha \? conta\.cid/)
   })
 
-  it('a tela recebe um booleano para saber que existe CID, não o valor', () => {
-    // Sem isso a lógica fica circular: a tela só oferece o controle se receber o dado, e
-    // a rota só manda o dado se o controle estiver ligado.
-    expect(ler('server', 'api', 'area', 'cracha.get.ts')).toMatch(/temCid: Boolean\(conta\.cid\)/)
-    expect(ler('app', 'pages', 'area', 'cracha.vue')).toMatch(/v-if="data\.temCid"/)
+  it('a rota que gravava o opt-in voltou a aceitar um campo só', () => {
+    const rota = ler('server', 'api', 'area', 'cracha.put.ts')
+    expect(rota).not.toMatch(/cidNoCracha/)
+    expect(rota).toMatch(/readBody<\{ mostraDeficiencia\?: unknown \}>/)
   })
 
-  it('ligar a impressão sem CID guardado é recusado', () => {
-    expect(ler('server', 'api', 'area', 'cracha.put.ts')).toMatch(
-      /Não há CID guardado para imprimir/,
-    )
-  })
-
-  it('o texto do opt-in diz o que a impressão significa', () => {
+  it('a tela do crachá não oferece mais a escolha de imprimir o CID', () => {
     const tela = ler('app', 'pages', 'area', 'cracha.vue')
-    expect(tela).toMatch(/mostra a quem pedir/)
-    expect(tela).toMatch(/nunca mostra o seu CID/)
+    expect(tela).not.toMatch(/id="cid-no-cracha"/)
+    expect(tela).not.toMatch(/alternarCidNoCracha/)
+  })
+
+  it('o consentimento do formulário diz que autorizar é autorizar imprimir', () => {
+    /*
+      Com uma caixa só, ela precisa dizer as duas coisas. Sem isto, a autorização de
+      imprimir seria obtida por omissão — que é o defeito que as duas caixas existiam para
+      evitar, e a única compensação possível por tê-las juntado.
+    */
+    const tela = ler('app', 'pages', 'atendimento', 'inscricao.vue')
+    expect(tela).toMatch(/guardar o meu CID e a imprimi-lo no meu crachá/)
+    expect(tela).toMatch(/nunca<\/strong> aparece na página pública/)
   })
 })
 
@@ -184,15 +214,23 @@ describe('O cartão é deitado, e traz os campos do papel', () => {
   })
 
   it('não promete validade nem contribuição em dia', () => {
-    // Decisão do dono: validade fica para depois. O site não sabe se a contribuição está
-    // em dia, e imprimir seria sustentar o que não se pode.
-    expect(cracha).not.toMatch(/validade/i)
-    expect(cracha).not.toMatch(/contribuição em dia/i)
+    /*
+      Decisão do dono: validade fica para depois. O site não sabe se a contribuição está em
+      dia, e imprimir seria sustentar o que não se pode — mesmo o cartão de papel trazendo
+      as duas coisas, e mesmo o nosso sendo réplica dele desde 2026-08-21.
+
+      A busca é no **texto que sai impresso**, e não no arquivo inteiro: os comentários
+      explicam por que a validade não está lá, e um teste que lesse o arquivo cru reprovaria
+      justamente a explicação.
+    */
+    const impresso = textoDoTemplate(cracha)
+    expect(impresso).not.toMatch(/validade/i)
+    expect(impresso).not.toMatch(/contribuição em dia/i)
   })
 
   it('o número impresso é o do site, e não sequencial', () => {
     expect(cracha).toMatch(/numeroRegistro/)
-    expect(cracha).not.toMatch(/\/CD/)
+    expect(textoDoTemplate(cracha)).not.toMatch(/\/CD/)
   })
 
   it('a folha cabe: dois cartões de 85,6 mm mais o vão dentro de 210 mm', () => {

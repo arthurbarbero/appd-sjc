@@ -103,8 +103,16 @@ function fechar() {
       role="group"
       aria-label="Folha A4 com o crachá em tamanho real"
     >
+      <!--
+        Os dois lados **encostados**, e a tira inteira com marca de corte só em volta.
+
+        O dono viu o vão entre eles e disse o motivo, que é de uso e não de estética: "a
+        pessoa vai imprimir e ela vai dobrar aqui, então não pode ter esse espaço, tem que
+        tá bem coladinho". Com vão, quem dobra no meio deixa uma aba branca de um lado e
+        corta o cartão do outro.
+      -->
       <div class="folha">
-        <div class="corte">
+        <div class="tira">
           <AppdCracha
             lado="frente"
             :nome="data.nome ?? ''"
@@ -112,14 +120,14 @@ function fechar() {
             :situacao="data.situacao"
             :foto="data.foto"
             :deficiencias="data.deficiencias"
-            :cid="data.cidNoCracha ? data.cid : null"
+            :cid="data.cid"
             :cras="data.cras"
             :credencial-transporte="data.credencialTransporte"
             :emissao="data.emissao"
+            :nascimento="data.nascimento"
+            :cpf="data.cpf"
             :url-verificacao="urlVerificacao"
           />
-        </div>
-        <div class="corte">
           <AppdCracha
             lado="verso"
             :nome="data.nome ?? ''"
@@ -127,6 +135,8 @@ function fechar() {
             :situacao="data.situacao"
             :contato-emergencia="data.contatoEmergencia"
             :cuidador-nome="data.cuidadorNome"
+            :emissao="data.emissao"
+            :endereco-pessoa="data.enderecoPessoa"
             :url-verificacao="urlVerificacao"
           />
         </div>
@@ -180,15 +190,16 @@ function fechar() {
 }
 
 /*
-  A conta que define a margem, agora que o cartão é deitado.
+  A conta da folha, com a tira colada.
 
-  Dois cartões de 85,6 mm somam 171,2 mm. Com os 20 mm de margem de antes sobravam 170 mm
-  úteis — e a tira **não cabia**: o segundo cartão era empurrado para fora da folha, sem
-  aviso nenhum na tela. O cartão em pé cabia por acaso, porque media 54 mm de largura.
+  Dois cartões de 85,6 mm somam 171,2 mm — sem vão nenhum entre eles, desde 2026-08-21. Com
+  12 mm de margem sobram 186 mm úteis, e a tira ocupa 171,2: quase 15 mm de respiro para a
+  tesoura, que é o motivo de a margem existir.
 
-  12 mm de margem deixam 186 mm úteis; com 8 mm entre os dois, a tira ocupa 179,2 e sobram
-  quase 7 para respiro. A margem continua larga o bastante para a tesoura, que é o motivo
-  de ela existir.
+  Os 8 mm de vão que havia antes saíram por decisão do dono, e o motivo é a dobra: a tira é
+  cortada inteira e dobrada ao meio, e um vão no meio vira aba branca de um lado e corte no
+  cartão do outro. A linha central é **dobra**, não corte — por isso a marca de corte
+  aparece só nas quatro pontas da tira.
 */
 .folha {
   width: 210mm;
@@ -199,17 +210,19 @@ function fechar() {
   padding: 12mm;
   box-sizing: border-box;
   display: flex;
-  gap: 8mm;
   align-items: flex-start;
 }
 
-/* Marcas de corte finas, para saber onde cortar sem invadir o cartão. */
-.corte {
+.tira {
   position: relative;
+  display: flex;
+  /* Sem gap: os dois lados se encostam para a dobra cair exatamente no meio. */
+  gap: 0;
 }
 
-.corte::before,
-.corte::after {
+/* Marcas de corte finas, nas pontas da tira — nunca entre os dois cartões. */
+.tira::before,
+.tira::after {
   content: '';
   position: absolute;
   left: -6mm;
@@ -218,11 +231,11 @@ function fechar() {
   background: var(--texto);
 }
 
-.corte::before {
+.tira::before {
   top: 0;
 }
 
-.corte::after {
+.tira::after {
   bottom: 0;
 }
 
