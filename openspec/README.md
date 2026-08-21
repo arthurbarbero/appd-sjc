@@ -22,7 +22,7 @@ cenários validados item a item, em `VALIDACAO.md` dentro de cada pasta.
 | `site-institucional`          | 15 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
 | `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam o catálogo completo de termos   |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
-| `cracha-impresso`             | proposal escrito; três decisões do dono antes da spec                     |
+| `cracha-impresso`             | **spec e tasks escritas**; T6 espera a decisão sobre o desenho            |
 
 **`acabamento-de-interface` foi arquivada em 2026-08-21**, com `VALIDACAO.md` item a item.
 Nasceu de uma revisão do dono em vídeo — 30 apontamentos em doze telas, e boa parte deles
@@ -30,10 +30,18 @@ era uma regra de largura mal escopada aparecendo em sete lugares. Foi a primeira
 cujas telas **não** passaram pelo Claude Design: liberação do dono, com axe A/AA em três
 larguras e conferência de teclado no lugar do gate de design.
 
-**`cracha-impresso` é a próxima**, e tem proposal esperando três decisões do dono. Ela saiu
-da anterior quando a foto do cartão físico mostrou que o pedido — frente e verso lado a
-lado — vinha acompanhado de cinco campos que o modelo não tem e de uma frente que imprime
-CID e CPF, contra o que a nossa própria tela promete.
+**`cracha-impresso` é a próxima**, com proposal, spec e tasks escritos em 21/08. Ela saiu da
+anterior quando a foto do cartão físico mostrou que o pedido — frente e verso lado a lado —
+vinha acompanhado de cinco campos que o modelo não tem e de uma frente que imprime CID.
+
+O dono decidiu **coletar o CID**, e essa é a mudança de fundo do projeto: o site passa a
+guardar diagnóstico, não mais categoria de deficiência. Virou
+[ADR-020](../docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md), com as três travas sem as
+quais a decisão não se sustenta — consentimento próprio para guardar, opt-in próprio para
+imprimir, e **nunca** em `/verificar`.
+
+As tasks começam pelas travas, e não pelo desenho: sem elas de pé não existe cartão para
+imprimir o dado.
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,
 puxada para a V1 pelo dono em 2026-08-07 (ADR-016, que supersede em parte o ADR-014). Ela
