@@ -4,8 +4,8 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**Trabalho em curso na branch `acabamento-de-interface`** (2026-08-20), 7 commits, **não
-publicada**. A `main` publica a cada push, e o gate de aceite ainda não fechou — ver T15.
+**Branch `acabamento-de-interface`**, não publicada. A `main` publica a cada push, e a
+change ainda não passou pelo gate final.
 
 A origem é uma **revisão do dono em vídeo**, de 16min40s, percorrendo o site no ar. O
 áudio foi transcrito localmente (faster-whisper `large-v3-turbo`, offline) e cada item
@@ -19,47 +19,64 @@ independentes. A medida saiu do seletor de elemento e passou à classe `.prosa`,
 centralizada; as treze larguras avulsas que cada página tinha inventado viraram três
 tokens.
 
-**Fases 1 e 3 fechadas** — o que não dependia de design nem de terceiros:
+**As três fases estão feitas.**
 
-| Frente                     | Estado                                                                                         |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| Sistema de largura         | feito, com teste que reprova largura nova fora de token                                        |
-| B1, foto ausente na área   | feito — **não era carregamento**: a tela desenhava a palavra "Foto" num retângulo cinza        |
-| B3, recorte em branco      | feito — cancelar devolvia o vazio no lugar da foto que havia                                   |
-| B2, salto de rolagem       | **não reproduziu** — quatro hipóteses testadas, CLS zero no dev e em produção; precisa do dono |
-| ✕ do erro de campo         | feito em 28 lugares; a frase passa a carregar a sinalização não-cromática                      |
-| Home, cadastro, área, etc. | feito — 16 itens de conteúdo e campo                                                           |
-| Campos 20 e 21             | feito — estado (do CEP, que já devolvia a UF) e país, com migration `0004`                     |
+| Frente                   | Estado                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| Sistema de largura       | feito, com teste que reprova largura nova fora de token                                    |
+| B1, foto ausente na área | feito — **não era carregamento**: a tela desenhava a palavra "Foto" num retângulo cinza    |
+| B3, recorte em branco    | feito — cancelar devolvia o vazio no lugar da foto que havia                               |
+| B2, salto de rolagem     | **dispensado pelo dono**; o "subir ao clicar e ao salvar", que era outra coisa, foi feito  |
+| ✕ do erro de campo       | feito em 28 lugares; a frase passa a carregar a sinalização não-cromática                  |
+| Conteúdo e campos        | feito — 16 itens em home, cadastro, área, exclusão, crachá, sobre e contato                |
+| Campos 20 e 21           | feito — estado (do CEP, que já devolvia a UF) e país, com migration `0004`                 |
+| Cabeçalho e menu         | feito — painel deslizante da direita, hambúrguer, marca sem texto em largura intermediária |
+| Área do associado        | feito — menu à esquerda, conteúdo à direita, com fileira de volta abaixo de 760px          |
 
-**Fase 2 parada no canvas, como manda a regra**: cabeçalho que perde o texto da marca,
-menu hambúrguer deslizando da direita e área do associado com menu à esquerda são telas, e
-nenhuma tela começa antes do design aprovado.
+**A Fase 2 não passou pelo canvas por liberação do dono** em 2026-08-20: "estou liberando
+pra você pegar inspirações na internet e fazer você mesmo". No lugar do gate de design
+entrou medição: axe A/AA sem violação em 390, 1000 e 1280px, com o painel aberto e
+fechado, e o ciclo de teclado conferido — abrir, percorrer, `Esc`, foco de volta ao botão.
 
-**Fase 4 saiu da change.** A foto do crachá físico mostrou que não é diagramação: cinco
+**A Fase 4 saiu da change.** A foto do crachá físico mostrou que não é diagramação: cinco
 campos que o modelo não tem, identidade visual fora do `DESIGN.md`, e a frente do cartão
 real imprimindo CID e CPF — contra o que a nossa própria tela promete (ADR-019). Vira
 proposal próprio.
 
-**Números**: `npm test` de 233 para **307**. `npm run aceite` **ainda não passa** — ver
-T15 em `openspec/changes/acabamento-de-interface/tasks.md`.
+**Números**: `npm test` de 233 para **329**. `npm run aceite` de 143 para **176**
+verificações.
 
-### Três coisas que ficaram devendo, e são do dono
+### A armadilha que custou a maior parte de uma sessão
 
-1. **B2** — dizer se o salto de rolagem volta a acontecer, de preferência com as extensões
-   do navegador desativadas.
-2. **A biografia da fundadora** — conferi `appd.org.br` em 20/08: não existe texto sobre
-   Maria Claudete além da frase de que ela fundou. A assimetria da tela vem da fonte.
-   Pendência 8a em `docs/pendencias-appd.md`.
-3. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
+O gate parecia reprovar com `401` em toda rota de `/api/area`, e o mesmo acontecia no
+commit anterior à change — o que parecia defeito antigo do produto. Não era nenhum dos
+dois: eu subia o worker com `wrangler dev .output/server/index.mjs`, que **ignora o
+`wrangler.jsonc`** e portanto não carrega o segredo que sela o cookie de sessão. O cookie
+existia e não abria.
+
+`npm run aceite` sobe o servidor sozinho, do jeito certo. **Só passe `APPD_BASE` para
+apontar a um endereço que já está no ar** — nunca para um worker subido à mão.
+
+Outra, menor: rodar o aceite várias vezes junto de scripts que também criam conta estoura
+a cota de 12 cadastros por 15 minutos, e o `429` aparece disfarçado de outro defeito.
+Limpar com `wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"`.
+
+### Três coisas que ficaram com o dono
+
+1. **A biografia da fundadora** — conferi `appd.org.br` em 20/08: não existe texto sobre
+   Maria Claudete além da frase de que ela fundou. A assimetria da tela vem da fonte, não
+   da transcrição. Pendência 8a em `docs/pendencias-appd.md`.
+2. **O atendimento de manhã** — saiu do site junto com o bloco "Antes de começar". A
    constante segue em `shared/conteudo.ts`; se a informação importa, o lugar é
    `/atendimento`.
+3. **A Fase 4** — o crachá impresso espera proposal próprio.
 
 ### Uma revogação registrada
 
 Apagar as duas linhas do crachá **revoga o REQ-24 de `cracha-do-associado`**, que está
 arquivada e validada. O comportamento não mudou — a geração segue local, no navegador —,
 mas o requisito que obrigava a tela a dizer isso deixou de valer. Marcado na spec
-arquivada para a ausência não ser lida como esquecimento.
+arquivada, e o gate de aceite agora exige a **ausência** da frase.
 
 ---
 

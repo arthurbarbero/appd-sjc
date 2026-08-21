@@ -22,32 +22,22 @@ que hoje declaram largura por conta própria (`AppdOferta.vue`, `inscricao.vue`,
 inteiro, não das telas citadas no vídeo — a lição do marcador de lugar que sobreviveu na
 rota vizinha.
 
-### T2 — B2, o salto de rolagem — **NÃO REPRODUZIU**
+### T2 — B2, o salto de rolagem — **DISPENSADO PELO DONO**, e o que ele pedia foi feito
 
 Cobre REQ-8, REQ-9.
 
-A task exigia nomear a causa antes de corrigir. O resultado da investigação é que **não
-há defeito confirmado no código**, e por isso nada foi corrigido — mexer aqui seria
-inventar conserto para sintoma que não se manifesta.
+Duas coisas estavam misturadas nesta task, e a separação é o que a destrava.
 
-O que foi tentado, em 2026-08-20:
+**O salto** — a página indo para baixo sozinha — não reproduziu: quatro hipóteses testadas
+(rolagem preservada ao trocar de seção, posição restaurada ao voltar, clique em região
+neutra, e layout shift medido por `PerformanceObserver` no dev **e** em produção, com CLS
+0,0000 em todas). O dono dispensou em 2026-08-20: "esquece o salto se tu não conseguiu".
 
-| Hipótese                                      | Como foi testada                                                                                   | Resultado                     |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
-| Rolagem preservada ao trocar de seção         | Playwright, conta criada no dev, clique em cada item do menu com a página no topo e rolada         | `scrollY` volta a 0 sempre    |
-| Posição restaurada ao voltar para `/area`     | Sequência exata do vídeo: `/area` rolada → `/area/cracha` → "Início"                               | `scrollY` = 0 nas duas voltas |
-| Clique em região neutra rola                  | Clique em área sem controle, página rolada                                                         | `scrollY` não muda            |
-| Layout shift (conteúdo que carrega e empurra) | `PerformanceObserver` de `layout-shift` em `/area`, `/area/cracha` e `/`, no dev **e** em produção | CLS = 0,0000 em todas         |
-
-O que o vídeo mostra, e sustenta a leitura de estado transitório: o dono deu um refresh
-e disse "por aqui tá normal" (09:26); mais tarde relatou "fiz um refresh esquisito"
-(11:49). Na mesma sessão há um popup do LastPass aberto sobre a página (08:22).
-
-**O que falta**, e é do dono: dizer se o salto volta a acontecer, de preferência com as
-extensões do navegador desativadas. Se voltar, a gravação desse momento fecha a causa.
-
-Enquanto isso, REQ-8 e REQ-9 viram **teste de regressão** no aceite — o comportamento
-correto de hoje fica travado, e uma regressão futura reprova.
+**Subir ao clicar e ao salvar** é outra coisa, e era pedido — dito duas vezes no vídeo,
+"quando eu clicar aqui eu quero que ele suba, logicamente" (13:30). Isso **faltava**, e
+agora está em `app/router.options.ts`: `scrollBehavior` leva toda navegação ao topo,
+preservando âncora, o voltar do navegador e `prefers-reduced-motion`. Em `/area/dados`, o
+salvar também volta ao topo e põe o foco na confirmação.
 
 ### T3 — B1, a foto ausente no cartão da área
 
@@ -72,14 +62,17 @@ ela que passa a carregar a sinalização não-cromática.
 **Aceite**: os dois cenários de "A mensagem de erro", e o teste de acessibilidade não
 acusa erro sinalizado só por cor.
 
-## Fase 2 — cabeçalho e navegação — **BLOQUEADA: espera o canvas**
+## Fase 2 — cabeçalho e navegação — **FEITA**
 
-### T6 — Design das três telas
+### T6 — Design das três telas — **dispensado pelo dono**
 
-Cobre REQ-14 a REQ-19.
+Em 2026-08-20: "no caso onde precisa de Claude Design eu estou liberando pra você pegar
+inspirações na internet e fazer você mesmo". As três telas foram desenhadas e
+implementadas aqui, sem passar pelo canvas.
 
-Preparar o prompt e os tokens; o dono opera o canvas; ler o resultado com DesignSync e
-auditar em `docs/`. Sem isto, T7 e T8 não começam.
+O que substituiu o gate do design, porque alguma coisa tinha de substituir: axe A/AA em
+390, 1000 e 1280px, com o painel aberto e fechado, mais a conferência por teclado do
+ciclo abrir → percorrer → `Esc` → foco de volta ao botão.
 
 ### T7 — Cabeçalho e menu deslizante
 
