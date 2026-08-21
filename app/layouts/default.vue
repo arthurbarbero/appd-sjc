@@ -55,7 +55,20 @@ const botaoMenu = ref<HTMLElement | null>(null)
   O ponto de quebra está escrito duas vezes, aqui e no CSS, e não há como não estar. Se um
   mudar, o outro muda junto — é o mesmo par que a divisória da conta já mantinha alinhado.
 */
-const PONTO_DE_QUEBRA = '(max-width: 860px)'
+/*
+  O ponto de quebra do menu está em `em`, e não em pixel — de propósito.
+
+  Em media query, `em` mede a **fonte que a pessoa escolheu no navegador**, não a do
+  documento. 53.75em dá os mesmos 860px de sempre para quem usa o padrão de 16px; para
+  quem configurou 24px, vira 1290px, e o hambúrguer aparece mais cedo — que é exatamente
+  quando ele precisa aparecer, porque com fonte maior os seis links deixam de caber antes.
+
+  Com o valor em pixel, essa conta não acontecia: o dono viu a barra quebrar em duas
+  linhas numa faixa estreita, logo acima de 860px, antes de o hambúrguer entrar. Reproduzi
+  com fonte base a 150% — quebra entre 864 e 880px. O público deste site é o que mais
+  aumenta a fonte, então a faixa quebrada era justamente a dele.
+*/
+const PONTO_DE_QUEBRA = '(max-width: 53.75em)'
 const estreito = ref(false)
 
 onMounted(() => {
@@ -413,13 +426,13 @@ const atual = (para: string) =>
 }
 /*
   A divisória vertical só vira horizontal quando a navegação **já** virou coluna, e isso
-  acontece em 860px (a regra do menu sanfonado, mais abaixo). Enquanto os dois números
-  discordavam — a divisória em 900, o menu em 860 —, a faixa de 861 a 900px recebia
+  acontece em 53.75em (a regra do painel, mais abaixo). Enquanto os dois números
+  discordavam — a divisória em 900px, o menu em 53.75em —, a faixa de 861 a 900px recebia
   `width: 100%` numa navegação ainda horizontal, e o bloco da conta caía para a segunda
   linha. Era o mesmo defeito do REQ-1, sobrevivendo numa faixa estreita de largura.
   Se um dos dois mudar, o outro muda junto.
 */
-@media (width <= 860px) {
+@media (width <= 53.75em) {
   .cabecalho nav .conta {
     padding-left: 0;
     border-left: 0;
@@ -437,6 +450,15 @@ const atual = (para: string) =>
 }
 .cabecalho nav ul {
   gap: var(--e1);
+  /*
+    `nowrap` na barra larga: se por qualquer motivo a linha ficar apertada — zoom de
+    página, uma fonte com métricas mais largas —, os itens se aproximam em vez de o
+    último cair para uma segunda linha. Quebrar era o que o dono descreveu como "fica
+    mais feio até aparecer o hambúrguer".
+
+    No painel estreito a regra é outra, e vem da media query: lá a lista é coluna.
+  */
+  flex-wrap: nowrap;
 }
 
 /* Rodapé */
@@ -530,7 +552,7 @@ const atual = (para: string) =>
   `translateX(100%)` no estado fechado, e não `display: none`: é o que permite deslizar.
   A visibilidade é desligada junto para o painel fechado não receber foco.
 */
-@media (max-width: 860px) {
+@media (max-width: 53.75em) {
   .alternar {
     display: inline-flex;
   }

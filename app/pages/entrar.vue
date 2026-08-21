@@ -224,14 +224,24 @@ form {
 .campo {
   max-width: 100%;
 }
+/*
+  O olho fica **dentro** do campo, e o campo vai até a borda.
+
+  Antes ele era um botão ao lado, e isso custava duas coisas ao mesmo tempo: encurtava a
+  caixa da senha e a deixava mais estreita que a do e-mail logo acima. "Esse botão podia
+  tá dentro do campo, e o campo até o limite, pra ficar na mesma largura", disse o dono em
+  2026-08-21 — e o desalinho entre os dois campos era o que mais saltava.
+
+  `padding-right` reserva o espaço do ícone dentro do controle, para o texto da senha
+  nunca correr por baixo dele.
+*/
 .com-olho {
-  display: flex;
-  gap: var(--e2);
-  align-items: center;
+  position: relative;
 }
+
 .com-olho input {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  padding-right: calc(var(--alvo-min) + var(--e1));
 }
 
 /*
@@ -240,12 +250,16 @@ form {
   primeiro criaria a impressão de dois controles de mesmo peso.
 */
 .olho {
+  position: absolute;
+  right: var(--e1);
+  /* Centralizado na altura do controle, independente de quanto ele meça. */
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--alvo-min);
   height: var(--alvo-min);
-  flex: none;
   padding: 0;
   border: 0;
   border-radius: var(--raio-botao);

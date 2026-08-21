@@ -500,7 +500,7 @@ async function enviar() {
           <span v-else-if="avisoCep" role="status" class="ajuda">{{ avisoCep }}</span>
         </div>
 
-        <div :class="['campo', 'largo', { 'campo-erro': erros.endereco }]">
+        <div :class="['campo', { 'campo-erro': erros.endereco }]">
           <label for="endereco">
             Endereço (rua/avenida/travessa) <span class="obrigatorio" aria-hidden="true">*</span>
           </label>
@@ -907,10 +907,6 @@ async function enviar() {
 
 .consentir {
   background: var(--fundo);
-}
-
-.campo.largo {
-  max-width: 100%;
 }
 
 .campo.aninhado {

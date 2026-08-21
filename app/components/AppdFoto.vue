@@ -491,9 +491,18 @@ const tamanhoPronto = computed(() => (foto.value ? `${Math.round(foto.value.size
               <button type="button" class="botao botao-primario" @click="usarEstaFoto">
                 Usar esta foto
               </button>
-              <button type="button" class="botao botao-secundario" @click="cancelar">
-                Cancelar
+              <!--
+                Trocar de imagem virou uma ação **de dentro** do recorte (2026-08-21).
+
+                Antes havia dois botões antes de chegar aqui — um para ajustar, outro para
+                trocar —, e o dono pediu um só. Quem entra querendo outra imagem encontra
+                a porta no lugar em que já está olhando, em vez de precisar ter escolhido
+                certo lá atrás.
+              -->
+              <button type="button" class="botao botao-secundario" @click="entrada?.click()">
+                Escolher outra imagem
               </button>
+              <button type="button" class="botao botao-fantasma" @click="cancelar">Cancelar</button>
             </div>
           </div>
         </div>

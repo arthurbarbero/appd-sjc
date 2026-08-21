@@ -21,12 +21,33 @@ import { versaoPorHash } from '~~/shared/termos'
  * As listas vêm do mesmo módulo do formulário, e não de uma cópia: duplicar o
  * vocabulário aqui é como as duas telas divergem sem ninguém perceber.
  */
+/*
+  Toda regra abaixo carrega a própria mensagem, e isso não é capricho de estilo.
+
+  Zod tem texto padrão para quando falta um: **"Invalid input"**, em inglês. Ele não fica
+  no console — sobe pela resposta 422, cai no resumo de erros e aparece para a pessoa,
+  exatamente onde ela precisa entender o que fazer. Aconteceu em produção em 2026-08-21:
+  quem marcou "Outro" e escreveu uma letra só no "Qual?" leu "Invalid input" e não tinha
+  como saber que faltava a segunda letra.
+
+  O teste `test/mensagens-de-erro.spec.ts` reprova qualquer validação sem mensagem.
+*/
 const esquemaCorrecao = z
   .object({
     deficiencias: z.array(z.enum(DEFICIENCIAS)).min(1, 'Marque pelo menos uma opção.'),
-    deficienciaOutro: z.string().trim().min(2).max(100).optional(),
+    deficienciaOutro: z
+      .string()
+      .trim()
+      .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
+      .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
+      .optional(),
     atendimentos: z.array(z.enum(ATENDIMENTOS)).min(1, 'Marque pelo menos um atendimento.'),
-    atendimentoOutro: z.string().trim().min(2).max(100).optional(),
+    atendimentoOutro: z
+      .string()
+      .trim()
+      .min(2, 'Escreva pelo menos duas letras — uma só não diz o que é.')
+      .max(100, 'Descreva em poucas palavras: cabem 100 caracteres.')
+      .optional(),
     dias: z.array(z.enum(DIAS)).min(1, 'Marque pelo menos um dia.'),
 
     /*
@@ -36,10 +57,12 @@ const esquemaCorrecao = z
       necessariamente, consentir de novo — e consentimento novo precisa de registro novo,
       senão o histórico diria que ela retirou e o dado voltou sozinho.
     */
-    consentimentoSaude: z.literal(true).optional(),
+    consentimentoSaude: z
+      .literal(true, 'Para informar a deficiência de novo é preciso autorizar de novo.')
+      .optional(),
     termoHash: z
       .string()
-      .regex(/^[0-9a-f]{64}$/)
+      .regex(/^[0-9a-f]{64}$/, 'A impressão digital do termo veio fora do formato.')
       .optional(),
   })
   .strict()

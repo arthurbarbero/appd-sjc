@@ -324,13 +324,31 @@ a:hover {
 
 /* ---------- campos ---------- */
 
+/*
+  O campo ocupa a coluna em que está — sem teto próprio.
+
+  Passou por 34rem e por 40rem, e em 2026-08-21 o dono foi direto ao ponto olhando o
+  formulário: "todos esses campos precisam chegar ao máximo… o endereço tá certo, o
+  restante deveria tá igual ao endereço". O endereço era o único sem teto, e por isso o
+  único que preenchia a caixa.
+
+  Um teto em `rem` aqui sempre foi a decisão errada de lugar: quem sabe a largura certa é
+  a coluna que abriga o campo — o grid da seção, o cartão, o painel. Fora dela, o número
+  vira chute, e é o chute que produzia a faixa vazia à direita de cada caixa.
+
+  Onde um campo curto merece parar antes, quem diz é a tela: `.campo.curto` para CEP,
+  número e afins, aplicado por quem conhece o conteúdo.
+*/
 .campo {
   display: flex;
   flex-direction: column;
   gap: var(--e1);
-  /* 40rem, não 34: o cartão que abriga o campo passou a usar a largura do bloco, e o
-     controle preso em 544px lia como "espremido" ao lado dele. */
-  max-width: 40rem;
+  min-width: 0;
+}
+
+/* Campo de conteúdo curto e previsível — CEP, número, UF. Só onde a tela pedir. */
+.campo.curto {
+  max-width: 16rem;
 }
 
 /* Rótulo em caixa alta e baixa: CAIXA ALTA reduz legibilidade porque apaga o

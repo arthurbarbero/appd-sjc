@@ -53,6 +53,17 @@ async function salvar() {
       },
     })
     salvo.value = true
+    /*
+      Volta ao topo e põe o foco na confirmação — o mesmo que `/area/dados` já fazia.
+
+      Faltava só aqui, e o dono notou a diferença entre as duas telas em 2026-08-21: "no
+      meu cadastro, quando eu salvo, não tá subindo… nos meus dados acontece". Quem salva
+      no fim de um formulário longo fica olhando para o mesmo lugar, sem sinal de que deu
+      certo, e quem usa leitor de tela não ouve nada.
+    */
+    await nextTick()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    resumo.value?.focus()
   } catch (erro: unknown) {
     const dados = (erro as { data?: { data?: { erros?: Record<string, string> } } })?.data?.data
     Object.assign(erros, dados?.erros ?? { formulario: 'Não conseguimos salvar agora.' })
