@@ -4,9 +4,9 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar em <https://appd-sjc.appd-sjc.workers.dev>** (versão de 20/08). Duas changes foram
-arquivadas em 21/08: `cracha-impresso` e `cartao-fiel-e-cadastro-aberto`. **A segunda ainda
-não subiu** — o dono precisa conferir.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>**, com CI e deploy verdes em 21/08.
+Duas changes arquivadas no dia: `cracha-impresso` e `cartao-fiel-e-cadastro-aberto`.
+Falta o dono conferir no ar.
 
 ### `cartao-fiel-e-cadastro-aberto` — 21/08, a partir de dois Jams
 
@@ -71,9 +71,26 @@ dois que mais vale repetir:
   em media query `em` mede a fonte **do navegador**. O teste reprovava o produto por um
   defeito dele mesmo.
 
+#### Três deploys reprovados pela mesma migration
+
+Vale mais que o resto desta seção, porque a lição é de método: **o D1 local com banco vazio
+não prova nada sobre o D1 remoto com dados.**
+
+1. **Comentário de bloco** — o remoto responde `SQL code did not contain a statement` a
+   `/* ... */`; o local aceita.
+2. **`defer_foreign_keys`** — a receita recomendada para migration em transação. O remoto
+   reverteu o banco.
+3. **`foreign_keys=OFF`** — o que o drizzle-kit escreve, e o que a `0002` usou com sucesso.
+   Falhou igual: a `0002` passou porque o banco estava **vazio**, e recriar `usuarios` só
+   viola chave estrangeira quando há linhas filhas apontando para ela.
+
+O que funciona é não violar: as filhas vão para cópias sem restrição, são esvaziadas, as
+tabelas são recriadas e os dados voltam. Os dois primeiros viraram teste; o terceiro virou
+um teste que aplica a última migration sobre um banco **com dados** e com `foreign_keys = ON`.
+
 #### O que falta
 
-- **Subir e o dono conferir.** Nada disso está no ar.
+- **O dono conferir no ar.**
 - **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
   por milímetro na tela.
 - **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e
