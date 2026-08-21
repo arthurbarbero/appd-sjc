@@ -148,14 +148,59 @@ let arrastando = false
 let ultimoX = 0
 let ultimoY = 0
 
+/*
+  Dois dedos aproximam e afastam, do jeito que qualquer galeria de fotos faz.
+
+  Até 2026-08-20 o zoom só existia nos dois botões, e o dono notou o que isso significa no
+  telefone: "não consigo dar zoom pelo mouse, só por aqui… na versão mobile deve ficar
+  zoada isso". Num aparelho de toque, apertar `+` repetidas vezes para enquadrar o próprio
+  rosto é trabalho que o gesto resolve de uma vez.
+
+  Os botões **ficam**, e não por educação: eles são o caminho de quem usa um dedo só, de
+  quem tem tremor, e de quem navega por teclado — que continua com as setas e o `PageUp`.
+  O gesto é um caminho a mais, nunca o único.
+
+  A conta é a razão entre a distância dos dedos agora e no início do gesto, aplicada sobre
+  a escala daquele momento. Rastrear os ponteiros num mapa é o que permite saber que são
+  dois: `pointerdown` não avisa quantos dedos há na tela.
+*/
+const ponteiros = new Map<number, { x: number; y: number }>()
+let escalaNoInicioDoGesto = 1
+let distanciaNoInicioDoGesto = 0
+
+function distanciaEntreDedos() {
+  const [a, b] = [...ponteiros.values()]
+  if (!a || !b) return 0
+  return Math.hypot(a.x - b.x, a.y - b.y)
+}
+
 function comecarArrasto(e: PointerEvent) {
+  ponteiros.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+
+  if (ponteiros.size === 2) {
+    // O segundo dedo encerra o arrasto e abre o gesto de escala.
+    arrastando = false
+    escalaNoInicioDoGesto = escala.value
+    distanciaNoInicioDoGesto = distanciaEntreDedos()
+    return
+  }
+
   arrastando = true
   ultimoX = e.clientX
   ultimoY = e.clientY
-  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
 }
 
 function arrastar(e: PointerEvent) {
+  if (ponteiros.has(e.pointerId)) ponteiros.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+  if (ponteiros.size >= 2) {
+    if (distanciaNoInicioDoGesto === 0) return
+    const razao = distanciaEntreDedos() / distanciaNoInicioDoGesto
+    definirEscala(escalaNoInicioDoGesto * razao)
+    return
+  }
+
   if (!arrastando) return
   deslocX.value += e.clientX - ultimoX
   deslocY.value += e.clientY - ultimoY
@@ -163,8 +208,18 @@ function arrastar(e: PointerEvent) {
   ultimoY = e.clientY
 }
 
-function soltar() {
+function soltar(e?: PointerEvent) {
+  if (e) ponteiros.delete(e.pointerId)
   arrastando = false
+  distanciaNoInicioDoGesto = 0
+
+  // Sobrou um dedo: volta a arrastar de onde ele está, sem salto.
+  const restante = [...ponteiros.values()][0]
+  if (restante) {
+    arrastando = true
+    ultimoX = restante.x
+    ultimoY = restante.y
+  }
 }
 
 const PASSO = 8
@@ -186,8 +241,13 @@ function teclado(e: KeyboardEvent) {
   acao()
 }
 
+/** O teto e o piso do zoom, num lugar só: os botões e o gesto passam por aqui. */
+function definirEscala(valor: number) {
+  escala.value = Math.min(3, Math.max(1, Number(valor.toFixed(2))))
+}
+
 function aproximar(delta: number) {
-  escala.value = Math.min(3, Math.max(1, Number((escala.value + delta).toFixed(2))))
+  definirEscala(escala.value + delta)
 }
 
 async function usarEstaFoto() {

@@ -9,7 +9,7 @@ Rito de spec do projeto (skill `fluxo-spec`, régua nível Grande).
 Nada vira código antes de existir a change correspondente aqui — e, para tela,
 antes do design aprovado no Claude Design.
 
-## Estado das changes — 2026-08-07
+## Estado das changes — 2026-08-20
 
 **Arquivadas** (`archive/`): `modelo-de-dados`, `revisao-de-interface`,
 `cracha-do-associado`, `area-do-associado` e `cadastro-e-login` — as três últimas com os
@@ -22,6 +22,13 @@ cenários validados item a item, em `VALIDACAO.md` dentro de cada pasta.
 | `site-institucional`          | 15 tasks: medição de peso e CLS, 301 das URLs antigas, sitemap, robots    |
 | `formulario-atendimento`      | 8 das 10 tasks fechadas; T9 e T10 esperam o catálogo completo de termos   |
 | `consentimento-e-privacidade` | T4 destravada pelo ADR-006; telas esperam o canvas; archive espera a APPD |
+
+**`acabamento-de-interface`** entrou em 2026-08-20, da revisão do dono em vídeo: 26
+apontamentos em doze telas, e boa parte deles era uma regra de largura mal escopada
+aparecendo em sete lugares. Fases 1 a 3 feitas, com `VALIDACAO.md` item a item; o crachá
+impresso saiu dela e vira change própria. Foi a primeira change cujas telas **não**
+passaram pelo Claude Design — liberação do dono, com axe A/AA e conferência de teclado no
+lugar do gate de design.
 
 **`painel-administrativo` é a próxima change**: gerência de usuários e troca de senha,
 puxada para a V1 pelo dono em 2026-08-07 (ADR-016, que supersede em parte o ADR-014). Ela

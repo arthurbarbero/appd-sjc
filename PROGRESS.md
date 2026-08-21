@@ -43,8 +43,8 @@ campos que o modelo não tem, identidade visual fora do `DESIGN.md`, e a frente 
 real imprimindo CID e CPF — contra o que a nossa própria tela promete (ADR-019). Vira
 proposal próprio.
 
-**Números**: `npm test` de 233 para **329**. `npm run aceite` de 143 para **176**
-verificações.
+**Números**: `npm test` de 233 para **332**. `npm run aceite` de 143 para **211**
+verificações, repetível — roda duas vezes seguidas sem reprovar.
 
 ### A armadilha que custou a maior parte de uma sessão
 

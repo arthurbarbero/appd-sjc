@@ -240,3 +240,23 @@ describe('A área do associado tem menu à esquerda (REQ-18, REQ-19)', () => {
     expect(apenasEstilo(NAV)).toMatch(/a\[aria-current='page'\]::after/)
   })
 })
+
+describe('O recorte da foto aceita pinça, sem perder os outros caminhos (REQ-29)', () => {
+  const FOTO = readFileSync(join(RAIZ, 'app', 'components', 'AppdFoto.vue'), 'utf8')
+
+  it('dois ponteiros mudam a escala', () => {
+    expect(FOTO).toMatch(/ponteiros\.size >= 2/)
+    expect(FOTO).toMatch(/distanciaEntreDedos/)
+  })
+
+  it('o teto e o piso do zoom ficam num lugar só', () => {
+    expect(FOTO).toMatch(/function definirEscala/)
+    const aproximar = FOTO.match(/function aproximar\([\s\S]*?\n\}/)?.[0] ?? ''
+    expect(aproximar).toMatch(/definirEscala/)
+  })
+
+  it('botões e teclado continuam existindo — o gesto é um caminho a mais', () => {
+    expect(FOTO).toMatch(/@click="aproximar\(-?0\.1\)"/)
+    expect(FOTO).toMatch(/function teclado/)
+  })
+})
