@@ -132,6 +132,54 @@ export const usuarios = sqliteTable(
     crachaMostraDeficiencia: integer('cracha_mostra_deficiencia', { mode: 'boolean' })
       .notNull()
       .default(false),
+
+    /*
+      Campos 22 a 25, acrescentados em 2026-08-21 para o crachá impresso servir ao que o
+      cartão de papel da associação serve. Todos opcionais: nada no site depende deles.
+    */
+
+    /**
+     * Campo 22 — o código do diagnóstico, por exemplo `G82.4`.
+     *
+     * **Não é "mais um campo de deficiência", e o lugar dele aqui é deliberado**
+     * ([ADR-020](../../docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md)). O campo 12 vive
+     * em `inscricoes_atendimento` e guarda categoria larga — `Física`, `Sensorial`. Este
+     * guarda diagnóstico, com código e classificação clínica, e por isso fica em coluna
+     * própria: enfiá-lo no campo 12 faria toda leitura daquele campo passar a carregar
+     * diagnóstico, inclusive as que já existem e não sabem disso.
+     *
+     * Guardar exige consentimento próprio (`cid-diagnostico` no catálogo de termos), que
+     * não é o mesmo do Art. 11. Apagado na retirada e na exclusão, como as demais colunas
+     * pessoais.
+     */
+    cid: text('cid'),
+
+    /**
+     * Opt-in de imprimir o CID **no crachá**.
+     *
+     * Separado de `crachaMostraDeficiencia` porque são dados diferentes, e separado do
+     * consentimento de guardar porque **guardar não é imprimir**: a pessoa pode querer o
+     * CID registrado na associação sem querer carregá-lo estampado num cartão que mostra
+     * na rua.
+     *
+     * Nasce em 0. Diferente do opt-in do campo 12, este **não tem efeito nenhum fora do
+     * crachá**: em `/verificar` o CID nunca aparece, marcado ou não, e não há exceção.
+     */
+    cidNoCracha: integer('cid_no_cracha', { mode: 'boolean' }).notNull().default(false),
+
+    /** Campo 23 — número do CRAS de referência. Opcional, texto livre. */
+    cras: text('cras'),
+
+    /** Campo 24 — credencial municipal de transporte. Opcional, texto livre. */
+    credencialTransporte: text('credencial_transporte'),
+
+    /**
+     * Campo 25 — telefone de emergência.
+     *
+     * Vazio, o crachá cai para `cuidadorContato` — é o que "contato se houver" quer
+     * dizer: quem já informou o contato do cuidador não precisa digitar de novo.
+     */
+    contatoEmergencia: text('contato_emergencia'),
     /** UUID v4 gerado pelo cliente; dedupe de clique duplo. NULL depois da exclusão. */
     chaveIdempotencia: text('chave_idempotencia').unique(),
 

@@ -79,6 +79,12 @@ describe('As larguras de conteúdo saem de token (REQ-3)', () => {
     ['sobre.vue', ['220px']],
     ['cracha-impressao.vue', ['1080px']],
     ['AppdFoto.vue', ['360px']],
+    /*
+      O crachá mede em milímetros porque é documento físico: 85,6 × 54 mm é o ISO ID-1, e
+      a URL do verso para em 30 mm para caber ao lado do QR. Não é largura de conteúdo —
+      é a dimensão do papel.
+    */
+    ['AppdCracha.vue', ['30mm']],
   ])
 
   it.each(TELAS)('%s não inventa largura própria', (caminho) => {

@@ -112,6 +112,10 @@ function fechar() {
             :situacao="data.situacao"
             :foto="data.foto"
             :deficiencias="data.deficiencias"
+            :cid="data.cidNoCracha ? data.cid : null"
+            :cras="data.cras"
+            :credencial-transporte="data.credencialTransporte"
+            :emissao="data.emissao"
             :url-verificacao="urlVerificacao"
           />
         </div>
@@ -121,6 +125,8 @@ function fechar() {
             :nome="data.nome ?? ''"
             :numero-registro="data.numeroRegistro"
             :situacao="data.situacao"
+            :contato-emergencia="data.contatoEmergencia"
+            :cuidador-nome="data.cuidadorNome"
             :url-verificacao="urlVerificacao"
           />
         </div>
@@ -173,16 +179,27 @@ function fechar() {
   overflow-x: auto;
 }
 
+/*
+  A conta que define a margem, agora que o cartão é deitado.
+
+  Dois cartões de 85,6 mm somam 171,2 mm. Com os 20 mm de margem de antes sobravam 170 mm
+  úteis — e a tira **não cabia**: o segundo cartão era empurrado para fora da folha, sem
+  aviso nenhum na tela. O cartão em pé cabia por acaso, porque media 54 mm de largura.
+
+  12 mm de margem deixam 186 mm úteis; com 8 mm entre os dois, a tira ocupa 179,2 e sobram
+  quase 7 para respiro. A margem continua larga o bastante para a tesoura, que é o motivo
+  de ela existir.
+*/
 .folha {
   width: 210mm;
   height: 297mm;
   background: #fff;
   border: 1px solid var(--borda-suave);
   box-shadow: var(--sombra-2);
-  padding: 20mm;
+  padding: 12mm;
   box-sizing: border-box;
   display: flex;
-  gap: 10mm;
+  gap: 8mm;
   align-items: flex-start;
 }
 

@@ -50,6 +50,19 @@ const EVENTOS: Record<string, string> = {
 }
 
 /*
+  O nome legível de cada termo.
+
+  O `termoId` é identificador de catálogo — "deficiencia-art11" não é frase que alguém leia
+  para saber o que autorizou. A tabela abaixo é a tradução, e o fallback mostra o
+  identificador cru se um termo novo entrar sem passar por aqui: melhor um nome feio que
+  uma célula vazia num histórico que serve de prova.
+*/
+const TERMOS_NOME: Record<string, string> = {
+  'deficiencia-art11': 'Informação sobre deficiência',
+  'cid-diagnostico': 'CID (diagnóstico)',
+}
+
+/*
   Três estados, na mesma página: pedido, confirmação e feito. Dois cliques do cartão ao
   concluído (REQ-13) — tela intermediária aqui seria transformar um direito em percurso.
 */
@@ -266,6 +279,12 @@ useHead({
               <thead>
                 <tr>
                   <th scope="col">Evento</th>
+                  <!--
+                    A coluna nasceu com o CID (2026-08-21). Com um termo só, dizer qual era
+                    seria redundante; com dois, a linha "Autorizou" sem o nome do termo não
+                    responde à pergunta que a pessoa faz aqui — autorizei o quê?
+                  -->
+                  <th scope="col">Autorização</th>
                   <th scope="col">Versão do termo</th>
                   <th scope="col">Data e hora</th>
                   <th scope="col">Impressão digital do texto</th>
@@ -277,6 +296,7 @@ useHead({
                   :key="evento.registradoEm + evento.evento"
                 >
                   <td>{{ EVENTOS[evento.evento] ?? evento.evento }}</td>
+                  <td>{{ TERMOS_NOME[evento.termoId] ?? evento.termoId }}</td>
                   <td class="numeros">Versão {{ evento.versao.replace('v', '') }}</td>
                   <td class="numeros">{{ quando(evento.registradoEm) }}</td>
                   <!--

@@ -36,6 +36,13 @@
       "when": 1787268359078,
       "tag": "0004_lush_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1787281917060,
+      "tag": "0005_stale_whiplash",
+      "breakpoints": true
     }
   ]
 }

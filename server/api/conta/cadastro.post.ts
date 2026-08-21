@@ -144,6 +144,26 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  /*
+    O termo do CID, quando houver CID.
+
+    Mesma exigência do termo do Art. 11, e pelo mesmo motivo: hash que não existe no
+    catálogo é recusado, porque prova que ninguém consegue conferir é pior que campo
+    vazio. Sem CID, nada disso acontece — o campo é opcional de verdade (ADR-020).
+  */
+  const termoCid = d.cid ? versaoPorHash(d.termoCidHash ?? '') : null
+  if (d.cid && !termoCid) {
+    throw createError({
+      statusCode: 422,
+      data: {
+        erros: {
+          consentimentoCid:
+            'O termo do CID mudou enquanto você preenchia. Recarregue a página e leia o texto novo antes de enviar.',
+        },
+      },
+    })
+  }
+
   const numeroRegistro = await emitirNumeroRegistro(anoCorrente(), async (numero) => {
     try {
       // Transação lógica: o D1 executa `batch` como unidade atômica.
@@ -169,6 +189,12 @@ export default defineEventHandler(async (event) => {
           pais: d.pais,
           cuidadorNome: d.cuidadorNome ?? null,
           cuidadorContato: d.cuidadorContato ?? null,
+          // Campos 22 a 25. O CID entra só com consentimento — garantido pelo esquema e
+          // pela checagem do termo acima. `cidNoCracha` nasce falso: guardar não é imprimir.
+          cid: d.cid ?? null,
+          cras: d.cras ?? null,
+          credencialTransporte: d.credencialTransporte ?? null,
+          contatoEmergencia: d.contatoEmergencia ?? null,
           situacao: 'ativo',
           chaveIdempotencia: d.chaveIdempotencia,
           criadoEm: agora,
@@ -200,6 +226,30 @@ export default defineEventHandler(async (event) => {
           registradoEm: agora,
           origem: '/atendimento/inscricao',
         }),
+        /*
+          O aceite do CID é **outra linha**, com `termoId` próprio.
+
+          Não é detalhe de modelagem: é o que permite responder, anos depois, qual das duas
+          autorizações a pessoa deu. Uma linha só, com o termo do Art. 11, diria que ela
+          autorizou o atendimento — e calaria sobre o diagnóstico.
+
+          `...(termoCid ? [...] : [])` porque sem CID não há aceite a registrar, e gravar
+          consentimento de algo que não foi informado é ruído no histórico.
+        */
+        ...(termoCid
+          ? [
+              bd.insert(schema.consentimentos).values({
+                id: crypto.randomUUID(),
+                usuarioId: id,
+                termoId: termoCid.termoId,
+                versao: termoCid.versao,
+                hash: termoCid.hash,
+                evento: 'aceite',
+                registradoEm: agora,
+                origem: '/atendimento/inscricao',
+              }),
+            ]
+          : []),
       ])
       return true
     } catch (erro) {

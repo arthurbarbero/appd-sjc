@@ -202,6 +202,13 @@ const camposPessoais = {
   estado: z.string().trim().min(2, 'Informe o estado.').max(60, 'O estado cabe em 60 caracteres.'),
   pais: z.string().trim().min(2, 'Informe o país.').max(60, 'O país cabe em 60 caracteres.'),
   cuidadorNome: z.string().trim().max(120, 'O nome cabe em 120 caracteres.').optional(),
+  /*
+    Campos 23 a 25, do crachá impresso (2026-08-21). Opcionais: nada no site depende
+    deles, e o cadastro conclui sem qualquer um.
+  */
+  cras: z.string().trim().max(40, 'O CRAS cabe em 40 caracteres.').optional(),
+  credencialTransporte: z.string().trim().max(40, 'A credencial cabe em 40 caracteres.').optional(),
+  contatoEmergencia: telefone.optional(),
   cuidadorContato: telefone.optional(),
 }
 
@@ -285,6 +292,31 @@ export const esquemaInscricao = z
     // Art. 11 da LGPD — sem isto, nada é gravado (REQ-41).
     consentimentoSaude: z.literal(true, 'É preciso autorizar para concluir o cadastro.'),
 
+    /*
+      Campo 22 — o CID, e o consentimento que ele exige.
+
+      **Opcional, e opcional de verdade**: sem CID o cadastro conclui, o crachá sai e a
+      verificação funciona (ADR-020). Campo opcional que trava o envio é campo obrigatório
+      com outro nome.
+
+      O consentimento é **próprio**, e não o `consentimentoSaude` acima. São finalidades
+      diferentes — uma organiza o atendimento, a outra guarda diagnóstico para imprimir —
+      e o Art. 11 pede autorização específica por finalidade. O par abaixo espelha o do
+      Art. 11 de propósito: booleano mais hash do texto exibido, para o histórico poder
+      dizer que texto exatamente a pessoa leu.
+
+      O `superRefine` no fim do esquema é que amarra os dois: informar CID sem autorizar
+      é recusado; autorizar sem informar CID é inofensivo e passa.
+    */
+    cid: z.string().trim().max(60, 'O CID cabe em 60 caracteres.').optional(),
+    consentimentoCid: z
+      .literal(true, 'Para informar o CID é preciso autorizar a associação a guardá-lo.')
+      .optional(),
+    termoCidHash: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/, 'Recarregue a página e leia o termo do CID antes de enviar.')
+      .optional(),
+
     /**
      * Hash do termo que a tela **exibiu** (`consentimento-e-privacidade` REQ-8).
      *
@@ -310,6 +342,20 @@ export const esquemaInscricao = z
   .refine((d) => !d.deficiencias.includes('Outro') || !!d.deficienciaOutro, {
     path: ['deficienciaOutro'],
     message: 'Você marcou "Outro": descreva em poucas palavras.',
+  })
+  /*
+    Informar CID exige autorizar; autorizar sem informar não custa nada.
+
+    A assimetria é o ponto (ADR-020): a trava existe para impedir que diagnóstico seja
+    guardado sem consentimento específico, não para punir quem marcou uma caixa a mais.
+  */
+  .refine((d) => !d.cid || d.consentimentoCid === true, {
+    path: ['consentimentoCid'],
+    message: 'Para informar o CID é preciso autorizar a associação a guardá-lo.',
+  })
+  .refine((d) => !d.cid || !!d.termoCidHash, {
+    path: ['consentimentoCid'],
+    message: 'Recarregue a página e leia o termo do CID antes de enviar.',
   })
   .refine((d) => !d.atendimentos.includes('Outro') || !!d.atendimentoOutro, {
     path: ['atendimentoOutro'],
