@@ -4,7 +4,7 @@
 - Origem: revisão do dono em vídeo, 2026-08-20 (10:50 a 11:26), mais a foto do crachá
   físico entregue por ele no mesmo dia
 - Dono do conteúdo: Arthur Barbero · Execução: Claude Code
-- Status: **rascunho** — vira spec depois da revisão do dono
+- Status: **aprovado pelo dono em 2026-08-21**, com as seis decisões abaixo — spec escrita
 
 ## Por que existe
 
@@ -89,18 +89,33 @@ Isso precisa ser decidido, não deduzido.
 - **O número no formato `00001/CD`.** O nosso é `APPD-2026-XXXXXX`, sorteado de propósito
   para não vazar a lista de associados por sequência. Voltar ao sequencial reabriria isso.
 
-## Três decisões que precisam ser suas antes da spec
+## As seis decisões do dono — 2026-08-21
 
-1. **A identidade visual.** Replicamos a cara do cartão físico — faixa azul, brasão, verde
-   — ou o crachá segue o design system do site? A primeira reconhece; a segunda mantém a
-   coerência que o v2 construiu. Não dá para as duas.
-2. **Emissão e contato de emergência.** Valem a pena como campos novos? Emissão o sistema
-   sabe (é a data do cadastro); contato de emergência seria o campo 22, e hoje existe
-   `cuidadorContato`, que talvez já sirva.
-3. **A foto do cartão físico não pode ser versionada.** É o crachá de uma pessoa
-   identificada, com CPF, CID e endereço, e o repositório é público. Fica no seu
-   computador; aqui ela entra descrita em texto. Se precisarmos dela na spec, descrevo o
-   layout em medidas, não em imagem.
+| Pergunta                         | Resposta                               |
+| -------------------------------- | -------------------------------------- |
+| CID no crachá?                   | **Sim — e entra também no formulário** |
+| Validade?                        | **Fica para depois**                   |
+| Número sequencial do cartão?     | **Usar o nosso**, `APPD-AAAA-XXXXXX`   |
+| Identidade visual?               | **Inspirada no cartão atual**          |
+| Emissão e contato de emergência? | **Emissão sim; contato se houver**     |
+| CRAS e Credencial de Transporte? | **Campos opcionais no formulário**     |
+
+**A primeira decisão é a que muda o projeto**, e por isso virou
+[ADR-020](../../../docs/adr/adr-020-cid-no-cadastro-e-no-cracha.md) em vez de virar linha de
+spec. O site passa a guardar **diagnóstico**, não mais categoria de deficiência — `G82.4`
+tem código e classificação clínica, `Física` não. E o crachá vai no bolso: é o dado mais
+exposto que este projeto vai produzir.
+
+A decisão tem uso real e legítimo — o CID é o que os serviços pedem na porta, e um cartão
+sem ele obriga a pessoa a carregar laudo à parte. O que o ADR faz não é discutir a decisão,
+é registrar as três travas sem as quais ela não se sustenta: consentimento próprio para
+guardar, opt-in próprio para imprimir, e **nunca** em `/verificar`.
+
+Duas coisas ficam de fora por consequência, e não por escolha minha:
+
+- **Validar o código contra a tabela oficial do CID** — o site não é sistema de saúde.
+- **A frase "válida com a contribuição em dia"**, que o cartão de papel estampa: sem
+  validade, ela não tem o que sustentar.
 
 ## Impacto
 
@@ -108,7 +123,9 @@ Isso precisa ser decidido, não deduzido.
   levado no bolso e mostrado a terceiros — mais exposto que a página de verificação. Cada
   campo que entrar aqui precisa passar pelo mesmo crivo do ADR-019.
 - **Toca produção / custo real?** Não. Mesmo Worker, mesmo D1, geração no navegador.
-- **Schema**: depende das decisões 1 e 2. Se nenhum campo novo entrar, nenhuma migration.
+- **Schema**: cinco colunas novas em `usuarios` — `cid`, `cidNoCracha`, `cras`,
+  `credencialTransporte`, `contatoEmergencia`. Nenhuma tabela nova, então o adendo de
+  `modelo-de-dados` segue respeitado.
 - **Aceite**: a suíte tem verificações do crachá que vão reprovar — é a intenção. A tela de
   impressão tem gate próprio desde `cracha-do-associado`.
 
