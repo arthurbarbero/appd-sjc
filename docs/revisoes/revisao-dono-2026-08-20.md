@@ -97,13 +97,13 @@ o rodapé (00:59), os links de "Combinar a retirada" e "Falar sobre voluntariado
 O dono conferiu a versão publicada num telefone e apontou cinco coisas. A disposição geral
 foi aprovada: "pelo que vi no celular ficou bom".
 
-| #   | Pedido                                                                                          | O que era                                                                                                                           |
-| --- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| M1  | "Esse Mostrar senha gigantesco é feio, podia ser só um símbolo de olho igual os login modernos" | O rótulo ocupava quase tanto quanto o campo e o espremia. Virou ícone, com o nome preservado em `aria-label`.                       |
-| M2  | "Os botões [do É WhatsApp] não estão na mesma altura dos outros"                                | O grupo não tem a linha de ajuda que o campo vizinho tem, e subia. Agora as opções encostam na mesma base do telefone.              |
-| M3  | "Como a minha área fica no celular, muito feio… talvez um accordion ou formas mais modernas"    | As cinco abas quebravam em três linhas com "Sair" sobrando. Virou fileira rolável — accordion foi descartado, ver abaixo.           |
-| M4  | "Essa foto no canto superior esquerdo tira por favor"                                           | O retrato que eu havia posto no topo do menu lateral como "cabeçalho mini". Removido.                                               |
-| M5  | "Não consigo trocar/editar a foto pra testar a parada da pinça"                                 | **Defeito pré-existente**: o envio de foto só era montado para quem **não** tinha foto. Errar a foto uma vez condenava àquela foto. |
+| #   | Pedido                                                                                                           | O que era                                                                                                                           |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| M1  | "Esse Mostrar senha gigantesco é feio, podia ser só um símbolo de olho igual os login modernos"                  | O rótulo ocupava quase tanto quanto o campo e o espremia. Virou ícone, com o nome preservado em `aria-label`.                       |
+| M2  | "Os botões [do É WhatsApp] não estão na mesma altura dos outros"                                                 | O grupo não tem a linha de ajuda que o campo vizinho tem, e subia. Agora as opções encostam na mesma base do telefone.              |
+| M3  | "Como a minha área fica no celular, muito feio… talvez um accordion ou formas mais modernas"                     | As cinco abas quebravam em três linhas com "Sair" sobrando. Virou fileira rolável — accordion foi descartado, ver abaixo.           |
+| M4  | "Essa foto no canto superior esquerdo tira por favor"                                                            | O retrato que eu havia posto no topo do menu lateral como "cabeçalho mini". Removido.                                               |
+| M5  | "Não consigo trocar/editar a foto pra testar a parada da pinça" — e depois: "precisamos do editar e trocar foto" | **Defeito pré-existente**: o envio de foto só era montado para quem **não** tinha foto. Errar a foto uma vez condenava àquela foto. |
 
 **Por que não accordion, em M3.** Ele custa dois toques — abrir e escolher — e esconde os
 destinos enquanto está fechado. Para cinco seções do mesmo nível, trocadas com frequência,
@@ -111,6 +111,22 @@ a fileira rolável é o padrão consolidado ([Smashing
 Magazine](https://www.smashingmagazine.com/2022/11/navigation-design-mobile-ux/),
 [UXPin](https://www.uxpin.com/studio/blog/mobile-navigation-examples/)). Accordion serve
 para conteúdo longo, não para navegação.
+
+**Trocar e editar são duas coisas, e a primeira versão só tinha uma.** Ao ver o botão
+"Trocar a minha foto", o dono respondeu: "precisamos do editar e trocar foto". Ele estava
+certo — trocar pede um arquivo novo, e quem só quer centralizar o próprio rosto teria de
+caçar o original no aparelho, que muitas vezes já não está lá. Agora são dois caminhos:
+**Ajustar o enquadramento** reabre o recorte com a foto guardada, e **Trocar a minha foto**
+pede outro arquivo.
+
+O que "ajustar" **não** faz está escrito na própria tela: a imagem é a que o servidor
+guardou, já recortada em 4:5, então dá para aproximar e mover, mas o que ficou de fora no
+recorte anterior não volta.
+
+Uma armadilha que só apareceu rodando: apontar o `src` do recorte direto para a rota da
+foto deixava o quadro **vazio**. Quem o quadro desenha é `urlOrigem`, e é ela que a
+limpeza revoga — a foto guardada precisa virar object URL como qualquer outra, para os
+dois caminhos serem o mesmo daí em diante.
 
 **O defeito que a fileira rolável escondeu, e que quase passou.** Na primeira versão dela,
 o `ul` transbordava em vez de rolar: 702px de itens numa tela de 360, `scrollLeft` travado

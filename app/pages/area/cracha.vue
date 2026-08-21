@@ -33,6 +33,29 @@ const temFoto = computed(() => Boolean(data.value?.foto))
 
 /** Abre o recorte para quem já tem foto. Fecha sozinho quando a nova foto entra. */
 const trocandoFoto = ref(false)
+const tituloDaTroca = ref('Trocar a minha foto')
+
+/*
+  A rota que serve a foto guardada, para o recorte poder reabri-la. Constante e não
+  literal: com o caminho cru no atributo, o Vite tenta resolvê-lo como asset em tempo de
+  build e o `npm run build` falha enquanto o dev passa.
+*/
+const ROTA_FOTO = '/api/area/foto'
+const campoFoto = ref<{ editarAtual: () => Promise<void> } | null>(null)
+
+/** Abre o seletor de arquivo para uma foto nova. */
+function abrirTroca() {
+  tituloDaTroca.value = 'Trocar a minha foto'
+  trocandoFoto.value = true
+}
+
+/** Abre o recorte já carregado com a foto atual, sem passar pelo seletor de arquivo. */
+async function ajustarFoto() {
+  tituloDaTroca.value = 'Ajustar o enquadramento'
+  trocandoFoto.value = true
+  await nextTick()
+  await campoFoto.value?.editarAtual()
+}
 const urlVerificacao = computed(() => `${origem}/verificar/${data.value?.numeroRegistro ?? ''}`)
 
 const dadosCracha = computed<DadosCracha>(() => ({
@@ -165,18 +188,36 @@ async function exportar(formato: 'png' | 'pdf') {
           seletor de arquivo permanentemente aberto no alto sugere que algo está faltando.
         -->
         <section v-else class="trocar-bloco">
-          <button
-            v-if="!trocandoFoto"
-            type="button"
-            class="botao botao-secundario"
-            @click="trocandoFoto = true"
-          >
-            Trocar a minha foto
-          </button>
+          <!--
+            Dois caminhos, porque são duas intenções diferentes (2026-08-21).
+
+            **Ajustar** trabalha sobre a foto que já está guardada: serve para centralizar
+            o rosto ou aproximar, sem precisar caçar o arquivo original no aparelho — que
+            muitas vezes já nem existe mais.
+
+            **Trocar** pede um arquivo novo, e é o único caminho quando a foto em si é a
+            errada.
+
+            Separá-los é o que evita a pergunta que o dono fez ao tentar mexer na foto:
+            um botão só, chamado "trocar", não parece prometer reenquadramento.
+          -->
+          <div v-if="!trocandoFoto" class="acoes-foto">
+            <button type="button" class="botao botao-secundario" @click="ajustarFoto">
+              Ajustar o enquadramento
+            </button>
+            <button type="button" class="botao botao-secundario" @click="abrirTroca">
+              Trocar a minha foto
+            </button>
+          </div>
 
           <template v-else>
-            <h2>Trocar a minha foto</h2>
-            <AppdFoto v-model="enviandoFoto" rotulo="Nova foto para o crachá" />
+            <h2>{{ tituloDaTroca }}</h2>
+            <AppdFoto
+              ref="campoFoto"
+              v-model="enviandoFoto"
+              rotulo="Nova foto para o crachá"
+              :imagem-inicial="ROTA_FOTO"
+            />
             <button type="button" class="botao botao-fantasma" @click="trocandoFoto = false">
               Manter a foto de agora
             </button>
@@ -374,6 +415,12 @@ async function exportar(formato: 'png' | 'pdf') {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: var(--e3);
+}
+
+.acoes-foto {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--e3);
 }
 

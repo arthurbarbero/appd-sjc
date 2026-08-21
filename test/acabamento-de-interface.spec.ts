@@ -260,3 +260,33 @@ describe('O recorte da foto aceita pinça, sem perder os outros caminhos (REQ-29
     expect(FOTO).toMatch(/function teclado/)
   })
 })
+
+describe('Dá para trocar E ajustar a foto que já existe (M5, 2026-08-21)', () => {
+  const CRACHA = readFileSync(join(RAIZ, 'app', 'pages', 'area', 'cracha.vue'), 'utf8')
+  const FOTO = readFileSync(join(RAIZ, 'app', 'components', 'AppdFoto.vue'), 'utf8')
+
+  it('quem já tem foto encontra os dois caminhos', () => {
+    // Antes disto o envio só era montado para quem NÃO tinha foto: errar a foto uma vez
+    // condenava a pessoa àquela foto.
+    expect(CRACHA).toMatch(/Ajustar o enquadramento/)
+    expect(CRACHA).toMatch(/Trocar a minha foto/)
+  })
+
+  it('ajustar abre o recorte com a foto guardada, sem seletor de arquivo', () => {
+    expect(FOTO).toMatch(/function editarAtual/)
+    expect(FOTO).toMatch(/defineExpose/)
+    expect(CRACHA).toMatch(/editarAtual/)
+  })
+
+  it('a foto guardada vira object URL, e não src direto para a rota', () => {
+    // `urlOrigem` é o que o quadro desenha e o que `limpar()` revoga; apontar o src para
+    // a rota deixava a imagem fora desse ciclo e o recorte abria vazio.
+    const fn = FOTO.match(/async function editarAtual\(\)[\s\S]*?\n\}/)?.[0] ?? ''
+    expect(fn).toMatch(/createObjectURL/)
+    expect(fn).not.toMatch(/crossOrigin/)
+  })
+
+  it('a tela diz o que ajustar não faz', () => {
+    expect(FOTO).toMatch(/não volta/)
+  })
+})

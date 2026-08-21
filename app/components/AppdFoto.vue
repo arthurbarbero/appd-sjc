@@ -20,8 +20,9 @@ import { ALTURA, LARGURA, MAXIMO_ORIGEM, QUALIDADE, TETO_BYTES, TIPOS_ORIGEM } f
 
 const foto = defineModel<Blob | null>({ default: null })
 
-const props = withDefaults(defineProps<{ rotulo?: string }>(), {
+const props = withDefaults(defineProps<{ rotulo?: string; imagemInicial?: string | null }>(), {
   rotulo: 'Foto para o crachá',
+  imagemInicial: null,
 })
 
 type Etapa = 'vazio' | 'recorte' | 'processando' | 'erro' | 'pronto'
@@ -86,6 +87,9 @@ function limpar() {
 const fotoGuardada = shallowRef<Blob | null>(null)
 const previaGuardada = ref('')
 
+/** O recorte em curso veio da foto já guardada, e não de um arquivo novo. */
+const reenquadrando = ref(false)
+
 function guardarAtual() {
   descartarGuardada()
   if (foto.value && previa.value) {
@@ -126,6 +130,7 @@ async function escolher(evento: Event) {
     return
   }
 
+  reenquadrando.value = false
   limpar()
   urlOrigem.value = URL.createObjectURL(arquivo)
 
@@ -141,6 +146,66 @@ async function escolher(evento: Event) {
   imagem.value = img
   etapa.value = 'recorte'
 }
+
+/*
+  Reenquadrar a foto que já está guardada, sem escolher outro arquivo.
+
+  "Trocar" e "editar" são coisas diferentes, e só a primeira existia: quem quisesse
+  apenas centralizar o próprio rosto tinha de sair procurando o arquivo original no
+  aparelho — que muitas vezes já não está lá.
+
+  **O que foi cortado antes não volta**, e a tela diz isso. Esta imagem é a que o servidor
+  guardou, já recortada em 4:5 e comprimida; dá para aproximar e reposicionar dentro dela,
+  não para recuperar o que ficou de fora no primeiro recorte. Prometer o contrário seria
+  mentir sobre o que a operação faz.
+*/
+async function editarAtual() {
+  if (!props.imagemInicial) return
+
+  reenquadrando.value = true
+  guardarAtual()
+  limpar()
+  erro.value = ''
+
+  /*
+    A foto guardada é buscada como blob e vira um object URL, em vez de ir direto no
+    `src`.
+
+    O quadro do recorte desenha `<img :src="urlOrigem">`, e `urlOrigem` é o que `limpar()`
+    revoga — apontar o `src` para a rota deixaria a imagem fora desse ciclo, e foi
+    exatamente o que aconteceu na primeira tentativa: o recorte abria com o quadro vazio,
+    porque `imagem` estava carregada e `urlOrigem` continuava em branco.
+
+    Assim o caminho de editar e o de escolher arquivo passam a ser o mesmo daqui para a
+    frente, e não há um segundo jeito de liberar memória para alguém esquecer.
+  */
+  let blob: Blob
+  try {
+    const resposta = await fetch(props.imagemInicial)
+    if (!resposta.ok) throw new Error(String(resposta.status))
+    blob = await resposta.blob()
+  } catch {
+    erro.value = 'Não conseguimos abrir a sua foto guardada. Tente enviar uma foto nova.'
+    etapa.value = 'erro'
+    return
+  }
+
+  urlOrigem.value = URL.createObjectURL(blob)
+
+  const img = new Image()
+  img.src = urlOrigem.value
+  try {
+    await img.decode()
+  } catch {
+    erro.value = 'Não conseguimos abrir a sua foto guardada. Tente enviar uma foto nova.'
+    etapa.value = 'erro'
+    return
+  }
+  imagem.value = img
+  etapa.value = 'recorte'
+}
+
+defineExpose({ editarAtual })
 
 /* Arrastar com o ponteiro. O teclado tem caminho próprio, logo abaixo — um não substitui
    o outro, e a tela não depende de nenhum dos dois isoladamente. */
@@ -367,6 +432,10 @@ const tamanhoPronto = computed(() => (foto.value ? `${Math.round(foto.value.size
       </template>
 
       <template v-else-if="etapa === 'recorte'">
+        <p v-if="reenquadrando" class="aviso-reenquadrar">
+          Você está ajustando a foto que já estava guardada. Dá para aproximar e mover, mas o que
+          ficou de fora no recorte anterior não volta.
+        </p>
         <div class="foto-recorte">
           <div
             class="foto-moldura"
@@ -494,6 +563,12 @@ const tamanhoPronto = computed(() => (foto.value ? `${Math.round(foto.value.size
   display: flex;
   flex-direction: column;
   gap: var(--e2);
+  max-width: var(--medida);
+}
+
+.aviso-reenquadrar {
+  color: var(--texto-suave);
+  font-size: var(--texto-rotulo);
   max-width: var(--medida);
 }
 
