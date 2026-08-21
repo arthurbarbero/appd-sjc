@@ -133,6 +133,76 @@ describe('A migration é aplicável no D1', () => {
   })
 })
 
+/**
+ * A migration mais recente aplicada sobre um banco **com dados**, e com FK ligada.
+ *
+ * ## Por que este bloco existe
+ *
+ * `bancoMigrado()` aplica tudo num banco vazio, e banco vazio esconde a classe de defeito
+ * que derrubou o deploy de 2026-08-21 três vezes seguidas: recriar `usuarios` só viola
+ * chave estrangeira quando **há linhas filhas** apontando para ela. Local vazio passava;
+ * remoto com dados falhava.
+ *
+ * As duas receitas de PRAGMA foram tentadas e nenhuma vale no D1 remoto —
+ * `defer_foreign_keys` fez o banco reverter, `foreign_keys=OFF` foi ignorado. O que
+ * funciona é não violar: guardar as filhas em cópias sem restrição, esvaziá-las, recriar as
+ * tabelas e repor. É essa sequência que este teste exercita.
+ */
+describe('A migration preserva os dados, com FK ligada', () => {
+  it('usuário, inscrição, foto e consentimento sobrevivem à recriação das tabelas', () => {
+    const db = new DatabaseSync(':memory:')
+    db.exec('PRAGMA foreign_keys = ON')
+
+    const arquivos = readdirSync(PASTA_MIGRATIONS)
+      .filter((f) => f.endsWith('.sql'))
+      .sort()
+    const ultima = arquivos[arquivos.length - 1]!
+    const aplica = (arquivo: string) => {
+      const sql = readFileSync(join(PASTA_MIGRATIONS, arquivo), 'utf8')
+      for (const comando of sql.split('--> statement-breakpoint')) {
+        if (comando.trim()) db.exec(comando)
+      }
+    }
+
+    // Tudo menos a última: é o estado do banco remoto antes do deploy.
+    for (const arquivo of arquivos.slice(0, -1)) aplica(arquivo)
+
+    /*
+      Telefone no formato **antigo**, sem `+`. É o que está gravado lá, e é o que a cópia
+      precisa prefixar para não bater no CHECK novo.
+    */
+    const usuarioId = criaUsuario(db, { telefone: '12991657059' })
+    criaInscricao(db, usuarioId)
+    db.prepare(
+      `INSERT INTO fotos (id, usuario_id, conteudo, tipo, largura, altura, criado_em, atualizado_em)
+       VALUES ('f', ?, ?, 'image/jpeg', 400, 500, ?, ?)`,
+    ).run(usuarioId, new Uint8Array([1, 2, 3]), AGORA, AGORA)
+    db.prepare(
+      `INSERT INTO consentimentos (id, usuario_id, termo_id, versao, hash, evento, registrado_em, origem)
+       VALUES ('c', ?, 'deficiencia-art11', 'v1', ?, 'aceite', ?, '/atendimento/inscricao')`,
+    ).run(usuarioId, HASH64, AGORA)
+
+    expect(() => aplica(ultima), `${ultima} falhou com dados no banco`).not.toThrow()
+
+    const conta = (tabela: string) =>
+      Number(db.prepare(`SELECT count(*) AS n FROM ${tabela}`).get()!.n)
+    expect(conta('usuarios')).toBe(1)
+    expect(conta('inscricoes_atendimento')).toBe(1)
+    expect(conta('fotos')).toBe(1)
+    expect(conta('consentimentos')).toBe(1)
+
+    // O telefone antigo ganhou o código do país na cópia, e passa no CHECK novo.
+    const linha = db.prepare('SELECT telefone FROM usuarios').get()!
+    expect(linha.telefone).toBe('+5512991657059')
+
+    // Nenhuma tabela auxiliar ficou para trás.
+    const tabelas = db
+      .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'tmp_%'`)
+      .all()
+    expect(tabelas).toEqual([])
+  })
+})
+
 describe('Integridade do modelo de dados', () => {
   let db: DatabaseSync
 

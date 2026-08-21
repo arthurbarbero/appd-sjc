@@ -1,36 +1,9 @@
-PRAGMA foreign_keys=OFF;--> statement-breakpoint
-CREATE TABLE `__new_inscricoes_atendimento` (
-	`id` text PRIMARY KEY NOT NULL,
-	`usuario_id` text NOT NULL,
-	`deficiencias` text NOT NULL,
-	`deficiencia_outro` text,
-	`atendimentos` text NOT NULL,
-	`atendimento_outro` text,
-	`dias` text NOT NULL,
-	`ciencia_contribuicao` text NOT NULL,
-	`status` text DEFAULT 'Interesse registrado' NOT NULL,
-	`criado_em` text NOT NULL,
-	`atualizado_em` text NOT NULL,
-	FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "inscricoes_status" CHECK("__new_inscricoes_atendimento"."status" = 'Interesse registrado'),
-	CONSTRAINT "inscricoes_ciencia" CHECK("__new_inscricoes_atendimento"."ciencia_contribuicao" = 'Ciente'),
-	CONSTRAINT "inscricoes_deficiencias_json" CHECK(json_valid("__new_inscricoes_atendimento"."deficiencias") AND json_type("__new_inscricoes_atendimento"."deficiencias") = 'array' AND json_array_length("__new_inscricoes_atendimento"."deficiencias") >= 0),
-	CONSTRAINT "inscricoes_atendimentos_json" CHECK(json_valid("__new_inscricoes_atendimento"."atendimentos") AND json_type("__new_inscricoes_atendimento"."atendimentos") = 'array' AND json_array_length("__new_inscricoes_atendimento"."atendimentos") >= 0),
-	CONSTRAINT "inscricoes_dias_json" CHECK(json_valid("__new_inscricoes_atendimento"."dias") AND json_type("__new_inscricoes_atendimento"."dias") = 'array' AND json_array_length("__new_inscricoes_atendimento"."dias") >= 0),
-	CONSTRAINT "inscricoes_outro_tamanho" CHECK(("__new_inscricoes_atendimento"."deficiencia_outro" IS NULL OR length("__new_inscricoes_atendimento"."deficiencia_outro") BETWEEN 2 AND 100)
-        AND ("__new_inscricoes_atendimento"."atendimento_outro" IS NULL OR length("__new_inscricoes_atendimento"."atendimento_outro") BETWEEN 2 AND 100)),
-	CONSTRAINT "inscricoes_criado_em_utc" CHECK(length("__new_inscricoes_atendimento"."criado_em") = 20
-    AND "__new_inscricoes_atendimento"."criado_em" LIKE '____-__-__T__:__:__Z'
-    AND "__new_inscricoes_atendimento"."criado_em" NOT GLOB '*[^0-9:TZ-]*'),
-	CONSTRAINT "inscricoes_atualizado_em_utc" CHECK(length("__new_inscricoes_atendimento"."atualizado_em") = 20
-    AND "__new_inscricoes_atendimento"."atualizado_em" LIKE '____-__-__T__:__:__Z'
-    AND "__new_inscricoes_atendimento"."atualizado_em" NOT GLOB '*[^0-9:TZ-]*')
-);
---> statement-breakpoint
-INSERT INTO `__new_inscricoes_atendimento`("id", "usuario_id", "deficiencias", "deficiencia_outro", "atendimentos", "atendimento_outro", "dias", "ciencia_contribuicao", "status", "criado_em", "atualizado_em") SELECT "id", "usuario_id", "deficiencias", "deficiencia_outro", "atendimentos", "atendimento_outro", "dias", "ciencia_contribuicao", "status", "criado_em", "atualizado_em" FROM `inscricoes_atendimento`;--> statement-breakpoint
-DROP TABLE `inscricoes_atendimento`;--> statement-breakpoint
-ALTER TABLE `__new_inscricoes_atendimento` RENAME TO `inscricoes_atendimento`;--> statement-breakpoint
-CREATE UNIQUE INDEX `inscricoes_atendimento_usuario_id_unique` ON `inscricoes_atendimento` (`usuario_id`);--> statement-breakpoint
+CREATE TABLE `tmp_inscricoes` AS SELECT * FROM `inscricoes_atendimento`;--> statement-breakpoint
+CREATE TABLE `tmp_fotos` AS SELECT * FROM `fotos`;--> statement-breakpoint
+CREATE TABLE `tmp_consentimentos` AS SELECT * FROM `consentimentos`;--> statement-breakpoint
+DELETE FROM `inscricoes_atendimento`;--> statement-breakpoint
+DELETE FROM `fotos`;--> statement-breakpoint
+DELETE FROM `consentimentos`;--> statement-breakpoint
 CREATE TABLE `__new_usuarios` (
 	`id` text PRIMARY KEY NOT NULL,
 	`numero_registro` text NOT NULL,
@@ -104,8 +77,7 @@ CREATE TABLE `__new_usuarios` (
         AND "__new_usuarios"."numero" IS NOT NULL AND "__new_usuarios"."bairro" IS NOT NULL AND "__new_usuarios"."municipio" IS NOT NULL
         AND "__new_usuarios"."cep" IS NOT NULL
       ))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 INSERT INTO `__new_usuarios`("id", "numero_registro", "email", "cpf", "senha_hash", "senha_params", "nome", "nascimento", "telefone", "telefone_whatsapp", "cep", "endereco", "numero", "complemento", "bairro", "municipio", "estado", "pais", "cuidador_nome", "cuidador_contato", "situacao", "cracha_mostra_deficiencia", "cid", "cid_no_cracha", "cras", "credencial_transporte", "contato_emergencia", "chave_idempotencia", "criado_em", "atualizado_em") SELECT "id", "numero_registro", "email", "cpf", "senha_hash", "senha_params", "nome", "nascimento", CASE WHEN "telefone" IS NULL OR "telefone" = '' THEN "telefone" WHEN "telefone" LIKE '+%' THEN "telefone" ELSE '+55' || "telefone" END, "telefone_whatsapp", "cep", "endereco", "numero", "complemento", "bairro", "municipio", "estado", "pais", "cuidador_nome", CASE WHEN "cuidador_contato" IS NULL OR "cuidador_contato" = '' THEN "cuidador_contato" WHEN "cuidador_contato" LIKE '+%' THEN "cuidador_contato" ELSE '+55' || "cuidador_contato" END, "situacao", "cracha_mostra_deficiencia", "cid", "cid_no_cracha", "cras", "credencial_transporte", CASE WHEN "contato_emergencia" IS NULL OR "contato_emergencia" = '' THEN "contato_emergencia" WHEN "contato_emergencia" LIKE '+%' THEN "contato_emergencia" ELSE '+55' || "contato_emergencia" END, "chave_idempotencia", "criado_em", "atualizado_em" FROM `usuarios`;--> statement-breakpoint
 DROP TABLE `usuarios`;--> statement-breakpoint
 ALTER TABLE `__new_usuarios` RENAME TO `usuarios`;--> statement-breakpoint
@@ -113,4 +85,38 @@ CREATE UNIQUE INDEX `usuarios_numero_registro_unique` ON `usuarios` (`numero_reg
 CREATE UNIQUE INDEX `usuarios_email_unique` ON `usuarios` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `usuarios_cpf_unique` ON `usuarios` (`cpf`);--> statement-breakpoint
 CREATE UNIQUE INDEX `usuarios_chave_idempotencia_unique` ON `usuarios` (`chave_idempotencia`);--> statement-breakpoint
-PRAGMA foreign_keys=ON;
+DROP TABLE `inscricoes_atendimento`;--> statement-breakpoint
+CREATE TABLE `inscricoes_atendimento` (
+	`id` text PRIMARY KEY NOT NULL,
+	`usuario_id` text NOT NULL,
+	`deficiencias` text NOT NULL,
+	`deficiencia_outro` text,
+	`atendimentos` text NOT NULL,
+	`atendimento_outro` text,
+	`dias` text NOT NULL,
+	`ciencia_contribuicao` text NOT NULL,
+	`status` text DEFAULT 'Interesse registrado' NOT NULL,
+	`criado_em` text NOT NULL,
+	`atualizado_em` text NOT NULL,
+	FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "inscricoes_status" CHECK("inscricoes_atendimento"."status" = 'Interesse registrado'),
+	CONSTRAINT "inscricoes_ciencia" CHECK("inscricoes_atendimento"."ciencia_contribuicao" = 'Ciente'),
+	CONSTRAINT "inscricoes_deficiencias_json" CHECK(json_valid("inscricoes_atendimento"."deficiencias") AND json_type("inscricoes_atendimento"."deficiencias") = 'array' AND json_array_length("inscricoes_atendimento"."deficiencias") >= 0),
+	CONSTRAINT "inscricoes_atendimentos_json" CHECK(json_valid("inscricoes_atendimento"."atendimentos") AND json_type("inscricoes_atendimento"."atendimentos") = 'array' AND json_array_length("inscricoes_atendimento"."atendimentos") >= 0),
+	CONSTRAINT "inscricoes_dias_json" CHECK(json_valid("inscricoes_atendimento"."dias") AND json_type("inscricoes_atendimento"."dias") = 'array' AND json_array_length("inscricoes_atendimento"."dias") >= 0),
+	CONSTRAINT "inscricoes_outro_tamanho" CHECK(("inscricoes_atendimento"."deficiencia_outro" IS NULL OR length("inscricoes_atendimento"."deficiencia_outro") BETWEEN 2 AND 100)
+        AND ("inscricoes_atendimento"."atendimento_outro" IS NULL OR length("inscricoes_atendimento"."atendimento_outro") BETWEEN 2 AND 100)),
+	CONSTRAINT "inscricoes_criado_em_utc" CHECK(length("inscricoes_atendimento"."criado_em") = 20
+    AND "inscricoes_atendimento"."criado_em" LIKE '____-__-__T__:__:__Z'
+    AND "inscricoes_atendimento"."criado_em" NOT GLOB '*[^0-9:TZ-]*'),
+	CONSTRAINT "inscricoes_atualizado_em_utc" CHECK(length("inscricoes_atendimento"."atualizado_em") = 20
+    AND "inscricoes_atendimento"."atualizado_em" LIKE '____-__-__T__:__:__Z'
+    AND "inscricoes_atendimento"."atualizado_em" NOT GLOB '*[^0-9:TZ-]*')
+);--> statement-breakpoint
+CREATE UNIQUE INDEX `inscricoes_atendimento_usuario_id_unique` ON `inscricoes_atendimento` (`usuario_id`);--> statement-breakpoint
+INSERT INTO `inscricoes_atendimento` SELECT * FROM `tmp_inscricoes`;--> statement-breakpoint
+INSERT INTO `fotos` SELECT * FROM `tmp_fotos`;--> statement-breakpoint
+INSERT INTO `consentimentos` SELECT * FROM `tmp_consentimentos`;--> statement-breakpoint
+DROP TABLE `tmp_inscricoes`;--> statement-breakpoint
+DROP TABLE `tmp_fotos`;--> statement-breakpoint
+DROP TABLE `tmp_consentimentos`;

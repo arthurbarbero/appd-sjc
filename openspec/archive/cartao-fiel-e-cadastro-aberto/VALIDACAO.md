@@ -98,17 +98,26 @@ erro — ele estava certo, só era de outro cartão. O dono baixou três.
 `0006` recria `inscricoes_atendimento` e `usuarios` — em SQLite um `CHECK` não se altera, a
 tabela é refeita. Duas coisas foram escritas à mão sobre o que o drizzle-kit gerou:
 
-1. **Um par `PRAGMA foreign_keys=OFF`/`ON` só, em volta das duas recriações.** O
-   drizzle-kit escreve um par em volta de **cada** tabela: com duas recriações, a segunda
-   fica fora e o `DROP TABLE usuarios` encontra as FKs de `inscricoes_atendimento`, `fotos`
-   e `consentimentos`.
+1. **Nenhum `PRAGMA`: a migration simplesmente não viola.** As filhas vão para cópias sem
+   restrição (`CREATE TABLE tmp_x AS SELECT * FROM x`), são esvaziadas, as tabelas são
+   recriadas e os dados voltam.
 
-   Passei antes por `defer_foreign_keys`, que resolve o mesmo problema e é a receita
-   recomendada quando a migration roda dentro de transação. **No D1 remoto ele não vale**:
-   o deploy respondeu `D1 DB was reset and rolled back (…) FOREIGN KEY constraint failed`
-   depois de o local aceitar. O `foreign_keys=OFF` vale — a migration `0002` já tinha
-   recriado `usuarios` inteiro assim e passado. Quando duas receitas resolvem o mesmo
-   problema, a que já rodou naquele ambiente ganha da que a documentação prefere.
+   Cheguei aqui por eliminação, e as duas tentativas anteriores valem registro:
+
+   - **`defer_foreign_keys`** — a receita recomendada quando a migration roda dentro de
+     transação, e o D1 roda. O deploy respondeu `D1 DB was reset and rolled back (…)
+FOREIGN KEY constraint failed`.
+   - **`foreign_keys=OFF`** — o que o drizzle-kit escreve, e o que a migration `0002` usou
+     para recriar `usuarios` inteiro com sucesso. Falhou igual.
+
+   A `0002` tinha passado porque o banco estava **vazio**: recriar `usuarios` só viola
+   chave estrangeira quando há linhas filhas apontando para ela. Foi essa a lição, e ela é
+   maior que o PRAGMA — **o D1 local com banco vazio não prova nada sobre o D1 remoto com
+   dados**. Três deploys reprovados até isso ficar claro.
+
+   O teste que entrou aplica a última migration sobre um banco **com** usuário, inscrição,
+   foto e consentimento, e com `foreign_keys = ON`. É o cenário do remoto, e agora ele roda
+   no `npm test`.
 
 2. **A cópia do telefone passa por um `CASE`** que prefixa `+55` no que não tem prefixo. O
    CHECK novo exige código de país, e um `SELECT "telefone"` cru faria a migration abortar.
@@ -119,13 +128,14 @@ mesmo motor para migrations, e esta foi a lição do dia:
 
 1. **Comentário de bloco.** O arquivo tinha `/* ... */` explicando as decisões acima, e o
    remoto responde `SQL code did not contain a statement`. O local aceita.
-2. **`defer_foreign_keys`.** Descrito acima: local aceita, remoto reverte.
+2. **PRAGMA de chave estrangeira, nas duas formas.** Descrito acima: o local aceita porque
+   está vazio; o remoto tem dados e recusa.
 
-Nos dois casos a migration passou no `db:migrate`, nos 387 testes e nas 276 verificações de
-aceite para reprovar no deploy, com a branch já na main. O primeiro virou teste — sobre o
-**arquivo**, como os dois que já moravam ali (placeholder de bind, GLOB com mais de dez
-classes). O segundo não dá para testar sem um D1 remoto, e fica registrado aqui: **migration
-que recria tabela usa `foreign_keys=OFF`, não `defer_foreign_keys`**.
+Nos dois casos a migration passou no `db:migrate`, nos testes e nas 276 verificações de
+aceite para reprovar no deploy, com a branch já na main. **Os dois viraram teste**: um sobre
+o arquivo (comentário de bloco, ao lado dos dois que já moravam ali — placeholder de bind e
+GLOB com mais de dez classes), outro sobre o comportamento, aplicando a migration em cima de
+dados com FK ligada.
 
 ## Ressalvas escritas, em vez de escondidas
 
