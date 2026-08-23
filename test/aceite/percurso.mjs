@@ -20,38 +20,11 @@
  */
 
 import { spawn, execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { AxeBuilder } from '@axe-core/playwright'
 
 const BASE = process.env.APPD_BASE ?? 'http://localhost:8787'
 
-/*
-  Os segredos do `.dev.vars`, que é o arquivo que o `wrangler dev` já lê.
-
-  O gate precisa da senha do modo atendimento para exercitar o caminho que importa, e ela
-  não está no ambiente deste processo — está no do worker. Ler o mesmo arquivo evita pedir
-  que alguém exporte a variável antes de rodar o gate, que é o tipo de passo que se esquece
-  e vira "o teste não funciona na minha máquina".
-
-  O arquivo está no `.gitignore`, e nada daqui vai para log: o que se usa é o valor, e o que
-  se imprime é o resultado.
-*/
-/** Quebra de linha, com ou sem CR: o `.dev.vars` é editado no Windows. */
-const SEPARADOR = new RegExp('\\r?\\n')
-
-function segredosLocais() {
-  try {
-    return readFileSync(new URL('../../.dev.vars', import.meta.url), 'utf8').split(SEPARADOR)
-  } catch {
-    return []
-  }
-}
-
-for (const linha of segredosLocais()) {
-  const [chave, ...resto] = linha.split('=')
-  if (chave?.trim() && resto.length) process.env[chave.trim()] ??= resto.join('=').trim()
-}
 const SOBE_SERVIDOR = !process.env.APPD_BASE
 
 const PUBLICAS = [
@@ -990,7 +963,7 @@ try {
     await anonimo.close()
   }
 
-  // ── 5f. O modo atendimento, e o projeto que acabou ────────────────────────
+  // ── 5f. O projeto que acabou ──────────────────────────────────────────────
   {
     const anonimo = await navegador.newContext({ viewport: { width: 1280, height: 900 } })
     const a = await anonimo.newPage()
@@ -1006,53 +979,6 @@ try {
     await a.goto(`${BASE}/atendimento/inscricao`, { waitUntil: 'networkidle' })
     const opcoes = await a.$$eval('input[type=checkbox]', (cs) => cs.map((c) => c.value))
     ok('a Bocha não é mais opção do formulário', !opcoes.includes('Bocha Paralímpica'))
-
-    /*
-      O modo atendimento (ADR-022).
-
-      A senha errada precisa ser recusada, e a certa precisa **elevar o teto sem mudar mais
-      nada**. Aqui só se prova o par: recusa e aceite. O teto em si não é exercitado — 120
-      cadastros esgotariam a janela de 15 minutos e bloqueariam a execução seguinte do gate.
-    */
-    const errada = await a.request.post(`${BASE}/api/atendimento/modo`, {
-      headers: { 'content-type': 'application/json' },
-      data: { senha: 'nao-e-a-senha' },
-    })
-    ok('senha errada não liga o modo atendimento', errada.status() === 401, errada.status())
-
-    await a.goto(`${BASE}/atendimento/modo`, { waitUntil: 'networkidle' })
-    ok('a tela do modo existe e tem campo de senha', (await a.$('#senha-atendimento')) !== null)
-
-    const axeModo = await new AxeBuilder({ page: a })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-      .analyze()
-    ok(
-      'axe A/AA em /atendimento/modo',
-      axeModo.violations.length === 0,
-      axeModo.violations.map((v) => `${v.id} (${v.nodes.length})`).join(', '),
-    )
-
-    /*
-      A senha certa vem do ambiente. Sem ela o cenário seria pular a metade que importa, e
-      por isso o gate **reprova** quando o segredo não está montado: um modo que nunca foi
-      exercitado é um modo que ninguém sabe se funciona.
-    */
-    const senha = process.env.MODO_ATENDIMENTO_SENHA
-    const certa = senha
-      ? await a.request.post(`${BASE}/api/atendimento/modo`, {
-          headers: { 'content-type': 'application/json' },
-          data: { senha },
-        })
-      : null
-    ok(
-      'a senha certa liga o modo atendimento',
-      certa?.status() === 200,
-      senha ? String(certa?.status()) : 'MODO_ATENDIMENTO_SENHA não está no ambiente do gate',
-    )
-
-    // E ligado ele continua sem dar acesso a nada: a área do associado segue barrada.
-    const area = await a.request.get(`${BASE}/api/area/cracha`)
-    ok('o modo ligado não abre a área do associado', area.status() === 401, area.status())
 
     await anonimo.close()
   }

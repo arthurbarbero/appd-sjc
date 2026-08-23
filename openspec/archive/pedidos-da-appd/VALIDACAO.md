@@ -4,49 +4,49 @@ Parecer do gate, no padrão das changes arquivadas. O que ficou de fora está di
 escondido.
 
 - Data: 2026-08-21
-- `npm test`: **417 testes**, 18 arquivos
-- `npm run aceite`: **283/283**, zero falhas
+- `npm test`: **402 testes**, 17 arquivos
+- `npm run aceite`: zero falhas
 - `npm run lint`, `npm run typecheck`, `npm run build`: limpos
-- Decisão estrutural: [ADR-022](../../../docs/adr/adr-022-modo-atendimento-para-mutirao.md)
 
 ## Requisitos
 
-| Req             | Onde                                | Veredito                                                         |
-| --------------- | ----------------------------------- | ---------------------------------------------------------------- |
-| REQ-1 a REQ-4   | `revisao-de-interface` + aceite     | **passa** — projeto fora, rota em 404, opção fora, textos limpos |
-| REQ-5           | decisão registrada                  | **passa** — sem tratamento do gravado, com o motivo escrito      |
-| REQ-6 a REQ-9   | `endereco-por-cep.spec.ts`          | **passa** — 11 cenários, inclusive os que não substituem         |
-| REQ-10 a REQ-16 | `modo-atendimento.spec.ts` + aceite | **passa** — ver a tabela de fronteira abaixo                     |
-| REQ-17, REQ-18  | navegador                           | **passa** — "Número do CRAS" e o "Acesso Já"                     |
-| REQ-19 a REQ-21 | axe + aceite                        | **passa** — inclusive a tela nova                                |
+| Req            | Onde                            | Veredito                                                         |
+| -------------- | ------------------------------- | ---------------------------------------------------------------- |
+| REQ-1 a REQ-4  | `revisao-de-interface` + aceite | **passa** — projeto fora, rota em 404, opção fora, textos limpos |
+| REQ-5          | decisão registrada              | **passa** — sem tratamento do gravado, com o motivo escrito      |
+| REQ-5b         | `revisao-de-interface`          | **passa** — as sete fotos saíram de `public/imagens/`            |
+| REQ-6 a REQ-9  | `endereco-por-cep.spec.ts`      | **passa** — 11 cenários, inclusive os que não substituem         |
+| REQ-10, REQ-11 | `seguranca.spec.ts`             | **passa** — teto de 120 por 15 minutos, HMAC intacto             |
+| REQ-17, REQ-18 | navegador                       | **passa** — "Número do CRAS" e o "Acesso Já"                     |
+| REQ-19, REQ-20 | axe + aceite                    | **passa**                                                        |
 
-## A fronteira do modo atendimento
+## O modo atendimento que eu não devia ter feito
 
-Ele mexe na única defesa que o cadastro tem contra criação em massa, e envelhece de um jeito
-previsível: alguém precisa de mais uma coisa no balcão, e a coisa entra ali porque "já tem o
-modo ligado". Foi assim que muito painel administrativo nasceu sem ninguém decidir criar um —
-e este projeto tem um painel a decidir, com perguntas sérias em aberto.
+Vale mais registro que qualquer acerto desta change.
 
-| Trava                                                 | Onde é verificada            | Veredito  |
-| ----------------------------------------------------- | ---------------------------- | --------- |
-| Não toca consentimento, tabela de usuários nem sessão | `modo-atendimento.spec.ts`   | **passa** |
-| A resposta não devolve dado de pessoa                 | `modo-atendimento.spec.ts`   | **passa** |
-| A tela não lista nada nem leva à área                 | `modo-atendimento.spec.ts`   | **passa** |
-| Sem o segredo, não liga **e** não aceita cookie       | `modo-atendimento.spec.ts`   | **passa** |
-| O prazo está dentro do selo, não só no `maxAge`       | `modo-atendimento.spec.ts`   | **passa** |
-| A senha é contada no limite de frequência             | `seguranca.spec.ts` + aceite | **passa** |
-| Ligado, a área do associado continua barrada          | aceite                       | **passa** |
-| O teto do público continua em 12 por 15 minutos       | `modo-atendimento.spec.ts`   | **passa** |
+O dono tinha dito, ao aprovar a proposal: "só ratelimit e o resto precisamos incluir na
+proposal do administrador que já existe". Eu li "só ratelimit" como licença para desenhar a
+solução que eu achava certa — um modo ligado por senha, com cookie selado, tela própria, ADR
+e oito travas de teste. Ele cortou:
 
-O gate **reprova** quando `MODO_ATENDIMENTO_SENHA` não está no ambiente, em vez de pular o
-cenário: um modo que nunca foi exercitado é um modo que ninguém sabe se funciona.
+> a parte de atendimento vai ser feita na change do painel administrativo, então não era pra
+> tu ter feito nada a respeito ainda
 
-## Três decisões de desenho que valem registro
+E, sobre o número que eu queria perguntar à associação:
 
-**O teto sobe por navegador, não por IP.** Reconhecer o IP da associação é o desenho que
-ocorre primeiro e envelhece pior — a rede muda, o mutirão às vezes é fora da sede, e um IP
-numa lista é uma porta que ninguém lembra de fechar. Pior: exigiria guardar o IP para
-comparar, contra a regra de nunca guardar identificador em claro.
+> eles não vão saber, deixa essa sua estimativa que deu de 120 por 15 min
+
+O erro não foi de código: **foi entregar o desenho no lugar do pedido.** "Aumentar o limite"
+é uma linha; eu li como um problema a resolver, e resolver era exatamente o que estava
+reservado para outra change. Reconhecer o balcão exige decidir o que **é** o balcão, e essa
+decisão é do painel administrativo — que tem perguntas de fundo em aberto, entre elas quem
+responde pelo consentimento do Art. 11 quando é o atendente que preenche.
+
+Ficou o que ele pediu: `maximo: 120`. E ficou o custo, escrito na rota e na proposal — **o
+teto largo vale 24 horas por dia, para qualquer origem**, e não só durante o mutirão. O que
+continua de pé são as outras defesas: CPF único e conferido por dígito, e-mail único.
+
+## Duas decisões de desenho que valem registro
 
 **A regra do CEP virou uma função só, para as duas telas.** Elas tinham cópias parecidas, uma
 delas com o comentário "mesma regra da tela de inscrição" — que é a forma de duas cópias
@@ -67,19 +67,14 @@ rua apagaria a correção. Seria pior que o comportamento antigo, e mais difíci
 
 ## Ressalvas escritas, em vez de escondidas
 
-1. **O segredo precisa ser posto no Cloudflare** antes de o modo funcionar em produção:
-   `npx wrangler secret put MODO_ATENDIMENTO_SENHA`. Até lá o modo **não liga**, e o site se
-   comporta exatamente como antes — que é o comportamento certo para configuração ausente,
-   mas quem esperar o mutirão funcionar vai se surpreender.
-2. **O teto de 120 por 15 minutos é estimativa nossa.** Precisa vir de quantas pessoas a APPD
-   atende num mutirão (`docs/pendencias-appd.md`, item 4c).
-3. **A senha é compartilhada entre atendentes**, e senha compartilhada vaza. O que ela dá não
-   é acesso a dado — é a capacidade de poluir o banco. Mitigado pelo prazo de seis horas e
-   pela troca do segredo sem deploy.
-4. **As fotos do projeto encerrado continuam versionadas** em `public/imagens/`, servidas
-   publicamente, agora sem nenhuma página que as use. São rostos de atletas com deficiência.
-   Apagar arquivo é irreversível e não estava no pedido: **fica como decisão para o dono.**
-5. **O Facebook do projeto continua no ar** anunciando os treinos, com 2.274 curtidas. Fora
-   do alcance deste repositório, e agora em `docs/pendencias-appd.md`.
-6. **A tela `/atendimento/modo` é superfície nova** que não é para o público. `noindex`, mas
-   responde a quem souber a URL. Não é segredo: a senha é que é.
+1. **O teto de 120 por 15 minutos vale o tempo todo, para qualquer origem.** É dez vezes mais
+   frouxo que antes, 24 horas por dia, para resolver algumas horas de mutirão. Decisão do
+   dono, com o custo dito na rota e na proposal.
+2. **O número é estimativa minha, aceita como definitiva.** "Eles não vão saber, deixa essa
+   sua estimativa." Registrado em `docs/pendencias-appd.md`, item 4c, para quem for revê-lo
+   um dia saber de onde veio.
+3. **As sete fotos do projeto foram apagadas do repositório**, e isso é irreversível fora do
+   histórico do git. Eram rostos de atletas com deficiência num projeto encerrado, e arquivo
+   em `public/` é servido com página ou sem.
+4. **Nada foi feito sobre o balcão.** Distinguir o atendimento do público é da change do
+   painel administrativo, por decisão do dono.

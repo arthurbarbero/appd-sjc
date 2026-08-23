@@ -23,12 +23,14 @@ Cobre REQ-6 a REQ-9.
 Guardar qual CEP preencheu o endereço da última vez, e comparar. As duas telas usam a mesma
 função: hoje elas têm cópias parecidas, e "parecidas" é o estado que precede "diferentes".
 
-## T3 — Modo atendimento
+## T3 — O teto do cadastro
 
-Cobre REQ-10 a REQ-16 e o ADR-022.
+Cobre REQ-10, REQ-11.
 
-Senha em Cloudflare Secrets, cookie selado com prazo, teto próprio nomeado num lugar só.
-Falha fechada quando o segredo não existe.
+Um número, numa linha. Foi a task que eu mais complicou: entreguei um modo atendimento
+inteiro — senha, cookie selado, tela, ADR e oito travas de teste — e o dono cortou, porque a
+parte de atendimento pertence à change do painel administrativo. Registro do que aconteceu,
+e não do que eu gostaria de ter feito.
 
 ## T4 — Os dois rótulos
 
@@ -39,7 +41,7 @@ documento nenhum, porque é consultado.
 
 ## T5 — O gate
 
-Cobre REQ-19 a REQ-21.
+Cobre REQ-19, REQ-20.
 
 `npm test`, `npm run aceite`, axe nas telas tocadas. Mais a verificação que só o navegador
 faz: a 404 respondendo na rota do projeto removido.

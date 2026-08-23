@@ -101,34 +101,15 @@ describe('o número de registro é imutável (REQ-3)', () => {
 
 describe('o limite de tentativas está ligado onde precisa (REQ-26)', () => {
   it.each([
+    ['conta/cadastro.post.ts', 'inscricao'],
     ['verificar/[numero].get.ts', 'verificacao'],
-    // A rota que liga o modo atendimento confere senha, e rota que confere senha e não
-    // conta tentativa é rota de força bruta.
-    ['atendimento/modo.post.ts', 'login'],
   ])('%s conta tentativas no escopo %s', (rota, escopo) => {
     const texto = ler(join(RAIZ, 'server', 'api', ...rota.split('/')))
     expect(texto).toMatch(/registrarTentativa\(/)
     expect(texto).toMatch(new RegExp(`escopo: '${escopo}'`))
   })
 
-  it('o cadastro conta tentativas, com o teto vindo do modo atendimento', () => {
-    /*
-      Os números do cadastro saíram da rota em 2026-08-21 e foram para
-      `server/utils/modo-atendimento.ts`, onde vivem os **dois** tetos: o do público e o do
-      balcão. A rota escolhe entre eles; declarar um número aqui seria um terceiro valor
-      para alguém trocar sem notar.
-    */
-    const rota = ler(join(RAIZ, 'server', 'api', 'conta', 'cadastro.post.ts'))
-    expect(rota).toMatch(/registrarTentativa\(/)
-    expect(rota).toMatch(/LIMITE_ATENDIMENTO : LIMITE_PUBLICO/)
-
-    const modo = ler(join(RAIZ, 'server', 'utils', 'modo-atendimento.ts'))
-    expect(modo).toMatch(/escopo: 'inscricao'/)
-    expect(modo).toMatch(/maximo:\s*\d+/)
-    expect(modo).toMatch(/janelaSegundos:\s*\d+/)
-  })
-
-  it('o cadastro continua com teto de corpo próprio', () => {
+  it('o cadastro declara os números do próprio limite', () => {
     /*
       O corte em si é medido em execução, no gate, pela rota de verificação — cuja janela é
       de 60 segundos e expira antes de alguém rodar o gate de novo. A do cadastro é de
@@ -139,8 +120,10 @@ describe('o limite de tentativas está ligado onde precisa (REQ-26)', () => {
       escopo, teto e janela declarados. Trocar qualquer um sem querer reprova.
     */
     const rota = ler(join(RAIZ, 'server', 'api', 'conta', 'cadastro.post.ts'))
-    // O teto de corpo, que é a outra metade da guarda. Os números do contador estão no
-    // teste acima, desde que passaram a morar em `modo-atendimento.ts`.
+    expect(rota).toMatch(/escopo:\s*'inscricao'/)
+    expect(rota).toMatch(/maximo:\s*\d+/)
+    expect(rota).toMatch(/janelaSegundos:\s*\d+/)
+    // E o teto de corpo, que é a outra metade da guarda.
     expect(rota).toMatch(/MAXIMO_CORPO/)
     expect(rota).toMatch(/statusCode:\s*413/)
   })

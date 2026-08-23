@@ -75,18 +75,19 @@ Hoje são **12 cadastros por IP a cada 15 minutos**. A APPD cadastra em mutirão
 pessoas, um wi-fi, muitas vezes um aparelho só. Do lado do servidor isso é indistinguível de
 um robô — e o limite existe justamente contra o robô.
 
-Aumentar o número para todo mundo é a saída errada: ela enfraquece a proteção 24 horas por
-dia para resolver quatro horas por mês. A spec vai desenhar a separação entre **o público**,
-que continua com um teto baixo, e **o atendimento**, que precisa de teto alto por algumas
-horas — sem que a distinção dependa de reconhecer o IP da associação, que muda.
+**O teto sobe, e sobe para todo mundo.** Eu tinha proposto separar o público do balcão, com
+um modo ligado por senha — e o dono cortou duas vezes: primeiro dizendo que a parte de
+atendimento pertence à change do painel administrativo, depois fechando o número sem levar a
+pergunta à associação ("eles não vão saber, deixa essa sua estimativa").
 
-O que já se sabe e delimita o desenho:
+Fica registrado o que essa simplicidade custa, porque a decisão é dele e o custo é real: **o
+teto largo vale 24 horas por dia, para qualquer origem**, e não só durante o mutirão. A
+proteção contra criação de contas em massa fica dez vezes mais frouxa o tempo todo. O que
+continua de pé são as outras defesas — CPF único e conferido por dígito verificador, e-mail
+único —, e é o que torna o abuso trabalhoso em vez de impossível.
 
-- o identificador **nunca** é gravado em claro (HMAC, `modelo-de-dados` REQ-30), e isso não
-  muda;
-- sem o segredo do limite, a aplicação **recusa contar** em vez de contar em claro;
-- o teto novo precisa de um número, e o número tem de vir de quantas pessoas a APPD atende
-  num mutirão. **Isso é pergunta para a associação**, e entra em `docs/pendencias-appd.md`.
+O que não muda: o identificador **nunca** é gravado em claro (HMAC, `modelo-de-dados`
+REQ-30), e sem o segredo do limite a aplicação **recusa contar** em vez de contar em claro.
 
 ### 5. O CEP volta a substituir o endereço
 
@@ -134,8 +135,7 @@ e-mail — e esse caminho é a decisão de fundo daquela change, não desta.
 1. **Bocha** — é a única correção de informação errada no ar, e a única em que alguém pode
    se deslocar por causa do que o site diz.
 2. **CEP** — muda comportamento que o atendimento usa todo dia.
-3. **Limite de frequência** — depende do número que a APPD ainda precisa dar, mas o desenho
-   pode ser feito antes.
+3. **Limite de frequência** — uma linha, com o número já fechado pelo dono.
 4. **Os dois rótulos** — rápidos, e sem risco.
 
 ## Fora de escopo

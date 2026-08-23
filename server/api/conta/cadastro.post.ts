@@ -42,17 +42,28 @@ function paraDataIso(brasileira: string): string {
  * exatamente o registro que este mecanismo existe para não criar.
  */
 /*
-  Dois tetos desde 2026-08-21: o do público e o do balcão.
+  O teto do cadastro, elevado em 2026-08-21 a pedido da associação.
 
-  A associação cadastra em mutirão — fila de pessoas, uma rede, muitas vezes um aparelho só —
-  e do lado do servidor isso é indistinguível de um robô. Aumentar o teto para todo mundo
-  enfraqueceria a proteção 24 horas por dia para resolver quatro horas por mês; o modo
-  atendimento eleva o teto **daquele navegador**, por seis horas, mediante senha.
+  Eram 12 por IP a cada 15 minutos. A APPD cadastra em **mutirão** — fila de pessoas no
+  balcão, uma rede de wi-fi, muitas vezes um aparelho só —, e do lado do servidor isso é
+  indistinguível de um robô: mesma origem, mesma cadência. O limite fazia o que foi escrito
+  para fazer, e o que ele barrava era o atendimento.
 
-  Os dois números vivem em `server/utils/modo-atendimento.ts`, num lugar só, porque o do
-  atendimento é provisório: ele precisa vir de quantas pessoas cabem num mutirão, e a
-  pergunta está em `docs/pendencias-appd.md`, item 4c.
+  **O número é uma estimativa nossa, e o dono a aceitou como definitiva**: "eles não vão
+  saber, deixa essa sua estimativa". São oito cadastros por minuto sustentados — mais do que
+  uma fila de balcão consegue, e ainda assim um teto: não é "sem limite", que seria a
+  resposta preguiçosa ao pedido.
+
+  **O que se perde, dito por inteiro**: o teto largo vale 24 horas por dia, para qualquer
+  origem, e não só durante o mutirão. A proteção contra criação de contas em massa fica dez
+  vezes mais frouxa o tempo todo. O que continua de pé são as outras defesas — CPF único e
+  conferido por dígito verificador, e-mail único — que é o que torna o abuso trabalhoso em
+  vez de impossível.
+
+  Um teto que subisse só para o balcão exigiria distinguir o balcão do público, e essa é
+  parte da change do painel administrativo, por decisão do dono.
 */
+const LIMITE = { escopo: 'inscricao', maximo: 120, janelaSegundos: 900 } as const
 
 /**
  * Teto do corpo, **derivado dos campos**, não chutado.
@@ -77,8 +88,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const limite = (await emModoAtendimento(event)) ? LIMITE_ATENDIMENTO : LIMITE_PUBLICO
-  const { excedeu } = await registrarTentativa(event, bd, ipDoPedido(event), limite)
+  const { excedeu } = await registrarTentativa(event, bd, ipDoPedido(event), LIMITE)
   if (excedeu) {
     throw createError({
       statusCode: 429,

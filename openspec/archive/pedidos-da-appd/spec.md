@@ -2,7 +2,6 @@
 
 - ID: SPEC-20260821c-pedidos-da-appd
 - Proposal: [`proposal.md`](proposal.md)
-- Decisão nova: [ADR-022](../../../docs/adr/adr-022-modo-atendimento-para-mutirao.md)
 
 ## Objetivo
 
@@ -29,6 +28,11 @@ coisa que não corresponde ao que a APPD faz —, e um deles anuncia um projeto 
   `DEFICIENCIA_NAO_CONSENTIDA`: o gravado continua legível, só a oferta some. **No dia em
   que houver dado real, esta decisão precisa ser revista antes de a próxima oferta sair.**
 
+- **REQ-5b** — As **fotos do projeto saem do repositório**. Decisão do dono: "remover tudo de
+  Bocha significa remover tudo, inclusive as imagens". Arquivo em `public/` é servido com
+  página ou sem — conteúdo removido do site que continua respondendo numa URL não foi
+  removido, só ficou sem link. E são rostos de atletas com deficiência.
+
 ## O CEP volta a substituir (REQ-6 a REQ-9)
 
 - **REQ-6** — Quando o CEP consultado é **diferente** do que preencheu o endereço da última
@@ -41,22 +45,18 @@ coisa que não corresponde ao que a APPD faz —, e um deles anuncia um projeto 
   dizendo que o endereço foi preenchido pelo CEP. Quem escreveu o complemento dentro do
   campo da rua perde o que escreveu, e precisa ver que perdeu.
 
-## O limite de cadastros (REQ-10 a REQ-16)
+## O limite de cadastros (REQ-10, REQ-11)
 
-- **REQ-10** — O teto do **público** não muda: 12 cadastros por IP a cada 15 minutos.
-- **REQ-11** — Existe um **modo atendimento**, que eleva o teto do aparelho que o ligou.
-- **REQ-12** — Ligar o modo exige uma **senha guardada em Cloudflare Secrets**, e nada mais.
-  Sem o segredo configurado, o modo **não liga** — falha fechada, como o segredo do limite.
-- **REQ-13** — O modo vale por **tempo limitado** e para **aquele navegador**, num cookie
-  selado. Não é uma configuração global do site: mutirão que esquece de desligar não deixa a
-  porta aberta para sempre.
-- **REQ-14** — O modo atendimento **não muda mais nada**. Não dispensa consentimento, não
-  altera validação, não dá acesso a dado de ninguém. Ele mexe num número, e só.
-- **REQ-15** — O teto do modo atendimento é **provisório** até a APPD dizer quantas pessoas
-  cabem num mutirão (`docs/pendencias-appd.md`, item 4c). O valor fica num lugar só, nomeado,
-  para a troca ser de uma linha.
-- **REQ-16** — O identificador continua **nunca gravado em claro** (HMAC, `modelo-de-dados`
-  REQ-30). O modo atendimento não abre exceção a isso.
+- **REQ-10** — O teto do cadastro passa de 12 para **120 por IP a cada 15 minutos**, para
+  todo mundo. Decisão do dono, com o número que ele aceitou como definitivo: "eles não vão
+  saber, deixa essa sua estimativa".
+- **REQ-11** — O identificador continua **nunca gravado em claro** (HMAC, `modelo-de-dados`
+  REQ-30), e sem o segredo do limite a aplicação continua **recusando contar**.
+
+**Não há modo, senha, cookie nem tela.** Eu havia proposto separar o público do balcão, e o
+dono cortou: a parte de atendimento pertence à change do painel administrativo. O que o custo
+dessa simplicidade tem de real está na proposal, e vale repetir: o teto largo vale 24 horas
+por dia, para qualquer origem.
 
 ## Os dois rótulos (REQ-17, REQ-18)
 
@@ -69,19 +69,16 @@ coisa que não corresponde ao que a APPD faz —, e um deles anuncia um projeto 
 ## Acessibilidade (bloqueante)
 
 - **REQ-19** — O aviso do REQ-9 é anunciado por leitor de tela, e não só desenhado.
-- **REQ-20** — A tela do modo atendimento, se houver, é operável só por teclado, e o campo de
-  senha tem rótulo próprio.
-- **REQ-21** — axe A/AA sem violação nas telas tocadas.
+- **REQ-20** — axe A/AA sem violação nas telas tocadas.
 
 ## Contrato de dados
 
-Nenhuma coluna nova, nenhuma migration. O modo atendimento vive em cookie selado e em
-Cloudflare Secrets; a tabela `tentativas` continua como está.
+Nenhuma coluna nova, nenhuma migration, nenhum segredo novo. A tabela `tentativas` continua
+como está — só o número do teto mudou.
 
 ## Fora de escopo
 
 - Qualquer forma nova de autenticação (decisão do dono).
-- O painel administrativo e o cadastro feito pelo atendente — estão na proposal daquela
-  change.
-- A página do projeto no Facebook, que continua no ar anunciando treinos. É pergunta para a
-  associação (`docs/pendencias-appd.md`, item 4d).
+- **Qualquer tratamento especial para o balcão** — modo, senha, sessão de atendente. Está na
+  change do painel administrativo, por decisão do dono.
+- O painel administrativo e o cadastro feito pelo atendente.

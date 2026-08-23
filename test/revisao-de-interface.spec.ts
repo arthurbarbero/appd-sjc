@@ -124,6 +124,32 @@ describe('Um projeto encerrado some do site inteiro', () => {
     'app/pages/atendimento/inscricao.vue',
   ]
 
+  it('as fotos do projeto saíram do repositório', () => {
+    /*
+      "Remover tudo de Bocha significa remover tudo, inclusive as imagens." — o dono, quando
+      eu deixei os arquivos para trás por serem só sete `.webp` que nenhuma página usava.
+
+      Ele tem razão pelo motivo que não precisou dizer: são rostos de atletas com deficiência,
+      e um arquivo em `public/` é **servido**, com página ou sem. Conteúdo removido do site que
+      continua respondendo numa URL não foi removido — só ficou sem link.
+    */
+    const publicadas = readdirSync(join(RAIZ, 'public', 'imagens'))
+    for (const nome of [
+      '2c64ff0311dc405a83953654da0baf7a',
+      '35085704197240fba6584a9f6102c7a9',
+      'a009cc5930f44abeaf7dacfcb834e613',
+      'af5d4f1e51d54ef0b7399d09b029cf40',
+      'bc6c0245add54ce2a56d12f5203aad0e',
+      'cb1173521d1145ba96e0bbb8c7970967',
+      'd19b56ab24c14baf8e65b4fa632972db',
+    ]) {
+      expect(
+        publicadas.some((f) => f.startsWith(nome)),
+        `${nome} voltou`,
+      ).toBe(false)
+    }
+  })
+
   it.each(ONDE)('%s não anuncia a Bocha Paralímpica', (arquivo) => {
     // Sem comentários: eles explicam a remoção, e reprovar a explicação seria absurdo.
     const fonte = readFileSync(join(RAIZ, arquivo), 'utf8')

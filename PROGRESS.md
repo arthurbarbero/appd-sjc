@@ -123,9 +123,10 @@ o mundo, e o site está errado até ser corrigido.
 - **O CEP voltou a substituir o endereço**, invertendo decisão registrada. Substitui **quando
   o CEP muda**, não a cada busca — senão o campo se limparia sozinho ao sair e voltar. A
   regra virou uma função só para as duas telas, que tinham cópias parecidas.
-- **Modo atendimento** ([ADR-022](docs/adr/adr-022-modo-atendimento-para-mutirao.md)): o teto
-  de cadastros sobe para o navegador que provar ser o balcão, por senha e por seis horas. O
-  teto do público não muda.
+- **O teto de cadastros subiu** de 12 para **120 por IP a cada 15 minutos**, para todo mundo.
+  Eu tinha entregue um modo atendimento inteiro — senha, cookie selado, tela, ADR e oito
+  travas — e o dono cortou: a parte de atendimento é da change do painel administrativo. O
+  erro não foi de código, foi **entregar o desenho no lugar do pedido**.
 - **Dois rótulos** corrigidos para o vocabulário de quem preenche: "Número do CRAS" e o
   "Acesso Já".
 
@@ -135,13 +136,16 @@ ter como o administrador fazer e gerenciar os usuários". Lá ficam as quatro de
 aquela change não pode empurrar, e a maior é **quem responde pelo consentimento do Art. 11
 quando é o atendente que preenche**.
 
-#### O que falta desta change
+As **sete fotos** do projeto saíram do repositório junto: arquivo em `public/` é servido com
+página ou sem, e conteúdo removido do site que continua respondendo numa URL não foi
+removido — só ficou sem link.
 
-- **`npx wrangler secret put MODO_ATENDIMENTO_SENHA`** no Cloudflare. Até lá o modo não liga.
-- **O número do teto** precisa vir da APPD: quantas pessoas cabem num mutirão.
-- **As fotos do projeto encerrado** continuam versionadas e servidas em `public/imagens/`,
-  sem nenhuma página que as use. São rostos de atletas com deficiência — **decisão do dono**.
-- **O Facebook da Bocha** continua no ar anunciando treinos. Fora do repositório.
+#### O que essa change deixou em aberto
+
+- **O teto de 120 vale 24 horas por dia, para qualquer origem.** Dez vezes mais frouxo que
+  antes o tempo todo, para resolver algumas horas de mutirão. O que segura o abuso são as
+  outras defesas: CPF único conferido por dígito, e-mail único.
+- **Distinguir o balcão do público** é da change do painel administrativo.
 - **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
   por milímetro na tela.
 - **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e
