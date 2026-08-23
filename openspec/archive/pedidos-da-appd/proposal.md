@@ -126,7 +126,7 @@ administrador **criar e gerenciar contas** das pessoas atendidas.
 
 E isso esbarra num bloqueio já conhecido, que a proposal do painel precisa encarar de frente:
 **o site não consegue enviar e-mail** enquanto não houver o domínio `appd.org.br`
-([ADR-016](../../../docs/adr/adr-016-recuperacao-de-senha-depende-do-dominio.md)). Se o
+([ADR-016](../../../docs/adr/adr-016-recuperacao-de-senha.md)). Se o
 administrador cria a conta, a senha tem de chegar à pessoa por algum caminho que não seja
 e-mail — e esse caminho é a decisão de fundo daquela change, não desta.
 

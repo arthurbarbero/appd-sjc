@@ -180,9 +180,13 @@ A associação pediu para aumentar o limite — "existe multidão também" —, 
 número sem levar a pergunta adiante: **"eles não vão saber, deixa essa sua estimativa"**.
 
 O teto passou de 12 para **120 cadastros por IP a cada 15 minutos**. Fica registrado aqui
-porque o número é uma estimativa nossa, e o dia em que alguém for revê-lo precisa saber
+porque o número nasceu de estimativa nossa, e o dia em que alguém for revê-lo precisa saber
 disso — e saber o que ele custa: o teto largo vale 24 horas por dia, para qualquer origem, e
 não só durante o mutirão.
+
+**Não é pendência.** O dono fechou em 2026-08-23: "já é para deixar como certo, é o teto que
+falamos, não é dívida". Está aqui como registro de onde o número veio, e não como pergunta a
+levar.
 
 ### 4d. O projeto de Bocha Paralímpica acabou
 

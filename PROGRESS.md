@@ -140,12 +140,14 @@ As **sete fotos** do projeto saíram do repositório junto: arquivo em `public/`
 página ou sem, e conteúdo removido do site que continua respondendo numa URL não foi
 removido — só ficou sem link.
 
-#### O que essa change deixou em aberto
+#### O que ficou decidido, e não é dívida
 
-- **O teto de 120 vale 24 horas por dia, para qualquer origem.** Dez vezes mais frouxo que
-  antes o tempo todo, para resolver algumas horas de mutirão. O que segura o abuso são as
-  outras defesas: CPF único conferido por dígito, e-mail único.
-- **Distinguir o balcão do público** é da change do painel administrativo.
+- **O teto de 120 por 15 minutos é a decisão**, não um valor provisório: "o ponto 11 já é
+  para deixar como certo, é o teto que falamos, não é dívida" (dono, 2026-08-23). Ele vale
+  24 horas por dia para qualquer origem, e o que segura o abuso são as outras defesas — CPF
+  único conferido por dígito verificador e e-mail único. Não há pergunta pendente à APPD
+  sobre isso.
+- **Distinguir o balcão do público** é da change do painel administrativo, e só de lá.
 - **Uma impressão de verdade.** Herdada de `cracha-impresso`: a tira cabe por aritmética e
   por milímetro na tela.
 - **A página de contato deixou de avisar que o formulário não envia**, por decisão do dono, e
@@ -314,6 +316,12 @@ removido — só ficou sem link.
       `send_email` da Cloudflare só alcança endereço verificado da própria conta; Resend e
       Brevo exigem verificação por DNS para escrever a destinatário arbitrário. Destrava
       com a publicação em `appd.org.br`.
+- [x] **`painel-administrativo`: proposal fechada em 2026-08-23.** As quatro decisões que a
+      travavam desde 21/08 foram tomadas pelo dono: quem marca o consentimento do Art. 11 no
+      cadastro presencial, como a senha chega à pessoa (provisória, sem troca obrigatória),
+      o que fazer com quem não tem e-mail (nada — é caso de balcão) e quantos perfis existem
+      (dois). A proposal traz o custo de cada uma escrito e um fatiamento em quatro entregas,
+      com a trilha de auditoria primeiro. **Falta a spec.**
 - [ ] Telas ainda não implementadas: **Crachá** (`/area/cracha`), **Verificação pública**
       (`/verificar/<numero>`), **Política de Privacidade** e **Seus direitos**. Cadastro,
       Login e Área do Associado foram implementados em 2026-08-06 e estão no ar — este
