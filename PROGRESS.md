@@ -4,9 +4,42 @@ Estado vivo do projeto. Atualizar ao fim de cada sessão.
 
 ## Agora
 
-**No ar em <https://appd-sjc.appd-sjc.workers.dev>**, com CI e deploy verdes em 21/08.
-Duas changes arquivadas no dia: `cracha-impresso` e `cartao-fiel-e-cadastro-aberto`.
-Falta o dono conferir no ar.
+**No ar em <https://appd-sjc.appd-sjc.workers.dev>**, com CI e deploy verdes. Última subida
+em 23/08. Árvore limpa, `main` sincronizada.
+
+- `npm test`: **402 testes**, 17 arquivos
+- `npm run aceite`: **278 verificações**, zero falhas
+- Três changes arquivadas em 21–23/08: `cracha-impresso`, `cartao-fiel-e-cadastro-aberto` e
+  `pedidos-da-appd`
+- Uma proposal fechada e esperando spec: `painel-administrativo`
+
+### Por onde continuar
+
+**A spec do `painel-administrativo`**, com critérios Gherkin. A
+[proposal](openspec/changes/painel-administrativo/proposal.md) está fechada: as quatro
+decisões que a travavam foram tomadas pelo dono em 23/08, o custo de cada uma está escrito,
+e há um fatiamento em quatro entregas com a trilha de auditoria primeiro.
+
+Uma decisão pequena continua em aberto e **trava só a migration**: o nome do perfil comum. O
+dono chamou de "voluntário"; a palavra já tem outro sentido no projeto desde 21/08 — quem se
+cadastra **sem** deficiência para ajudar. A sugestão na proposal é `associado`.
+
+### O que o dono ainda não conferiu
+
+- **O crachá impresso em papel de verdade.** Depois da correção do `print-color-adjust`, ele
+  não voltou a imprimir. A tira cabe na folha por aritmética e por milímetro na tela.
+
+### Como retomar o ambiente
+
+`npm run aceite` sobe o `wrangler dev` sozinho e é o caminho certo. Rodar
+`wrangler dev .output/server/index.mjs` à mão **ignora o `wrangler.jsonc`** e não carrega o
+segredo que sela o cookie — todas as rotas `/api/area` dão 401 e parece defeito do produto.
+Antes de `npm run build`, encerre o `wrangler` e os `workerd`, senão o `.output` fica travado
+com `EBUSY`. Se o gate acusar 429, limpe a contagem:
+
+```bash
+npx wrangler d1 execute appd-sjc --local --command "DELETE FROM tentativas;"
+```
 
 ### `cartao-fiel-e-cadastro-aberto` — 21/08, a partir de dois Jams
 
